@@ -1,0 +1,87 @@
+name: goldwen_app
+description: A premium dating app that prioritizes quality over quantity connections.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+  flutter: ">=3.13.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Navigation
+  go_router: ^12.1.1
+  
+  # UI Components
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.0
+  
+  # Authentication
+  firebase_auth: ^4.15.3
+  google_sign_in: ^6.1.6
+  sign_in_with_apple: ^5.0.0
+  
+  # Backend & API
+  http: ^1.1.0
+  dio: ^5.3.3
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # Notifications
+  firebase_messaging: ^14.7.5
+  flutter_local_notifications: ^16.3.0
+  
+  # Image Handling
+  image_picker: ^1.0.4
+  image_cropper: ^5.0.1
+  
+  # UI Utilities
+  shimmer: ^3.0.0
+  lottie: ^2.7.0
+  
+  # Subscriptions
+  in_app_purchase: ^3.1.11
+  
+  # Utilities
+  intl: ^0.18.1
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.7
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    
+  fonts:
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-Regular.ttf
+        - asset: assets/fonts/PlayfairDisplay-Bold.ttf
+          weight: 700
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato-Regular.ttf
+        - asset: assets/fonts/Lato-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Lato-Light.ttf
+          weight: 300
