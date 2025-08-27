@@ -47,6 +47,54 @@ class _AuthPageState extends State<AuthPage> {
               
               const SizedBox(height: AppSpacing.xxl),
               
+              // Email/Password Login Section
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go('/login'),
+                  child: const Text('Se connecter avec email'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: AppSpacing.md),
+              
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => context.go('/register'),
+                  child: const Text('Créer un compte'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryGold,
+                    side: const BorderSide(color: AppColors.primaryGold),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: AppSpacing.xl),
+              
+              // Divider
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    child: Text(
+                      'Ou continuer avec',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              
+              const SizedBox(height: AppSpacing.xl),
+              
               // Google Sign In
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
@@ -137,7 +185,7 @@ class _AuthPageState extends State<AuthPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Text(
-                      'Sécurisé et privé',
+                      'Connexion rapide',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),

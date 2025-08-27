@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ProfileProvider with ChangeNotifier {
   String? _name;
-  int? _age;
+  DateTime? _birthDate;
   String? _bio;
   List<String> _photos = [];
   List<String> _prompts = [];
@@ -10,17 +10,34 @@ class ProfileProvider with ChangeNotifier {
   bool _isProfileComplete = false;
 
   String? get name => _name;
-  int? get age => _age;
+  DateTime? get birthDate => _birthDate;
+  int? get age => _birthDate != null ? _calculateAge(_birthDate!) : null;
   String? get bio => _bio;
   List<String> get photos => _photos;
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
   bool get isProfileComplete => _isProfileComplete;
 
-  void setBasicInfo(String name, int age, String bio) {
+  int _calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || 
+        (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  void setBasicInfo(String name, DateTime birthDate, String bio) {
     _name = name;
-    _age = age;
+    _birthDate = birthDate;
     _bio = bio;
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void setBirthDate(DateTime birthDate) {
+    _birthDate = birthDate;
     _checkProfileCompletion();
     notifyListeners();
   }
@@ -64,7 +81,7 @@ class ProfileProvider with ChangeNotifier {
 
   void _checkProfileCompletion() {
     _isProfileComplete = _name != null &&
-        _age != null &&
+        _birthDate != null &&
         _bio != null &&
         _photos.length >= 3 &&
         _prompts.length >= 3 &&
