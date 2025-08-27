@@ -47,6 +47,42 @@ class _AuthPageState extends State<AuthPage> {
               
               const SizedBox(height: AppSpacing.xxl),
               
+              // Email/Password Sign In
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.go('/auth/email');
+                  },
+                  icon: const Icon(Icons.email_outlined, size: 24),
+                  label: const Text('Continuer avec email'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: AppSpacing.lg),
+              
+              // Divider
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    child: Text(
+                      'ou',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              
+              const SizedBox(height: AppSpacing.lg),
+              
               // Google Sign In
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/api_service.dart';
 import '../../profile/providers/profile_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class PersonalityQuestionnairePage extends StatefulWidget {
   const PersonalityQuestionnairePage({super.key});
@@ -15,6 +17,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final Map<String, dynamic> _answers = {};
+  bool _isSubmitting = false;
 
   final List<Map<String, dynamic>> _questions = [
     {
@@ -230,8 +233,17 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
               if (_currentPage > 0) const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: selectedAnswer != null ? _nextQuestion : null,
-                  child: Text(_currentPage == _questions.length - 1 ? 'Terminer' : 'Suivant'),
+                  onPressed: (selectedAnswer != null && !_isSubmitting) ? _nextQuestion : null,
+                  child: _isSubmitting && _currentPage == _questions.length - 1
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(_currentPage == _questions.length - 1 ? 'Terminer' : 'Suivant'),
                 ),
               ),
             ],
@@ -269,11 +281,48 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     }
   }
 
-  void _finishQuestionnaire() {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-    profileProvider.setPersonalityAnswers(_answers);
-    
-    context.go('/profile-setup');
+  Future<void> _finishQuestionnaire() async {
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      profileProvider.setPersonalityAnswers(_answers);
+      
+      // Convert answers to API format
+      final List<Map<String, dynamic>> apiAnswers = _answers.entries.map((entry) {
+        return {
+          'questionId': entry.key, // In real app, this would be the UUID from backend
+          'textAnswer': entry.value,
+          'numericAnswer': null,
+          'booleanAnswer': null,
+          'multipleChoiceAnswer': null,
+        };
+      }).toList();
+
+      // Submit to backend
+      await ApiService.submitPersonalityAnswers(apiAnswers);
+      
+      if (mounted) {
+        context.go('/profile-setup');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la sauvegarde: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
