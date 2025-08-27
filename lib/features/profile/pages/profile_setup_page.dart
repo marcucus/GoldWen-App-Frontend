@@ -519,13 +519,27 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       _nameController.text,
       _calculateAge(_birthDate!),
       _bioController.text,
+      birthDate: _birthDate,
     );
     
     for (int i = 0; i < _promptControllers.length; i++) {
       profileProvider.addPrompt(_promptControllers[i].text);
     }
     
+    // Submit to backend
+    _saveProfileToBackend(profileProvider);
+    
     context.go('/home');
+  }
+
+  Future<void> _saveProfileToBackend(ProfileProvider profileProvider) async {
+    try {
+      await profileProvider.saveProfile();
+      await profileProvider.submitPromptAnswers();
+    } catch (e) {
+      // Handle error silently for now - could show snackbar
+      debugPrint('Error saving profile: $e');
+    }
   }
 
   @override
