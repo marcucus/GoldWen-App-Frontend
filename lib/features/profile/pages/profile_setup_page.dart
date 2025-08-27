@@ -474,9 +474,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
   }
 
-  void _addPhoto(ProfileProvider profileProvider) {
-    // TODO: Implement image picker
-    profileProvider.addPhoto('mock_photo_${profileProvider.photos.length + 1}');
+  void _addPhoto(ProfileProvider profileProvider) async {
+    // TODO: Implement actual image picker
+    // For now, simulate adding a photo
+    await profileProvider.addPhoto('mock_photo_${profileProvider.photos.length + 1}');
+    
+    if (profileProvider.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(profileProvider.errorMessage!),
+          backgroundColor: AppColors.errorRed,
+        ),
+      );
+    }
   }
 
   Future<void> _selectBirthDate() async {
@@ -518,7 +528,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     return age;
   }
 
-  void _finishSetup() {
+  void _finishSetup() async {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     
     if (_selectedBirthDate != null) {
@@ -533,7 +543,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       profileProvider.addPrompt(_promptControllers[i].text);
     }
     
-    context.go('/home');
+    // Save profile to backend
+    final success = await profileProvider.saveProfile();
+    if (success && mounted) {
+      context.go('/home');
+    } else if (mounted) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(profileProvider.errorMessage ?? 'Erreur lors de la sauvegarde'),
+          backgroundColor: AppColors.errorRed,
+        ),
+      );
+    }
   }
 
   @override

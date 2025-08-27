@@ -5,6 +5,7 @@ import '../../features/onboarding/pages/personality_questionnaire_page.dart';
 import '../../features/auth/pages/auth_page.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/register_page.dart';
+import '../../features/auth/pages/forgot_password_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
@@ -35,6 +36,11 @@ class AppRouter {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
       ),
 
       // Onboarding Flow
