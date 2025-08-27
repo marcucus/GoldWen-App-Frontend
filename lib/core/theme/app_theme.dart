@@ -27,7 +27,7 @@ class AppTheme {
         surface: AppColors.backgroundWhite,
         onSurface: AppColors.textDark,
       ),
-      
+
       // Typography
       textTheme: TextTheme(
         // Headlines use Playfair Display (Serif)
@@ -49,7 +49,7 @@ class AppTheme {
           color: AppColors.textDark,
           height: 1.3,
         ),
-        
+
         // Body text uses Lato (Sans-Serif)
         bodyLarge: GoogleFonts.lato(
           fontSize: 16,
@@ -69,7 +69,7 @@ class AppTheme {
           color: AppColors.textSecondary,
           height: 1.4,
         ),
-        
+
         // Labels
         labelLarge: GoogleFonts.lato(
           fontSize: 14,
@@ -84,7 +84,7 @@ class AppTheme {
           height: 1.4,
         ),
       ),
-      
+
       // App Bar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.backgroundWhite,
@@ -97,7 +97,7 @@ class AppTheme {
         ),
         centerTitle: true,
       ),
-      
+
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -114,7 +114,7 @@ class AppTheme {
           elevation: 2,
         ),
       ),
-      
+
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -126,7 +126,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
-      
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -151,11 +151,12 @@ class AppTheme {
           color: AppColors.textSecondary,
           fontSize: 14,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      
+
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.backgroundWhite,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -163,7 +164,7 @@ class AppTheme {
         ),
         margin: const EdgeInsets.all(8),
       ),
-      
+
       // Divider Theme
       dividerTheme: const DividerThemeData(
         color: AppColors.dividerLight,

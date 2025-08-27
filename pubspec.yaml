@@ -17,7 +17,7 @@ dependencies:
   provider: ^6.1.1
   
   # Navigation
-  go_router: ^12.1.1
+  go_router: ^16.2.0
   
   # UI Components
   google_fonts: ^6.1.0
@@ -25,9 +25,9 @@ dependencies:
   cached_network_image: ^3.3.0
   
   # Authentication
-  firebase_auth: ^4.15.3
-  google_sign_in: ^6.1.6
-  sign_in_with_apple: ^5.0.0
+  firebase_auth: ^6.0.1
+  google_sign_in: ^7.1.1
+  sign_in_with_apple: ^7.0.1
   
   # Backend & API
   http: ^1.1.0
@@ -39,28 +39,28 @@ dependencies:
   hive_flutter: ^1.1.0
   
   # Notifications
-  firebase_messaging: ^14.7.5
-  flutter_local_notifications: ^16.3.0
+  firebase_messaging: ^16.0.0
+  flutter_local_notifications: ^19.4.1
   
   # Image Handling
   image_picker: ^1.0.4
-  image_cropper: ^5.0.1
+  image_cropper: ^9.1.0
   
   # UI Utilities
   shimmer: ^3.0.0
-  lottie: ^2.7.0
+  lottie: ^3.3.1
   
   # Subscriptions
   in_app_purchase: ^3.1.11
   
   # Utilities
-  intl: ^0.18.1
+  intl: ^0.20.2
   uuid: ^4.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.7
 

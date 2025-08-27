@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../features/onboarding/pages/welcome_page.dart';
-import '../features/onboarding/pages/personality_questionnaire_page.dart';
-import '../features/auth/pages/auth_page.dart';
-import '../features/profile/pages/profile_setup_page.dart';
-import '../features/matching/pages/daily_matches_page.dart';
-import '../features/matching/pages/profile_detail_page.dart';
-import '../features/chat/pages/chat_page.dart';
-import '../features/subscription/pages/subscription_page.dart';
+import '../../features/onboarding/pages/welcome_page.dart';
+import '../../features/onboarding/pages/personality_questionnaire_page.dart';
+import '../../features/auth/pages/auth_page.dart';
+import '../../features/profile/pages/profile_setup_page.dart';
+import '../../features/matching/pages/daily_matches_page.dart';
+import '../../features/matching/pages/profile_detail_page.dart';
+import '../../features/chat/pages/chat_page.dart';
+import '../../features/subscription/pages/subscription_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -24,7 +24,7 @@ class AppRouter {
         name: 'auth',
         builder: (context, state) => const AuthPage(),
       ),
-      
+
       // Onboarding Flow
       GoRoute(
         path: '/questionnaire',
@@ -36,7 +36,7 @@ class AppRouter {
         name: 'profile-setup',
         builder: (context, state) => const ProfileSetupPage(),
       ),
-      
+
       // Main App
       GoRoute(
         path: '/home',
@@ -59,7 +59,7 @@ class AppRouter {
           return ChatPage(chatId: chatId);
         },
       ),
-      
+
       // Subscription
       GoRoute(
         path: '/subscription',

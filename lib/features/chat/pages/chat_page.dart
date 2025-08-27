@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/chat_provider.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
-  
+
   const ChatPage({
     super.key,
     required this.chatId,
@@ -28,7 +27,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(hours: 24),
     );
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadChatMessages();
     });
@@ -43,7 +42,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   void _startTimerAnimation() {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final remainingTime = chatProvider.getRemainingTime(widget.chatId);
-    
+
     if (remainingTime != null && remainingTime.inSeconds > 0) {
       final progress = 1.0 - (remainingTime.inSeconds / (24 * 60 * 60));
       _timerAnimationController.value = progress;
@@ -72,27 +71,30 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   const Text('Sophie'),
                   Consumer<ChatProvider>(
                     builder: (context, chatProvider, child) {
-                      final remainingTime = chatProvider.getRemainingTime(widget.chatId);
+                      final remainingTime =
+                          chatProvider.getRemainingTime(widget.chatId);
                       if (remainingTime == null) return const SizedBox.shrink();
-                      
-                      final isExpired = chatProvider.isChatExpired(widget.chatId);
+
+                      final isExpired =
+                          chatProvider.isChatExpired(widget.chatId);
                       if (isExpired) {
                         return Text(
                           'Conversation expirée',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.errorRed,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.errorRed,
+                                  ),
                         );
                       }
-                      
+
                       final hours = remainingTime.inHours;
                       final minutes = remainingTime.inMinutes % 60;
-                      
+
                       return Text(
                         'Expire dans ${hours}h ${minutes}m',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primaryGold,
-                        ),
+                              color: AppColors.primaryGold,
+                            ),
                       );
                     },
                   ),
@@ -112,7 +114,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         builder: (context, chatProvider, child) {
           final messages = chatProvider.getChatMessages(widget.chatId);
           final isExpired = chatProvider.isChatExpired(widget.chatId);
-          
+
           return Column(
             children: [
               // Timer indicator
@@ -132,7 +134,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   },
                 ),
               ),
-              
+
               // Messages
               Expanded(
                 child: messages.isEmpty
@@ -147,7 +149,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         },
                       ),
               ),
-              
+
               // Input area
               if (!isExpired) _buildMessageInput(chatProvider),
               if (isExpired) _buildExpiredMessage(),
@@ -161,13 +163,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isFromCurrentUser = message['isFromCurrentUser'] ?? false;
     final timestamp = message['timestamp'] as DateTime;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
-        mainAxisAlignment: isFromCurrentUser
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isFromCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isFromCurrentUser) ...[
             CircleAvatar(
@@ -199,17 +200,19 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   Text(
                     message['text'],
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isFromCurrentUser ? Colors.white : AppColors.textDark,
-                    ),
+                          color: isFromCurrentUser
+                              ? Colors.white
+                              : AppColors.textDark,
+                        ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isFromCurrentUser
-                          ? Colors.white70
-                          : AppColors.textSecondary,
-                    ),
+                          color: isFromCurrentUser
+                              ? Colors.white70
+                              : AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -299,15 +302,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           Text(
             'Cette conversation a expiré',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.errorRed,
-            ),
+                  color: AppColors.errorRed,
+                ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Les conversations GoldWen durent 24 heures pour encourager des échanges authentiques.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -339,16 +342,16 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             Text(
               'Félicitations, c\'est un match !',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.primaryGold,
-              ),
+                    color: AppColors.primaryGold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Commencez une conversation avec Sophie. Vous avez 24 heures pour faire connaissance.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -362,7 +365,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     if (message.isNotEmpty) {
       chatProvider.sendMessage(widget.chatId, message);
       _messageController.clear();
-      
+
       // Scroll to bottom
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -413,8 +416,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               Text(
                 'Après expiration, cette conversation sera archivée et ne sera plus accessible.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
               ),
             ],
           ),
@@ -449,8 +452,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
               ),
             ],
           ),

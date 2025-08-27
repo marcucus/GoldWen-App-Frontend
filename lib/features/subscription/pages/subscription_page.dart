@@ -90,37 +90,37 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Text(
                     'Passez à GoldWen Plus',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppColors.primaryGold,
-                    ),
+                          color: AppColors.primaryGold,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Maximisez vos chances de trouver la bonne personne',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Features
             _buildFeaturesList(),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Plans
             Text(
               'Choisissez votre formule',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            
+
             const SizedBox(height: AppSpacing.lg),
-            
+
             Column(
               children: _plans.asMap().entries.map((entry) {
                 final index = entry.key;
@@ -128,9 +128,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return _buildPlanCard(index, plan);
               }).toList(),
             ),
-            
+
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Subscribe button
             SizedBox(
               width: double.infinity,
@@ -145,20 +145,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: AppSpacing.md),
-            
+
             // Terms
             Text(
               'Votre abonnement sera automatiquement renouvelé. Vous pouvez l\'annuler à tout moment dans les réglages.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Links
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -186,9 +186,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget _buildFeaturesList() {
     final features = [
       {
-        'icon': Icons.favorite_multiple,
+        'icon': Icons.favorite,
         'title': '3 sélections par jour',
-        'description': 'Choisissez jusqu\'à 3 profils dans votre sélection quotidienne',
+        'description':
+            'Choisissez jusqu\'à 3 profils dans votre sélection quotidienne',
       },
       {
         'icon': Icons.priority_high,
@@ -238,8 +239,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     Text(
                       feature['description'] as String,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   ],
                 ),
@@ -270,7 +271,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ? AppColors.primaryGold.withOpacity(0.1)
                 : AppColors.backgroundWhite,
             border: Border.all(
-              color: isSelected ? AppColors.primaryGold : AppColors.dividerLight,
+              color:
+                  isSelected ? AppColors.primaryGold : AppColors.dividerLight,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(AppBorderRadius.large),
@@ -299,24 +301,35 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           children: [
                             Text(
                               plan['duration'] as String,
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: isSelected ? AppColors.primaryGold : null,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color: isSelected
+                                        ? AppColors.primaryGold
+                                        : null,
+                                  ),
                             ),
                             Text(
                               plan['pricePerMonth'] as String,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                           ],
                         ),
                       ),
                       Text(
                         plan['price'] as String,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: isSelected ? AppColors.primaryGold : null,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              color: isSelected ? AppColors.primaryGold : null,
+                            ),
                       ),
                     ],
                   ),
@@ -329,14 +342,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.successGreen.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                        borderRadius:
+                            BorderRadius.circular(AppBorderRadius.small),
                       ),
                       child: Text(
                         plan['saving'] as String,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.successGreen,
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: AppColors.successGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ),
                   ],
@@ -353,14 +367,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryGold,
-                      borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                      borderRadius:
+                          BorderRadius.circular(AppBorderRadius.small),
                     ),
                     child: Text(
                       'Populaire',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ),
@@ -373,7 +388,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   void _subscribe() {
     final selectedPlan = _plans[_selectedPlanIndex];
-    
+
     // TODO: Implement actual subscription logic with in-app purchases
     showDialog(
       context: context,
