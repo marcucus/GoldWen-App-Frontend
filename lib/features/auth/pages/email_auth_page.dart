@@ -281,8 +281,24 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
       setState(() {
         if (e is ApiException) {
           _errorMessage = e.message;
+          // Show more specific error messages for common issues
+          if (e.statusCode == 0 || e.message.contains('connection')) {
+            _errorMessage = 'Problème de connexion au serveur. Vérifiez votre connexion internet et que le serveur backend est démarré.';
+          }
         } else {
           _errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+          // Show connection issues more clearly
+          if (e.toString().contains('Connection') || e.toString().contains('Network') || e.toString().contains('Socket')) {
+            _errorMessage = 'Impossible de se connecter au serveur. Assurez-vous que le backend est démarré sur localhost:3000.';
+          }
+        }
+        // Debug information for development
+        if (mounted) {
+          print('Auth error: $e');
+          if (e is ApiException) {
+            print('Status code: ${e.statusCode}');
+            print('Error code: ${e.code}');
+          }
         }
       });
     }
