@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../onboarding/pages/personality_questionnaire_page.dart';
 
 class EmailAuthPage extends StatefulWidget {
   const EmailAuthPage({super.key});
@@ -270,7 +271,11 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
       }
 
       if (authProvider.isAuthenticated && mounted) {
-        context.go('/questionnaire');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const PersonalityQuestionnairePage(),
+          ),
+        );
       }
     } catch (e) {
       setState(() {

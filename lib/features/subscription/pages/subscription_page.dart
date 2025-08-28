@@ -424,7 +424,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                context.go('/home');
+                Navigator.of(context).pop(); // Also close subscription page
               },
               child: const Text('Commencer'),
             ),
