@@ -160,9 +160,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> message) {
-    final isFromCurrentUser = message['isFromCurrentUser'] ?? false;
-    final timestamp = message['timestamp'] as DateTime;
+  Widget _buildMessageBubble(ChatMessage message) {
+    // TODO: Get current user ID from auth provider
+    final isFromCurrentUser = message.senderId == 'current_user';
+    final timestamp = message.createdAt;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -198,7 +199,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    message['text'],
+                    message.content,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: isFromCurrentUser
                               ? Colors.white
