@@ -11,6 +11,7 @@ class ChatProvider with ChangeNotifier {
   String? _error;
   WebSocketService? _webSocketService;
   bool _isWebSocketConnected = false;
+  String? _currentUserId;
 
   List<Conversation> get conversations => _conversations;
   Map<String, List<ChatMessage>> get chatMessages => _chatMessages;
@@ -21,6 +22,10 @@ class ChatProvider with ChangeNotifier {
 
   ChatProvider() {
     _initializeWebSocket();
+  }
+
+  void setCurrentUserId(String userId) {
+    _currentUserId = userId;
   }
 
   void clearError() {
@@ -174,7 +179,7 @@ class ChatProvider with ChangeNotifier {
       final tempMessage = ChatMessage(
         id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
         conversationId: chatId,
-        senderId: 'current_user', // TODO: Get from auth provider
+        senderId: _currentUserId ?? 'current_user', // Use set user ID or fallback
         type: type,
         content: message,
         isRead: false,

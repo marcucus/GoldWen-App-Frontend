@@ -219,8 +219,15 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Implement sign out logic with backend if needed
-      await Future.delayed(const Duration(seconds: 1));
+      // Call backend logout endpoint if token exists
+      if (_token != null) {
+        try {
+          await ApiService.logout();
+        } catch (e) {
+          // If logout API call fails, still proceed with local cleanup
+          print('Logout API call failed: $e');
+        }
+      }
       
       _user = null;
       _token = null;

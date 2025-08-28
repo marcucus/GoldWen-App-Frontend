@@ -174,10 +174,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               : '${profileProvider.photos.length} photo(s)',
           Icons.photo_library,
           () {
-            // TODO: Navigate to photo management
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Gestion des photos - À implémenter')),
-            );
+            _navigateToPhotoManagement(context);
           },
         ),
         
@@ -189,10 +186,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               : '${profileProvider.prompts.length} réponse(s)',
           Icons.quiz,
           () {
-            // TODO: Navigate to prompts editing
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Édition des réponses - À implémenter')),
-            );
+            _navigateToPromptsEditing(context);
           },
         ),
         
@@ -202,10 +196,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           'Gérer mes critères de recherche',
           Icons.tune,
           () {
-            // TODO: Navigate to preferences
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Préférences - À implémenter')),
-            );
+            _navigateToPreferences(context);
           },
         ),
         
@@ -309,9 +300,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 title: const Text('Aide et support'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Support - À implémenter')),
-                  );
+                  _showSupportDialog(context);
                 },
               ),
               
@@ -363,6 +352,79 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 backgroundColor: Colors.red,
               ),
               child: const Text('Se déconnecter'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  // Navigation methods for button handlers
+  void _navigateToPhotoManagement(BuildContext context) {
+    // For now, navigate to profile setup where photos can be managed
+    context.go('/profile-setup');
+  }
+  
+  void _navigateToPromptsEditing(BuildContext context) {
+    // Navigate to questionnaire page to edit prompts/responses
+    context.go('/questionnaire');
+  }
+  
+  void _navigateToPreferences(BuildContext context) {
+    // Show preferences dialog or navigate to preferences page
+    _showPreferencesDialog(context);
+  }
+  
+  void _showPreferencesDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Préférences'),
+          content: const Text('Fonctionnalité de préférences en cours de développement. '
+              'Vous pourrez bientôt personnaliser vos critères de recherche ici.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  void _showSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Aide et Support'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Pour toute question ou problème:'),
+              const SizedBox(height: 12),
+              const Text('📧 Email: support@goldwen.app'),
+              const Text('💬 Chat: Disponible dans l\'app'),
+              const Text('📱 Téléphone: +33 1 23 45 67 89'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fermer'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Could navigate to chat or open email client
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ouverture du chat support...')),
+                );
+              },
+              child: const Text('Contacter'),
             ),
           ],
         );

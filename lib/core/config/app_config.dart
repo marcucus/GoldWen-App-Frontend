@@ -1,8 +1,26 @@
 class AppConfig {
-  static const String mainApiBaseUrl = 'http://localhost:3000/api/v1';
-  static const String matchingServiceBaseUrl = 'http://localhost:8000/api/v1';
-  static const String webSocketBaseUrl = 'ws://localhost:3000/chat';
-  static const String matchingServiceApiKey = 'matching-service-secret-key';
+  // Environment-based API URLs with fallback to localhost for development
+  static const String mainApiBaseUrl = String.fromEnvironment(
+    'MAIN_API_BASE_URL',
+    defaultValue: 'https://api.goldwen.app/api/v1', // Production URL
+  );
+  static const String matchingServiceBaseUrl = String.fromEnvironment(
+    'MATCHING_SERVICE_BASE_URL', 
+    defaultValue: 'https://matching.goldwen.app/api/v1', // Production URL
+  );
+  static const String webSocketBaseUrl = String.fromEnvironment(
+    'WEBSOCKET_BASE_URL',
+    defaultValue: 'wss://api.goldwen.app/chat', // Production WebSocket URL
+  );
+  static const String matchingServiceApiKey = String.fromEnvironment(
+    'MATCHING_SERVICE_API_KEY',
+    defaultValue: 'matching-service-secret-key',
+  );
+  
+  // Development URLs (can be overridden with environment variables)
+  static const String devMainApiBaseUrl = 'http://localhost:3000/api/v1';
+  static const String devMatchingServiceBaseUrl = 'http://localhost:8000/api/v1';
+  static const String devWebSocketBaseUrl = 'ws://localhost:3000/chat';
   
   // API Timeouts
   static const Duration defaultTimeout = Duration(seconds: 30);
