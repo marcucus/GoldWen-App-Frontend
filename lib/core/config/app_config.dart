@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 class AppConfig {
   // Environment-based API URLs with fallback to localhost for development
   static const String mainApiBaseUrl = String.fromEnvironment(
@@ -18,9 +20,36 @@ class AppConfig {
   );
   
   // Development URLs (can be overridden with environment variables)
-  static const String devMainApiBaseUrl = 'http://localhost:3000/api/v1';
-  static const String devMatchingServiceBaseUrl = 'http://localhost:8000/api/v1';
-  static const String devWebSocketBaseUrl = 'ws://localhost:3000/chat';
+  // Use 10.0.2.2 for Android emulator to access host machine, localhost for others
+  static String get devMainApiBaseUrl => _getDevUrl('3000');
+  static String get devMatchingServiceBaseUrl => _getDevUrl('8000');
+  static String get devWebSocketBaseUrl => _getDevWebSocketUrl('3000');
+  
+  // Helper method to get the correct development URL based on platform
+  static String _getDevUrl(String port) {
+    try {
+      if (Platform.isAndroid) {
+        return 'http://10.0.2.2:$port/api/v1';
+      }
+    } catch (e) {
+      // Platform.isAndroid might not be available in some contexts (like tests)
+      // Fall back to localhost
+    }
+    return 'http://localhost:$port/api/v1';
+  }
+  
+  // Helper method for WebSocket URLs
+  static String _getDevWebSocketUrl(String port) {
+    try {
+      if (Platform.isAndroid) {
+        return 'ws://10.0.2.2:$port/chat';
+      }
+    } catch (e) {
+      // Platform.isAndroid might not be available in some contexts (like tests)
+      // Fall back to localhost
+    }
+    return 'ws://localhost:$port/chat';
+  }
   
   // API Timeouts
   static const Duration defaultTimeout = Duration(seconds: 30);

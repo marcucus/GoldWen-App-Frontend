@@ -122,10 +122,16 @@ Manages push notifications and settings.
 Centralized configuration management.
 
 **Settings:**
-- API endpoints
+- API endpoints with automatic platform detection
+- Automatic Android emulator support (uses 10.0.2.2 instead of localhost)
 - Timeouts
 - Feature flags
 - Environment detection
+
+**Platform-Specific URLs:**
+- **Android Emulator**: Automatically uses `10.0.2.2` to access host machine
+- **iOS Simulator**: Uses `localhost` (direct host access)
+- **Physical Devices**: Use appropriate network configuration
 
 ## Error Handling
 

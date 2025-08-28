@@ -94,6 +94,23 @@ flutter pub get
 flutter run
 ```
 
+### Configuration pour développement avec émulateur Android
+
+Si vous utilisez un émulateur Android et que votre backend est lancé sur localhost, l'application détecte automatiquement la plateforme et utilise l'adresse IP appropriée :
+
+- **Android Emulator** : `10.0.2.2` (pour accéder à la machine hôte)
+- **iOS Simulator** : `localhost` (accès direct à la machine hôte)
+- **Appareil physique** : Utiliser l'adresse IP de votre machine sur le réseau local
+
+Le fichier `lib/core/config/app_config.dart` gère automatiquement cette configuration selon la plateforme détectée.
+
+### Backend requis
+
+Pour que l'application fonctionne, assurez-vous que votre backend soit lancé sur :
+- **API principale** : Port 3000 (`http://localhost:3000/api/v1`)
+- **Service de matching** : Port 8000 (`http://localhost:8000/api/v1`)
+- **WebSocket** : Port 3000 (`ws://localhost:3000/chat`)
+
 ### Commandes utiles
 ```bash
 # Analyse du code
