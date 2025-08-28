@@ -1,194 +1,456 @@
 import 'package:flutter/material.dart';
-
-class Chat {
-  final String id;
-  final String? matchName;
-  final String? lastMessage;
-  final int unreadCount;
-  final DateTime? lastActivity;
-
-  Chat({
-    required this.id,
-    this.matchName,
-    this.lastMessage,
-    this.unreadCount = 0,
-    this.lastActivity,
-  });
-}
+import '../../../core/services/api_service.dart';
+import '../../../core/services/websocket_service.dart';
+import '../../../core/models/models.dart';
 
 class ChatProvider with ChangeNotifier {
-  Map<String, List<Map<String, dynamic>>> _chatMessages = {};
-  Map<String, DateTime> _chatExpiryTimes = {};
-  List<Chat> _chats = [];
+  List<Conversation> _conversations = [];
+  Map<String, List<ChatMessage>> _chatMessages = {};
+  Map<String, TypingStatus> _typingStatuses = {};
   bool _isLoading = false;
+  String? _error;
+  WebSocketService? _webSocketService;
+  bool _isWebSocketConnected = false;
 
-  Map<String, List<Map<String, dynamic>>> get chatMessages => _chatMessages;
-  Map<String, DateTime> get chatExpiryTimes => _chatExpiryTimes;
-  List<Chat> get chats => _chats;
+  List<Conversation> get conversations => _conversations;
+  Map<String, List<ChatMessage>> get chatMessages => _chatMessages;
+  Map<String, TypingStatus> get typingStatuses => _typingStatuses;
   bool get isLoading => _isLoading;
+  String? get error => _error;
+  bool get isWebSocketConnected => _isWebSocketConnected;
 
-  List<Map<String, dynamic>> getChatMessages(String chatId) {
+  ChatProvider() {
+    _initializeWebSocket();
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  List<ChatMessage> getChatMessages(String chatId) {
     return _chatMessages[chatId] ?? [];
   }
 
-  DateTime? getChatExpiryTime(String chatId) {
-    return _chatExpiryTimes[chatId];
+  Conversation? getConversation(String chatId) {
+    try {
+      return _conversations.firstWhere((conv) => conv.id == chatId);
+    } catch (e) {
+      return null;
+    }
   }
 
   bool isChatExpired(String chatId) {
-    final expiryTime = _chatExpiryTimes[chatId];
-    if (expiryTime == null) return false;
-    return DateTime.now().isAfter(expiryTime);
+    final conversation = getConversation(chatId);
+    return conversation?.isExpired ?? false;
   }
 
   Duration? getRemainingTime(String chatId) {
-    final expiryTime = _chatExpiryTimes[chatId];
-    if (expiryTime == null) return null;
+    final conversation = getConversation(chatId);
+    if (conversation?.expiresAt == null) return null;
     
     final now = DateTime.now();
-    if (now.isAfter(expiryTime)) return Duration.zero;
+    if (now.isAfter(conversation!.expiresAt!)) return Duration.zero;
     
-    return expiryTime.difference(now);
+    return conversation.expiresAt!.difference(now);
   }
 
-  Duration? getChatRemainingTime(String chatId) {
-    return getRemainingTime(chatId);
+  TypingStatus? getTypingStatus(String chatId) {
+    final status = _typingStatuses[chatId];
+    if (status?.isRecent == true) return status;
+    return null;
   }
 
-  Future<void> loadChats() async {
-    _isLoading = true;
-    notifyListeners();
+  bool isUserTyping(String chatId, String userId) {
+    final status = getTypingStatus(chatId);
+    return status?.userId == userId && status?.isTyping == true;
+  }
+
+  Future<void> initializeWebSocket(String token) async {
+    try {
+      _webSocketService = WebSocketService();
+      _webSocketService!.setToken(token);
+      
+      // Listen to WebSocket events
+      _webSocketService!.messageStream.listen(_handleNewMessage);
+      _webSocketService!.typingStream.listen(_handleTypingUpdate);
+      _webSocketService!.readReceiptStream.listen(_handleReadReceipt);
+      _webSocketService!.chatExpiredStream.listen(_handleChatExpired);
+      _webSocketService!.connectionStream.listen(_handleConnectionUpdate);
+      
+      await _webSocketService!.connect();
+    } catch (e) {
+      _error = 'Failed to connect to chat service';
+      notifyListeners();
+    }
+  }
+
+  void _initializeWebSocket() {
+    // This will be called when token is available
+    // For now, just set up the structure
+  }
+
+  Future<void> loadConversations() async {
+    _setLoading();
 
     try {
-      // TODO: Implement API call to load chats
-      await Future.delayed(const Duration(seconds: 1));
+      final response = await ApiService.getConversations();
+      final conversationsData = response['data'] ?? response['conversations'] ?? [];
       
-      // Mock data
-      _chats = [
-        Chat(
-          id: 'chat1',
-          matchName: 'Alice',
-          lastMessage: 'Hello! How are you?',
-          unreadCount: 2,
-          lastActivity: DateTime.now().subtract(const Duration(minutes: 30)),
-        ),
-        Chat(
-          id: 'chat2',
-          matchName: 'Bob',
-          lastMessage: 'Nice to meet you!',
-          unreadCount: 0,
-          lastActivity: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-      ];
+      _conversations = (conversationsData as List)
+          .map((c) => Conversation.fromJson(c as Map<String, dynamic>))
+          .toList();
       
-      // Set expiry times for chats
-      for (final chat in _chats) {
-        _chatExpiryTimes[chat.id] = DateTime.now().add(const Duration(hours: 24));
+      _error = null;
+    } catch (e) {
+      _handleError(e, 'Failed to load conversations');
+    } finally {
+      _setLoaded();
+    }
+  }
+
+  Future<void> loadConversationDetails(String chatId) async {
+    try {
+      final response = await ApiService.getConversationDetails(chatId);
+      final conversationData = response['data'] ?? response;
+      
+      final conversation = Conversation.fromJson(conversationData);
+      final index = _conversations.indexWhere((c) => c.id == chatId);
+      
+      if (index != -1) {
+        _conversations[index] = conversation;
+      } else {
+        _conversations.add(conversation);
+      }
+      
+      notifyListeners();
+    } catch (e) {
+      _handleError(e, 'Failed to load conversation details');
+    }
+  }
+
+  Future<void> loadChatMessages(String chatId, {int page = 1, int limit = 50}) async {
+    if (page == 1) _setLoading();
+
+    try {
+      final response = await ApiService.getMessages(
+        chatId,
+        page: page,
+        limit: limit,
+      );
+      
+      final messagesData = response['data'] ?? response['messages'] ?? [];
+      final newMessages = (messagesData as List)
+          .map((m) => ChatMessage.fromJson(m as Map<String, dynamic>))
+          .toList();
+
+      if (page == 1) {
+        _chatMessages[chatId] = newMessages;
+      } else {
+        _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), ...newMessages];
+      }
+      
+      // Join the chat room for real-time updates
+      _webSocketService?.joinChat(chatId);
+      
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _handleError(e, 'Failed to load messages');
+    } finally {
+      if (page == 1) _setLoaded();
+    }
+  }
+
+  Future<void> sendMessage(String chatId, String message, {String type = 'text'}) async {
+    if (isChatExpired(chatId)) {
+      _error = 'Cannot send message to expired chat';
+      notifyListeners();
+      return;
+    }
+
+    try {
+      // Optimistically add message to UI
+      final tempMessage = ChatMessage(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        conversationId: chatId,
+        senderId: 'current_user', // TODO: Get from auth provider
+        type: type,
+        content: message,
+        isRead: false,
+        createdAt: DateTime.now(),
+      );
+
+      _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), tempMessage];
+      notifyListeners();
+
+      // Send via WebSocket for real-time delivery
+      if (_isWebSocketConnected) {
+        _webSocketService?.sendMessage(chatId, message, type: type);
+      }
+
+      // Also send via REST API for persistence
+      final response = await ApiService.sendMessage(chatId, type: type, content: message);
+      final sentMessageData = response['data'] ?? response;
+      final sentMessage = ChatMessage.fromJson(sentMessageData);
+
+      // Replace temp message with real message
+      final messages = _chatMessages[chatId] ?? [];
+      final tempIndex = messages.indexWhere((m) => m.id == tempMessage.id);
+      if (tempIndex != -1) {
+        messages[tempIndex] = sentMessage;
+        _chatMessages[chatId] = messages;
+      }
+
+      // Update conversation's last message
+      final convIndex = _conversations.indexWhere((c) => c.id == chatId);
+      if (convIndex != -1) {
+        _conversations[convIndex] = _conversations[convIndex].copyWith(
+          lastMessage: sentMessage,
+          updatedAt: DateTime.now(),
+        );
+      }
+
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      // Remove the temp message on error
+      final messages = _chatMessages[chatId] ?? [];
+      messages.removeWhere((m) => m.id.startsWith('temp_'));
+      _chatMessages[chatId] = messages;
+      
+      _handleError(e, 'Failed to send message');
+    }
+  }
+
+  Future<void> markMessageAsRead(String chatId, String messageId) async {
+    try {
+      await ApiService.markMessageAsRead(chatId, messageId);
+      
+      // Update local message status
+      final messages = _chatMessages[chatId] ?? [];
+      final messageIndex = messages.indexWhere((m) => m.id == messageId);
+      if (messageIndex != -1) {
+        messages[messageIndex] = messages[messageIndex].copyWith(
+          isRead: true,
+          readAt: DateTime.now(),
+        );
+        _chatMessages[chatId] = messages;
+        notifyListeners();
+      }
+
+      // Send read receipt via WebSocket
+      _webSocketService?.markMessageAsRead(chatId, messageId);
+    } catch (e) {
+      // Read receipts are not critical, so don't show error to user
+    }
+  }
+
+  Future<void> deleteMessage(String chatId, String messageId) async {
+    try {
+      await ApiService.deleteMessage(chatId, messageId);
+      
+      // Remove message from local list
+      final messages = _chatMessages[chatId] ?? [];
+      messages.removeWhere((m) => m.id == messageId);
+      _chatMessages[chatId] = messages;
+      
+      notifyListeners();
+    } catch (e) {
+      _handleError(e, 'Failed to delete message');
+    }
+  }
+
+  void startTyping(String chatId) {
+    _webSocketService?.sendTyping(chatId);
+  }
+
+  void stopTyping(String chatId) {
+    _webSocketService?.sendStoppedTyping(chatId);
+  }
+
+  void leaveChatRoom(String chatId) {
+    _webSocketService?.leaveChat(chatId);
+  }
+
+  // WebSocket event handlers
+  void _handleNewMessage(Map<String, dynamic> data) {
+    try {
+      final message = ChatMessage.fromJson(data['message']);
+      final chatId = message.conversationId;
+      
+      final messages = _chatMessages[chatId] ?? [];
+      messages.add(message);
+      _chatMessages[chatId] = messages;
+      
+      // Update conversation's last message
+      final convIndex = _conversations.indexWhere((c) => c.id == chatId);
+      if (convIndex != -1) {
+        _conversations[convIndex] = _conversations[convIndex].copyWith(
+          lastMessage: message,
+          unreadCount: _conversations[convIndex].unreadCount + 1,
+          updatedAt: DateTime.now(),
+        );
+      }
+      
+      notifyListeners();
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  void _handleTypingUpdate(Map<String, dynamic> data) {
+    try {
+      final typingStatus = TypingStatus.fromJson(data);
+      _typingStatuses[typingStatus.conversationId] = typingStatus;
+      notifyListeners();
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  void _handleReadReceipt(Map<String, dynamic> data) {
+    try {
+      final chatId = data['chatId'] as String;
+      final messageId = data['messageId'] as String;
+      
+      final messages = _chatMessages[chatId] ?? [];
+      final messageIndex = messages.indexWhere((m) => m.id == messageId);
+      if (messageIndex != -1) {
+        messages[messageIndex] = messages[messageIndex].copyWith(
+          isRead: true,
+          readAt: DateTime.now(),
+        );
+        _chatMessages[chatId] = messages;
+        notifyListeners();
       }
     } catch (e) {
-      // Handle error
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      // Handle error silently
     }
   }
 
-  Future<void> createChat(String chatId, String otherUserId) async {
+  void _handleChatExpired(Map<String, dynamic> data) {
     try {
-      // TODO: Implement API call to create chat
-      await Future.delayed(const Duration(seconds: 1));
+      final chatId = data['chatId'] as String;
       
-      _chatMessages[chatId] = [];
-      _chatExpiryTimes[chatId] = DateTime.now().add(const Duration(hours: 24));
-      
-      // Add to chats list
-      _chats.add(Chat(
-        id: chatId,
-        matchName: 'New Match',
-        lastMessage: 'New match!',
-        unreadCount: 0,
-        lastActivity: DateTime.now(),
-      ));
+      // Remove from conversations or mark as expired
+      _conversations.removeWhere((c) => c.id == chatId);
+      _chatMessages.remove(chatId);
+      _typingStatuses.remove(chatId);
       
       notifyListeners();
     } catch (e) {
-      // Handle error
+      // Handle error silently
     }
   }
 
-  Future<void> sendMessage(String chatId, String message) async {
-    if (isChatExpired(chatId)) return;
-
-    try {
-      // TODO: Implement API call to send message
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      final messageData = {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'text': message,
-        'senderId': 'current_user', // TODO: Get from auth provider
-        'timestamp': DateTime.now(),
-        'isFromCurrentUser': true,
-      };
-
-      _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), messageData];
-      notifyListeners();
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  Future<void> loadChatMessages(String chatId) async {
-    _isLoading = true;
+  void _handleConnectionUpdate(bool isConnected) {
+    _isWebSocketConnected = isConnected;
     notifyListeners();
-
-    try {
-      // TODO: Implement API call to load messages
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Mock data
-      if (!_chatMessages.containsKey(chatId)) {
-        _chatMessages[chatId] = [
-          {
-            'id': '1',
-            'text': 'Hi! Great to match with you!',
-            'senderId': 'other_user',
-            'timestamp': DateTime.now().subtract(const Duration(hours: 2)),
-            'isFromCurrentUser': false,
-          },
-          {
-            'id': '2',
-            'text': 'Hello! Nice to meet you too!',
-            'senderId': 'current_user',
-            'timestamp': DateTime.now().subtract(const Duration(hours: 1)),
-            'isFromCurrentUser': true,
-          },
-        ];
-        _chatExpiryTimes[chatId] = DateTime.now().add(const Duration(hours: 22));
-      }
-    } catch (e) {
-      // Handle error
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
   }
 
   void clearExpiredChats() {
     final now = DateTime.now();
-    final expiredChatIds = _chatExpiryTimes.entries
-        .where((entry) => now.isAfter(entry.value))
-        .map((entry) => entry.key)
+    final expiredChatIds = _conversations
+        .where((conv) => conv.expiresAt != null && now.isAfter(conv.expiresAt!))
+        .map((conv) => conv.id)
         .toList();
 
     for (final chatId in expiredChatIds) {
       _chatMessages.remove(chatId);
-      _chatExpiryTimes.remove(chatId);
-      _chats.removeWhere((chat) => chat.id == chatId);
+      _typingStatuses.remove(chatId);
     }
+    
+    _conversations.removeWhere((conv) => expiredChatIds.contains(conv.id));
 
     if (expiredChatIds.isNotEmpty) {
       notifyListeners();
     }
+  }
+
+  // Utility methods
+  void _setLoading() {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+  }
+
+  void _setLoaded() {
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void _handleError(dynamic error, String fallbackMessage) {
+    _isLoading = false;
+    
+    if (error is ApiException) {
+      _error = error.message;
+    } else {
+      _error = fallbackMessage;
+    }
+    
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _webSocketService?.dispose();
+    super.dispose();
+  }
+}
+
+// Extension to add copyWith method to Conversation
+extension ConversationExtension on Conversation {
+  Conversation copyWith({
+    String? id,
+    String? matchId,
+    List<String>? participantIds,
+    ChatMessage? lastMessage,
+    int? unreadCount,
+    String? status,
+    DateTime? expiresAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Profile? otherParticipant,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      matchId: matchId ?? this.matchId,
+      participantIds: participantIds ?? this.participantIds,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      status: status ?? this.status,
+      expiresAt: expiresAt ?? this.expiresAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      otherParticipant: otherParticipant ?? this.otherParticipant,
+    );
+  }
+}
+
+// Extension to add copyWith method to ChatMessage
+extension ChatMessageExtension on ChatMessage {
+  ChatMessage copyWith({
+    String? id,
+    String? conversationId,
+    String? senderId,
+    String? type,
+    String? content,
+    bool? isRead,
+    DateTime? createdAt,
+    DateTime? readAt,
+    User? sender,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      senderId: senderId ?? this.senderId,
+      type: type ?? this.type,
+      content: content ?? this.content,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      readAt: readAt ?? this.readAt,
+      sender: sender ?? this.sender,
+    );
   }
 }
