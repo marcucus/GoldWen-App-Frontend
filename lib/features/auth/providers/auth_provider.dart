@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/models/models.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
 class AuthProvider with ChangeNotifier {
   AuthStatus _status = AuthStatus.initial;
-  String? _userId;
-  String? _email;
-  String? _name;
+  User? _user;
   String? _token;
+  String? _error;
 
   AuthStatus get status => _status;
-  String? get userId => _userId;
-  String? get email => _email;
-  String? get name => _name;
+  User? get user => _user;
   String? get token => _token;
+  String? get error => _error;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+
+  String? get userId => _user?.id;
+  String? get email => _user?.email;
+  String? get name => '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim();
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
 
   Future<void> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
       final response = await ApiService.login(
@@ -30,12 +37,10 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
       
-      _handleAuthSuccess(response);
+      await _handleAuthSuccess(response);
     } catch (e) {
-      _status = AuthStatus.unauthenticated;
+      _handleAuthError(e);
     }
-    
-    notifyListeners();
   }
 
   Future<void> registerWithEmail({
@@ -44,8 +49,7 @@ class AuthProvider with ChangeNotifier {
     required String firstName,
     required String lastName,
   }) async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
       final response = await ApiService.register(
@@ -55,18 +59,15 @@ class AuthProvider with ChangeNotifier {
         lastName: lastName,
       );
       
-      _handleAuthSuccess(response);
+      await _handleAuthSuccess(response);
     } catch (e) {
-      _status = AuthStatus.unauthenticated;
+      _handleAuthError(e);
       rethrow;
     }
-    
-    notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
       // TODO: Implement Google Sign In with Firebase Auth
@@ -81,17 +82,14 @@ class AuthProvider with ChangeNotifier {
         lastName: 'Doe',
       );
       
-      _handleAuthSuccess(response);
+      await _handleAuthSuccess(response);
     } catch (e) {
-      _status = AuthStatus.unauthenticated;
+      _handleAuthError(e);
     }
-    
-    notifyListeners();
   }
 
   Future<void> signInWithApple() async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
       // TODO: Implement Apple Sign In
@@ -106,57 +104,148 @@ class AuthProvider with ChangeNotifier {
         lastName: 'Doe',
       );
       
-      _handleAuthSuccess(response);
+      await _handleAuthSuccess(response);
     } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    _setLoading();
+
+    try {
+      await ApiService.forgotPassword(email);
       _status = AuthStatus.unauthenticated;
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  Future<void> resetPassword(String token, String newPassword) async {
+    _setLoading();
+
+    try {
+      await ApiService.resetPassword(token, newPassword);
+      _status = AuthStatus.unauthenticated;
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    _setLoading();
+
+    try {
+      await ApiService.changePassword(currentPassword, newPassword);
+      _error = null;
+      _status = AuthStatus.authenticated;
+      notifyListeners();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  Future<void> verifyEmail(String token) async {
+    _setLoading();
+
+    try {
+      await ApiService.verifyEmail(token);
+      // Refresh user data
+      await refreshUser();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  Future<void> refreshUser() async {
+    if (!isAuthenticated) return;
+
+    try {
+      final response = await ApiService.getCurrentUser();
+      final userData = response['data'] ?? response;
+      _user = User.fromJson(userData);
+      notifyListeners();
+    } catch (e) {
+      // If refresh fails, user might need to re-authenticate
+      if (e is ApiException && e.isAuthError) {
+        await signOut();
+      }
+    }
+  }
+
+  Future<void> _handleAuthSuccess(Map<String, dynamic> response) async {
+    try {
+      final data = response['data'] ?? response;
+      final userData = data['user'] ?? data;
+      final token = data['token'] ?? data['accessToken'];
+      
+      _user = User.fromJson(userData);
+      _token = token;
+      _status = AuthStatus.authenticated;
+      _error = null;
+      
+      // Set token for subsequent API calls
+      ApiService.setToken(_token!);
+      
+      notifyListeners();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
+  void _handleAuthError(dynamic error) {
+    _status = AuthStatus.unauthenticated;
+    
+    if (error is ApiException) {
+      _error = error.message;
+    } else {
+      _error = 'An unexpected error occurred';
     }
     
     notifyListeners();
   }
 
-  void _handleAuthSuccess(Map<String, dynamic> response) {
-    final data = response['data'];
-    final user = data['user'];
-    
-    _userId = user['id'];
-    _email = user['email'];
-    _name = '${user['firstName']} ${user['lastName'] ?? ''}';
-    _token = data['token'];
-    _status = AuthStatus.authenticated;
-    
-    // Set token for subsequent API calls
-    ApiService.setToken(_token!);
+  void _setLoading() {
+    _status = AuthStatus.loading;
+    _error = null;
+    notifyListeners();
   }
 
   Future<void> signOut() async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
-      // TODO: Implement sign out logic with backend
+      // TODO: Implement sign out logic with backend if needed
       await Future.delayed(const Duration(seconds: 1));
       
-      _userId = null;
-      _email = null;
-      _name = null;
+      _user = null;
       _token = null;
       _status = AuthStatus.unauthenticated;
+      _error = null;
       
       // Clear token from API service
-      ApiService.setToken('');
+      ApiService.clearToken();
     } catch (e) {
-      // Handle error
+      // Even if logout fails, clear local state
+      _user = null;
+      _token = null;
+      _status = AuthStatus.unauthenticated;
+      _error = null;
+      ApiService.clearToken();
     }
     
     notifyListeners();
   }
 
   Future<void> checkAuthStatus() async {
-    _status = AuthStatus.loading;
-    notifyListeners();
+    _setLoading();
 
     try {
-      // TODO: Check if user is already authenticated
+      // TODO: Check if user has a valid stored token
       await Future.delayed(const Duration(seconds: 1));
       
       // For now, assume not authenticated
@@ -166,5 +255,35 @@ class AuthProvider with ChangeNotifier {
     }
     
     notifyListeners();
+  }
+
+  Future<void> updateUserSettings(Map<String, dynamic> settings) async {
+    try {
+      await ApiService.updateUserSettings(settings);
+      await refreshUser();
+    } catch (e) {
+      _error = e is ApiException ? e.message : 'Failed to update settings';
+      notifyListeners();
+    }
+  }
+
+  Future<void> deactivateAccount() async {
+    try {
+      await ApiService.deactivateAccount();
+      await signOut();
+    } catch (e) {
+      _error = e is ApiException ? e.message : 'Failed to deactivate account';
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      await ApiService.deleteAccount();
+      await signOut();
+    } catch (e) {
+      _error = e is ApiException ? e.message : 'Failed to delete account';
+      notifyListeners();
+    }
   }
 }

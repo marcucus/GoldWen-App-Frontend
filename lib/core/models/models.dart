@@ -1,0 +1,7 @@
+// Export all model classes
+export 'user.dart';
+export 'profile.dart';
+export 'matching.dart';
+export 'chat.dart';
+export 'subscription.dart';
+export 'notification.dart';
