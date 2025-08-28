@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/match_profile.dart';
+import '../providers/matching_provider.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   final String profileId;
@@ -358,7 +360,11 @@ class ProfileDetailPage extends StatelessWidget {
   }
 
   void _selectProfile(BuildContext context, MatchProfile profile) {
-    // TODO: Implement profile selection logic
+    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+    
+    // Add to selected profiles list
+    matchingProvider.selectProfile(profile.id);
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Vous avez choisi ${profile.name} ! Revenez demain pour votre nouvelle sélection.'),

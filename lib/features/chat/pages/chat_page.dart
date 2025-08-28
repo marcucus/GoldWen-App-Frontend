@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
 import '../providers/chat_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -162,8 +163,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
-    // TODO: Get current user ID from auth provider
-    final isFromCurrentUser = message.senderId == 'current_user';
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUserId = authProvider.user?.id ?? 'current_user'; // Fallback to 'current_user' if no user
+    final isFromCurrentUser = message.senderId == currentUserId;
     final timestamp = message.createdAt;
 
     return Padding(
