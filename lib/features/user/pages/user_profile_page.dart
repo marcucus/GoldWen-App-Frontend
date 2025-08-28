@@ -112,9 +112,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
         const SizedBox(height: AppSpacing.sm),
         
         // Bio
-        if (profileProvider.bio.isNotEmpty)
+        if (profileProvider.bio?.isNotEmpty == true)
           Text(
-            profileProvider.bio,
+            profileProvider.bio!,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: AppColors.textSecondary,
             ),

@@ -1,16 +1,34 @@
 import 'package:flutter/material.dart';
 
+class Chat {
+  final String id;
+  final String? matchName;
+  final String? lastMessage;
+  final int unreadCount;
+  final DateTime? lastActivity;
+
+  Chat({
+    required this.id,
+    this.matchName,
+    this.lastMessage,
+    this.unreadCount = 0,
+    this.lastActivity,
+  });
+}
+
 class ChatProvider with ChangeNotifier {
-  Map<String, List<Map<String, dynamic>>> _chats = {};
+  Map<String, List<Map<String, dynamic>>> _chatMessages = {};
   Map<String, DateTime> _chatExpiryTimes = {};
+  List<Chat> _chats = [];
   bool _isLoading = false;
 
-  Map<String, List<Map<String, dynamic>>> get chats => _chats;
+  Map<String, List<Map<String, dynamic>>> get chatMessages => _chatMessages;
   Map<String, DateTime> get chatExpiryTimes => _chatExpiryTimes;
+  List<Chat> get chats => _chats;
   bool get isLoading => _isLoading;
 
   List<Map<String, dynamic>> getChatMessages(String chatId) {
-    return _chats[chatId] ?? [];
+    return _chatMessages[chatId] ?? [];
   }
 
   DateTime? getChatExpiryTime(String chatId) {
@@ -33,13 +51,65 @@ class ChatProvider with ChangeNotifier {
     return expiryTime.difference(now);
   }
 
+  Duration? getChatRemainingTime(String chatId) {
+    return getRemainingTime(chatId);
+  }
+
+  Future<void> loadChats() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // TODO: Implement API call to load chats
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Mock data
+      _chats = [
+        Chat(
+          id: 'chat1',
+          matchName: 'Alice',
+          lastMessage: 'Hello! How are you?',
+          unreadCount: 2,
+          lastActivity: DateTime.now().subtract(const Duration(minutes: 30)),
+        ),
+        Chat(
+          id: 'chat2',
+          matchName: 'Bob',
+          lastMessage: 'Nice to meet you!',
+          unreadCount: 0,
+          lastActivity: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+      ];
+      
+      // Set expiry times for chats
+      for (final chat in _chats) {
+        _chatExpiryTimes[chat.id] = DateTime.now().add(const Duration(hours: 24));
+      }
+    } catch (e) {
+      // Handle error
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> createChat(String chatId, String otherUserId) async {
     try {
       // TODO: Implement API call to create chat
       await Future.delayed(const Duration(seconds: 1));
       
-      _chats[chatId] = [];
+      _chatMessages[chatId] = [];
       _chatExpiryTimes[chatId] = DateTime.now().add(const Duration(hours: 24));
+      
+      // Add to chats list
+      _chats.add(Chat(
+        id: chatId,
+        matchName: 'New Match',
+        lastMessage: 'New match!',
+        unreadCount: 0,
+        lastActivity: DateTime.now(),
+      ));
+      
       notifyListeners();
     } catch (e) {
       // Handle error
@@ -61,7 +131,7 @@ class ChatProvider with ChangeNotifier {
         'isFromCurrentUser': true,
       };
 
-      _chats[chatId] = [...(_chats[chatId] ?? []), messageData];
+      _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), messageData];
       notifyListeners();
     } catch (e) {
       // Handle error
@@ -77,8 +147,8 @@ class ChatProvider with ChangeNotifier {
       await Future.delayed(const Duration(seconds: 1));
       
       // Mock data
-      if (!_chats.containsKey(chatId)) {
-        _chats[chatId] = [
+      if (!_chatMessages.containsKey(chatId)) {
+        _chatMessages[chatId] = [
           {
             'id': '1',
             'text': 'Hi! Great to match with you!',
@@ -112,8 +182,9 @@ class ChatProvider with ChangeNotifier {
         .toList();
 
     for (final chatId in expiredChatIds) {
-      _chats.remove(chatId);
+      _chatMessages.remove(chatId);
       _chatExpiryTimes.remove(chatId);
+      _chats.removeWhere((chat) => chat.id == chatId);
     }
 
     if (expiredChatIds.isNotEmpty) {

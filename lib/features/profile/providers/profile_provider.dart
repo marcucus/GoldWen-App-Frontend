@@ -10,6 +10,7 @@ class ProfileProvider with ChangeNotifier {
   List<String> _prompts = [];
   Map<String, dynamic> _personalityAnswers = {};
   bool _isProfileComplete = false;
+  bool _isLoading = false;
 
   String? get name => _name;
   int? get age => _age;
@@ -19,6 +20,7 @@ class ProfileProvider with ChangeNotifier {
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
   bool get isProfileComplete => _isProfileComplete;
+  bool get isLoading => _isLoading;
 
   void setBasicInfo(String name, int age, String bio, {DateTime? birthDate}) {
     _name = name;
@@ -106,8 +108,20 @@ class ProfileProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadProfile(String userId) async {
-    // TODO: Implement load profile from backend
-    await Future.delayed(const Duration(seconds: 1));
+  Future<void> loadProfile([String? userId]) async {
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      // TODO: Implement load profile from backend
+      await Future.delayed(const Duration(seconds: 1));
+      // Mock data for testing
+      _name = "Test User";
+      _age = 25;
+      _bio = "Hello, this is my bio";
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
