@@ -5,10 +5,14 @@ import '../../features/onboarding/pages/personality_questionnaire_page.dart';
 import '../../features/auth/pages/auth_page.dart';
 import '../../features/auth/pages/email_auth_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
+import '../../features/main/pages/main_navigation_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
 import '../../features/chat/pages/chat_page.dart';
 import '../../features/subscription/pages/subscription_page.dart';
+import '../../features/legal/pages/terms_page.dart';
+import '../../features/legal/pages/privacy_page.dart';
+import '../../features/user/pages/user_profile_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -47,7 +51,7 @@ class AppRouter {
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const DailyMatchesPage(),
+        builder: (context, state) => const MainNavigationPage(),
       ),
       GoRoute(
         path: '/profile/:profileId',
@@ -71,6 +75,25 @@ class AppRouter {
         path: '/subscription',
         name: 'subscription',
         builder: (context, state) => const SubscriptionPage(),
+      ),
+
+      // Legal Pages
+      GoRoute(
+        path: '/terms',
+        name: 'terms',
+        builder: (context, state) => const TermsPage(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        name: 'privacy',
+        builder: (context, state) => const PrivacyPage(),
+      ),
+
+      // User Profile
+      GoRoute(
+        path: '/user-profile',
+        name: 'user-profile',
+        builder: (context, state) => const UserProfilePage(),
       ),
     ],
   );

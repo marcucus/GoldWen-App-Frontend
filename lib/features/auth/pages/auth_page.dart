@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import 'email_auth_page.dart';
+import '../../onboarding/pages/personality_questionnaire_page.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -18,7 +20,7 @@ class _AuthPageState extends State<AuthPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/welcome'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SafeArea(
@@ -52,7 +54,11 @@ class _AuthPageState extends State<AuthPage> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    context.go('/auth/email');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const EmailAuthPage(),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.email_outlined, size: 24),
                   label: const Text('Continuer avec email'),
@@ -94,7 +100,11 @@ class _AuthPageState extends State<AuthPage> {
                           : () async {
                               await authProvider.signInWithGoogle();
                               if (authProvider.isAuthenticated && mounted) {
-                                context.go('/questionnaire');
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const PersonalityQuestionnairePage(),
+                                  ),
+                                );
                               }
                             },
                       icon: authProvider.status == AuthStatus.loading
@@ -136,7 +146,11 @@ class _AuthPageState extends State<AuthPage> {
                           : () async {
                               await authProvider.signInWithApple();
                               if (authProvider.isAuthenticated && mounted) {
-                                context.go('/questionnaire');
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const PersonalityQuestionnairePage(),
+                                  ),
+                                );
                               }
                             },
                       icon: authProvider.status == AuthStatus.loading

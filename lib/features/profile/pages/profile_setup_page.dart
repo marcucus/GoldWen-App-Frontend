@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/profile_provider.dart';
+import '../../main/pages/main_navigation_page.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   const ProfileSetupPage({super.key});
@@ -531,7 +532,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     // Submit to backend
     _saveProfileToBackend(profileProvider);
     
-    context.go('/home');
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const MainNavigationPage(),
+      ),
+    );
   }
 
   Future<void> _saveProfileToBackend(ProfileProvider profileProvider) async {

@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../profile/pages/profile_setup_page.dart';
 
 class PersonalityQuestionnairePage extends StatefulWidget {
   const PersonalityQuestionnairePage({super.key});
@@ -305,7 +306,11 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       await ApiService.submitPersonalityAnswers(apiAnswers);
       
       if (mounted) {
-        context.go('/profile-setup');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const ProfileSetupPage(),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
