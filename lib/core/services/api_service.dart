@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api/v1';
+  static String get baseUrl => AppConfig.isDevelopment 
+      ? AppConfig.devMainApiBaseUrl 
+      : AppConfig.mainApiBaseUrl;
   static String? _token;
 
   static void setToken(String token) {
@@ -93,6 +96,15 @@ class ApiService {
         'firstName': firstName,
         'lastName': lastName,
       }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> logout() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/logout'),
+      headers: _headers,
     );
 
     return _handleResponse(response);
@@ -780,8 +792,10 @@ class ApiService {
 
 // External Matching Service API
 class MatchingServiceApi {
-  static const String baseUrl = 'http://localhost:8000/api/v1';
-  static const String apiKey = 'matching-service-secret-key';
+  static String get baseUrl => AppConfig.isDevelopment 
+      ? AppConfig.devMatchingServiceBaseUrl 
+      : AppConfig.matchingServiceBaseUrl;
+  static String get apiKey => AppConfig.matchingServiceApiKey;
 
   static Map<String, String> get _headers => {
         'Content-Type': 'application/json',

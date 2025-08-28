@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+import '../config/app_config.dart';
 
 class WebSocketService {
-  static const String baseUrl = 'ws://localhost:3000/chat';
+  static String get baseUrl => AppConfig.isDevelopment 
+      ? AppConfig.devWebSocketBaseUrl 
+      : AppConfig.webSocketBaseUrl;
   
   WebSocketChannel? _channel;
   String? _token;

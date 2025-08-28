@@ -113,12 +113,44 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      // TODO: Implement load profile from backend
-      await Future.delayed(const Duration(seconds: 1));
-      // Mock data for testing
-      _name = "Test User";
-      _age = 25;
-      _bio = "Hello, this is my bio";
+      final response = await ApiService.getProfile();
+      final profileData = response['data'] ?? response;
+      
+      // Update profile data from response
+      _name = profileData['firstName'] != null && profileData['lastName'] != null
+          ? '${profileData['firstName']} ${profileData['lastName']}'
+          : profileData['name'];
+      _bio = profileData['bio'];
+      _birthDate = profileData['birthDate'] != null 
+          ? DateTime.parse(profileData['birthDate'])
+          : null;
+      
+      // Calculate age from birthDate
+      if (_birthDate != null) {
+        final now = DateTime.now();
+        _age = now.year - _birthDate!.year;
+        if (now.month < _birthDate!.month || 
+            (now.month == _birthDate!.month && now.day < _birthDate!.day)) {
+          _age = _age! - 1;
+        }
+      }
+      
+      // Load photos and prompts
+      _photos = List<String>.from(profileData['photos'] ?? []);
+      _prompts = List<String>.from(profileData['prompts'] ?? []);
+      _personalityAnswers = Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
+      
+      _checkProfileCompletion();
+    } catch (e) {
+      // If API call fails, keep default empty state
+      _name = null;
+      _age = null;
+      _bio = null;
+      _birthDate = null;
+      _photos.clear();
+      _prompts.clear();
+      _personalityAnswers.clear();
+      _isProfileComplete = false;
     } finally {
       _isLoading = false;
       notifyListeners();
