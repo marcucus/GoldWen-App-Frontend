@@ -2,8 +2,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:goldwen_app/core/services/api_service.dart';
 import 'package:goldwen_app/core/services/websocket_service.dart';
 import 'package:goldwen_app/core/models/models.dart';
+import 'package:goldwen_app/core/config/app_config.dart';
 
 void main() {
+  group('AppConfig Tests', () {
+    test('should provide development URLs for different platforms', () {
+      // Test that the development URLs are properly configured
+      // In test environment, Platform.isAndroid might not be available
+      // but the URLs should still be valid
+      expect(AppConfig.devMainApiBaseUrl, anyOf(
+        equals('http://localhost:3000/api/v1'),
+        equals('http://10.0.2.2:3000/api/v1')
+      ));
+      
+      expect(AppConfig.devMatchingServiceBaseUrl, anyOf(
+        equals('http://localhost:8000/api/v1'),
+        equals('http://10.0.2.2:8000/api/v1')
+      ));
+      
+      expect(AppConfig.devWebSocketBaseUrl, anyOf(
+        equals('ws://localhost:3000/chat'),
+        equals('ws://10.0.2.2:3000/chat')
+      ));
+    });
+
+    test('should have correct production URLs', () {
+      expect(AppConfig.mainApiBaseUrl, equals('https://api.goldwen.app/api/v1'));
+      expect(AppConfig.matchingServiceBaseUrl, equals('https://matching.goldwen.app/api/v1'));
+      expect(AppConfig.webSocketBaseUrl, equals('wss://api.goldwen.app/chat'));
+    });
+  });
+
   group('ApiService Tests', () {
     test('should set and manage JWT token correctly', () {
       // Test token setting
@@ -18,7 +47,13 @@ void main() {
     });
 
     test('should have correct base URL', () {
-      expect(ApiService.baseUrl, equals('http://localhost:3000/api/v1'));
+      // In test environment, expect localhost since Platform.isAndroid 
+      // is likely to throw or return false
+      expect(ApiService.baseUrl, contains('/api/v1'));
+      expect(ApiService.baseUrl, anyOf(
+        equals('http://localhost:3000/api/v1'),
+        equals('http://10.0.2.2:3000/api/v1')
+      ));
     });
 
     test('should handle API exceptions correctly', () {
@@ -48,7 +83,11 @@ void main() {
 
   group('MatchingServiceApi Tests', () {
     test('should have correct base URL and headers', () {
-      expect(MatchingServiceApi.baseUrl, equals('http://localhost:8000/api/v1'));
+      expect(MatchingServiceApi.baseUrl, contains('/api/v1'));
+      expect(MatchingServiceApi.baseUrl, anyOf(
+        equals('http://localhost:8000/api/v1'),
+        equals('http://10.0.2.2:8000/api/v1')
+      ));
       expect(MatchingServiceApi.apiKey, equals('matching-service-secret-key'));
     });
   });
@@ -56,7 +95,11 @@ void main() {
   group('WebSocketService Tests', () {
     test('should initialize with correct base URL', () {
       final wsService = WebSocketService();
-      expect(WebSocketService.baseUrl, equals('ws://localhost:3000/chat'));
+      expect(WebSocketService.baseUrl, contains('/chat'));
+      expect(WebSocketService.baseUrl, anyOf(
+        equals('ws://localhost:3000/chat'),
+        equals('ws://10.0.2.2:3000/chat')
+      ));
     });
 
     test('should require token before connecting', () {
