@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/matching_provider.dart';
-import '../models/match_profile.dart';
+import '../../../core/models/profile.dart';
 import '../../subscription/pages/subscription_page.dart';
 
 class DailyMatchesPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
 
   void _loadDailyMatches() {
     final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
-    matchingProvider.loadDailyProfiles();
+    matchingProvider.loadDailySelection();
   }
 
   @override
@@ -159,7 +159,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
     );
   }
 
-  Widget _buildProfileCard(MatchProfile profile, MatchingProvider matchingProvider) {
+  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider) {
     final isSelected = matchingProvider.isProfileSelected(profile.id);
     final canSelect = matchingProvider.canSelectMore || isSelected;
 
@@ -209,40 +209,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
                       ),
                     ),
                     
-                    // Compatibility score
-                    Positioned(
-                      top: AppSpacing.md,
-                      right: AppSpacing.md,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.small),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              '${(profile.compatibilityScore * 100).round()}%',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
                     // Selection indicator
                     if (isSelected)
                       Positioned(
@@ -276,7 +242,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
                   Row(
                     children: [
                       Text(
-                        '${profile.name}, ${profile.age}',
+                        'Profil ${profile.age != null ? ', ${profile.age}' : ''}',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const Spacer(),
@@ -292,7 +258,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
                   
                   // Bio
                   Text(
-                    profile.bio,
+                    profile.bio ?? 'Aucune biographie disponible',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),

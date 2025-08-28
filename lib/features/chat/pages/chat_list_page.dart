@@ -20,7 +20,7 @@ class _ChatListPageState extends State<ChatListPage> {
 
   void _loadChats() {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    chatProvider.loadChats();
+    chatProvider.loadConversations();
   }
 
   @override
@@ -40,7 +40,7 @@ class _ChatListPageState extends State<ChatListPage> {
             );
           }
 
-          if (chatProvider.chats.isEmpty) {
+          if (chatProvider.conversations.isEmpty) {
             return _buildEmptyState();
           }
 
@@ -48,9 +48,9 @@ class _ChatListPageState extends State<ChatListPage> {
             onRefresh: () async => _loadChats(),
             child: ListView.builder(
               padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: chatProvider.chats.length,
+              itemCount: chatProvider.conversations.length,
               itemBuilder: (context, index) {
-                final chat = chatProvider.chats[index];
+                final chat = chatProvider.conversations[index];
                 return _buildChatItem(chat, chatProvider);
               },
             ),
@@ -94,7 +94,7 @@ class _ChatListPageState extends State<ChatListPage> {
 
   Widget _buildChatItem(dynamic chat, ChatProvider chatProvider) {
     final isExpired = chatProvider.isChatExpired(chat.id);
-    final remainingTime = chatProvider.getChatRemainingTime(chat.id);
+    final remainingTime = chatProvider.getRemainingTime(chat.id);
     
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -113,14 +113,14 @@ class _ChatListPageState extends State<ChatListPage> {
             ),
           ),
           title: Text(
-            chat.matchName ?? 'Match',
+            chat.otherParticipant?.id ?? 'Match',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                chat.lastMessage ?? 'Nouveau match !',
+                chat.lastMessage?.content ?? 'Nouveau match !',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
