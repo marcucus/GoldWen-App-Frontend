@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/onboarding/pages/welcome_page.dart';
 import '../../features/onboarding/pages/personality_questionnaire_page.dart';
 import '../../features/auth/pages/auth_page.dart';
+import '../../features/auth/pages/email_auth_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
@@ -23,6 +24,11 @@ class AppRouter {
         path: '/auth',
         name: 'auth',
         builder: (context, state) => const AuthPage(),
+      ),
+      GoRoute(
+        path: '/auth/email',
+        name: 'email-auth',
+        builder: (context, state) => const EmailAuthPage(),
       ),
 
       // Onboarding Flow

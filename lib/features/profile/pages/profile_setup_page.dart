@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/profile_provider.dart';
 
@@ -16,7 +17,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   int _currentPage = 0;
   
   final _nameController = TextEditingController();
-  final _ageController = TextEditingController();
+  DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(3, (index) => TextEditingController());
 
@@ -105,14 +106,45 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           
           const SizedBox(height: AppSpacing.lg),
           
-          // Age field
-          TextFormField(
-            controller: _ageController,
-            decoration: const InputDecoration(
-              labelText: 'Âge',
-              hintText: 'Votre âge',
+          // Birth date field
+          GestureDetector(
+            onTap: _selectBirthDate,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 16,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.dividerLight),
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _birthDate != null
+                          ? DateFormat('dd/MM/yyyy').format(_birthDate!)
+                          : 'Date de naissance',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: _birthDate != null
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
             ),
-            keyboardType: TextInputType.number,
           ),
           
           const SizedBox(height: AppSpacing.lg),
@@ -415,7 +447,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   bool _isBasicInfoValid() {
     return _nameController.text.isNotEmpty &&
-           _ageController.text.isNotEmpty &&
+           _birthDate != null &&
            _bioController.text.isNotEmpty;
   }
 
@@ -423,7 +455,41 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     return _promptControllers.every((controller) => controller.text.isNotEmpty);
   }
 
-  void _nextPage() {
+  int _calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || 
+        (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  Future<void> _selectBirthDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
+      lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      locale: const Locale('fr', 'FR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: AppColors.primaryGold,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _birthDate) {
+      setState(() {
+        _birthDate = picked;
+      });
+    }
+  }
     if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -451,21 +517,34 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     
     profileProvider.setBasicInfo(
       _nameController.text,
-      int.parse(_ageController.text),
+      _calculateAge(_birthDate!),
       _bioController.text,
+      birthDate: _birthDate,
     );
     
     for (int i = 0; i < _promptControllers.length; i++) {
       profileProvider.addPrompt(_promptControllers[i].text);
     }
     
+    // Submit to backend
+    _saveProfileToBackend(profileProvider);
+    
     context.go('/home');
+  }
+
+  Future<void> _saveProfileToBackend(ProfileProvider profileProvider) async {
+    try {
+      await profileProvider.saveProfile();
+      await profileProvider.submitPromptAnswers();
+    } catch (e) {
+      // Handle error silently for now - could show snackbar
+      debugPrint('Error saving profile: $e');
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _ageController.dispose();
     _bioController.dispose();
     for (final controller in _promptControllers) {
       controller.dispose();
