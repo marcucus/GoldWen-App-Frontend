@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/matching_provider.dart';
 import '../models/match_profile.dart';
+import '../../subscription/pages/subscription_page.dart';
 
 class DailyMatchesPage extends StatefulWidget {
   const DailyMatchesPage({super.key});
@@ -31,10 +32,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Votre sélection du jour'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.star_border),
-            onPressed: () => context.go('/subscription'),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SubscriptionPage(),
+              ),
+            ),
           ),
         ],
       ),
@@ -112,7 +118,11 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
           if (!matchingProvider.hasSubscription) ...[
             const SizedBox(height: AppSpacing.sm),
             GestureDetector(
-              onTap: () => context.go('/subscription'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SubscriptionPage(),
+                ),
+              ),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,

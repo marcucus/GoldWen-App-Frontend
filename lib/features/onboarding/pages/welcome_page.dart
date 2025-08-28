@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../auth/pages/auth_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -97,7 +98,11 @@ class WelcomePage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.go('/auth');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AuthPage(),
+                      ),
+                    );
                   },
                   child: const Text('Commencer'),
                 ),

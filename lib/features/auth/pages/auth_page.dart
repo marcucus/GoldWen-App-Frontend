@@ -18,7 +18,7 @@ class _AuthPageState extends State<AuthPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/welcome'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SafeArea(

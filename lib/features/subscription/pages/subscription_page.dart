@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../legal/pages/terms_page.dart';
+import '../../legal/pages/privacy_page.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -43,7 +45,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         title: const Text('GoldWen Plus'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => context.pop(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SingleChildScrollView(
@@ -165,13 +167,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               children: [
                 TextButton(
                   onPressed: () {
-                    // TODO: Show terms
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const TermsPage(),
+                      ),
+                    );
                   },
                   child: const Text('Conditions d\'utilisation'),
                 ),
                 TextButton(
                   onPressed: () {
-                    // TODO: Show privacy policy
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPage(),
+                      ),
+                    );
                   },
                   child: const Text('Confidentialité'),
                 ),

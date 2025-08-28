@@ -38,7 +38,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/auth'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SafeArea(
