@@ -133,7 +133,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           : 'Date de naissance',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: _birthDate != null
-                            ? AppColors.textPrimary
+                            ? AppColors.textDark
                             : AppColors.textSecondary,
                       ),
                     ),
@@ -490,6 +490,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       });
     }
   }
+
+  void _nextPage() {
     if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
