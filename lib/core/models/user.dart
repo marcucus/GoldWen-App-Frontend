@@ -26,19 +26,42 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
-      fcmToken: json['fcmToken'] as String?,
-      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      emailNotifications: json['emailNotifications'] as bool? ?? true,
-      pushNotifications: json['pushNotifications'] as bool? ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      status: json['status'] as String? ?? 'active',
-    );
+    try {
+      return User(
+        id: json['id'] as String? ?? json['_id'] as String? ?? '',
+        email: json['email'] as String? ?? '',
+        firstName: json['firstName'] as String? ?? json['first_name'] as String? ?? '',
+        lastName: json['lastName'] as String? ?? json['last_name'] as String? ?? '',
+        fcmToken: json['fcmToken'] as String?,
+        notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+        emailNotifications: json['emailNotifications'] as bool? ?? true,
+        pushNotifications: json['pushNotifications'] as bool? ?? true,
+        createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
+        updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
+        status: json['status'] as String? ?? 'active',
+      );
+    } catch (e) {
+      print('Error parsing User from JSON: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
+
+  static DateTime _parseDateTime(dynamic dateValue) {
+    if (dateValue == null) {
+      return DateTime.now();
+    }
+    if (dateValue is String) {
+      return DateTime.parse(dateValue);
+    }
+    if (dateValue is DateTime) {
+      return dateValue;
+    }
+    // If it's a timestamp (int/double)
+    if (dateValue is num) {
+      return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt());
+    }
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {

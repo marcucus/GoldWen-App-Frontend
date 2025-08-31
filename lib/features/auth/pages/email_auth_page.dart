@@ -264,18 +264,61 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           lastName: _lastNameController.text.trim(),
         );
       } else {
+        print('Starting sign in with email: ${_emailController.text.trim()}');
         await authProvider.signInWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+        print('Sign in completed. Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
+        
+        // Wait a moment for the provider to notify listeners
+        await Future.delayed(const Duration(milliseconds: 50));
+        print('After delay - Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
       }
 
-      if (authProvider.isAuthenticated && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const PersonalityQuestionnairePage(),
-          ),
-        );
+      print('Checking authentication status...');
+      print('authProvider.isAuthenticated: ${authProvider.isAuthenticated}');
+      print('mounted: $mounted');
+      
+      if (authProvider.isAuthenticated) {
+        if (mounted) {
+          print('Navigating to PersonalityQuestionnairePage...');
+          try {
+            await Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const PersonalityQuestionnairePage(),
+              ),
+            );
+            print('Navigation completed successfully');
+          } catch (e) {
+            print('Navigation failed: $e');
+            // Try alternative navigation method
+            Navigator.pushReplacementNamed(context, '/personality-questionnaire');
+          }
+        } else {
+          print('Widget not mounted, retrying navigation in 100ms...');
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (mounted) {
+            print('Widget now mounted, navigating...');
+            try {
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const PersonalityQuestionnairePage(),
+                ),
+              );
+              print('Delayed navigation completed successfully');
+            } catch (e) {
+              print('Delayed navigation failed: $e');
+            }
+          } else {
+            print('Widget still not mounted after delay');
+          }
+        }
+      } else {
+        print('User not authenticated after sign in');
+        if (authProvider.error != null) {
+          print('Auth error: ${authProvider.error}');
+        }
       }
     } catch (e) {
       setState(() {
@@ -298,6 +341,14 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           if (e is ApiException) {
             print('Status code: ${e.statusCode}');
             print('Error code: ${e.code}');
+          }
+          
+          // Check if this might be a successful response that failed to parse
+          if (e.toString().contains('201') || 
+              e.toString().contains('200') || 
+              e.toString().contains('JWT') ||
+              e.toString().contains('token')) {
+            _errorMessage = 'Connexion réussie mais erreur de traitement. Veuillez réessayer ou contacter le support si le problème persiste.';
           }
         }
       });
