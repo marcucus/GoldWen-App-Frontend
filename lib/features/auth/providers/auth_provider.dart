@@ -182,34 +182,57 @@ class AuthProvider with ChangeNotifier {
       // Debug: Print the full response to understand its structure
       print('Auth response received: $response');
       
-      final data = response['data'] ?? response;
+      // Try multiple levels of data nesting
+      Map<String, dynamic> data;
+      if (response['data'] != null) {
+        data = response['data'] as Map<String, dynamic>;
+      } else if (response['result'] != null) {
+        data = response['result'] as Map<String, dynamic>;
+      } else {
+        data = response;
+      }
       print('Extracted data: $data');
       
       // Try different possible structures for user data
       Map<String, dynamic>? userData;
       if (data['user'] != null) {
         userData = data['user'] as Map<String, dynamic>;
+        print('Found user data in user field');
+      } else if (data['profile'] != null) {
+        userData = data['profile'] as Map<String, dynamic>;
+        print('Found user data in profile field');
       } else if (data.containsKey('id') && data.containsKey('email')) {
         // User data might be directly in the response
         userData = data;
+        print('Found user data directly in response');
       } else {
-        throw Exception('User data not found in response');
+        print('Available keys in data: ${data.keys.toList()}');
+        throw Exception('User data not found in response. Available keys: ${data.keys.toList()}');
       }
       print('User data: $userData');
       
       // Try different possible token field names
       String? token;
-      token = data['token'] as String? ?? 
-              data['accessToken'] as String? ?? 
-              data['access_token'] as String? ??
-              response['token'] as String? ??
-              response['accessToken'] as String? ??
-              response['access_token'] as String?;
+      final possibleTokenFields = [
+        'token', 'accessToken', 'access_token', 'authToken', 'auth_token',
+        'jwt', 'jwtToken', 'jwt_token', 'bearerToken', 'bearer_token'
+      ];
+      
+      // Check in data first, then in response root
+      for (final field in possibleTokenFields) {
+        token = data[field] as String? ?? response[field] as String?;
+        if (token != null && token.isNotEmpty) {
+          print('Found token in field: $field');
+          break;
+        }
+      }
       
       print('Token: $token');
       
       if (token == null || token.isEmpty) {
-        throw Exception('Token not found in response');
+        print('Available keys in data: ${data.keys.toList()}');
+        print('Available keys in response: ${response.keys.toList()}');
+        throw Exception('Token not found in response. Checked fields: $possibleTokenFields');
       }
       
       _user = User.fromJson(userData);
@@ -221,9 +244,11 @@ class AuthProvider with ChangeNotifier {
       ApiService.setToken(_token!);
       
       print('Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
+      print('User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
       notifyListeners();
     } catch (e) {
       print('Error in _handleAuthSuccess: $e');
+      print('Stack trace: ${StackTrace.current}');
       _handleAuthError(e);
     }
   }

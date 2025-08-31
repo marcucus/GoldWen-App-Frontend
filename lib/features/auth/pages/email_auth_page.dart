@@ -270,6 +270,10 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           password: _passwordController.text,
         );
         print('Sign in completed. Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
+        
+        // Wait a moment for the provider to notify listeners
+        await Future.delayed(const Duration(milliseconds: 50));
+        print('After delay - Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
       }
 
       print('Checking authentication status...');
@@ -285,6 +289,20 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
         );
       } else {
         print('Not navigating: isAuthenticated=${authProvider.isAuthenticated}, mounted=$mounted');
+        
+        // If authentication succeeded but widget is not mounted, wait a bit and retry
+        if (authProvider.isAuthenticated && !mounted) {
+          print('Authentication succeeded but widget not mounted, retrying in 100ms...');
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (mounted) {
+            print('Widget now mounted, navigating...');
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const PersonalityQuestionnairePage(),
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
       setState(() {
@@ -307,6 +325,14 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           if (e is ApiException) {
             print('Status code: ${e.statusCode}');
             print('Error code: ${e.code}');
+          }
+          
+          // Check if this might be a successful response that failed to parse
+          if (e.toString().contains('201') || 
+              e.toString().contains('200') || 
+              e.toString().contains('JWT') ||
+              e.toString().contains('token')) {
+            _errorMessage = 'Connexion réussie mais erreur de traitement. Veuillez réessayer ou contacter le support si le problème persiste.';
           }
         }
       });
