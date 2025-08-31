@@ -280,28 +280,44 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
       print('authProvider.isAuthenticated: ${authProvider.isAuthenticated}');
       print('mounted: $mounted');
       
-      if (authProvider.isAuthenticated && mounted) {
-        print('Navigating to PersonalityQuestionnairePage...');
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const PersonalityQuestionnairePage(),
-          ),
-        );
-      } else {
-        print('Not navigating: isAuthenticated=${authProvider.isAuthenticated}, mounted=$mounted');
-        
-        // If authentication succeeded but widget is not mounted, wait a bit and retry
-        if (authProvider.isAuthenticated && !mounted) {
-          print('Authentication succeeded but widget not mounted, retrying in 100ms...');
-          await Future.delayed(const Duration(milliseconds: 100));
-          if (mounted) {
-            print('Widget now mounted, navigating...');
-            Navigator.of(context).pushReplacement(
+      if (authProvider.isAuthenticated) {
+        if (mounted) {
+          print('Navigating to PersonalityQuestionnairePage...');
+          try {
+            await Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const PersonalityQuestionnairePage(),
               ),
             );
+            print('Navigation completed successfully');
+          } catch (e) {
+            print('Navigation failed: $e');
+            // Try alternative navigation method
+            Navigator.pushReplacementNamed(context, '/personality-questionnaire');
           }
+        } else {
+          print('Widget not mounted, retrying navigation in 100ms...');
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (mounted) {
+            print('Widget now mounted, navigating...');
+            try {
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const PersonalityQuestionnairePage(),
+                ),
+              );
+              print('Delayed navigation completed successfully');
+            } catch (e) {
+              print('Delayed navigation failed: $e');
+            }
+          } else {
+            print('Widget still not mounted after delay');
+          }
+        }
+      } else {
+        print('User not authenticated after sign in');
+        if (authProvider.error != null) {
+          print('Auth error: ${authProvider.error}');
         }
       }
     } catch (e) {

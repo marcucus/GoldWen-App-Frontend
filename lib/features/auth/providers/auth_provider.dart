@@ -40,6 +40,7 @@ class AuthProvider with ChangeNotifier {
       await _handleAuthSuccess(response);
     } catch (e) {
       _handleAuthError(e);
+      rethrow; // Ensure exceptions propagate to the UI
     }
   }
 

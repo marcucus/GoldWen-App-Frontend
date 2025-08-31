@@ -738,13 +738,18 @@ class ApiService {
 
   static Map<String, dynamic> _handleResponse(http.Response response) {
     try {
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
+      // Debug information for development only
+      if (AppConfig.isDevelopment) {
+        print('API Response Status: ${response.statusCode}');
+        print('API Response Body: ${response.body}');
+      }
       
       final Map<String, dynamic> data = jsonDecode(response.body);
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        print('API Response successful, returning data: $data');
+        if (AppConfig.isDevelopment) {
+          print('API Response successful, returning data: $data');
+        }
         return data;
       } else {
         throw ApiException(
