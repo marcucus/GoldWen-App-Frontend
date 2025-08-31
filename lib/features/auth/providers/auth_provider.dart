@@ -179,9 +179,38 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _handleAuthSuccess(Map<String, dynamic> response) async {
     try {
+      // Debug: Print the full response to understand its structure
+      print('Auth response received: $response');
+      
       final data = response['data'] ?? response;
-      final userData = data['user'] ?? data;
-      final token = data['token'] ?? data['accessToken'];
+      print('Extracted data: $data');
+      
+      // Try different possible structures for user data
+      Map<String, dynamic>? userData;
+      if (data['user'] != null) {
+        userData = data['user'] as Map<String, dynamic>;
+      } else if (data.containsKey('id') && data.containsKey('email')) {
+        // User data might be directly in the response
+        userData = data;
+      } else {
+        throw Exception('User data not found in response');
+      }
+      print('User data: $userData');
+      
+      // Try different possible token field names
+      String? token;
+      token = data['token'] as String? ?? 
+              data['accessToken'] as String? ?? 
+              data['access_token'] as String? ??
+              response['token'] as String? ??
+              response['accessToken'] as String? ??
+              response['access_token'] as String?;
+      
+      print('Token: $token');
+      
+      if (token == null || token.isEmpty) {
+        throw Exception('Token not found in response');
+      }
       
       _user = User.fromJson(userData);
       _token = token;
@@ -191,8 +220,10 @@ class AuthProvider with ChangeNotifier {
       // Set token for subsequent API calls
       ApiService.setToken(_token!);
       
+      print('Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
       notifyListeners();
     } catch (e) {
+      print('Error in _handleAuthSuccess: $e');
       _handleAuthError(e);
     }
   }

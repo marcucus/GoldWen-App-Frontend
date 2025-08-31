@@ -264,18 +264,27 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           lastName: _lastNameController.text.trim(),
         );
       } else {
+        print('Starting sign in with email: ${_emailController.text.trim()}');
         await authProvider.signInWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+        print('Sign in completed. Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
       }
 
+      print('Checking authentication status...');
+      print('authProvider.isAuthenticated: ${authProvider.isAuthenticated}');
+      print('mounted: $mounted');
+      
       if (authProvider.isAuthenticated && mounted) {
+        print('Navigating to PersonalityQuestionnairePage...');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const PersonalityQuestionnairePage(),
           ),
         );
+      } else {
+        print('Not navigating: isAuthenticated=${authProvider.isAuthenticated}, mounted=$mounted');
       }
     } catch (e) {
       setState(() {
