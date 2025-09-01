@@ -28,17 +28,26 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     try {
       return User(
-        id: json['id'] as String? ?? json['_id'] as String? ?? '',
-        email: json['email'] as String? ?? '',
-        firstName: json['firstName'] as String? ?? json['first_name'] as String? ?? '',
-        lastName: json['lastName'] as String? ?? json['last_name'] as String? ?? '',
-        fcmToken: json['fcmToken'] as String?,
-        notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-        emailNotifications: json['emailNotifications'] as bool? ?? true,
-        pushNotifications: json['pushNotifications'] as bool? ?? true,
+        id: (json['id'] is String ? json['id'] as String : json['id']?.toString()) ?? 
+            (json['_id'] is String ? json['_id'] as String : json['_id']?.toString()) ?? '',
+        email: (json['email'] is String ? json['email'] as String : json['email']?.toString()) ?? '',
+        firstName: (json['firstName'] is String ? json['firstName'] as String : json['firstName']?.toString()) ?? 
+                   (json['first_name'] is String ? json['first_name'] as String : json['first_name']?.toString()) ?? '',
+        lastName: (json['lastName'] is String ? json['lastName'] as String : json['lastName']?.toString()) ?? 
+                  (json['last_name'] is String ? json['last_name'] as String : json['last_name']?.toString()) ?? '',
+        fcmToken: json['fcmToken'] is String ? json['fcmToken'] as String : json['fcmToken']?.toString(),
+        notificationsEnabled: json['notificationsEnabled'] is bool ? json['notificationsEnabled'] as bool : 
+                             (json['notificationsEnabled']?.toString().toLowerCase() == 'true') ? true : 
+                             (json['notificationsEnabled'] == null) ? true : false,
+        emailNotifications: json['emailNotifications'] is bool ? json['emailNotifications'] as bool : 
+                           (json['emailNotifications']?.toString().toLowerCase() == 'true') ? true : 
+                           (json['emailNotifications'] == null) ? true : false,
+        pushNotifications: json['pushNotifications'] is bool ? json['pushNotifications'] as bool : 
+                          (json['pushNotifications']?.toString().toLowerCase() == 'true') ? true : 
+                          (json['pushNotifications'] == null) ? true : false,
         createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
         updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
-        status: json['status'] as String? ?? 'active',
+        status: (json['status'] is String ? json['status'] as String : json['status']?.toString()) ?? 'active',
       );
     } catch (e) {
       print('Error parsing User from JSON: $e');
