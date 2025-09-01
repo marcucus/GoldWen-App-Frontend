@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../auth/pages/auth_page.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -21,7 +22,7 @@ class WelcomePage extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryGold,
+                  color: AppColors.primaryGold.withOpacity(0.1),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -31,10 +32,12 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.favorite,
-                  size: 60,
-                  color: Colors.white,
+                child: const Center(
+                  child: AppLogo(
+                    width: 80,
+                    height: 80,
+                    useTransparentVersion: true,
+                  ),
                 ),
               ),
               

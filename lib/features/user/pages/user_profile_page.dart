@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/art_deco_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 
@@ -222,24 +224,40 @@ class _UserProfilePageState extends State<UserProfilePage> {
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Card(
-        child: ListTile(
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+      child: ArtDecoCard(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.primaryGold,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primaryGold,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: onTap,
+            const Icon(Icons.arrow_forward_ios, size: 16),
+          ],
         ),
       ),
     );
@@ -276,6 +294,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
               
               const SizedBox(height: AppSpacing.lg),
+              
+              ListTile(
+                leading: const Icon(Icons.palette),
+                title: const Text('Thème'),
+                subtitle: Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    String themeName;
+                    switch (themeProvider.themeMode) {
+                      case AppThemeMode.light:
+                        themeName = 'Clair';
+                        break;
+                      case AppThemeMode.dark:
+                        themeName = 'Sombre';
+                        break;
+                      case AppThemeMode.system:
+                        themeName = 'Système';
+                        break;
+                    }
+                    return Text(themeName);
+                  },
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showThemeDialog(context);
+                },
+              ),
               
               ListTile(
                 leading: const Icon(Icons.privacy_tip),
@@ -429,6 +473,119 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ],
         );
       },
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(Icons.palette),
+                  const SizedBox(width: 8),
+                  const Text('Choisir un thème'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    AppThemeMode.system,
+                    'Système',
+                    'Suivre le thème du téléphone',
+                    Icons.settings_system_daydream,
+                  ),
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    AppThemeMode.light,
+                    'Clair',
+                    'Thème Art Déco doré',
+                    Icons.light_mode,
+                  ),
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    AppThemeMode.dark,
+                    'Sombre',
+                    'Thème Art Déco sombre',
+                    Icons.dark_mode,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Fermer'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    AppThemeMode mode,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    final isSelected = themeProvider.themeMode == mode;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGold : Colors.transparent,
+            width: 2,
+          ),
+          color: isSelected 
+              ? AppColors.primaryGold.withOpacity(0.1) 
+              : Colors.transparent,
+        ),
+        child: ListTile(
+          leading: Icon(
+            icon,
+            color: isSelected ? AppColors.primaryGold : null,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? AppColors.primaryGold : null,
+            ),
+          ),
+          subtitle: Text(subtitle),
+          trailing: isSelected 
+              ? const Icon(
+                  Icons.check_circle,
+                  color: AppColors.primaryGold,
+                )
+              : null,
+          onTap: () {
+            themeProvider.setThemeMode(mode);
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Thème "$title" activé'),
+                backgroundColor: AppColors.primaryGold,
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
