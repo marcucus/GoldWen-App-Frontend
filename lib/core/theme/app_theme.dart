@@ -27,6 +27,19 @@ class AppColors {
   static const Color artDecoCopper = Color(0xFFB87333);
   static const Color artDecoBronze = Color(0xFFCD7F32);
   static const Color artDecoSilver = Color(0xFFC0C0C0);
+  
+  // Art Deco Gradients
+  static const LinearGradient goldGradient = LinearGradient(
+    colors: [primaryGold, primaryGoldLight],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient darkGoldGradient = LinearGradient(
+    colors: [primaryGoldDark, artDecoBronze],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
 
 class AppTheme {

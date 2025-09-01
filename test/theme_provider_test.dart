@@ -11,34 +11,34 @@ void main() {
     });
 
     test('should initialize with system theme mode', () {
-      expect(themeProvider.themeMode, ThemeMode.system);
+      expect(themeProvider.themeMode, AppThemeMode.system);
     });
 
     test('should change theme mode', () async {
-      await themeProvider.setThemeMode(ThemeMode.dark);
-      expect(themeProvider.themeMode, ThemeMode.dark);
+      await themeProvider.setThemeMode(AppThemeMode.dark);
+      expect(themeProvider.themeMode, AppThemeMode.dark);
       expect(themeProvider.isDarkMode, true);
 
-      await themeProvider.setThemeMode(ThemeMode.light);
-      expect(themeProvider.themeMode, ThemeMode.light);
+      await themeProvider.setThemeMode(AppThemeMode.light);
+      expect(themeProvider.themeMode, AppThemeMode.light);
       expect(themeProvider.isDarkMode, false);
     });
 
     test('should return correct logo asset for theme', () {
       // Test light theme
-      themeProvider.setThemeMode(ThemeMode.light);
+      themeProvider.setThemeMode(AppThemeMode.light);
       expect(themeProvider.currentLogoAsset, 'assets/images/logo_light.png');
 
       // Test dark theme
-      themeProvider.setThemeMode(ThemeMode.dark);
+      themeProvider.setThemeMode(AppThemeMode.dark);
       expect(themeProvider.currentLogoAsset, 'assets/images/logo_dark.png');
     });
 
     test('should return app icon asset based on current mode', () {
-      themeProvider.setThemeMode(ThemeMode.light);
+      themeProvider.setThemeMode(AppThemeMode.light);
       expect(themeProvider.appIconAsset, contains('logo_light.png'));
 
-      themeProvider.setThemeMode(ThemeMode.dark);
+      themeProvider.setThemeMode(AppThemeMode.dark);
       expect(themeProvider.appIconAsset, contains('logo_dark.png'));
     });
   });

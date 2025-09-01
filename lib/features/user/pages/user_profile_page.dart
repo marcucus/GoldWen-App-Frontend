@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/art_deco_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 
@@ -223,24 +224,40 @@ class _UserProfilePageState extends State<UserProfilePage> {
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Card(
-        child: ListTile(
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+      child: ArtDecoCard(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.primaryGold,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primaryGold,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: onTap,
+            const Icon(Icons.arrow_forward_ios, size: 16),
+          ],
         ),
       ),
     );
@@ -285,13 +302,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   builder: (context, themeProvider, child) {
                     String themeName;
                     switch (themeProvider.themeMode) {
-                      case ThemeMode.light:
+                      case AppThemeMode.light:
                         themeName = 'Clair';
                         break;
-                      case ThemeMode.dark:
+                      case AppThemeMode.dark:
                         themeName = 'Sombre';
                         break;
-                      case ThemeMode.system:
+                      case AppThemeMode.system:
                         themeName = 'Système';
                         break;
                     }
@@ -479,7 +496,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   _buildThemeOption(
                     context,
                     themeProvider,
-                    ThemeMode.system,
+                    AppThemeMode.system,
                     'Système',
                     'Suivre le thème du téléphone',
                     Icons.settings_system_daydream,
@@ -487,7 +504,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   _buildThemeOption(
                     context,
                     themeProvider,
-                    ThemeMode.light,
+                    AppThemeMode.light,
                     'Clair',
                     'Thème Art Déco doré',
                     Icons.light_mode,
@@ -495,7 +512,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   _buildThemeOption(
                     context,
                     themeProvider,
-                    ThemeMode.dark,
+                    AppThemeMode.dark,
                     'Sombre',
                     'Thème Art Déco sombre',
                     Icons.dark_mode,
@@ -518,7 +535,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget _buildThemeOption(
     BuildContext context,
     ThemeProvider themeProvider,
-    ThemeMode mode,
+    AppThemeMode mode,
     String title,
     String subtitle,
     IconData icon,

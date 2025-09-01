@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum ThemeMode { light, dark, system }
+enum AppThemeMode { light, dark, system }
 
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   
-  ThemeMode _themeMode = ThemeMode.system;
+  AppThemeMode _themeMode = AppThemeMode.system;
   bool _isDarkMode = false;
 
-  ThemeMode get themeMode => _themeMode;
+  AppThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _isDarkMode;
 
   ThemeProvider() {
@@ -20,13 +20,13 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadThemeFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeIndex = prefs.getInt(_themeKey) ?? ThemeMode.system.index;
-    _themeMode = ThemeMode.values[themeIndex];
+    final themeIndex = prefs.getInt(_themeKey) ?? AppThemeMode.system.index;
+    _themeMode = AppThemeMode.values[themeIndex];
     _updateSystemTheme();
     notifyListeners();
   }
 
-  Future<void> setThemeMode(ThemeMode mode) async {
+  Future<void> setThemeMode(AppThemeMode mode) async {
     _themeMode = mode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKey, mode.index);
@@ -36,13 +36,13 @@ class ThemeProvider extends ChangeNotifier {
 
   void _updateSystemTheme() {
     switch (_themeMode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         _isDarkMode = false;
         break;
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         _isDarkMode = true;
         break;
-      case ThemeMode.system:
+      case AppThemeMode.system:
         final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
         _isDarkMode = brightness == Brightness.dark;
         break;
@@ -61,11 +61,11 @@ class ThemeProvider extends ChangeNotifier {
 
   String get currentLogoAsset {
     switch (_themeMode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         return 'assets/images/logo_light.png';
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         return 'assets/images/logo_dark.png';
-      case ThemeMode.system:
+      case AppThemeMode.system:
         return _isDarkMode 
             ? 'assets/images/logo_dark.png' 
             : 'assets/images/logo_light.png';
