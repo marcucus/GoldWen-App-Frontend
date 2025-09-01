@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 
@@ -278,6 +279,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
               const SizedBox(height: AppSpacing.lg),
               
               ListTile(
+                leading: const Icon(Icons.palette),
+                title: const Text('Thème'),
+                subtitle: Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    String themeName;
+                    switch (themeProvider.themeMode) {
+                      case ThemeMode.light:
+                        themeName = 'Clair';
+                        break;
+                      case ThemeMode.dark:
+                        themeName = 'Sombre';
+                        break;
+                      case ThemeMode.system:
+                        themeName = 'Système';
+                        break;
+                    }
+                    return Text(themeName);
+                  },
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showThemeDialog(context);
+                },
+              ),
+              
+              ListTile(
                 leading: const Icon(Icons.privacy_tip),
                 title: const Text('Conditions d\'utilisation'),
                 onTap: () {
@@ -429,6 +456,119 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ],
         );
       },
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(Icons.palette),
+                  const SizedBox(width: 8),
+                  const Text('Choisir un thème'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    ThemeMode.system,
+                    'Système',
+                    'Suivre le thème du téléphone',
+                    Icons.settings_system_daydream,
+                  ),
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    ThemeMode.light,
+                    'Clair',
+                    'Thème Art Déco doré',
+                    Icons.light_mode,
+                  ),
+                  _buildThemeOption(
+                    context,
+                    themeProvider,
+                    ThemeMode.dark,
+                    'Sombre',
+                    'Thème Art Déco sombre',
+                    Icons.dark_mode,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Fermer'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    ThemeMode mode,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    final isSelected = themeProvider.themeMode == mode;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGold : Colors.transparent,
+            width: 2,
+          ),
+          color: isSelected 
+              ? AppColors.primaryGold.withOpacity(0.1) 
+              : Colors.transparent,
+        ),
+        child: ListTile(
+          leading: Icon(
+            icon,
+            color: isSelected ? AppColors.primaryGold : null,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? AppColors.primaryGold : null,
+            ),
+          ),
+          subtitle: Text(subtitle),
+          trailing: isSelected 
+              ? const Icon(
+                  Icons.check_circle,
+                  color: AppColors.primaryGold,
+                )
+              : null,
+          onTap: () {
+            themeProvider.setThemeMode(mode);
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Thème "$title" activé'),
+                backgroundColor: AppColors.primaryGold,
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
