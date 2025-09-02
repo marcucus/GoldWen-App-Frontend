@@ -1,0 +1,106 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { MatchingService } from './matching.service';
+import { GetMatchesDto } from './dto/matching.dto';
+
+@ApiTags('matching')
+@Controller('matching')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+export class MatchingController {
+  constructor(private readonly matchingService: MatchingService) {}
+
+  @Get('daily-selection')
+  @ApiOperation({ summary: 'Get daily selection of profiles' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daily selection retrieved successfully',
+  })
+  async getDailySelection(@Request() req: any) {
+    return this.matchingService.getDailySelection(req.user.id);
+  }
+
+  @Post('daily-selection/generate')
+  @ApiOperation({ summary: 'Manually generate daily selection (for testing)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Daily selection generated successfully',
+  })
+  async generateDailySelection(@Request() req: any) {
+    return this.matchingService.generateDailySelection(req.user.id);
+  }
+
+  @Post('choose/:targetUserId')
+  @ApiOperation({ summary: 'Choose a profile from daily selection' })
+  @ApiResponse({
+    status: 201,
+    description: 'Profile choice registered successfully',
+  })
+  async chooseProfile(
+    @Request() req: any,
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    return this.matchingService.chooseProfile(req.user.id, targetUserId);
+  }
+
+  @Get('matches')
+  @ApiOperation({ summary: 'Get user matches' })
+  @ApiResponse({ status: 200, description: 'Matches retrieved successfully' })
+  async getMatches(@Request() req: any, @Query() query: GetMatchesDto) {
+    return this.matchingService.getUserMatches(req.user.id, query.status);
+  }
+
+  @Get('matches/:matchId')
+  @ApiOperation({ summary: 'Get specific match details' })
+  @ApiResponse({
+    status: 200,
+    description: 'Match details retrieved successfully',
+  })
+  async getMatch(@Request() req: any, @Param('matchId') matchId: string) {
+    const matches = await this.matchingService.getUserMatches(req.user.id);
+    const match = matches.find((m) => m.id === matchId);
+
+    if (!match) {
+      throw new Error('Match not found');
+    }
+
+    return match;
+  }
+
+  @Delete('matches/:matchId')
+  @ApiOperation({ summary: 'Delete a match' })
+  @ApiResponse({ status: 200, description: 'Match deleted successfully' })
+  async deleteMatch(@Request() req: any, @Param('matchId') matchId: string) {
+    await this.matchingService.deleteMatch(req.user.id, matchId);
+    return { message: 'Match deleted successfully' };
+  }
+
+  @Get('compatibility/:targetUserId')
+  @ApiOperation({ summary: 'Get compatibility score with another user' })
+  @ApiResponse({ status: 200, description: 'Compatibility score calculated' })
+  async getCompatibilityScore(
+    @Request() req: any,
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    const score = await this.matchingService.getCompatibilityScore(
+      req.user.id,
+      targetUserId,
+    );
+    return { compatibilityScore: score };
+  }
+}

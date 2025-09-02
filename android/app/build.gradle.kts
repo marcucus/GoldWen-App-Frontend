@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.goldwen_app"
+    namespace = "com.goldwen.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.goldwen_app"
+        applicationId = "com.goldwen.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

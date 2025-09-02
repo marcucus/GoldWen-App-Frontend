@@ -1,4 +1,4 @@
-package com.example.goldwen_app
+package com.goldwen.app
 
 import io.flutter.embedding.android.FlutterActivity
 
