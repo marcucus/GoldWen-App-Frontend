@@ -58,17 +58,17 @@ import { AdminModule } from './modules/admin/admin.module';
 
     // Database
     TypeOrmModule.forRootAsync({
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => ({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: '192.168.1.183',
-        port: 5432,
-        username: 'postgres',
-        password: 'admin',
-        database: 'postgres',
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.database'),
         autoLoadEntities: true,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
+        synchronize: configService.get('app.environment') === 'development',
         logging: configService.get('app.environment') === 'development',
       }),
       inject: [ConfigService],

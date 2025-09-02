@@ -17,6 +17,35 @@ import { Admin } from '../database/entities/admin.entity';
 import { Report } from '../database/entities/report.entity';
 
 export const createDataSource = (configService: ConfigService) => {
+  const dbType = process.env.DATABASE_TYPE || 'postgres';
+  
+  if (dbType === 'sqlite') {
+    return new DataSource({
+      type: 'sqlite',
+      database: process.env.DATABASE_DATABASE || ':memory:',
+      entities: [
+        User,
+        Profile,
+        PersonalityQuestion,
+        PersonalityAnswer,
+        Photo,
+        Prompt,
+        PromptAnswer,
+        DailySelection,
+        Match,
+        Chat,
+        Message,
+        Subscription,
+        Notification,
+        Admin,
+        Report,
+      ],
+      migrations: ['src/database/migrations/*.ts'],
+      synchronize: configService.get('app.environment') === 'development',
+      logging: configService.get('app.environment') === 'development',
+    });
+  }
+  
   return new DataSource({
     type: 'postgres',
     host: configService.get('database.host'),

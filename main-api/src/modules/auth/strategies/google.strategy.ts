@@ -6,19 +6,9 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
-    const clientId = configService.get('oauth.google.clientId');
-    const clientSecret = configService.get('oauth.google.clientSecret');
+    const clientId = configService.get('oauth.google.clientId') || 'dummy-client-id';
+    const clientSecret = configService.get('oauth.google.clientSecret') || 'dummy-client-secret';
     const environment = configService.get('app.environment');
-
-    // Only require OAuth credentials in production
-    if (environment === 'production' && (!clientId || !clientSecret)) {
-      throw new Error('Google OAuth credentials not configured');
-    }
-
-    // Skip OAuth initialization in development if credentials are missing
-    if (!clientId || !clientSecret) {
-      return;
-    }
 
     super({
       clientID: clientId,
@@ -26,6 +16,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: '/auth/google/callback',
       scope: ['email', 'profile'],
     });
+
+    // Only require OAuth credentials in production
+    if (environment === 'production' && (!clientId || !clientSecret)) {
+      throw new Error('Google OAuth credentials not configured');
+    }
   }
 
   async validate(
