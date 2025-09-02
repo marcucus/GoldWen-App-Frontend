@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/models/profile.dart';
 
 class ProfileProvider with ChangeNotifier {
   String? _name;
@@ -9,8 +10,10 @@ class ProfileProvider with ChangeNotifier {
   List<String> _photos = [];
   List<String> _prompts = [];
   Map<String, dynamic> _personalityAnswers = {};
+  List<PersonalityQuestion> _personalityQuestions = [];
   bool _isProfileComplete = false;
   bool _isLoading = false;
+  String? _error;
 
   String? get name => _name;
   int? get age => _age;
@@ -19,8 +22,10 @@ class ProfileProvider with ChangeNotifier {
   List<String> get photos => _photos;
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
+  List<PersonalityQuestion> get personalityQuestions => _personalityQuestions;
   bool get isProfileComplete => _isProfileComplete;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   void setBasicInfo(String name, int age, String bio, {DateTime? birthDate}) {
     _name = name;
@@ -66,6 +71,79 @@ class ProfileProvider with ChangeNotifier {
     _personalityAnswers = answers;
     _checkProfileCompletion();
     notifyListeners();
+  }
+
+  void setPersonalityAnswer(String questionId, dynamic answer) {
+    _personalityAnswers[questionId] = answer;
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  Future<void> loadPersonalityQuestions() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.getPersonalityQuestions();
+      final questionsData = response as List;
+      _personalityQuestions = questionsData
+          .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
+          .toList();
+      _error = null;
+    } catch (e) {
+      _error = 'Failed to load personality questions: $e';
+      print('Error loading personality questions: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> submitPersonalityAnswers() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final answersData = _personalityAnswers.entries.map((entry) {
+        final questionId = entry.key;
+        final answer = entry.value;
+        
+        // Find the question to determine the type
+        final question = _personalityQuestions.firstWhere(
+          (q) => q.id == questionId,
+          orElse: () => throw Exception('Question not found: $questionId'),
+        );
+        
+        // Format answer according to question type
+        Map<String, dynamic> answerData = {
+          'questionId': questionId,
+        };
+        
+        if (question.type == 'multiple_choice') {
+          answerData['textAnswer'] = answer.toString();
+        } else if (question.type == 'scale') {
+          answerData['numericAnswer'] = answer is int ? answer : int.tryParse(answer.toString()) ?? 0;
+        } else if (question.type == 'boolean') {
+          answerData['booleanAnswer'] = answer is bool ? answer : answer.toString().toLowerCase() == 'true';
+        } else {
+          answerData['textAnswer'] = answer.toString();
+        }
+        
+        return answerData;
+      }).toList();
+
+      await ApiService.submitPersonalityAnswers(answersData);
+      _error = null;
+    } catch (e) {
+      _error = 'Failed to submit personality answers: $e';
+      print('Error submitting personality answers: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void _checkProfileCompletion() {

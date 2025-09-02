@@ -255,50 +255,70 @@ class PromptAnswer {
 
 class PersonalityQuestion {
   final String id;
-  final String text;
+  final String question;
   final String type;
   final List<String>? options;
   final int? minValue;
   final int? maxValue;
-  final bool required;
+  final bool isRequired;
   final int order;
+  final bool isActive;
+  final String category;
+  final String? description;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   PersonalityQuestion({
     required this.id,
-    required this.text,
+    required this.question,
     required this.type,
     this.options,
     this.minValue,
     this.maxValue,
-    required this.required,
+    required this.isRequired,
     required this.order,
+    required this.isActive,
+    required this.category,
+    this.description,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory PersonalityQuestion.fromJson(Map<String, dynamic> json) {
     return PersonalityQuestion(
       id: json['id'] as String,
-      text: json['text'] as String,
+      question: json['question'] as String,
       type: json['type'] as String,
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
       minValue: json['minValue'] as int?,
       maxValue: json['maxValue'] as int?,
-      required: json['required'] as bool? ?? true,
+      isRequired: json['isRequired'] as bool? ?? true,
       order: json['order'] as int,
+      isActive: json['isActive'] as bool? ?? true,
+      category: json['category'] as String,
+      description: json['description'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'text': text,
+      'question': question,
       'type': type,
       'options': options,
       'minValue': minValue,
       'maxValue': maxValue,
-      'required': required,
+      'isRequired': isRequired,
       'order': order,
+      'isActive': isActive,
+      'category': category,
+      'description': description,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }

@@ -1,28 +1,32 @@
 class User {
   final String id;
   final String email;
-  final String firstName;
-  final String lastName;
+  final String? firstName;
+  final String? lastName;
   final String? fcmToken;
-  final bool notificationsEnabled;
-  final bool emailNotifications;
-  final bool pushNotifications;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final String status;
+  final bool? notificationsEnabled;
+  final bool? emailNotifications;
+  final bool? pushNotifications;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final String? status;
+  final bool? isOnboardingCompleted;
+  final bool? isProfileCompleted;
 
   User({
     required this.id,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    this.firstName,
+    this.lastName,
     this.fcmToken,
-    required this.notificationsEnabled,
-    required this.emailNotifications,
-    required this.pushNotifications,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.status,
+    this.notificationsEnabled,
+    this.emailNotifications,
+    this.pushNotifications,
+    this.createdAt,
+    this.updatedAt,
+    this.status,
+    this.isOnboardingCompleted,
+    this.isProfileCompleted,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -31,23 +35,35 @@ class User {
         id: (json['id'] is String ? json['id'] as String : json['id']?.toString()) ?? 
             (json['_id'] is String ? json['_id'] as String : json['_id']?.toString()) ?? '',
         email: (json['email'] is String ? json['email'] as String : json['email']?.toString()) ?? '',
-        firstName: (json['firstName'] is String ? json['firstName'] as String : json['firstName']?.toString()) ?? 
-                   (json['first_name'] is String ? json['first_name'] as String : json['first_name']?.toString()) ?? '',
-        lastName: (json['lastName'] is String ? json['lastName'] as String : json['lastName']?.toString()) ?? 
-                  (json['last_name'] is String ? json['last_name'] as String : json['last_name']?.toString()) ?? '',
+        firstName: json['firstName'] is String ? json['firstName'] as String : 
+                   json['first_name'] is String ? json['first_name'] as String : 
+                   json['firstName']?.toString(),
+        lastName: json['lastName'] is String ? json['lastName'] as String : 
+                  json['last_name'] is String ? json['last_name'] as String :
+                  json['lastName']?.toString(),
         fcmToken: json['fcmToken'] is String ? json['fcmToken'] as String : json['fcmToken']?.toString(),
         notificationsEnabled: json['notificationsEnabled'] is bool ? json['notificationsEnabled'] as bool : 
                              (json['notificationsEnabled']?.toString().toLowerCase() == 'true') ? true : 
-                             (json['notificationsEnabled'] == null) ? true : false,
+                             json['notificationsEnabled'] == null ? null : false,
         emailNotifications: json['emailNotifications'] is bool ? json['emailNotifications'] as bool : 
                            (json['emailNotifications']?.toString().toLowerCase() == 'true') ? true : 
-                           (json['emailNotifications'] == null) ? true : false,
+                           json['emailNotifications'] == null ? null : false,
         pushNotifications: json['pushNotifications'] is bool ? json['pushNotifications'] as bool : 
                           (json['pushNotifications']?.toString().toLowerCase() == 'true') ? true : 
-                          (json['pushNotifications'] == null) ? true : false,
-        createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
-        updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
-        status: (json['status'] is String ? json['status'] as String : json['status']?.toString()) ?? 'active',
+                          json['pushNotifications'] == null ? null : false,
+        createdAt: json['createdAt'] != null || json['created_at'] != null 
+                  ? _parseDateTime(json['createdAt'] ?? json['created_at']) 
+                  : null,
+        updatedAt: json['updatedAt'] != null || json['updated_at'] != null 
+                  ? _parseDateTime(json['updatedAt'] ?? json['updated_at']) 
+                  : null,
+        status: json['status'] is String ? json['status'] as String : json['status']?.toString(),
+        isOnboardingCompleted: json['isOnboardingCompleted'] is bool ? json['isOnboardingCompleted'] as bool :
+                              (json['isOnboardingCompleted']?.toString().toLowerCase() == 'true') ? true :
+                              json['isOnboardingCompleted'] == null ? null : false,
+        isProfileCompleted: json['isProfileCompleted'] is bool ? json['isProfileCompleted'] as bool :
+                           (json['isProfileCompleted']?.toString().toLowerCase() == 'true') ? true :
+                           json['isProfileCompleted'] == null ? null : false,
       );
     } catch (e) {
       print('Error parsing User from JSON: $e');
@@ -56,12 +72,17 @@ class User {
     }
   }
 
-  static DateTime _parseDateTime(dynamic dateValue) {
+  static DateTime? _parseDateTime(dynamic dateValue) {
     if (dateValue == null) {
-      return DateTime.now();
+      return null;
     }
     if (dateValue is String) {
-      return DateTime.parse(dateValue);
+      try {
+        return DateTime.parse(dateValue);
+      } catch (e) {
+        print('Error parsing date: $dateValue');
+        return null;
+      }
     }
     if (dateValue is DateTime) {
       return dateValue;
@@ -70,22 +91,24 @@ class User {
     if (dateValue is num) {
       return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt());
     }
-    return DateTime.now();
+    return null;
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
-      'fcmToken': fcmToken,
-      'notificationsEnabled': notificationsEnabled,
-      'emailNotifications': emailNotifications,
-      'pushNotifications': pushNotifications,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'status': status,
+      if (firstName != null) 'firstName': firstName,
+      if (lastName != null) 'lastName': lastName,
+      if (fcmToken != null) 'fcmToken': fcmToken,
+      if (notificationsEnabled != null) 'notificationsEnabled': notificationsEnabled,
+      if (emailNotifications != null) 'emailNotifications': emailNotifications,
+      if (pushNotifications != null) 'pushNotifications': pushNotifications,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      if (status != null) 'status': status,
+      if (isOnboardingCompleted != null) 'isOnboardingCompleted': isOnboardingCompleted,
+      if (isProfileCompleted != null) 'isProfileCompleted': isProfileCompleted,
     };
   }
 
@@ -101,6 +124,8 @@ class User {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? status,
+    bool? isOnboardingCompleted,
+    bool? isProfileCompleted,
   }) {
     return User(
       id: id ?? this.id,
@@ -114,6 +139,8 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      isOnboardingCompleted: isOnboardingCompleted ?? this.isOnboardingCompleted,
+      isProfileCompleted: isProfileCompleted ?? this.isProfileCompleted,
     );
   }
 }

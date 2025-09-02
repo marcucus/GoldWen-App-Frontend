@@ -155,6 +155,7 @@ export class UpdateProfileDto {
 
 export class PersonalityAnswerDto {
   @ApiProperty()
+  @IsUUID()
   questionId: string;
 
   @ApiPropertyOptional()
