@@ -21,6 +21,16 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   notificationsEnabled?: boolean;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  isOnboardingCompleted?: boolean;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  isProfileCompleted?: boolean;
 }
 
 export class UpdateUserSettingsDto {
