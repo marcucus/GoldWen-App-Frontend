@@ -40,6 +40,10 @@ class _ChatListPageState extends State<ChatListPage> {
             );
           }
 
+          if (chatProvider.error != null) {
+            return _buildErrorState(chatProvider.error!);
+          }
+
           if (chatProvider.conversations.isEmpty) {
             return _buildEmptyState();
           }
@@ -85,6 +89,47 @@ class _ChatListPageState extends State<ChatListPage> {
                 color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 80,
+              color: AppColors.errorRed,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Erreur de chargement',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              error,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ElevatedButton(
+              onPressed: () {
+                final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+                chatProvider.clearError();
+                _loadChats();
+              },
+              child: const Text('Réessayer'),
             ),
           ],
         ),

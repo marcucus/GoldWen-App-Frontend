@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 
@@ -23,11 +24,35 @@ class ApiService {
         if (_token != null) 'Authorization': 'Bearer $_token',
       };
 
+  // Helper method to handle HTTP requests with timeout and error handling
+  static Future<http.Response> _makeRequest(
+    Future<http.Response> request, [
+    Duration? timeout,
+  ]) async {
+    try {
+      return await request.timeout(timeout ?? AppConfig.defaultTimeout);
+    } on TimeoutException catch (_) {
+      throw ApiException(
+        statusCode: 0,
+        message: 'Request timeout - Please check your internet connection and try again',
+        code: 'TIMEOUT_ERROR',
+      );
+    } catch (e) {
+      throw ApiException(
+        statusCode: 0,
+        message: 'Network error - Unable to connect to server',
+        code: 'NETWORK_ERROR',
+      );
+    }
+  }
+
   // Health check endpoints
   static Future<Map<String, dynamic>> healthCheck() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/health'),
-      headers: _headers,
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/health'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
@@ -403,9 +428,11 @@ class ApiService {
 
   // Chat endpoints
   static Future<Map<String, dynamic>> getConversations() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/chat/conversations'),
-      headers: _headers,
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/chat/conversations'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
@@ -413,9 +440,11 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getConversationDetails(
       String chatId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/chat/conversations/$chatId'),
-      headers: _headers,
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/chat/conversations/$chatId'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
@@ -430,7 +459,9 @@ class ApiService {
 
     final uri = Uri.parse('$baseUrl/chat/conversations/$chatId/messages')
         .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _makeRequest(
+      http.get(uri, headers: _headers),
+    );
 
     return _handleResponse(response);
   }
