@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../providers/profile_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
@@ -16,6 +18,7 @@ class ProfileSetupPage extends StatefulWidget {
 class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  final ImagePicker _picker = ImagePicker();
   
   final _nameController = TextEditingController();
   DateTime? _birthDate;
@@ -27,6 +30,23 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     'Je ne peux pas vivre sans...',
     'Ma passion secrète est...',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to update button state when user types
+    _nameController.addListener(_updateButtonState);
+    _bioController.addListener(_updateButtonState);
+    for (final controller in _promptControllers) {
+      controller.addListener(_updateButtonState);
+    }
+  }
+
+  void _updateButtonState() {
+    setState(() {
+      // This will trigger a rebuild and update button states
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +119,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           TextFormField(
             controller: _nameController,
             decoration: const InputDecoration(
-              labelText: 'Prénom',
-              hintText: 'Votre prénom',
+              labelText: 'Pseudo',
+              hintText: 'Votre pseudo',
             ),
             textCapitalization: TextCapitalization.words,
           ),
@@ -217,7 +237,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     final hasPhoto = index < profileProvider.photos.length;
                     
                     return GestureDetector(
-                      onTap: () => _addPhoto(profileProvider),
+                      onTap: hasPhoto ? null : () => _addPhoto(profileProvider),
                       child: Container(
                         decoration: BoxDecoration(
                           color: hasPhoto ? null : AppColors.accentCream,
@@ -236,11 +256,23 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                       width: double.infinity,
                                       height: double.infinity,
                                       color: AppColors.primaryGold.withOpacity(0.3),
-                                      child: const Icon(
-                                        Icons.image,
-                                        size: 40,
-                                        color: Colors.white,
-                                      ),
+                                      child: profileProvider.photos[index].startsWith('file://')
+                                          ? Image.file(
+                                              File(profileProvider.photos[index].replaceFirst('file://', '')),
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return const Icon(
+                                                  Icons.image,
+                                                  size: 40,
+                                                  color: Colors.white,
+                                                );
+                                              },
+                                            )
+                                          : const Icon(
+                                              Icons.image,
+                                              size: 40,
+                                              color: Colors.white,
+                                            ),
                                     ),
                                   ),
                                   Positioned(
@@ -510,9 +542,81 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
   }
 
-  void _addPhoto(ProfileProvider profileProvider) {
-    // TODO: Implement image picker
-    profileProvider.addPhoto('mock_photo_${profileProvider.photos.length + 1}');
+  Future<void> _addPhoto(ProfileProvider profileProvider) async {
+    if (profileProvider.photos.length >= 6) {
+      return; // Maximum photos reached
+    }
+
+    try {
+      // Show dialog to choose between camera and gallery
+      final ImageSource? source = await _showImageSourceDialog();
+      if (source == null) return;
+
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        // For now, we'll add the image path as a mock URL
+        // In a real app, you would upload the image to a server
+        profileProvider.addPhoto('file://${image.path}');
+        
+        // TODO: In production, upload the image to backend
+        // final uploadedUrl = await ApiService.uploadPhoto(image.path);
+        // profileProvider.addPhoto(uploadedUrl);
+      }
+    } catch (e) {
+      // Show error message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'ajout de la photo: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<ImageSource?> _showImageSourceDialog() async {
+    return showDialog<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Choisir une source'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Appareil photo'),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galerie'),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Annuler'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _finishSetup() {
@@ -551,6 +655,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   @override
   void dispose() {
+    // Remove listeners before disposing
+    _nameController.removeListener(_updateButtonState);
+    _bioController.removeListener(_updateButtonState);
+    for (final controller in _promptControllers) {
+      controller.removeListener(_updateButtonState);
+    }
+    
     _nameController.dispose();
     _bioController.dispose();
     for (final controller in _promptControllers) {
