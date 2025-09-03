@@ -409,9 +409,7 @@ export class ChatService {
     }
 
     // Check if user is part of this chat through the match
-    return (
-      chat.match.user1Id === userId || chat.match.user2Id === userId
-    );
+    return chat.match.user1Id === userId || chat.match.user2Id === userId;
   }
 
   async markMessageAsRead(messageId: string, userId: string): Promise<void> {

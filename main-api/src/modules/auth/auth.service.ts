@@ -46,45 +46,47 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
     const { email, password, firstName, lastName } = registerDto;
     try {
-// Check if user already exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
+      // Check if user already exists
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
+      if (existingUser) {
+        throw new ConflictException('User with this email already exists');
+      }
 
-    // Hash password
-    const passwordHash = await PasswordUtil.hash(password);
+      // Hash password
+      const passwordHash = await PasswordUtil.hash(password);
 
-    // Create user
-    const user = this.userRepository.create({
-      email,
-      passwordHash,
-      status: UserStatus.ACTIVE,
-      emailVerificationToken: StringUtil.generateRandomString(32),
-    });
+      // Create user
+      const user = this.userRepository.create({
+        email,
+        passwordHash,
+        status: UserStatus.ACTIVE,
+        emailVerificationToken: StringUtil.generateRandomString(32),
+      });
 
-    const savedUser = await this.userRepository.save(user);
+      const savedUser = await this.userRepository.save(user);
 
-    // Create basic profile
-    const profile = this.profileRepository.create({
-      userId: savedUser.id,
-      firstName,
-      lastName,
-    });
+      // Create basic profile
+      const profile = this.profileRepository.create({
+        userId: savedUser.id,
+        firstName,
+        lastName,
+      });
 
-    await this.profileRepository.save(profile);
+      await this.profileRepository.save(profile);
 
-    // Send welcome email (async, don't wait)
-    this.emailService.sendWelcomeEmail(savedUser.email, firstName).catch(() => {
-      // Email sending is not critical, so we don't throw errors
-    });
+      // Send welcome email (async, don't wait)
+      this.emailService
+        .sendWelcomeEmail(savedUser.email, firstName)
+        .catch(() => {
+          // Email sending is not critical, so we don't throw errors
+        });
 
-    // Generate JWT token
-    const accessToken = this.generateAccessToken(savedUser);
+      // Generate JWT token
+      const accessToken = this.generateAccessToken(savedUser);
 
-    return { user: savedUser, accessToken };
+      return { user: savedUser, accessToken };
     } catch (error) {
       console.log('Error registering user:', error);
       throw new InternalServerErrorException('Error registering user');

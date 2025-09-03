@@ -18,6 +18,7 @@ import {
   UpdateProfileDto,
   SubmitPersonalityAnswersDto,
   SubmitPromptAnswersDto,
+  UpdateProfileStatusDto,
 } from './dto/profiles.dto';
 
 @Injectable()
@@ -307,8 +308,7 @@ export class ProfilesService {
     const hasMinPhotos = (user.profile.photos?.length || 0) >= 3;
     const hasPromptAnswers = (user.profile.promptAnswers?.length || 0) >= 3;
     const hasRequiredProfileFields = !!(
-      user.profile.birthDate &&
-      user.profile.bio
+      user.profile.birthDate && user.profile.bio
     );
 
     // Get required personality questions count
@@ -325,7 +325,7 @@ export class ProfilesService {
       hasPromptAnswers &&
       hasPersonalityAnswers &&
       hasRequiredProfileFields;
-    
+
     // Onboarding is completed when personality questions are answered
     const isOnboardingCompleted = hasPersonalityAnswers;
 
@@ -365,10 +365,7 @@ export class ProfilesService {
     const hasPhotos = (user.profile.photos?.length || 0) >= 3;
     const hasPrompts = (user.profile.promptAnswers?.length || 0) >= 3;
     const hasRequiredProfileFields = !!(
-      user.profile.birthDate &&
-      user.profile.gender &&
-      user.profile.interestedInGenders &&
-      user.profile.interestedInGenders.length > 0
+      user.profile.birthDate && user.profile.bio
     );
 
     const requiredQuestionsCount =
@@ -387,12 +384,7 @@ export class ProfilesService {
     if (!hasRequiredProfileFields) {
       const missingFields = [];
       if (!user.profile.birthDate) missingFields.push('birth date');
-      if (!user.profile.gender) missingFields.push('gender');
-      if (
-        !user.profile.interestedInGenders ||
-        user.profile.interestedInGenders.length === 0
-      )
-        missingFields.push('interested genders');
+      if (!user.profile.bio) missingFields.push('bio');
       missingSteps.push(
         `Complete basic profile information: ${missingFields.join(', ')}`,
       );
@@ -410,5 +402,36 @@ export class ProfilesService {
       hasRequiredProfileFields,
       missingSteps,
     };
+  }
+
+  async updateProfileStatus(
+    userId: string,
+    statusDto: UpdateProfileStatusDto,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile'],
+    });
+
+    if (!user || !user.profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    // Update user status
+    if (statusDto.status) {
+      user.status = statusDto.status as any; // Will be validated by enum
+    }
+
+    // Force update completion status if requested
+    if (statusDto.completed) {
+      user.isProfileCompleted = true;
+      user.isOnboardingCompleted = true;
+    } else {
+      // Recalculate completion status
+      await this.updateProfileCompletionStatus(userId);
+      return; // updateProfileCompletionStatus already saves the user
+    }
+
+    await this.userRepository.save(user);
   }
 }

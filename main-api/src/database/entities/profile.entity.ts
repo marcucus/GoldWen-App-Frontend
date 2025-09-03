@@ -123,7 +123,7 @@ export class Profile {
     if (!this.birthDate) {
       return null;
     }
-    
+
     const today = new Date();
     const birthDate = new Date(this.birthDate);
     let age = today.getFullYear() - birthDate.getFullYear();

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/api_service.dart';
 import '../providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
@@ -691,6 +692,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.saveProfile();
       await profileProvider.submitPromptAnswers();
+      
+      // Mark profile as active and completed
+      await ApiService.updateProfileStatus(
+        status: 'active',
+        completed: true,
+      );
       
       // Refresh user data to get updated completion status from backend
       await authProvider.refreshUser();
