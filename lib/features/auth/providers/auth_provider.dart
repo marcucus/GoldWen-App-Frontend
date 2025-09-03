@@ -314,6 +314,18 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> markOnboardingCompleted() async {
+    try {
+      await ApiService.updateUser({
+        'isOnboardingCompleted': true,
+      });
+      await refreshUser();
+    } catch (e) {
+      _error = e is ApiException ? e.message : 'Failed to mark onboarding as completed';
+      notifyListeners();
+    }
+  }
+
   Future<void> deactivateAccount() async {
     try {
       await ApiService.deactivateAccount();
