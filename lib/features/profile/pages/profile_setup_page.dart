@@ -61,18 +61,27 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               .map((prompt) => prompt.text)
               .toList();
         });
+      } else {
+        // If we don't have enough prompts, show error
+        throw Exception('Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)');
       }
     } catch (e) {
       print('Error loading prompts: $e');
-      // Fallback to default prompts if loading fails
-      setState(() {
-        _promptQuestions = [
-          'Ce qui me rend vraiment heureux(se), c\'est...',
-          'Je ne peux pas vivre sans...',
-          'Ma passion secrète est...',
-        ];
-        _selectedPromptIds = ['fallback_1', 'fallback_2', 'fallback_3'];
-      });
+      // Show error instead of fallback - we need real prompt IDs from backend
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du chargement des prompts: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Réessayer',
+              textColor: Colors.white,
+              onPressed: _loadPrompts,
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -664,6 +673,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
+    // Validate that we have valid prompt IDs before proceeding
+    if (_selectedPromptIds.isEmpty || _selectedPromptIds.any((id) => id.startsWith('fallback'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur: Les prompts n\'ont pas été chargés correctement. Veuillez redémarrer l\'application.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+    
     profileProvider.setBasicInfo(
       _nameController.text,
       _calculateAge(_birthDate!),
@@ -674,33 +695,43 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     // Set prompt answers using real prompt IDs
     for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
       if (_promptControllers[i].text.isNotEmpty) {
+        print('Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
         profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text);
       }
     }
     
     // Submit to backend and mark completion
     _saveProfileToBackend(profileProvider, authProvider);
-    
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainNavigationPage(),
-      ),
-    );
   }
 
   Future<void> _saveProfileToBackend(ProfileProvider profileProvider, AuthProvider authProvider) async {
     try {
+      print('Starting profile save process...');
       await profileProvider.saveProfile();
+      print('Profile basic data saved successfully');
+      
       await profileProvider.submitPromptAnswers();
+      print('Prompt answers submitted successfully');
       
       // Mark profile as active and completed
       await ApiService.updateProfileStatus(
         status: 'active',
         completed: true,
       );
+      print('Profile status updated successfully');
       
       // Refresh user data to get updated completion status from backend
       await authProvider.refreshUser();
+      print('User data refreshed successfully');
+      
+      // Navigate to main navigation page only after successful save
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const MainNavigationPage(),
+          ),
+        );
+      }
     } catch (e) {
       // Show error to user
       debugPrint('Error saving profile: $e');
@@ -710,10 +741,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             content: Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
             backgroundColor: Colors.red,
             action: SnackBarAction(
-              label: 'OK',
+              label: 'Réessayer',
               textColor: Colors.white,
-              onPressed: () {},
+              onPressed: () => _saveProfileToBackend(profileProvider, authProvider),
             ),
+            duration: const Duration(seconds: 10),
           ),
         );
       }

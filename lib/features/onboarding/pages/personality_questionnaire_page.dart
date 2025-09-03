@@ -444,16 +444,31 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           throw Exception('Question UUID not found for key: ${entry.key}');
         }
         
-        return {
+        // Find the backend question to determine correct answer format
+        final backendQuestion = Provider.of<ProfileProvider>(context, listen: false)
+            .personalityQuestions
+            .firstWhere((q) => q.id == questionUuid, orElse: () => throw Exception('Backend question not found'));
+        
+        Map<String, dynamic> answerData = {
           'questionId': questionUuid,
-          'textAnswer': entry.value,
-          'numericAnswer': null,
-          'booleanAnswer': null,
-          'multipleChoiceAnswer': null,
         };
+        
+        // Set the appropriate answer field based on question type
+        if (backendQuestion.type == 'multiple_choice') {
+          answerData['textAnswer'] = entry.value.toString();
+        } else if (backendQuestion.type == 'scale') {
+          answerData['numericAnswer'] = entry.value is int ? entry.value : int.tryParse(entry.value.toString()) ?? 0;
+        } else if (backendQuestion.type == 'boolean') {
+          answerData['booleanAnswer'] = entry.value is bool ? entry.value : entry.value.toString().toLowerCase() == 'true';
+        } else {
+          answerData['textAnswer'] = entry.value.toString();
+        }
+        
+        return answerData;
       }).toList();
 
       print('Submitting ${apiAnswers.length} personality answers');
+      print('API Answers format: $apiAnswers');
 
       // Submit to backend and refresh user to get updated status
       await ApiService.submitPersonalityAnswers(apiAnswers);
