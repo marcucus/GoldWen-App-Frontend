@@ -158,22 +158,22 @@ export class MatchingService {
       const userProfile = {
         personalityAnswers: user.personalityAnswers || [],
         preferences: {
-          ageRange: { 
-            min: user.profile?.minAge || 18, 
-            max: user.profile?.maxAge || 80 
+          ageRange: {
+            min: user.profile?.minAge || 18,
+            max: user.profile?.maxAge || 80,
           },
           maxDistance: user.profile?.maxDistance || 50,
           interestedInGenders: user.profile?.interestedInGenders || [],
         },
       };
 
-      const availableProfiles = potentialMatches.map(match => ({
+      const availableProfiles = potentialMatches.map((match) => ({
         userId: match.id,
         personalityAnswers: match.personalityAnswers || [],
         preferences: {
-          ageRange: { 
-            min: match.profile?.minAge || 18, 
-            max: match.profile?.maxAge || 80 
+          ageRange: {
+            min: match.profile?.minAge || 18,
+            max: match.profile?.maxAge || 80,
           },
           maxDistance: match.profile?.maxDistance || 50,
           interestedInGenders: match.profile?.interestedInGenders || [],
@@ -183,14 +183,17 @@ export class MatchingService {
       const maxChoicesAllowed = await this.getMaxChoicesPerDay(userId);
       const selectionSize = Math.min(5, maxChoicesAllowed); // Max 5 per day
 
-      const selectionResult = await this.matchingIntegrationService.generateDailySelection({
-        userId,
-        userProfile,
-        availableProfiles,
-        selectionSize,
-      });
+      const selectionResult =
+        await this.matchingIntegrationService.generateDailySelection({
+          userId,
+          userProfile,
+          availableProfiles,
+          selectionSize,
+        });
 
-      const selectedProfileIds = selectionResult.selectedProfiles.map(p => p.userId);
+      const selectedProfileIds = selectionResult.selectedProfiles.map(
+        (p) => p.userId,
+      );
 
       // Create daily selection entry
       const dailySelection = this.dailySelectionRepository.create({
@@ -202,8 +205,12 @@ export class MatchingService {
 
       return this.dailySelectionRepository.save(dailySelection);
     } catch (error) {
-      this.logger.error('Failed to generate daily selection using external service, falling back to local calculation', error.message, 'MatchingService');
-      
+      this.logger.error(
+        'Failed to generate daily selection using external service, falling back to local calculation',
+        error.message,
+        'MatchingService',
+      );
+
       // Fallback to local calculation
       const compatibilityScores = await Promise.all(
         potentialMatches.map(async (potentialMatch) => {

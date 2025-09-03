@@ -234,3 +234,14 @@ export class SubmitPromptAnswersDto {
   @ArrayMinSize(3)
   answers: PromptAnswerDto[];
 }
+
+export class UpdateProfileStatusDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  completed: boolean;
+}

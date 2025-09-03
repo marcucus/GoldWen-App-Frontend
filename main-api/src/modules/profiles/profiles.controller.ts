@@ -26,6 +26,7 @@ import {
   SubmitPersonalityAnswersDto,
   UploadPhotosDto,
   SubmitPromptAnswersDto,
+  UpdateProfileStatusDto,
 } from './dto/profiles.dto';
 
 @ApiTags('profiles')
@@ -105,8 +106,14 @@ export class ProfilesController {
 
   @Put('me/photos/:photoId/primary')
   @ApiOperation({ summary: 'Set photo as primary' })
-  @ApiResponse({ status: 200, description: 'Primary photo updated successfully' })
-  async setPrimaryPhoto(@Request() req: any, @Param('photoId') photoId: string) {
+  @ApiResponse({
+    status: 200,
+    description: 'Primary photo updated successfully',
+  })
+  async setPrimaryPhoto(
+    @Request() req: any,
+    @Param('photoId') photoId: string,
+  ) {
     return this.profilesService.setPrimaryPhoto(req.user.id, photoId);
   }
 
@@ -117,7 +124,7 @@ export class ProfilesController {
     return this.profilesService.getPrompts();
   }
 
-  @Post('prompt-answers')
+  @Post('me/prompt-answers')
   @ApiOperation({ summary: 'Submit prompt answers' })
   @ApiResponse({
     status: 201,
@@ -132,5 +139,19 @@ export class ProfilesController {
       promptAnswersDto,
     );
     return { message: 'Prompt answers submitted successfully' };
+  }
+
+  @Put('me/status')
+  @ApiOperation({ summary: 'Update profile status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile status updated successfully',
+  })
+  async updateProfileStatus(
+    @Request() req: any,
+    @Body() statusDto: UpdateProfileStatusDto,
+  ) {
+    await this.profilesService.updateProfileStatus(req.user.id, statusDto);
+    return { message: 'Profile status updated successfully' };
   }
 }

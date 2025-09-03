@@ -48,8 +48,11 @@ export class MatchingIntegrationService {
     private readonly configService: ConfigService,
     private readonly logger: CustomLoggerService,
   ) {
-    this.matchingServiceUrl = this.configService.get('matchingService.url') || 'http://localhost:8000';
-    this.apiKey = this.configService.get('matchingService.apiKey') || 'matching-service-secret-key';
+    this.matchingServiceUrl =
+      this.configService.get('matchingService.url') || 'http://localhost:8000';
+    this.apiKey =
+      this.configService.get('matchingService.apiKey') ||
+      'matching-service-secret-key';
   }
 
   async calculateCompatibility(
@@ -83,7 +86,11 @@ export class MatchingIntegrationService {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to calculate compatibility', error.message, 'MatchingIntegration');
+      this.logger.error(
+        'Failed to calculate compatibility',
+        error.message,
+        'MatchingIntegration',
+      );
 
       // Return a fallback compatibility result if matching service is down
       return {
@@ -131,15 +138,24 @@ export class MatchingIntegrationService {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to generate daily selection', error.message, 'MatchingIntegration');
+      this.logger.error(
+        'Failed to generate daily selection',
+        error.message,
+        'MatchingIntegration',
+      );
 
       // Return fallback selection if matching service is down
       // Randomly select from available profiles
-      const shuffled = request.availableProfiles.sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, Math.min(request.selectionSize, shuffled.length));
-      
+      const shuffled = request.availableProfiles.sort(
+        () => 0.5 - Math.random(),
+      );
+      const selected = shuffled.slice(
+        0,
+        Math.min(request.selectionSize, shuffled.length),
+      );
+
       return {
-        selectedProfiles: selected.map(profile => ({
+        selectedProfiles: selected.map((profile) => ({
           userId: profile.userId,
           compatibilityScore: Math.floor(Math.random() * 40) + 60, // Random score 60-100
           reasons: ['Fallback selection - Matching service unavailable'],
@@ -184,11 +200,15 @@ export class MatchingIntegrationService {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to calculate batch compatibility', error.message, 'MatchingIntegration');
+      this.logger.error(
+        'Failed to calculate batch compatibility',
+        error.message,
+        'MatchingIntegration',
+      );
 
       // Return fallback compatibility results
       const fallbackResults: Record<string, CompatibilityResult> = {};
-      profilesToCompare.forEach(profile => {
+      profilesToCompare.forEach((profile) => {
         fallbackResults[profile.userId] = {
           compatibilityScore: Math.floor(Math.random() * 40) + 50,
           details: {
@@ -230,7 +250,11 @@ export class MatchingIntegrationService {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to get algorithm stats', error.message, 'MatchingIntegration');
+      this.logger.error(
+        'Failed to get algorithm stats',
+        error.message,
+        'MatchingIntegration',
+      );
 
       // Return fallback stats
       return {
@@ -253,7 +277,10 @@ export class MatchingIntegrationService {
 
       return response.ok;
     } catch (error) {
-      this.logger.warn('Matching service health check failed', 'MatchingIntegration');
+      this.logger.warn(
+        'Matching service health check failed',
+        'MatchingIntegration',
+      );
       return false;
     }
   }

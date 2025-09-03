@@ -185,7 +185,7 @@ class ApiService {
   static Future<Map<String, dynamic>> submitPromptAnswers(
       List<Map<String, dynamic>> answers) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/profiles/prompt-answers'),
+      Uri.parse('$baseUrl/profiles/me/prompt-answers'),
       headers: _headers,
       body: jsonEncode({'answers': answers}),
     );
@@ -377,6 +377,23 @@ class ApiService {
     final response = await http.get(
       Uri.parse('$baseUrl/profiles/prompts'),
       headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Profile status update
+  static Future<Map<String, dynamic>> updateProfileStatus({
+    required String status,
+    required bool completed,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/profiles/me/status'),
+      headers: _headers,
+      body: jsonEncode({
+        'status': status,
+        'completed': completed,
+      }),
     );
 
     return _handleResponse(response);
