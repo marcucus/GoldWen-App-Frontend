@@ -428,6 +428,8 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
 
     try {
       final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
       profileProvider.setPersonalityAnswers(_answers);
       
       // Verify we have all answers
@@ -453,8 +455,9 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
 
       print('Submitting ${apiAnswers.length} personality answers');
 
-      // Submit to backend
+      // Submit to backend and mark onboarding completion
       await ApiService.submitPersonalityAnswers(apiAnswers);
+      await authProvider.markOnboardingCompleted();
       
       if (mounted) {
         Navigator.of(context).pushReplacement(

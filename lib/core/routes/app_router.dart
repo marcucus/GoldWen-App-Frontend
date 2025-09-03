@@ -4,6 +4,7 @@ import '../../features/onboarding/pages/welcome_page.dart';
 import '../../features/onboarding/pages/personality_questionnaire_page.dart';
 import '../../features/auth/pages/auth_page.dart';
 import '../../features/auth/pages/email_auth_page.dart';
+import '../../features/auth/pages/splash_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/main/pages/main_navigation_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
@@ -16,8 +17,15 @@ import '../../features/user/pages/user_profile_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/welcome',
+    initialLocation: '/splash',
     routes: [
+      // Splash screen
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+      
       // Welcome & Authentication
       GoRoute(
         path: '/welcome',

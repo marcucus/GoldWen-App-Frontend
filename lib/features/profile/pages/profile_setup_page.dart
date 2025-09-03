@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../providers/profile_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
 
 class ProfileSetupPage extends StatefulWidget {
@@ -621,6 +622,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _finishSetup() {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     profileProvider.setBasicInfo(
       _nameController.text,
@@ -633,8 +635,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       profileProvider.addPrompt(_promptControllers[i].text);
     }
     
-    // Submit to backend
-    _saveProfileToBackend(profileProvider);
+    // Submit to backend and mark completion
+    _saveProfileToBackend(profileProvider, authProvider);
     
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -643,13 +645,27 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     );
   }
 
-  Future<void> _saveProfileToBackend(ProfileProvider profileProvider) async {
+  Future<void> _saveProfileToBackend(ProfileProvider profileProvider, AuthProvider authProvider) async {
     try {
       await profileProvider.saveProfile();
       await profileProvider.submitPromptAnswers();
+      await authProvider.markProfileCompleted();
     } catch (e) {
-      // Handle error silently for now - could show snackbar
+      // Show error to user
       debugPrint('Error saving profile: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
     }
   }
 
