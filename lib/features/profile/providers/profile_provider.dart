@@ -86,7 +86,20 @@ class ProfileProvider with ChangeNotifier {
 
     try {
       final response = await ApiService.getPersonalityQuestions();
-      final questionsData = response as List;
+      // Handle different possible response structures
+      List<dynamic> questionsData;
+      if (response is List) {
+        questionsData = response;
+      } else if (response is Map<String, dynamic>) {
+        // Try common keys for list data
+        questionsData = response['data'] as List? ?? 
+                       response['questions'] as List? ?? 
+                       response['items'] as List? ?? 
+                       [];
+      } else {
+        throw Exception('Unexpected response format for personality questions');
+      }
+      
       _personalityQuestions = questionsData
           .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
           .toList();
