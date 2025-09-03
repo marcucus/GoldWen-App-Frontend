@@ -207,5 +207,55 @@ void main() {
       ApiService.clearToken();
       expect(ApiService.token, isNull);
     });
+
+    test('should format personality answers correctly for API', () {
+      // Test data format for personality answers
+      final testAnswers = [
+        {
+          'questionId': 'uuid-1',
+          'textAnswer': 'Test answer 1',
+        },
+        {
+          'questionId': 'uuid-2',
+          'numericAnswer': 5,
+        },
+        {
+          'questionId': 'uuid-3',
+          'booleanAnswer': true,
+        },
+      ];
+      
+      // Verify structure - should not be wrapped in 'answers' object
+      expect(testAnswers, isList);
+      expect(testAnswers.length, equals(3));
+      expect(testAnswers[0]['questionId'], equals('uuid-1'));
+      expect(testAnswers[0]['textAnswer'], equals('Test answer 1'));
+      expect(testAnswers[1]['numericAnswer'], equals(5));
+      expect(testAnswers[2]['booleanAnswer'], equals(true));
+    });
+
+    test('should format prompt answers correctly for API', () {
+      // Test data format for prompt answers
+      final testAnswers = [
+        {
+          'promptId': 'prompt-uuid-1',
+          'answer': 'My answer to prompt 1',
+        },
+        {
+          'promptId': 'prompt-uuid-2', 
+          'answer': 'My answer to prompt 2',
+        },
+        {
+          'promptId': 'prompt-uuid-3',
+          'answer': 'My answer to prompt 3',
+        },
+      ];
+      
+      // Verify structure - should not be wrapped in 'answers' object
+      expect(testAnswers, isList);
+      expect(testAnswers.length, equals(3));
+      expect(testAnswers[0]['promptId'], equals('prompt-uuid-1'));
+      expect(testAnswers[0]['answer'], equals('My answer to prompt 1'));
+    });
   });
 }

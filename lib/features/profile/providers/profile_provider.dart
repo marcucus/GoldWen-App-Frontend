@@ -265,8 +265,15 @@ class ProfileProvider with ChangeNotifier {
         return answerData;
       }).toList();
 
+      print('ProfileProvider: Submitting ${answersData.length} personality answers');
+      print('ProfileProvider: Answers data: $answersData');
+      
       await ApiService.submitPersonalityAnswers(answersData);
       _error = null;
+      print('ProfileProvider: Personality answers submitted successfully');
+      
+      // Refresh profile data after successful submission
+      await loadProfile();
     } catch (e) {
       _error = 'Failed to submit personality answers: $e';
       print('Error submitting personality answers: $e');

@@ -673,6 +673,37 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
+    // Validate required fields
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez saisir votre pseudo'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (_birthDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner votre date de naissance'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (_bioController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez rédiger votre bio'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     // Validate that we have valid prompt IDs before proceeding
     if (_selectedPromptIds.isEmpty || _selectedPromptIds.any((id) => id.startsWith('fallback'))) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -685,10 +716,23 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       return;
     }
     
+    // Validate prompt answers
+    for (int i = 0; i < _promptControllers.length; i++) {
+      if (_promptControllers[i].text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Veuillez répondre à la question ${i + 1}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+    
     profileProvider.setBasicInfo(
-      _nameController.text,
+      _nameController.text.trim(),
       _calculateAge(_birthDate!),
-      _bioController.text,
+      _bioController.text.trim(),
       birthDate: _birthDate,
     );
     
@@ -696,7 +740,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
       if (_promptControllers[i].text.isNotEmpty) {
         print('Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
-        profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text);
+        profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text.trim());
       }
     }
     
@@ -705,6 +749,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Future<void> _saveProfileToBackend(ProfileProvider profileProvider, AuthProvider authProvider) async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Sauvegarde en cours...'),
+          ],
+        ),
+      ),
+    );
+    
     try {
       print('Starting profile save process...');
       await profileProvider.saveProfile();
@@ -724,6 +784,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       await authProvider.refreshUser();
       print('User data refreshed successfully');
       
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      
       // Navigate to main navigation page only after successful save
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -733,6 +798,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         );
       }
     } catch (e) {
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      
       // Show error to user
       debugPrint('Error saving profile: $e');
       if (mounted) {

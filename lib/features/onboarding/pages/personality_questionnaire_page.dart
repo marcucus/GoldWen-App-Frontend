@@ -491,13 +491,20 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           errorMessage = 'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
         } else if (e.toString().contains('Validation failed')) {
           errorMessage = 'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
+        } else if (e.toString().contains('Network error') || e.toString().contains('timeout')) {
+          errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Réessayer',
+              textColor: Colors.white,
+              onPressed: _finishQuestionnaire,
+            ),
           ),
         );
       }
