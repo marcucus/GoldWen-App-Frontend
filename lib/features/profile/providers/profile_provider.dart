@@ -16,6 +16,22 @@ class ProfileProvider with ChangeNotifier {
   bool _isProfileComplete = false;
   bool _isLoading = false;
   String? _error;
+  
+  // New fields for complete profile
+  String? _gender;
+  List<String> _interestedInGenders = [];
+  String? _location;
+  double? _latitude;
+  double? _longitude;
+  int? _minAge;
+  int? _maxAge;
+  int? _maxDistance;
+  String? _jobTitle;
+  String? _company;
+  String? _education;
+  int? _height;
+  List<String> _interests = [];
+  List<String> _languages = [];
 
   String? get name => _name;
   int? get age => _age;
@@ -30,6 +46,22 @@ class ProfileProvider with ChangeNotifier {
   bool get isProfileComplete => _isProfileComplete;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  
+  // New getters
+  String? get gender => _gender;
+  List<String> get interestedInGenders => _interestedInGenders;
+  String? get location => _location;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
+  int? get minAge => _minAge;
+  int? get maxAge => _maxAge;
+  int? get maxDistance => _maxDistance;
+  String? get jobTitle => _jobTitle;
+  String? get company => _company;
+  String? get education => _education;
+  int? get height => _height;
+  List<String> get interests => _interests;
+  List<String> get languages => _languages;
 
   void setBasicInfo(String name, int age, String bio, {DateTime? birthDate}) {
     _name = name;
@@ -92,6 +124,65 @@ class ProfileProvider with ChangeNotifier {
   void removePromptAnswer(String promptId) {
     _promptAnswers.remove(promptId);
     _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  // New setter methods
+  void setGender(String gender) {
+    _gender = gender;
+    notifyListeners();
+  }
+
+  void setGenderPreferences(List<String> genders) {
+    _interestedInGenders = genders;
+    notifyListeners();
+  }
+
+  void setLocation({required String location, double? latitude, double? longitude}) {
+    _location = location;
+    _latitude = latitude;
+    _longitude = longitude;
+    notifyListeners();
+  }
+
+  void setAgePreferences({required int minAge, required int maxAge}) {
+    _minAge = minAge;
+    _maxAge = maxAge;
+    notifyListeners();
+  }
+
+  void setDistancePreference({required int maxDistance}) {
+    _maxDistance = maxDistance;
+    notifyListeners();
+  }
+
+  void setJobTitle(String jobTitle) {
+    _jobTitle = jobTitle;
+    notifyListeners();
+  }
+
+  void setCompany(String company) {
+    _company = company;
+    notifyListeners();
+  }
+
+  void setEducation(String education) {
+    _education = education;
+    notifyListeners();
+  }
+
+  void setHeight(int height) {
+    _height = height;
+    notifyListeners();
+  }
+
+  void setInterests(List<String> interests) {
+    _interests = interests;
+    notifyListeners();
+  }
+
+  void setLanguages(List<String> languages) {
+    _languages = languages;
     notifyListeners();
   }
 
@@ -192,7 +283,12 @@ class ProfileProvider with ChangeNotifier {
         _bio != null &&
         _photos.length >= 3 &&
         _promptAnswers.length >= 3 &&
-        _personalityAnswers.isNotEmpty;
+        _personalityAnswers.isNotEmpty &&
+        _gender != null &&
+        _interestedInGenders.isNotEmpty &&
+        _location != null &&
+        _minAge != null &&
+        _maxAge != null;
   }
 
   Future<void> saveProfile() async {
@@ -202,7 +298,20 @@ class ProfileProvider with ChangeNotifier {
         if (_birthDate != null)
           'birthDate': _birthDate!.toIso8601String().split('T')[0],
         if (_bio != null) 'bio': _bio,
-        // Add other profile fields as needed
+        if (_gender != null) 'gender': _gender,
+        if (_interestedInGenders.isNotEmpty) 'interestedInGenders': _interestedInGenders,
+        if (_location != null) 'location': _location,
+        if (_latitude != null) 'latitude': _latitude,
+        if (_longitude != null) 'longitude': _longitude,
+        if (_minAge != null) 'minAge': _minAge,
+        if (_maxAge != null) 'maxAge': _maxAge,
+        if (_maxDistance != null) 'maxDistance': _maxDistance,
+        if (_jobTitle != null) 'jobTitle': _jobTitle,
+        if (_company != null) 'company': _company,
+        if (_education != null) 'education': _education,
+        if (_height != null) 'height': _height,
+        if (_interests.isNotEmpty) 'interests': _interests,
+        if (_languages.isNotEmpty) 'languages': _languages,
       };
 
       await ApiService.updateProfile(profileData);
