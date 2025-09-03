@@ -176,6 +176,10 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       'core_value': 'core_value',
     };
 
+    if (backendQuestions.isEmpty) {
+      throw Exception('Aucune question de personnalité trouvée sur le serveur');
+    }
+
     // Sort backend questions by order to ensure consistent mapping
     final sortedBackendQuestions = List<PersonalityQuestion>.from(backendQuestions)
       ..sort((a, b) => a.order.compareTo(b.order));
@@ -197,6 +201,11 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         final questionKey = _questions[i]['key'] as String;
         _questionKeyToUuid[questionKey] = sortedBackendQuestions[i].id;
       }
+    }
+
+    // Verify we have all necessary mappings
+    if (_questionKeyToUuid.length < _questions.length) {
+      throw Exception('Impossible de mapper toutes les questions. Questions trouvées: ${_questionKeyToUuid.length}, Questions nécessaires: ${_questions.length}');
     }
 
     print('Question mapping created: $_questionKeyToUuid');
@@ -421,6 +430,11 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       profileProvider.setPersonalityAnswers(_answers);
       
+      // Verify we have all answers
+      if (_answers.length < _questions.length) {
+        throw Exception('Veuillez répondre à toutes les questions');
+      }
+      
       // Convert answers to API format using actual UUIDs
       final List<Map<String, dynamic>> apiAnswers = _answers.entries.map((entry) {
         final questionUuid = _questionKeyToUuid[entry.key];
@@ -437,6 +451,8 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         };
       }).toList();
 
+      print('Submitting ${apiAnswers.length} personality answers');
+
       // Submit to backend
       await ApiService.submitPersonalityAnswers(apiAnswers);
       
@@ -448,11 +464,22 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         );
       }
     } catch (e) {
+      print('Error submitting personality answers: $e');
       if (mounted) {
+        String errorMessage = 'Erreur lors de la sauvegarde: ${e.toString()}';
+        
+        // Provide more specific error messages
+        if (e.toString().contains('UUID not found')) {
+          errorMessage = 'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
+        } else if (e.toString().contains('Validation failed')) {
+          errorMessage = 'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la sauvegarde: ${e.toString()}'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
