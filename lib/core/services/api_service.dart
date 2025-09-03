@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 
 class ApiService {
-  static String get baseUrl => AppConfig.isDevelopment 
-      ? AppConfig.devMainApiBaseUrl 
+  static String get baseUrl => AppConfig.isDevelopment
+      ? AppConfig.devMainApiBaseUrl
       : AppConfig.mainApiBaseUrl;
   static String? _token;
 
@@ -111,7 +111,8 @@ class ApiService {
   }
 
   // Profile endpoints
-  static Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData) async {
+  static Future<Map<String, dynamic>> updateProfile(
+      Map<String, dynamic> profileData) async {
     final response = await http.put(
       Uri.parse('$baseUrl/profiles/me'),
       headers: _headers,
@@ -121,7 +122,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> submitPersonalityAnswers(List<Map<String, dynamic>> answers) async {
+  static Future<Map<String, dynamic>> submitPersonalityAnswers(
+      List<Map<String, dynamic>> answers) async {
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/personality-answers'),
       headers: _headers,
@@ -131,16 +133,16 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getPersonalityQuestions() async {
+  static Future<List<dynamic>> getPersonalityQuestions() async {
     final response = await http.get(
       Uri.parse('$baseUrl/profiles/personality-questions'),
       headers: _headers,
     );
-
-    return _handleResponse(response);
+    return _handleResponse(response) as List<dynamic>;
   }
 
-  static Future<Map<String, dynamic>> submitPromptAnswers(List<Map<String, dynamic>> answers) async {
+  static Future<Map<String, dynamic>> submitPromptAnswers(
+      List<Map<String, dynamic>> answers) async {
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/prompt-answers'),
       headers: _headers,
@@ -161,7 +163,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> resetPassword(String token, String newPassword) async {
+  static Future<Map<String, dynamic>> resetPassword(
+      String token, String newPassword) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/reset-password'),
       headers: _headers,
@@ -174,7 +177,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+  static Future<Map<String, dynamic>> changePassword(
+      String currentPassword, String newPassword) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/change-password'),
       headers: _headers,
@@ -216,7 +220,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateUser(Map<String, dynamic> userData) async {
+  static Future<Map<String, dynamic>> updateUser(
+      Map<String, dynamic> userData) async {
     final response = await http.put(
       Uri.parse('$baseUrl/users/me'),
       headers: _headers,
@@ -226,7 +231,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateUserSettings(Map<String, dynamic> settings) async {
+  static Future<Map<String, dynamic>> updateUserSettings(
+      Map<String, dynamic> settings) async {
     final response = await http.put(
       Uri.parse('$baseUrl/users/me/settings'),
       headers: _headers,
@@ -282,8 +288,10 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> uploadPhoto(String filePath, {int? order}) async {
-    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
+  static Future<Map<String, dynamic>> uploadPhoto(String filePath,
+      {int? order}) async {
+    var request =
+        http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
     request.headers.addAll(_headers);
     request.files.add(await http.MultipartFile.fromPath('photo', filePath));
     if (order != null) {
@@ -295,7 +303,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updatePhotoOrder(String photoId, int order) async {
+  static Future<Map<String, dynamic>> updatePhotoOrder(
+      String photoId, int order) async {
     final response = await http.put(
       Uri.parse('$baseUrl/profiles/me/photos/$photoId'),
       headers: _headers,
@@ -351,13 +360,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getMatches({int? page, int? limit, String? status}) async {
+  static Future<Map<String, dynamic>> getMatches(
+      {int? page, int? limit, String? status}) async {
     final queryParams = <String, String>{};
     if (page != null) queryParams['page'] = page.toString();
     if (limit != null) queryParams['limit'] = limit.toString();
     if (status != null) queryParams['status'] = status;
 
-    final uri = Uri.parse('$baseUrl/matching/matches').replace(queryParameters: queryParams);
+    final uri = Uri.parse('$baseUrl/matching/matches')
+        .replace(queryParameters: queryParams);
     final response = await http.get(uri, headers: _headers);
 
     return _handleResponse(response);
@@ -400,7 +411,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getConversationDetails(String chatId) async {
+  static Future<Map<String, dynamic>> getConversationDetails(
+      String chatId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/chat/conversations/$chatId'),
       headers: _headers,
@@ -409,19 +421,22 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getMessages(String chatId, {int? page, int? limit, String? before}) async {
+  static Future<Map<String, dynamic>> getMessages(String chatId,
+      {int? page, int? limit, String? before}) async {
     final queryParams = <String, String>{};
     if (page != null) queryParams['page'] = page.toString();
     if (limit != null) queryParams['limit'] = limit.toString();
     if (before != null) queryParams['before'] = before;
 
-    final uri = Uri.parse('$baseUrl/chat/conversations/$chatId/messages').replace(queryParameters: queryParams);
+    final uri = Uri.parse('$baseUrl/chat/conversations/$chatId/messages')
+        .replace(queryParameters: queryParams);
     final response = await http.get(uri, headers: _headers);
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> sendMessage(String chatId, {required String type, required String content}) async {
+  static Future<Map<String, dynamic>> sendMessage(String chatId,
+      {required String type, required String content}) async {
     final response = await http.post(
       Uri.parse('$baseUrl/chat/conversations/$chatId/messages'),
       headers: _headers,
@@ -434,7 +449,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> markMessageAsRead(String chatId, String messageId) async {
+  static Future<Map<String, dynamic>> markMessageAsRead(
+      String chatId, String messageId) async {
     final response = await http.put(
       Uri.parse('$baseUrl/chat/conversations/$chatId/messages/$messageId/read'),
       headers: _headers,
@@ -443,7 +459,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> deleteMessage(String chatId, String messageId) async {
+  static Future<Map<String, dynamic>> deleteMessage(
+      String chatId, String messageId) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/chat/conversations/$chatId/messages/$messageId'),
       headers: _headers,
@@ -563,13 +580,15 @@ class ApiService {
     if (type != null) queryParams['type'] = type;
     if (read != null) queryParams['read'] = read.toString();
 
-    final uri = Uri.parse('$baseUrl/notifications').replace(queryParameters: queryParams);
+    final uri = Uri.parse('$baseUrl/notifications')
+        .replace(queryParameters: queryParams);
     final response = await http.get(uri, headers: _headers);
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> markNotificationAsRead(String notificationId) async {
+  static Future<Map<String, dynamic>> markNotificationAsRead(
+      String notificationId) async {
     final response = await http.put(
       Uri.parse('$baseUrl/notifications/$notificationId/read'),
       headers: _headers,
@@ -587,7 +606,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> deleteNotification(String notificationId) async {
+  static Future<Map<String, dynamic>> deleteNotification(
+      String notificationId) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/notifications/$notificationId'),
       headers: _headers,
@@ -596,7 +616,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateNotificationSettings(Map<String, bool> settings) async {
+  static Future<Map<String, dynamic>> updateNotificationSettings(
+      Map<String, bool> settings) async {
     final response = await http.put(
       Uri.parse('$baseUrl/notifications/settings'),
       headers: _headers,
@@ -653,7 +674,8 @@ class ApiService {
     if (status != null) queryParams['status'] = status;
     if (search != null) queryParams['search'] = search;
 
-    final uri = Uri.parse('$baseUrl/admin/users').replace(queryParameters: queryParams);
+    final uri =
+        Uri.parse('$baseUrl/admin/users').replace(queryParameters: queryParams);
     final response = await http.get(uri, headers: _headers);
 
     return _handleResponse(response);
@@ -668,7 +690,8 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateUserStatus(String userId, String status) async {
+  static Future<Map<String, dynamic>> updateUserStatus(
+      String userId, String status) async {
     final response = await http.put(
       Uri.parse('$baseUrl/admin/users/$userId/status'),
       headers: _headers,
@@ -690,13 +713,15 @@ class ApiService {
     if (status != null) queryParams['status'] = status;
     if (type != null) queryParams['type'] = type;
 
-    final uri = Uri.parse('$baseUrl/admin/reports').replace(queryParameters: queryParams);
+    final uri = Uri.parse('$baseUrl/admin/reports')
+        .replace(queryParameters: queryParams);
     final response = await http.get(uri, headers: _headers);
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateReportStatus(String reportId, String status, String resolution) async {
+  static Future<Map<String, dynamic>> updateReportStatus(
+      String reportId, String status, String resolution) async {
     final response = await http.put(
       Uri.parse('$baseUrl/admin/reports/$reportId'),
       headers: _headers,
@@ -736,33 +761,44 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Map<String, dynamic> _handleResponse(http.Response response) {
+  static dynamic _handleResponse(http.Response response) {
     try {
-      // Debug information for development only
       if (AppConfig.isDevelopment) {
         print('API Response Status: ${response.statusCode}');
         print('API Response Body: ${response.body}');
       }
-      
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      
+
+      final decoded = jsonDecode(response.body);
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (AppConfig.isDevelopment) {
-          print('API Response successful, returning data: $data');
+          print('API Response successful, returning data: $decoded');
         }
-        return data;
+        return decoded; // Peut être Map ou List
       } else {
+        // Si erreur, essaye d'extraire le message d'un Map, sinon retourne le body brut
+        String message;
+        String? code;
+        Map<String, dynamic>? errors;
+        if (decoded is Map<String, dynamic>) {
+          message = decoded['message'] ??
+              _getDefaultErrorMessage(response.statusCode);
+          code = decoded['code'];
+          errors = decoded['errors'];
+        } else {
+          message = _getDefaultErrorMessage(response.statusCode);
+          code = null;
+          errors = null;
+        }
         throw ApiException(
           statusCode: response.statusCode,
-          message: data['message'] ?? _getDefaultErrorMessage(response.statusCode),
-          code: data['code'],
-          errors: data['errors'],
+          message: message,
+          code: code,
+          errors: errors,
         );
       }
     } catch (e) {
-      if (e is ApiException) {
-        rethrow;
-      }
+      if (e is ApiException) rethrow;
       throw ApiException(
         statusCode: response.statusCode,
         message: 'Failed to parse response: $e',
@@ -801,8 +837,8 @@ class ApiService {
 
 // External Matching Service API
 class MatchingServiceApi {
-  static String get baseUrl => AppConfig.isDevelopment 
-      ? AppConfig.devMatchingServiceBaseUrl 
+  static String get baseUrl => AppConfig.isDevelopment
+      ? AppConfig.devMatchingServiceBaseUrl
       : AppConfig.matchingServiceBaseUrl;
   static String get apiKey => AppConfig.matchingServiceApiKey;
 
@@ -874,7 +910,7 @@ class MatchingServiceApi {
 
   static Map<String, dynamic> _handleMatchingResponse(http.Response response) {
     final Map<String, dynamic> data = jsonDecode(response.body);
-    
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
     } else {

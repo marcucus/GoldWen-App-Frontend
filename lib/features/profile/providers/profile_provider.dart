@@ -85,24 +85,11 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await ApiService.getPersonalityQuestions();
-      // Handle different possible response structures
-      List<dynamic> questionsData;
-      if (response is List) {
-        questionsData = response;
-      } else if (response is Map<String, dynamic>) {
-        // Try common keys for list data
-        questionsData = response['data'] as List? ?? 
-                       response['questions'] as List? ?? 
-                       response['items'] as List? ?? 
-                       [];
-      } else {
-        throw Exception('Unexpected response format for personality questions');
-      }
-      
+      final questionsData = await ApiService.getPersonalityQuestions();
       _personalityQuestions = questionsData
           .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
           .toList();
+
       _error = null;
     } catch (e) {
       _error = 'Failed to load personality questions: $e';
@@ -122,28 +109,31 @@ class ProfileProvider with ChangeNotifier {
       final answersData = _personalityAnswers.entries.map((entry) {
         final questionId = entry.key;
         final answer = entry.value;
-        
+
         // Find the question to determine the type
         final question = _personalityQuestions.firstWhere(
           (q) => q.id == questionId,
           orElse: () => throw Exception('Question not found: $questionId'),
         );
-        
+
         // Format answer according to question type
         Map<String, dynamic> answerData = {
           'questionId': questionId,
         };
-        
+
         if (question.type == 'multiple_choice') {
           answerData['textAnswer'] = answer.toString();
         } else if (question.type == 'scale') {
-          answerData['numericAnswer'] = answer is int ? answer : int.tryParse(answer.toString()) ?? 0;
+          answerData['numericAnswer'] =
+              answer is int ? answer : int.tryParse(answer.toString()) ?? 0;
         } else if (question.type == 'boolean') {
-          answerData['booleanAnswer'] = answer is bool ? answer : answer.toString().toLowerCase() == 'true';
+          answerData['booleanAnswer'] = answer is bool
+              ? answer
+              : answer.toString().toLowerCase() == 'true';
         } else {
           answerData['textAnswer'] = answer.toString();
         }
-        
+
         return answerData;
       }).toList();
 
@@ -171,11 +161,12 @@ class ProfileProvider with ChangeNotifier {
   Future<void> saveProfile() async {
     try {
       final profileData = <String, dynamic>{
-        if (_birthDate != null) 'birthDate': _birthDate!.toIso8601String().split('T')[0],
+        if (_birthDate != null)
+          'birthDate': _birthDate!.toIso8601String().split('T')[0],
         if (_bio != null) 'bio': _bio,
         // Add other profile fields as needed
       };
-      
+
       await ApiService.updateProfile(profileData);
     } catch (e) {
       // Handle error - could throw to let UI handle it
@@ -187,12 +178,13 @@ class ProfileProvider with ChangeNotifier {
     try {
       final promptAnswers = _prompts.asMap().entries.map((entry) {
         return {
-          'promptId': 'prompt_${entry.key + 1}', // In real app, use actual prompt IDs
+          'promptId':
+              'prompt_${entry.key + 1}', // In real app, use actual prompt IDs
           'answer': entry.value,
           'order': entry.key + 1,
         };
       }).toList();
-      
+
       await ApiService.submitPromptAnswers(promptAnswers);
     } catch (e) {
       rethrow;
@@ -202,35 +194,37 @@ class ProfileProvider with ChangeNotifier {
   Future<void> loadProfile([String? userId]) async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       final response = await ApiService.getProfile();
       final profileData = response['data'] ?? response;
-      
+
       // Update profile data from response
-      _name = profileData['firstName'] != null && profileData['lastName'] != null
-          ? '${profileData['firstName']} ${profileData['lastName']}'
-          : profileData['name'];
+      _name =
+          profileData['firstName'] != null && profileData['lastName'] != null
+              ? '${profileData['firstName']} ${profileData['lastName']}'
+              : profileData['name'];
       _bio = profileData['bio'];
-      _birthDate = profileData['birthDate'] != null 
+      _birthDate = profileData['birthDate'] != null
           ? DateTime.parse(profileData['birthDate'])
           : null;
-      
+
       // Calculate age from birthDate
       if (_birthDate != null) {
         final now = DateTime.now();
         _age = now.year - _birthDate!.year;
-        if (now.month < _birthDate!.month || 
+        if (now.month < _birthDate!.month ||
             (now.month == _birthDate!.month && now.day < _birthDate!.day)) {
           _age = _age! - 1;
         }
       }
-      
+
       // Load photos and prompts
       _photos = List<String>.from(profileData['photos'] ?? []);
       _prompts = List<String>.from(profileData['prompts'] ?? []);
-      _personalityAnswers = Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
-      
+      _personalityAnswers =
+          Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
+
       _checkProfileCompletion();
     } catch (e) {
       // If API call fails, keep default empty state

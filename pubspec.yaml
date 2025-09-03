@@ -57,6 +57,8 @@ dependencies:
   # Utilities
   intl: ^0.20.2
   uuid: ^4.2.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
