@@ -137,25 +137,38 @@ export class ProfilesService {
       );
     }
 
-    // Delete existing answers
-    await this.personalityAnswerRepository.delete({ userId });
+    try {
+      // Delete existing answers
+      await this.personalityAnswerRepository.delete({ userId });
 
-    // Create new answers
-    const answerEntities = answers.map((answer) => {
-      return this.personalityAnswerRepository.create({
-        userId,
-        questionId: answer.questionId,
-        textAnswer: answer.textAnswer,
-        numericAnswer: answer.numericAnswer,
-        booleanAnswer: answer.booleanAnswer,
-        multipleChoiceAnswer: answer.multipleChoiceAnswer,
+      // Create new answers
+      const answerEntities = answers.map((answer) => {
+        return this.personalityAnswerRepository.create({
+          userId,
+          questionId: answer.questionId,
+          textAnswer: answer.textAnswer,
+          numericAnswer: answer.numericAnswer,
+          booleanAnswer: answer.booleanAnswer,
+          multipleChoiceAnswer: answer.multipleChoiceAnswer,
+        });
       });
-    });
 
-    await this.personalityAnswerRepository.save(answerEntities);
+      await this.personalityAnswerRepository.save(answerEntities);
 
-    // Check if profile is now complete
-    await this.updateProfileCompletionStatus(userId);
+      // Check if profile is now complete
+      await this.updateProfileCompletionStatus(userId);
+    } catch (error) {
+      // Log the error for debugging
+      console.error(
+        'Error saving personality answers for user',
+        userId,
+        ':',
+        error,
+      );
+      throw new BadRequestException(
+        'Failed to save personality answers: ' + error.message,
+      );
+    }
   }
 
   async uploadPhotos(
@@ -251,22 +264,31 @@ export class ProfilesService {
       throw new NotFoundException('Profile not found');
     }
 
-    // Delete existing prompt answers
-    await this.promptAnswerRepository.delete({ profileId: profile.id });
+    try {
+      // Delete existing prompt answers
+      await this.promptAnswerRepository.delete({ profileId: profile.id });
 
-    // Create new prompt answers
-    const answerEntities = answers.map((answer) => {
-      return this.promptAnswerRepository.create({
-        profileId: profile.id,
-        promptId: answer.promptId,
-        answer: answer.answer,
+      // Create new prompt answers
+      const answerEntities = answers.map((answer, index) => {
+        return this.promptAnswerRepository.create({
+          profileId: profile.id,
+          promptId: answer.promptId,
+          answer: answer.answer,
+          order: index + 1, // Set order field which is required by the entity
+        });
       });
-    });
 
-    await this.promptAnswerRepository.save(answerEntities);
+      await this.promptAnswerRepository.save(answerEntities);
 
-    // Check if profile is now complete
-    await this.updateProfileCompletionStatus(userId);
+      // Check if profile is now complete
+      await this.updateProfileCompletionStatus(userId);
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error saving prompt answers for user', userId, ':', error);
+      throw new BadRequestException(
+        'Failed to save prompt answers: ' + error.message,
+      );
+    }
   }
 
   async deletePhoto(userId: string, photoId: string): Promise<void> {

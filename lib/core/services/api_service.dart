@@ -188,7 +188,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/prompt-answers'),
       headers: _headers,
-      body: jsonEncode(answers), // Send as direct array, not wrapped
+      body: jsonEncode({'answers': answers}), // Wrap in answers object as expected by DTO
     );
 
     return _handleResponse(response);

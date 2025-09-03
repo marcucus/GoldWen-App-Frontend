@@ -251,11 +251,17 @@ void main() {
         },
       ];
       
-      // Verify structure - should not be wrapped in 'answers' object
+      // The API expects answers to be wrapped in 'answers' object now
+      final expectedApiFormat = {'answers': testAnswers};
+      
       expect(testAnswers, isList);
       expect(testAnswers.length, equals(3));
       expect(testAnswers[0]['promptId'], equals('prompt-uuid-1'));
       expect(testAnswers[0]['answer'], equals('My answer to prompt 1'));
+      
+      // Verify the wrapper format expected by backend
+      expect(expectedApiFormat['answers'], equals(testAnswers));
+      expect(expectedApiFormat['answers'], isList);
     });
   });
 }
