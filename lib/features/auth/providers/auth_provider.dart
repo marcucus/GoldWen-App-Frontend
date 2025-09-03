@@ -18,7 +18,9 @@ class AuthProvider with ChangeNotifier {
 
   String? get userId => _user?.id;
   String? get email => _user?.email;
-  String? get name => '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim();
+  String? get name => '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim().isNotEmpty 
+      ? '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim() 
+      : null;
 
   void clearError() {
     _error = null;
@@ -183,77 +185,28 @@ class AuthProvider with ChangeNotifier {
       // Debug: Print the full response to understand its structure
       print('Auth response received: $response');
       
-      // Try multiple levels of data nesting
-      Map<String, dynamic> data;
-      if (response['data'] != null) {
-        data = response['data'] as Map<String, dynamic>;
-      } else if (response['result'] != null) {
-        data = response['result'] as Map<String, dynamic>;
-      } else {
-        data = response;
+      // The backend returns: { "success": true, "message": "...", "data": { "user": {...}, "accessToken": "..." } }
+      final data = response['data'] as Map<String, dynamic>?;
+      if (data == null) {
+        throw Exception('Response data is null');
       }
       print('Extracted data: $data');
       
-      // Try different possible structures for user data
-      Map<String, dynamic>? userData;
-      if (data['user'] != null) {
-        if (data['user'] is Map<String, dynamic>) {
-          userData = data['user'] as Map<String, dynamic>;
-          print('Found user data in user field');
-        } else {
-          print('Warning: user field exists but is not a Map<String, dynamic>: ${data['user'].runtimeType}');
-        }
-      } else if (data['profile'] != null) {
-        if (data['profile'] is Map<String, dynamic>) {
-          userData = data['profile'] as Map<String, dynamic>;
-          print('Found user data in profile field');
-        } else {
-          print('Warning: profile field exists but is not a Map<String, dynamic>: ${data['profile'].runtimeType}');
-        }
-      } else if (data.containsKey('id') && data.containsKey('email')) {
-        // User data might be directly in the response
-        userData = data;
-        print('Found user data directly in response');
-      } else {
-        print('Available keys in data: ${data.keys.toList()}');
-        throw Exception('User data not found in response. Available keys: ${data.keys.toList()}');
+      // Extract user data
+      final userData = data['user'] as Map<String, dynamic>?;
+      if (userData == null) {
+        throw Exception('User data not found in response');
       }
       print('User data: $userData');
       
-      // Try different possible token field names
-      String? token;
-      final possibleTokenFields = [
-        'token', 'accessToken', 'access_token', 'authToken', 'auth_token',
-        'jwt', 'jwtToken', 'jwt_token', 'bearerToken', 'bearer_token'
-      ];
-      
-      // Check in data first, then in response root
-      for (final field in possibleTokenFields) {
-        // Safely extract token - check type before casting
-        final dataToken = data[field] is String ? data[field] as String : null;
-        final responseToken = response[field] is String ? response[field] as String : null;
-        token = dataToken ?? responseToken;
-        if (token != null && token.isNotEmpty) {
-          print('Found token in field: $field');
-          break;
-        }
-      }
-      
-      print('Token: $token');
-      
-      
-      if (userData == null) {
-        print('Available keys in data: ${data.keys.toList()}');
-        throw Exception('User data not found or invalid in response. Available keys: ${data.keys.toList()}');
-      }
-      
+      // Extract token - backend returns it as 'accessToken'
+      final token = data['accessToken'] as String?;
       if (token == null || token.isEmpty) {
-        print('Available keys in data: ${data.keys.toList()}');
-        print('Available keys in response: ${response.keys.toList()}');
-        throw Exception('Token not found in response. Checked fields: $possibleTokenFields');
+        throw Exception('Access token not found in response');
       }
+      print('Token: ${token.substring(0, 10)}...');
       
-      _user = User.fromJson(userData!);
+      _user = User.fromJson(userData);
       _token = token;
       _status = AuthStatus.authenticated;
       _error = null;

@@ -133,7 +133,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getPersonalityQuestions() async {
     final response = await http.get(
-      Uri.parse('$baseUrl/profiles/questions'),
+      Uri.parse('$baseUrl/profiles/personality-questions'),
       headers: _headers,
     );
 
