@@ -455,9 +455,9 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
 
       print('Submitting ${apiAnswers.length} personality answers');
 
-      // Submit to backend and mark onboarding completion
+      // Submit to backend and refresh user to get updated status
       await ApiService.submitPersonalityAnswers(apiAnswers);
-      await authProvider.markOnboardingCompleted();
+      await authProvider.refreshUser();
       
       if (mounted) {
         Navigator.of(context).pushReplacement(
