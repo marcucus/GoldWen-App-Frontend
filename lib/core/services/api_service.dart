@@ -92,13 +92,15 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: _headers,
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: _headers,
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      ),
     );
 
     return _handleResponse(response);
@@ -111,16 +113,18 @@ class ApiService {
     required String firstName,
     String? lastName,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/social-login'),
-      headers: _headers,
-      body: jsonEncode({
-        'socialId': socialId,
-        'provider': provider,
-        'email': email,
-        'firstName': firstName,
-        'lastName': lastName,
-      }),
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/auth/social-login'),
+        headers: _headers,
+        body: jsonEncode({
+          'socialId': socialId,
+          'provider': provider,
+          'email': email,
+          'firstName': firstName,
+          'lastName': lastName,
+        }),
+      ),
     );
 
     return _handleResponse(response);
@@ -159,9 +163,11 @@ class ApiService {
   }
 
   static Future<List<dynamic>> getPersonalityQuestions() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/profiles/personality-questions'),
-      headers: _headers,
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/profiles/personality-questions'),
+        headers: _headers,
+      ),
     );
     return _handleResponse(response) as List<dynamic>;
   }
@@ -368,9 +374,11 @@ class ApiService {
 
   // Matching endpoints
   static Future<Map<String, dynamic>> getDailySelection() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/matching/daily-selection'),
-      headers: _headers,
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/matching/daily-selection'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
