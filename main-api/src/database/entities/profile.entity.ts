@@ -30,6 +30,9 @@ export class Profile {
   lastName: string;
 
   @Column({ nullable: true })
+  pseudo: string;
+
+  @Column({ nullable: true })
   birthDate: Date;
 
   @Column({

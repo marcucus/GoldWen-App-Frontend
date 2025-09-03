@@ -175,7 +175,7 @@ class ApiService {
   static Future<Map<String, dynamic>> submitPromptAnswers(
       List<Map<String, dynamic>> answers) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/profiles/me/prompt-answers'),
+      Uri.parse('$baseUrl/profiles/prompt-answers'),
       headers: _headers,
       body: jsonEncode({'answers': answers}),
     );
