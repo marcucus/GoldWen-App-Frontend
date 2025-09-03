@@ -161,6 +161,7 @@ class ProfileProvider with ChangeNotifier {
   Future<void> saveProfile() async {
     try {
       final profileData = <String, dynamic>{
+        if (_name != null) 'pseudo': _name,
         if (_birthDate != null)
           'birthDate': _birthDate!.toIso8601String().split('T')[0],
         if (_bio != null) 'bio': _bio,
@@ -200,10 +201,10 @@ class ProfileProvider with ChangeNotifier {
       final profileData = response['data'] ?? response;
 
       // Update profile data from response
-      _name =
-          profileData['firstName'] != null && profileData['lastName'] != null
+      _name = profileData['pseudo'] ?? 
+          (profileData['firstName'] != null && profileData['lastName'] != null
               ? '${profileData['firstName']} ${profileData['lastName']}'
-              : profileData['name'];
+              : profileData['name']);
       _bio = profileData['bio'];
       _birthDate = profileData['birthDate'] != null
           ? DateTime.parse(profileData['birthDate'])

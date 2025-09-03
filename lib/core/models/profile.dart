@@ -1,6 +1,7 @@
 class Profile {
   final String id;
   final String userId;
+  final String? pseudo;
   final DateTime? birthDate;
   final String? gender;
   final List<String> interestedInGenders;
@@ -27,6 +28,7 @@ class Profile {
   Profile({
     required this.id,
     required this.userId,
+    this.pseudo,
     this.birthDate,
     this.gender,
     this.interestedInGenders = const [],
@@ -55,6 +57,7 @@ class Profile {
     return Profile(
       id: json['id'] as String,
       userId: json['userId'] as String,
+      pseudo: json['pseudo'] as String?,
       birthDate: json['birthDate'] != null 
           ? DateTime.parse(json['birthDate'] as String)
           : null,
@@ -98,6 +101,7 @@ class Profile {
     return {
       'id': id,
       'userId': userId,
+      'pseudo': pseudo,
       'birthDate': birthDate?.toIso8601String(),
       'gender': gender,
       'interestedInGenders': interestedInGenders,
