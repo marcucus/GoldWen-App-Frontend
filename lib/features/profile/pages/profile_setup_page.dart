@@ -651,8 +651,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       await profileProvider.submitPromptAnswers();
       await authProvider.markProfileCompleted();
     } catch (e) {
-      // Handle error silently for now - could show snackbar
+      // Show error to user
       debugPrint('Error saving profile: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
     }
   }
 
