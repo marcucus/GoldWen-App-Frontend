@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/models/profile.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/pages/profile_setup_page.dart';
@@ -19,6 +20,9 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   int _currentPage = 0;
   final Map<String, dynamic> _answers = {};
   bool _isSubmitting = false;
+  bool _isLoading = true;
+  String? _error;
+  Map<String, String> _questionKeyToUuid = {};
 
   final List<Map<String, dynamic>> _questions = [
     {
@@ -124,7 +128,142 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadPersonalityQuestions();
+  }
+
+  Future<void> _loadPersonalityQuestions() async {
+    try {
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.loadPersonalityQuestions();
+      
+      if (profileProvider.error != null) {
+        setState(() {
+          _error = profileProvider.error;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Create mapping between hardcoded question keys and backend UUIDs
+      _createQuestionMapping(profileProvider.personalityQuestions);
+      
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Erreur lors du chargement des questions: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _createQuestionMapping(List<PersonalityQuestion> backendQuestions) {
+    // Map hardcoded question keys to backend question UUIDs
+    // First, try to match by category if available
+    final categoryMapping = {
+      'motivation': 'motivation',
+      'free_time': 'free_time', 
+      'conflict_style': 'conflict_style',
+      'relationship_expectation': 'relationship_expectation',
+      'communication_style': 'communication_style',
+      'family_importance': 'family_importance',
+      'stress_management': 'stress_management',
+      'future_vision': 'future_vision',
+      'humor_style': 'humor_style',
+      'core_value': 'core_value',
+    };
+
+    if (backendQuestions.isEmpty) {
+      throw Exception('Aucune question de personnalité trouvée sur le serveur');
+    }
+
+    // Sort backend questions by order to ensure consistent mapping
+    final sortedBackendQuestions = List<PersonalityQuestion>.from(backendQuestions)
+      ..sort((a, b) => a.order.compareTo(b.order));
+
+    // If category mapping works, use it
+    for (final backendQuestion in sortedBackendQuestions) {
+      for (final entry in categoryMapping.entries) {
+        if (backendQuestion.category == entry.value) {
+          _questionKeyToUuid[entry.key] = backendQuestion.id;
+          break;
+        }
+      }
+    }
+
+    // If category mapping didn't work (not enough matches), fall back to order-based mapping
+    if (_questionKeyToUuid.length < _questions.length && sortedBackendQuestions.length >= _questions.length) {
+      _questionKeyToUuid.clear();
+      for (int i = 0; i < _questions.length && i < sortedBackendQuestions.length; i++) {
+        final questionKey = _questions[i]['key'] as String;
+        _questionKeyToUuid[questionKey] = sortedBackendQuestions[i].id;
+      }
+    }
+
+    // Verify we have all necessary mappings
+    if (_questionKeyToUuid.length < _questions.length) {
+      throw Exception('Impossible de mapper toutes les questions. Questions trouvées: ${_questionKeyToUuid.length}, Questions nécessaires: ${_questions.length}');
+    }
+
+    print('Question mapping created: $_questionKeyToUuid');
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Questionnaire de personnalité'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Questionnaire de personnalité'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Colors.red[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                    _error = null;
+                  });
+                  _loadPersonalityQuestions();
+                },
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Question ${_currentPage + 1}/${_questions.length}'),
@@ -291,16 +430,28 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       profileProvider.setPersonalityAnswers(_answers);
       
-      // Convert answers to API format
+      // Verify we have all answers
+      if (_answers.length < _questions.length) {
+        throw Exception('Veuillez répondre à toutes les questions');
+      }
+      
+      // Convert answers to API format using actual UUIDs
       final List<Map<String, dynamic>> apiAnswers = _answers.entries.map((entry) {
+        final questionUuid = _questionKeyToUuid[entry.key];
+        if (questionUuid == null) {
+          throw Exception('Question UUID not found for key: ${entry.key}');
+        }
+        
         return {
-          'questionId': entry.key, // In real app, this would be the UUID from backend
+          'questionId': questionUuid,
           'textAnswer': entry.value,
           'numericAnswer': null,
           'booleanAnswer': null,
           'multipleChoiceAnswer': null,
         };
       }).toList();
+
+      print('Submitting ${apiAnswers.length} personality answers');
 
       // Submit to backend
       await ApiService.submitPersonalityAnswers(apiAnswers);
@@ -313,11 +464,22 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         );
       }
     } catch (e) {
+      print('Error submitting personality answers: $e');
       if (mounted) {
+        String errorMessage = 'Erreur lors de la sauvegarde: ${e.toString()}';
+        
+        // Provide more specific error messages
+        if (e.toString().contains('UUID not found')) {
+          errorMessage = 'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
+        } else if (e.toString().contains('Validation failed')) {
+          errorMessage = 'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la sauvegarde: ${e.toString()}'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
