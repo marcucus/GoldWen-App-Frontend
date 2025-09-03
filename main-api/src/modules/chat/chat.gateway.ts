@@ -50,7 +50,7 @@ export class ChatGateway
         client.handshake.auth?.token || client.handshake.query?.token;
 
       if (!token) {
-      this.logger.warn('WebSocket connection rejected: No token provided');
+        this.logger.warn('WebSocket connection rejected: No token provided');
         client.disconnect();
         return;
       }
@@ -68,7 +68,11 @@ export class ChatGateway
       // Join user to their personal room for notifications
       await client.join(`user:${client.userId}`);
     } catch (error) {
-      this.logger.error('WebSocket authentication failed', error.message, 'ChatGateway');
+      this.logger.error(
+        'WebSocket authentication failed',
+        error.message,
+        'ChatGateway',
+      );
       client.disconnect();
     }
   }
@@ -170,7 +174,11 @@ export class ChatGateway
         conversationId: data.conversationId,
       });
     } catch (error) {
-      this.logger.error('Error sending message via WebSocket', error.message, 'ChatGateway');
+      this.logger.error(
+        'Error sending message via WebSocket',
+        error.message,
+        'ChatGateway',
+      );
       client.emit('error', { message: 'Failed to send message' });
     }
   }
@@ -209,10 +217,7 @@ export class ChatGateway
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
-      await this.chatService.markMessageAsRead(
-        data.messageId,
-        client.userId!,
-      );
+      await this.chatService.markMessageAsRead(data.messageId, client.userId!);
 
       // Notify other users in the conversation
       client.to(`chat:${data.conversationId}`).emit('message_read', {
@@ -227,7 +232,11 @@ export class ChatGateway
         conversationId: data.conversationId,
       });
     } catch (error) {
-      this.logger.error('Error marking message as read', error.message, 'ChatGateway');
+      this.logger.error(
+        'Error marking message as read',
+        error.message,
+        'ChatGateway',
+      );
       client.emit('error', { message: 'Failed to mark message as read' });
     }
   }
@@ -268,10 +277,7 @@ export class ChatGateway
   }
 
   // Method to notify about chat expiration
-  async notifyChatExpiring(
-    conversationId: string,
-    expiresAt: Date,
-  ) {
+  async notifyChatExpiring(conversationId: string, expiresAt: Date) {
     this.server.to(`chat:${conversationId}`).emit('chat_expiring', {
       conversationId,
       expiresAt,

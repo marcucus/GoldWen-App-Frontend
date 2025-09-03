@@ -140,21 +140,27 @@ export class EmailService {
 
   private getEmailErrorMessage(error: any): string {
     const errorMsg = error?.message || error?.toString() || 'Unknown error';
-    
+
     // Check for common Gmail authentication errors
-    if (errorMsg.includes('Username and Password not accepted') || 
-        errorMsg.includes('BadCredentials')) {
-      return `Gmail authentication failed. Please ensure you are using an App Password instead of your regular password. ` +
-             `Visit https://support.google.com/accounts/answer/185833 to create an App Password. ` +
-             `Original error: ${errorMsg}`;
+    if (
+      errorMsg.includes('Username and Password not accepted') ||
+      errorMsg.includes('BadCredentials')
+    ) {
+      return (
+        `Gmail authentication failed. Please ensure you are using an App Password instead of your regular password. ` +
+        `Visit https://support.google.com/accounts/answer/185833 to create an App Password. ` +
+        `Original error: ${errorMsg}`
+      );
     }
-    
+
     if (errorMsg.includes('Invalid login')) {
-      return `Email login failed. Please check your email credentials and ensure 2FA is properly configured. ` +
-             `For Gmail users, use App Passwords instead of regular passwords. ` +
-             `Original error: ${errorMsg}`;
+      return (
+        `Email login failed. Please check your email credentials and ensure 2FA is properly configured. ` +
+        `For Gmail users, use App Passwords instead of regular passwords. ` +
+        `Original error: ${errorMsg}`
+      );
     }
-    
+
     return errorMsg;
   }
 

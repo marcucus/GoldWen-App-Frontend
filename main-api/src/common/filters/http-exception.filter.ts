@@ -37,7 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message = 'Validation failed';
         }
       } else {
-        message = exceptionResponse as string;
+        message = exceptionResponse;
         code = exception.name;
       }
     } else {
@@ -47,9 +47,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       // Log unexpected errors
       this.logger.error(
-        'Unexpected error occurred: ' + (exception instanceof Error ? exception.message : 'Unknown error'),
+        'Unexpected error occurred: ' +
+          (exception instanceof Error ? exception.message : 'Unknown error'),
         exception instanceof Error ? exception.stack : undefined,
-        'HttpExceptionFilter'
+        'HttpExceptionFilter',
       );
     }
 
@@ -58,12 +59,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.error(
         `HTTP ${status} Error: ${message}`,
         undefined,
-        'HttpExceptionFilter'
+        'HttpExceptionFilter',
       );
     } else if (status >= 400) {
       this.logger.debug(
         `HTTP ${status} Client Error: ${message}`,
-        'HttpExceptionFilter'
+        'HttpExceptionFilter',
       );
     }
 

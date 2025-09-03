@@ -30,7 +30,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return the GoldWen welcome message', () => {
-      expect(appController.getHello()).toBe('GoldWen API - Designed to be deleted ❤️');
+      expect(appController.getHello()).toBe(
+        'GoldWen API - Designed to be deleted ❤️',
+      );
     });
   });
 });

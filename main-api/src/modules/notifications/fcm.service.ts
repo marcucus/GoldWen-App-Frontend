@@ -32,7 +32,9 @@ export class FcmService {
     payload: NotificationPayload,
   ): Promise<FcmResponse> {
     if (!this.serverKey) {
-      this.logger.warn('FCM server key not configured, skipping push notification');
+      this.logger.warn(
+        'FCM server key not configured, skipping push notification',
+      );
       return { success: false, error: 'FCM not configured' };
     }
 
@@ -69,7 +71,7 @@ export class FcmService {
       const response = await fetch(this.fcmUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `key=${this.serverKey}`,
+          Authorization: `key=${this.serverKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(message),
@@ -88,7 +90,11 @@ export class FcmService {
           messageId: result.results?.[0]?.message_id,
         };
       } else {
-        this.logger.error('Failed to send push notification', result.results?.[0]?.error || 'Unknown error', 'FcmService');
+        this.logger.error(
+          'Failed to send push notification',
+          result.results?.[0]?.error || 'Unknown error',
+          'FcmService',
+        );
 
         return {
           success: false,
@@ -96,7 +102,11 @@ export class FcmService {
         };
       }
     } catch (error) {
-      this.logger.error('Error sending push notification', error.message, 'FcmService');
+      this.logger.error(
+        'Error sending push notification',
+        error.message,
+        'FcmService',
+      );
 
       return {
         success: false,
@@ -116,8 +126,8 @@ export class FcmService {
       results.push(result);
     }
 
-    const successCount = results.filter(r => r.success).length;
-    
+    const successCount = results.filter((r) => r.success).length;
+
     this.logger.info('Batch push notifications sent', {
       total: deviceTokens.length,
       successful: successCount,
@@ -132,7 +142,9 @@ export class FcmService {
     payload: NotificationPayload,
   ): Promise<FcmResponse> {
     if (!this.serverKey) {
-      this.logger.warn('FCM server key not configured, skipping topic notification');
+      this.logger.warn(
+        'FCM server key not configured, skipping topic notification',
+      );
       return { success: false, error: 'FCM not configured' };
     }
 
@@ -150,7 +162,7 @@ export class FcmService {
       const response = await fetch(this.fcmUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `key=${this.serverKey}`,
+          Authorization: `key=${this.serverKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(message),
@@ -169,7 +181,11 @@ export class FcmService {
           messageId: result.message_id,
         };
       } else {
-        this.logger.error('Failed to send topic notification', result.error || 'Unknown error', 'FcmService');
+        this.logger.error(
+          'Failed to send topic notification',
+          result.error || 'Unknown error',
+          'FcmService',
+        );
 
         return {
           success: false,
@@ -177,7 +193,11 @@ export class FcmService {
         };
       }
     } catch (error) {
-      this.logger.error('Error sending topic notification', error.message, 'FcmService');
+      this.logger.error(
+        'Error sending topic notification',
+        error.message,
+        'FcmService',
+      );
 
       return {
         success: false,
@@ -241,8 +261,10 @@ export class FcmService {
     conversationId: string,
     expiresAt: Date,
   ) {
-    const hoursLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60));
-    
+    const hoursLeft = Math.ceil(
+      (expiresAt.getTime() - Date.now()) / (1000 * 60 * 60),
+    );
+
     return this.sendToDevice(deviceToken, {
       title: 'Votre conversation expire bientôt',
       body: `Plus que ${hoursLeft}h pour discuter avec ${otherUserName}`,
