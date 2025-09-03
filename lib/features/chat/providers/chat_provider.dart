@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/models/models.dart';
+import '../../../core/config/app_config.dart';
 
 class ChatProvider with ChangeNotifier {
   List<Conversation> _conversations = [];
@@ -99,12 +100,42 @@ class ChatProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      if (AppConfig.isDevelopment) {
+        print('ChatProvider: Starting to load conversations...');
+      }
+      
       final response = await ApiService.getConversations();
+      
+      if (AppConfig.isDevelopment) {
+        print('ChatProvider: Received response: $response');
+      }
+      
       final conversationsData = response['data'] ?? response['conversations'] ?? [];
       
-      _conversations = (conversationsData as List)
-          .map((c) => Conversation.fromJson(c as Map<String, dynamic>))
-          .toList();
+      if (AppConfig.isDevelopment) {
+        print('ChatProvider: Processing ${(conversationsData as List).length} conversations');
+      }
+      
+      _conversations = [];
+      
+      // Parse conversations one by one to handle individual parsing errors
+      for (final conversationJson in (conversationsData as List)) {
+        try {
+          final conversation = Conversation.fromJson(conversationJson as Map<String, dynamic>);
+          _conversations.add(conversation);
+        } catch (e) {
+          // Log parsing error but continue with other conversations
+          if (AppConfig.isDevelopment) {
+            print('Error parsing conversation: $e');
+            print('Conversation data: $conversationJson');
+          }
+          // Skip this conversation and continue with others
+        }
+      }
+      
+      if (AppConfig.isDevelopment) {
+        print('ChatProvider: Successfully parsed ${_conversations.length} conversations');
+      }
       
       _error = null;
     } catch (e) {
@@ -145,9 +176,22 @@ class ChatProvider with ChangeNotifier {
       );
       
       final messagesData = response['data'] ?? response['messages'] ?? [];
-      final newMessages = (messagesData as List)
-          .map((m) => ChatMessage.fromJson(m as Map<String, dynamic>))
-          .toList();
+      final newMessages = <ChatMessage>[];
+      
+      // Parse messages one by one to handle individual parsing errors
+      for (final messageJson in (messagesData as List)) {
+        try {
+          final message = ChatMessage.fromJson(messageJson as Map<String, dynamic>);
+          newMessages.add(message);
+        } catch (e) {
+          // Log parsing error but continue with other messages
+          if (AppConfig.isDevelopment) {
+            print('Error parsing message: $e');
+            print('Message data: $messageJson');
+          }
+          // Skip this message and continue with others
+        }
+      }
 
       if (page == 1) {
         _chatMessages[chatId] = newMessages;
@@ -377,11 +421,17 @@ class ChatProvider with ChangeNotifier {
   void _setLoading() {
     _isLoading = true;
     _error = null;
+    if (AppConfig.isDevelopment) {
+      print('ChatProvider: Setting loading state to true');
+    }
     notifyListeners();
   }
 
   void _setLoaded() {
     _isLoading = false;
+    if (AppConfig.isDevelopment) {
+      print('ChatProvider: Setting loading state to false');
+    }
     notifyListeners();
   }
 
@@ -392,6 +442,11 @@ class ChatProvider with ChangeNotifier {
       _error = error.message;
     } else {
       _error = fallbackMessage;
+    }
+    
+    if (AppConfig.isDevelopment) {
+      print('ChatProvider: Error occurred - $_error');
+      print('Original error: $error');
     }
     
     notifyListeners();
