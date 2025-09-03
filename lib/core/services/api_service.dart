@@ -157,7 +157,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/personality-answers'),
       headers: _headers,
-      body: jsonEncode({'answers': answers}),
+      body: jsonEncode(answers), // Send as direct array, not wrapped
     );
 
     return _handleResponse(response);
@@ -188,7 +188,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/prompt-answers'),
       headers: _headers,
-      body: jsonEncode({'answers': answers}),
+      body: jsonEncode({'answers': answers}), // Wrap in answers object as expected by DTO
     );
 
     return _handleResponse(response);

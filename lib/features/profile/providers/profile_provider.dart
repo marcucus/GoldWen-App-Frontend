@@ -265,8 +265,15 @@ class ProfileProvider with ChangeNotifier {
         return answerData;
       }).toList();
 
+      print('ProfileProvider: Submitting ${answersData.length} personality answers');
+      print('ProfileProvider: Answers data: $answersData');
+      
       await ApiService.submitPersonalityAnswers(answersData);
       _error = null;
+      print('ProfileProvider: Personality answers submitted successfully');
+      
+      // Refresh profile data after successful submission
+      await loadProfile();
     } catch (e) {
       _error = 'Failed to submit personality answers: $e';
       print('Error submitting personality answers: $e');
@@ -314,8 +321,14 @@ class ProfileProvider with ChangeNotifier {
         if (_languages.isNotEmpty) 'languages': _languages,
       };
 
+      print('Saving profile data: $profileData');
       await ApiService.updateProfile(profileData);
+      print('Profile saved successfully');
+      
+      // Refresh profile data after successful save
+      await loadProfile();
     } catch (e) {
+      print('Error in saveProfile: $e');
       // Handle error - could throw to let UI handle it
       rethrow;
     }
@@ -330,8 +343,16 @@ class ProfileProvider with ChangeNotifier {
         };
       }).toList();
 
+      print('Submitting ${promptAnswers.length} prompt answers');
+      print('Prompt answers data: $promptAnswers');
+
       await ApiService.submitPromptAnswers(promptAnswers);
+      print('Prompt answers submitted successfully');
+      
+      // Refresh profile data after successful submission
+      await loadProfile();
     } catch (e) {
+      print('Error in submitPromptAnswers: $e');
       rethrow;
     }
   }
