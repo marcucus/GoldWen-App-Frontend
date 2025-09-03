@@ -26,11 +26,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(3, (index) => TextEditingController());
 
-  final List<String> _promptQuestions = [
-    'Ce qui me rend vraiment heureux(se), c\'est...',
-    'Je ne peux pas vivre sans...',
-    'Ma passion secrète est...',
-  ];
+  List<String> _selectedPromptIds = []; // Track selected prompt IDs
+  List<String> _promptQuestions = []; // Display texts for selected prompts
 
   @override
   void initState() {
@@ -40,6 +37,41 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     _bioController.addListener(_updateButtonState);
     for (final controller in _promptControllers) {
       controller.addListener(_updateButtonState);
+    }
+    
+    // Load prompts from backend
+    _loadPrompts();
+  }
+
+  void _loadPrompts() async {
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    try {
+      await profileProvider.loadPrompts();
+      
+      // Select first 3 prompts automatically
+      if (profileProvider.availablePrompts.length >= 3) {
+        setState(() {
+          _selectedPromptIds = profileProvider.availablePrompts
+              .take(3)
+              .map((prompt) => prompt.id)
+              .toList();
+          _promptQuestions = profileProvider.availablePrompts
+              .take(3)
+              .map((prompt) => prompt.text)
+              .toList();
+        });
+      }
+    } catch (e) {
+      print('Error loading prompts: $e');
+      // Fallback to default prompts if loading fails
+      setState(() {
+        _promptQuestions = [
+          'Ce qui me rend vraiment heureux(se), c\'est...',
+          'Je ne peux pas vivre sans...',
+          'Ma passion secrète est...',
+        ];
+        _selectedPromptIds = ['fallback_1', 'fallback_2', 'fallback_3'];
+      });
     }
   }
 
@@ -365,32 +397,39 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           const SizedBox(height: AppSpacing.xxl),
           
           Expanded(
-            child: ListView.builder(
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _promptQuestions[index],
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      TextFormField(
-                        controller: _promptControllers[index],
-                        decoration: const InputDecoration(
-                          hintText: 'Votre réponse...',
+            child: _promptQuestions.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: 3,
+                    itemBuilder: (context, index) {
+                      // Make sure we don't go out of bounds
+                      final questionText = index < _promptQuestions.length 
+                          ? _promptQuestions[index]
+                          : 'Question ${index + 1}...';
+                      
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              questionText,
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            TextFormField(
+                              controller: _promptControllers[index],
+                              decoration: const InputDecoration(
+                                hintText: 'Votre réponse...',
+                              ),
+                              maxLines: 2,
+                              maxLength: 100,
+                            ),
+                          ],
                         ),
-                        maxLines: 2,
-                        maxLength: 100,
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
           
           SizedBox(
@@ -631,8 +670,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       birthDate: _birthDate,
     );
     
-    for (int i = 0; i < _promptControllers.length; i++) {
-      profileProvider.addPrompt(_promptControllers[i].text);
+    // Set prompt answers using real prompt IDs
+    for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
+      if (_promptControllers[i].text.isNotEmpty) {
+        profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text);
+      }
     }
     
     // Submit to backend and mark completion
@@ -649,7 +691,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.saveProfile();
       await profileProvider.submitPromptAnswers();
-      await authProvider.markProfileCompleted();
+      
+      // Refresh user data to get updated completion status from backend
+      await authProvider.refreshUser();
     } catch (e) {
       // Show error to user
       debugPrint('Error saving profile: $e');

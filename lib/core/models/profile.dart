@@ -345,7 +345,7 @@ class Prompt {
       id: json['id'] as String,
       text: json['text'] as String,
       category: json['category'] as String,
-      active: json['active'] as bool? ?? true,
+      active: json['isActive'] as bool? ?? true,
     );
   }
 

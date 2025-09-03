@@ -31,6 +31,12 @@ export class UpdateProfileDto {
   @MaxLength(50)
   lastName?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  pseudo?: string;
+
   @ApiPropertyOptional({ description: 'Birth date in YYYY-MM-DD format' })
   @IsOptional()
   @IsDateString()

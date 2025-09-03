@@ -303,14 +303,12 @@ export class ProfilesService {
     // 1. Minimum 3 photos
     // 2. 3 prompt answers
     // 3. All required personality questions answered
-    // 4. Required profile fields: birthDate, gender, interestedInGenders
+    // 4. Required profile fields: birthDate (gender and interestedInGenders are optional for now)
     const hasMinPhotos = (user.profile.photos?.length || 0) >= 3;
     const hasPromptAnswers = (user.profile.promptAnswers?.length || 0) >= 3;
     const hasRequiredProfileFields = !!(
       user.profile.birthDate &&
-      user.profile.gender &&
-      user.profile.interestedInGenders &&
-      user.profile.interestedInGenders.length > 0
+      user.profile.bio
     );
 
     // Get required personality questions count
@@ -327,7 +325,9 @@ export class ProfilesService {
       hasPromptAnswers &&
       hasPersonalityAnswers &&
       hasRequiredProfileFields;
-    const isOnboardingCompleted = isProfileCompleted;
+    
+    // Onboarding is completed when personality questions are answered
+    const isOnboardingCompleted = hasPersonalityAnswers;
 
     // Update user status
     if (

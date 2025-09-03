@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/models.dart';
 
@@ -171,6 +173,10 @@ class AuthProvider with ChangeNotifier {
       final response = await ApiService.getCurrentUser();
       final userData = response['data'] ?? response;
       _user = User.fromJson(userData);
+      
+      // Update stored user data
+      await _storeAuthData();
+      
       notifyListeners();
     } catch (e) {
       // If refresh fails, user might need to re-authenticate
@@ -213,6 +219,9 @@ class AuthProvider with ChangeNotifier {
       
       // Set token for subsequent API calls
       ApiService.setToken(_token!);
+      
+      // Store token and user data for session persistence
+      await _storeAuthData();
       
       print('Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
       print('User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
@@ -263,6 +272,9 @@ class AuthProvider with ChangeNotifier {
       
       // Clear token from API service
       ApiService.clearToken();
+      
+      // Clear stored auth data
+      await _clearAuthData();
     } catch (e) {
       // Even if logout fails, clear local state
       _user = null;
@@ -270,6 +282,7 @@ class AuthProvider with ChangeNotifier {
       _status = AuthStatus.unauthenticated;
       _error = null;
       ApiService.clearToken();
+      await _clearAuthData();
     }
     
     notifyListeners();
@@ -279,12 +292,41 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Check if user has a valid stored token
-      await Future.delayed(const Duration(seconds: 1));
+      // Check for stored authentication data
+      final prefs = await SharedPreferences.getInstance();
+      final storedToken = prefs.getString('auth_token');
+      final storedUserData = prefs.getString('user_data');
       
-      // For now, assume not authenticated
+      if (storedToken != null && storedUserData != null) {
+        print('Found stored auth data, attempting to restore session...');
+        
+        // Set the token for API calls
+        ApiService.setToken(storedToken);
+        
+        // Verify the token is still valid by getting current user
+        try {
+          final response = await ApiService.getCurrentUser();
+          final userData = response['data'] ?? response;
+          
+          // Update with fresh user data from server
+          _user = User.fromJson(userData);
+          _token = storedToken;
+          _status = AuthStatus.authenticated;
+          _error = null;
+          
+          print('Session restored successfully for user: ${_user?.email}');
+          notifyListeners();
+          return;
+        } catch (e) {
+          print('Stored token is invalid, clearing auth data: $e');
+          await _clearAuthData();
+        }
+      }
+      
+      // No valid stored data, user needs to authenticate
       _status = AuthStatus.unauthenticated;
     } catch (e) {
+      print('Error checking auth status: $e');
       _status = AuthStatus.unauthenticated;
     }
     
@@ -343,6 +385,31 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _error = e is ApiException ? e.message : 'Failed to delete account';
       notifyListeners();
+    }
+  }
+
+  // Helper methods for persistent storage
+  Future<void> _storeAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (_token != null) {
+        await prefs.setString('auth_token', _token!);
+      }
+      if (_user != null) {
+        await prefs.setString('user_data', jsonEncode(_user!.toJson()));
+      }
+    } catch (e) {
+      print('Error storing auth data: $e');
+    }
+  }
+
+  Future<void> _clearAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      await prefs.remove('user_data');
+    } catch (e) {
+      print('Error clearing auth data: $e');
     }
   }
 }

@@ -172,10 +172,20 @@ class ApiService {
     return _handleResponse(response) as List<dynamic>;
   }
 
+  static Future<List<dynamic>> getPrompts() async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/profiles/prompts'),
+        headers: _headers,
+      ),
+    );
+    return _handleResponse(response) as List<dynamic>;
+  }
+
   static Future<Map<String, dynamic>> submitPromptAnswers(
       List<Map<String, dynamic>> answers) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/profiles/me/prompt-answers'),
+      Uri.parse('$baseUrl/profiles/prompt-answers'),
       headers: _headers,
       body: jsonEncode({'answers': answers}),
     );
