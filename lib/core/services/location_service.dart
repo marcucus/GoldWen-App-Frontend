@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'api_service.dart';
 
-class LocationService extends ChangeNotifier {
+class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   static final LocationService _instance = LocationService._internal();
   factory LocationService() => _instance;
   LocationService._internal();
@@ -14,6 +15,7 @@ class LocationService extends ChangeNotifier {
   bool _hasPermission = false;
   bool _isServiceEnabled = false;
   StreamSubscription<Position>? _positionStream;
+  bool _isAppInForeground = true;
 
   // Location update interval (15 minutes)
   static const Duration _updateInterval = Duration(minutes: 15);
@@ -25,6 +27,9 @@ class LocationService extends ChangeNotifier {
   /// Initialize the location service and request permissions
   Future<bool> initialize() async {
     try {
+      // Register for app lifecycle changes
+      WidgetsBinding.instance.addObserver(this);
+      
       // Check if location services are enabled
       _isServiceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!_isServiceEnabled) {
@@ -76,8 +81,8 @@ class LocationService extends ChangeNotifier {
   /// Update current position and send to backend
   Future<void> _updateCurrentPosition() async {
     try {
-      if (!_hasPermission || !_isServiceEnabled) {
-        debugPrint('LocationService: Cannot update position - no permission or service disabled');
+      if (!_hasPermission || !_isServiceEnabled || !_isAppInForeground) {
+        debugPrint('LocationService: Cannot update position - no permission, service disabled, or app in background');
         return;
       }
 
@@ -191,7 +196,30 @@ class LocationService extends ChangeNotifier {
     _positionStream?.cancel();
     _locationTimer = null;
     _positionStream = null;
+    WidgetsBinding.instance.removeObserver(this);
     debugPrint('LocationService: Stopped');
+  }
+
+  /// Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _isAppInForeground = true;
+        debugPrint('LocationService: App resumed, continuing location updates');
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        _isAppInForeground = false;
+        debugPrint('LocationService: App backgrounded, pausing location updates');
+        break;
+      case AppLifecycleState.hidden:
+        _isAppInForeground = false;
+        break;
+    }
   }
 
   @override
