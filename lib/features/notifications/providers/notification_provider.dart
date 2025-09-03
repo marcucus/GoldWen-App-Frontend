@@ -16,7 +16,9 @@ class NotificationProvider with ChangeNotifier {
   int get unreadCount => _unreadCount;
 
   List<AppNotification> get unreadNotifications {
-    return _notifications.where((notification) => !notification.isRead).toList();
+    return _notifications
+        .where((notification) => !notification.isRead)
+        .toList();
   }
 
   List<AppNotification> get readNotifications {
@@ -43,8 +45,9 @@ class NotificationProvider with ChangeNotifier {
         type: type,
         read: read,
       );
-      
-      final notificationsData = response['data'] ?? response['notifications'] ?? [];
+
+      final notificationsData =
+          response['data'] ?? response['notifications'] ?? [];
       final newNotifications = (notificationsData as List)
           .map((n) => AppNotification.fromJson(n as Map<String, dynamic>))
           .toList();
@@ -54,7 +57,7 @@ class NotificationProvider with ChangeNotifier {
       } else {
         _notifications.addAll(newNotifications);
       }
-      
+
       _updateUnreadCount();
       _error = null;
     } catch (e) {
@@ -83,7 +86,7 @@ class NotificationProvider with ChangeNotifier {
         quietHoursStart: '22:00',
         quietHoursEnd: '08:00',
       );
-      
+
       notifyListeners();
     } catch (e) {
       _handleError(e, 'Failed to load notification settings');
@@ -93,7 +96,7 @@ class NotificationProvider with ChangeNotifier {
   Future<bool> markAsRead(String notificationId) async {
     try {
       await ApiService.markNotificationAsRead(notificationId);
-      
+
       // Update local notification
       final index = _notifications.indexWhere((n) => n.id == notificationId);
       if (index != -1) {
@@ -104,7 +107,7 @@ class NotificationProvider with ChangeNotifier {
         _updateUnreadCount();
         notifyListeners();
       }
-      
+
       return true;
     } catch (e) {
       _handleError(e, 'Failed to mark notification as read');
@@ -117,7 +120,7 @@ class NotificationProvider with ChangeNotifier {
 
     try {
       await ApiService.markAllNotificationsAsRead();
-      
+
       // Update all local notifications
       _notifications = _notifications.map((notification) {
         if (!notification.isRead) {
@@ -128,7 +131,7 @@ class NotificationProvider with ChangeNotifier {
         }
         return notification;
       }).toList();
-      
+
       _updateUnreadCount();
       _error = null;
       _setLoaded();
@@ -142,12 +145,12 @@ class NotificationProvider with ChangeNotifier {
   Future<bool> deleteNotification(String notificationId) async {
     try {
       await ApiService.deleteNotification(notificationId);
-      
+
       // Remove from local list
       _notifications.removeWhere((n) => n.id == notificationId);
       _updateUnreadCount();
       notifyListeners();
-      
+
       return true;
     } catch (e) {
       _handleError(e, 'Failed to delete notification');
@@ -155,12 +158,24 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> updateNotificationSettings(NotificationSettings newSettings) async {
+  Future<bool> updateNotificationSettings(
+      NotificationSettings newSettings) async {
     _setLoading();
 
     try {
-      await ApiService.updateNotificationSettings(newSettings.toJson());
-      
+      await ApiService.updateNotificationSettings({
+        'dailySelection': newSettings.dailySelection,
+        'newMatches': newSettings.newMatches,
+        'newMessages': newSettings.newMessages,
+        'chatExpiring': newSettings.chatExpiring,
+        'promotions': newSettings.promotions,
+        'systemUpdates': newSettings.systemUpdates,
+        'pushEnabled': newSettings.pushEnabled,
+        'emailEnabled': newSettings.emailEnabled,
+        'soundEnabled': newSettings.soundEnabled,
+        'vibrationEnabled': newSettings.vibrationEnabled,
+      });
+
       _settings = newSettings;
       _error = null;
       _setLoaded();
@@ -182,10 +197,10 @@ class NotificationProvider with ChangeNotifier {
         body: body,
         type: type,
       );
-      
+
       // Optionally reload notifications to see the test notification
       await loadNotifications();
-      
+
       return true;
     } catch (e) {
       _handleError(e, 'Failed to send test notification');
@@ -299,13 +314,13 @@ class NotificationProvider with ChangeNotifier {
 
   void _handleError(dynamic error, String fallbackMessage) {
     _isLoading = false;
-    
+
     if (error is ApiException) {
       _error = error.message;
     } else {
       _error = fallbackMessage;
     }
-    
+
     notifyListeners();
   }
 }

@@ -34,7 +34,8 @@ class ApiService {
     } on TimeoutException catch (_) {
       throw ApiException(
         statusCode: 0,
-        message: 'Request timeout - Please check your internet connection and try again',
+        message:
+            'Request timeout - Please check your internet connection and try again',
         code: 'TIMEOUT_ERROR',
       );
     } catch (e) {
@@ -367,15 +368,6 @@ class ApiService {
   static Future<Map<String, dynamic>> setPrimaryPhoto(String photoId) async {
     final response = await http.put(
       Uri.parse('$baseUrl/profiles/me/photos/$photoId/primary'),
-      headers: _headers,
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getPrompts() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/profiles/prompts'),
       headers: _headers,
     );
 
