@@ -45,5 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>GoldWen utilise votre localisation pour vous proposer des profils compatibles dans votre région et améliorer votre expérience de matching.</string>
 </dict>
 </plist>
