@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/location_service.dart';
 import '../../matching/pages/daily_matches_page.dart';
 import '../../chat/pages/chat_list_page.dart';
 import '../../user/pages/user_profile_page.dart';
@@ -25,6 +26,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       const ChatListPage(),
       const UserProfilePage(),
     ];
+    
+    // Initialize location service to start background tracking
+    _initializeLocationService();
+  }
+
+  Future<void> _initializeLocationService() async {
+    try {
+      await LocationService().initialize();
+    } catch (e) {
+      debugPrint('MainNavigationPage: Failed to initialize location service: $e');
+    }
   }
 
   @override

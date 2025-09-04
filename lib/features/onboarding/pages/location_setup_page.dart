@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/location_service.dart';
 import '../../profile/providers/profile_provider.dart';
 import 'preferences_setup_page.dart';
 
@@ -14,16 +15,15 @@ class LocationSetupPage extends StatefulWidget {
 }
 
 class _LocationSetupPageState extends State<LocationSetupPage> {
-  final _locationController = TextEditingController();
   bool _isLoadingLocation = false;
   String? _detectedCity;
   double? _latitude;
   double? _longitude;
   String? _errorMessage;
+  bool _permissionPermanentlyDenied = false;
 
   @override
   void dispose() {
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -46,7 +46,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
               
               // Title and subtitle
               Text(
-                'Où habitez-vous ?',
+                'Localisation requise',
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -54,7 +54,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
               const SizedBox(height: AppSpacing.md),
               
               Text(
-                'Nous utilisons votre localisation pour vous proposer des profils à proximité.',
+                'Pour vous proposer les meilleurs profils à proximité, nous avons besoin d\'accéder à votre position. Cette autorisation est obligatoire pour utiliser GoldWen.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -81,14 +81,14 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      'Détection automatique',
+                      'Activer la localisation',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.primaryGold,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Utilisez votre position actuelle',
+                      'Autorisez l\'accès à votre position pour continuer',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -109,7 +109,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
                                 ),
                               )
                             : const Icon(Icons.location_on),
-                        label: Text(_isLoadingLocation ? 'Détection...' : 'Détecter ma position'),
+                        label: Text(_isLoadingLocation ? 'Activation...' : 'Activer la localisation'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryGold,
                         ),
@@ -121,52 +121,94 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
               
               const SizedBox(height: AppSpacing.xl),
               
-              // Or divider
-              Row(
-                children: [
-                  const Expanded(
-                    child: Divider(color: AppColors.dividerLight),
+              // Information about mandatory location
+              if (_permissionPermanentlyDenied)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                    border: Border.all(color: Colors.orange.shade200),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text(
-                      'ou',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.settings,
+                        color: Colors.orange.shade600,
+                        size: 48,
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Paramètres d\'application',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.orange.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'La localisation a été définitivement refusée. Veuillez l\'activer dans les paramètres de votre téléphone pour continuer.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.orange.shade600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _openAppSettings,
+                          icon: const Icon(Icons.settings),
+                          label: const Text('Ouvrir les paramètres'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const Expanded(
-                    child: Divider(color: AppColors.dividerLight),
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundGrey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                    border: Border.all(color: AppColors.dividerLight),
                   ),
-                ],
-              ),
-              
-              const SizedBox(height: AppSpacing.xl),
-              
-              // Manual location input
-              TextFormField(
-                controller: _locationController,
-                decoration: const InputDecoration(
-                  labelText: 'Ville',
-                  hintText: 'Paris, Lyon, Marseille...',
-                  prefixIcon: Icon(Icons.location_city),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.textSecondary,
+                        size: 48,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Pourquoi la localisation ?',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'GoldWen utilise votre position pour :\n• Vous proposer des profils à proximité\n• Améliorer la qualité des suggestions\n• Mettre à jour automatiquement votre zone de recherche',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                textCapitalization: TextCapitalization.words,
-                onChanged: (value) {
-                  setState(() {
-                    _errorMessage = null;
-                  });
-                },
-              ),
-              
-              const SizedBox(height: AppSpacing.md),
               
               // Show detected location if available
               if (_detectedCity != null)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
+                  margin: const EdgeInsets.only(top: AppSpacing.xl),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     borderRadius: BorderRadius.circular(AppBorderRadius.medium),
@@ -231,50 +273,73 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
   }
 
   bool _canContinue() {
-    return _locationController.text.isNotEmpty || _detectedCity != null;
+    return _detectedCity != null && _latitude != null && _longitude != null;
   }
 
   Future<void> _detectLocation() async {
     setState(() {
       _isLoadingLocation = true;
       _errorMessage = null;
+      _permissionPermanentlyDenied = false;
     });
 
     try {
-      // Check and request permission
-      PermissionStatus permission = await Permission.location.request();
+      // Request location access using LocationService
+      bool hasAccess = await LocationService.requestLocationAccess();
       
-      if (permission != PermissionStatus.granted) {
-        setState(() {
-          _errorMessage = 'Permission de localisation refusée. Veuillez entrer votre ville manuellement.';
-          _isLoadingLocation = false;
-        });
-        return;
-      }
-
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _errorMessage = 'Les services de localisation sont désactivés. Veuillez les activer ou entrer votre ville manuellement.';
-          _isLoadingLocation = false;
-        });
+      if (!hasAccess) {
+        // Check if permission was permanently denied
+        PermissionStatus permission = await Permission.location.status;
+        
+        if (permission == PermissionStatus.permanentlyDenied) {
+          setState(() {
+            _permissionPermanentlyDenied = true;
+            _errorMessage = 'L\'autorisation de localisation a été définitivement refusée. Vous devez l\'activer dans les paramètres pour continuer.';
+            _isLoadingLocation = false;
+          });
+        } else if (permission == PermissionStatus.denied) {
+          setState(() {
+            _errorMessage = 'L\'autorisation de localisation est nécessaire pour utiliser GoldWen. Veuillez accepter l\'autorisation pour continuer.';
+            _isLoadingLocation = false;
+          });
+        } else {
+          // Location services might be disabled
+          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+          if (!serviceEnabled) {
+            setState(() {
+              _errorMessage = 'Les services de localisation sont désactivés. Veuillez les activer dans les paramètres de votre téléphone.';
+              _isLoadingLocation = false;
+            });
+          } else {
+            setState(() {
+              _errorMessage = 'Impossible d\'accéder à votre position. Veuillez réessayer.';
+              _isLoadingLocation = false;
+            });
+          }
+        }
         return;
       }
 
       // Get current position
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
-      );
+      Position? position = await LocationService.getCurrentPosition();
+      
+      if (position == null) {
+        setState(() {
+          _errorMessage = 'Impossible de détecter votre position. Veuillez réessayer.';
+          _isLoadingLocation = false;
+        });
+        return;
+      }
 
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
         _detectedCity = 'Position détectée (${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)})';
-        _locationController.clear();
         _isLoadingLocation = false;
       });
+
+      // Initialize the location service for background updates
+      LocationService().initialize();
 
       // In a real app, you would reverse geocode to get the city name
       // For now, we'll use a placeholder
@@ -282,7 +347,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
       
     } catch (e) {
       setState(() {
-        _errorMessage = 'Impossible de détecter votre position. Veuillez entrer votre ville manuellement.';
+        _errorMessage = 'Erreur lors de la détection de votre position. Veuillez réessayer.';
         _isLoadingLocation = false;
       });
     }
@@ -298,20 +363,26 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
         latitude: _latitude,
         longitude: _longitude,
       );
-    } else if (_locationController.text.isNotEmpty) {
-      // Use manually entered location
-      profileProvider.setLocation(
-        location: _locationController.text.trim(),
-        latitude: null, // Will be geocoded later if needed
-        longitude: null,
+      
+      // Navigate to preferences setup page
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const PreferencesSetupPage(),
+        ),
       );
     }
-    
-    // Navigate to preferences setup page
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const PreferencesSetupPage(),
-      ),
-    );
+  }
+
+  void _openAppSettings() async {
+    await openAppSettings();
+    // After user returns from settings, check permission again
+    await Future.delayed(const Duration(milliseconds: 500));
+    bool hasPermission = await LocationService.checkLocationPermission();
+    if (hasPermission) {
+      setState(() {
+        _permissionPermanentlyDenied = false;
+        _errorMessage = null;
+      });
+    }
   }
 }

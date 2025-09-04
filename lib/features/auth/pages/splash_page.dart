@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/location_service.dart';
 import '../providers/auth_provider.dart';
 
 class SplashPage extends StatefulWidget {
@@ -32,11 +33,23 @@ class _SplashPageState extends State<SplashPage> {
       if (authProvider.isAuthenticated && authProvider.user != null) {
         final user = authProvider.user!;
 
-        // User is authenticated, check completion status
-        if (user.isProfileCompleted == true) {
-          // Profile completed, go to main app
+        // User is authenticated, check location permission first
+        bool hasLocationPermission = await LocationService.checkLocationPermission();
+        
+        if (!hasLocationPermission) {
+          // No location permission, redirect to location setup regardless of profile completion
           if (mounted) {
-            context.go('/main');
+            context.go('/welcome'); // Start fresh onboarding to handle location
+          }
+          return;
+        }
+
+        // Has location permission, check completion status
+        if (user.isProfileCompleted == true) {
+          // Profile completed and has location, initialize location service and go to main app
+          LocationService().initialize();
+          if (mounted) {
+            context.go('/home');
           }
           return;
         } else if (user.isOnboardingCompleted == true) {
@@ -48,7 +61,7 @@ class _SplashPageState extends State<SplashPage> {
         } else {
           // Authenticated but onboarding not completed, go to questionnaire
           if (mounted) {
-            context.go('/personality-questionnaire');
+            context.go('/questionnaire');
           }
           return;
         }
