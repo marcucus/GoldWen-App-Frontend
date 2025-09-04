@@ -42,220 +42,230 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              const SizedBox(height: AppSpacing.xl),
-              
-              // Title and subtitle
-              Text(
-                'Localisation requise',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.md),
-              
-              Text(
-                'Pour vous proposer les meilleurs profils à proximité, nous avons besoin d\'accéder à votre position. Cette autorisation est obligatoire pour utiliser GoldWen.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.xxl),
-              
-              // Auto-detect location button
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: AppColors.accentCream,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                  border: Border.all(color: AppColors.dividerLight),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.my_location,
-                      color: AppColors.primaryGold,
-                      size: 48,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      'Activer la localisation',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.primaryGold,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Autorisez l\'accès à votre position pour continuer',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isLoadingLocation ? null : _detectLocation,
-                        icon: _isLoadingLocation
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.location_on),
-                        label: Text(_isLoadingLocation ? 'Activation...' : 'Activer la localisation'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: AppSpacing.xl),
-              
-              // Information about mandatory location
-              if (_permissionPermanentlyDenied)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
+              // Scrollable content area
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.settings,
-                        color: Colors.orange.shade600,
-                        size: 48,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.xl),
+                      
+                      // Title and subtitle
                       Text(
-                        'Paramètres d\'application',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.orange.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'La localisation a été définitivement refusée. Veuillez l\'activer dans les paramètres de votre téléphone pour continuer.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.orange.shade600,
-                        ),
+                        'Localisation requise',
+                        style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
+                      
                       const SizedBox(height: AppSpacing.md),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _openAppSettings,
-                          icon: const Icon(Icons.settings),
-                          label: const Text('Ouvrir les paramètres'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange.shade600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundGrey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                    border: Border.all(color: AppColors.dividerLight),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: AppColors.textSecondary,
-                        size: 48,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
+                      
                       Text(
-                        'Pourquoi la localisation ?',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'GoldWen utilise votre position pour :\n• Vous proposer des profils à proximité\n• Améliorer la qualité des suggestions\n• Mettre à jour automatiquement votre zone de recherche',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        'Pour vous proposer les meilleurs profils à proximité, nous avons besoin d\'accéder à votre position. Cette autorisation est obligatoire pour utiliser GoldWen.',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppColors.textSecondary,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    ],
-                  ),
-                ),
-              
-              // Show detected location if available
-              if (_detectedCity != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  margin: const EdgeInsets.only(top: AppSpacing.xl),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                    border: Border.all(color: Colors.green.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green.shade600),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          'Position détectée: $_detectedCity',
-                          style: TextStyle(color: Colors.green.shade600),
+                      
+                      const SizedBox(height: AppSpacing.xxl),
+                      
+                      // Auto-detect location button
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentCream,
+                          borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                          border: Border.all(color: AppColors.dividerLight),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.my_location,
+                              color: AppColors.primaryGold,
+                              size: 48,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              'Activer la localisation',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: AppColors.primaryGold,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              'Autorisez l\'accès à votre position pour continuer',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _isLoadingLocation ? null : _detectLocation,
+                                icon: _isLoadingLocation
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      )
+                                    : const Icon(Icons.location_on),
+                                label: Text(_isLoadingLocation ? 'Activation...' : 'Activer la localisation'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryGold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              
-              // Error message
-              if (_errorMessage != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  margin: const EdgeInsets.only(top: AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                    border: Border.all(color: Colors.red.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade600),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade600),
+                      
+                      const SizedBox(height: AppSpacing.xl),
+                      
+                      // Information about mandatory location
+                      if (_permissionPermanentlyDenied)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.settings,
+                                color: Colors.orange.shade600,
+                                size: 48,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                'Paramètres d\'application',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.orange.shade600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                'La localisation a été définitivement refusée. Veuillez l\'activer dans les paramètres de votre téléphone pour continuer.',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.orange.shade600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: _openAppSettings,
+                                  icon: const Icon(Icons.settings),
+                                  label: const Text('Ouvrir les paramètres'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange.shade600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentCream.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                            border: Border.all(color: AppColors.dividerLight),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: AppColors.textSecondary,
+                                size: 48,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                'Pourquoi la localisation ?',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                'GoldWen utilise votre position pour :\n• Vous proposer des profils à proximité\n• Améliorer la qualité des suggestions\n• Mettre à jour automatiquement votre zone de recherche',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      
+                      // Show detected location if available
+                      if (_detectedCity != null)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          margin: const EdgeInsets.only(top: AppSpacing.xl),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.green.shade600),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  'Position détectée: $_detectedCity',
+                                  style: TextStyle(color: Colors.green.shade600),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      
+                      // Error message
+                      if (_errorMessage != null)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          margin: const EdgeInsets.only(top: AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline, color: Colors.red.shade600),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(color: Colors.red.shade600),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      
+                      // Add some bottom padding to ensure content doesn't stick to the button
+                      const SizedBox(height: AppSpacing.xl),
                     ],
                   ),
                 ),
+              ),
               
-              const Spacer(),
-              
-              // Continue button
+              // Fixed Continue button at bottom
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
