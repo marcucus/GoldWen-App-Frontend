@@ -54,10 +54,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        _showSettingsBottomSheet(context);
+                        context.go('/settings');
                       },
                       icon: const Icon(
-                        Icons.settings,
+                        Icons.person,
                         color: AppColors.textLight,
                       ),
                     ),
