@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'api_service.dart';
+import 'package:flutter/widgets.dart';
 
 class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   static final LocationService _instance = LocationService._internal();
@@ -29,7 +30,7 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
     try {
       // Register for app lifecycle changes
       WidgetsBinding.instance.addObserver(this);
-      
+
       // Check if location services are enabled
       _isServiceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!_isServiceEnabled) {
@@ -39,14 +40,14 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
 
       // Check current permission status
       PermissionStatus permission = await Permission.location.status;
-      
+
       if (permission != PermissionStatus.granted) {
         // Request location permission
         permission = await Permission.location.request();
       }
 
       _hasPermission = permission == PermissionStatus.granted;
-      
+
       if (!_hasPermission) {
         debugPrint('LocationService: Location permission denied');
         return false;
@@ -54,10 +55,10 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
 
       // Get initial position
       await _updateCurrentPosition();
-      
+
       // Start periodic location updates
       _startPeriodicUpdates();
-      
+
       debugPrint('LocationService: Initialized successfully');
       notifyListeners();
       return true;
@@ -70,11 +71,11 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   /// Start periodic location updates
   void _startPeriodicUpdates() {
     _locationTimer?.cancel();
-    
+
     _locationTimer = Timer.periodic(_updateInterval, (timer) async {
       await _updateCurrentPosition();
     });
-    
+
     debugPrint('LocationService: Started periodic location updates');
   }
 
@@ -82,7 +83,8 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _updateCurrentPosition() async {
     try {
       if (!_hasPermission || !_isServiceEnabled || !_isAppInForeground) {
-        debugPrint('LocationService: Cannot update position - no permission, service disabled, or app in background');
+        debugPrint(
+            'LocationService: Cannot update position - no permission, service disabled, or app in background');
         return;
       }
 
@@ -92,11 +94,12 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       );
 
       _currentPosition = position;
-      
+
       // Send location update to backend
       await _sendLocationToBackend(position.latitude, position.longitude);
-      
-      debugPrint('LocationService: Position updated - Lat: ${position.latitude}, Lng: ${position.longitude}');
+
+      debugPrint(
+          'LocationService: Position updated - Lat: ${position.latitude}, Lng: ${position.longitude}');
       notifyListeners();
     } catch (e) {
       debugPrint('LocationService: Failed to update position: $e');
@@ -143,7 +146,7 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       if (!serviceEnabled) {
         // Try to open location settings
         await Geolocator.openLocationSettings();
-        
+
         // Check again after potential user action
         serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (!serviceEnabled) {
@@ -153,12 +156,12 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
 
       // Request location permission
       PermissionStatus permission = await Permission.location.request();
-      
+
       if (permission == PermissionStatus.denied) {
         // Try again if denied
         permission = await Permission.location.request();
       }
-      
+
       if (permission == PermissionStatus.permanentlyDenied) {
         // Open app settings for user to manually grant permission
         await openAppSettings();
@@ -204,7 +207,7 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         _isAppInForeground = true;
@@ -214,7 +217,8 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
         _isAppInForeground = false;
-        debugPrint('LocationService: App backgrounded, pausing location updates');
+        debugPrint(
+            'LocationService: App backgrounded, pausing location updates');
         break;
       case AppLifecycleState.hidden:
         _isAppInForeground = false;

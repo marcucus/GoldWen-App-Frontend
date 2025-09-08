@@ -11,6 +11,8 @@ class AppColors {
   static const Color dividerLight = Color(0xFFE8E8E8);
   static const Color errorRed = Color(0xFFE57373);
   static const Color successGreen = Color(0xFF81C784);
+  static const Color backgroundGrey = Color(0xFFF0F0F0);
+  static const Color textPrimary = Color(0xFF212121);
 }
 
 class AppTheme {
