@@ -778,11 +778,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         status: 'active',
         completed: true,
       );
-      print('Profile status updated successfully');
-      
-      // Mark profile as completed in auth provider (sets both isProfileCompleted and isOnboardingCompleted to true)
-      await authProvider.markProfileCompleted();
-      print('Profile completion flags updated successfully');
+      print('Profile status updated successfully - backend sets completion flags automatically');
       
       // Refresh user data to get updated completion status from backend
       await authProvider.refreshUser();
