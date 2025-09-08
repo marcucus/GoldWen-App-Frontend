@@ -40,54 +40,115 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if we're coming from main navigation (need to show bottom padding)
+    final showBottomPadding = ModalRoute.of(context)?.settings.name == null;
+    
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('GoldWen Plus'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: AppColors.primaryGradient,
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryGold.withOpacity(0.1),
-                    AppColors.accentCream,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.cardOverlay.withOpacity(0.2),
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'GoldWen Plus',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppColors.textLight,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(AppBorderRadius.large),
               ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGold,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryGold.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.star,
-                      size: 40,
-                      color: Colors.white,
+              
+              // Content container
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundWhite,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(AppBorderRadius.xLarge),
+                      topRight: Radius.circular(AppBorderRadius.xLarge),
                     ),
                   ),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(AppSpacing.lg).copyWith(
+                      bottom: showBottomPadding ? 120 : AppSpacing.lg, // Extra space for floating nav
+                    ),
+                    child: Column(
+                      children: [
+                        // Header
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primaryGold.withOpacity(0.15),
+                                AppColors.accentCream.withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryGold.withOpacity(0.1),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.primaryGold,
+                                      AppColors.primaryGold.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primaryGold.withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.star,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
+                              ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     'Passez à GoldWen Plus',

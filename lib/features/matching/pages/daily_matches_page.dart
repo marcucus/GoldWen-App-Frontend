@@ -52,8 +52,22 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
                   ),
                   Container(
                     decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.cardOverlay.withOpacity(0.3),
+                          AppColors.cardOverlay.withOpacity(0.2),
+                        ],
+                      ),
                       shape: BoxShape.circle,
-                      color: AppColors.cardOverlay.withOpacity(0.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.cardOverlay.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.of(context).push(
@@ -62,8 +76,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
                         ),
                       ),
                       icon: const Icon(
-                        Icons.star_border,
+                        Icons.star,
                         color: AppColors.textLight,
+                        size: 26,
                       ),
                     ),
                   ),
