@@ -149,106 +149,112 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   color: Colors.white,
                                 ),
                               ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Passez à GoldWen Plus',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppColors.primaryGold,
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(
+                                'Passez à GoldWen Plus',
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: AppColors.primaryGold,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                'Maximisez vos chances de trouver la bonne personne',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Maximisez vos chances de trouver la bonne personne',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+
+                        const SizedBox(height: AppSpacing.xl),
+
+                        // Features
+                        _buildFeaturesList(),
+
+                        const SizedBox(height: AppSpacing.xl),
+
+                        // Plans
+                        Text(
+                          'Choisissez votre formule',
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                    textAlign: TextAlign.center,
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        Column(
+                          children: _plans.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final plan = entry.value;
+                            return _buildPlanCard(index, plan);
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: AppSpacing.xl),
+
+                        // Subscribe button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _subscribe,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                            ),
+                            child: Text(
+                              'Commencer mon abonnement',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.md),
+
+                        // Terms
+                        Text(
+                          'Votre abonnement sera automatiquement renouvelé. Vous pouvez l\'annuler à tout moment dans les réglages.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // Links
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const TermsPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Conditions d\'utilisation'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const PrivacyPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Confidentialité'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Features
-            _buildFeaturesList(),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Plans
-            Text(
-              'Choisissez votre formule',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            Column(
-              children: _plans.asMap().entries.map((entry) {
-                final index = entry.key;
-                final plan = entry.value;
-                return _buildPlanCard(index, plan);
-              }).toList(),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Subscribe button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _subscribe,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                ),
-                child: Text(
-                  'Commencer mon abonnement',
-                  style: const TextStyle(fontSize: 16),
                 ),
               ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Terms
-            Text(
-              'Votre abonnement sera automatiquement renouvelé. Vous pouvez l\'annuler à tout moment dans les réglages.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // Links
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const TermsPage(),
-                      ),
-                    );
-                  },
-                  child: const Text('Conditions d\'utilisation'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PrivacyPage(),
-                      ),
-                    );
-                  },
-                  child: const Text('Confidentialité'),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

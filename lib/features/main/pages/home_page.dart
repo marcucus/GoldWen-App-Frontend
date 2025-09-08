@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               
-              // Settings Button
+              // Profile Button
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -139,11 +139,11 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    // Open settings or user profile
-                    _showSettingsBottomSheet();
+                    // Navigate to user profile page
+                    context.go('/profile');
                   },
                   icon: const Icon(
-                    Icons.settings,
+                    Icons.person,
                     color: AppColors.textLight,
                   ),
                 ),
@@ -418,11 +418,11 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: _buildQuickActionCard(
-                'Paramètres',
+                'Profil',
                 Icons.person_outline,
                 () {
-                  // Navigate to settings page
-                  context.go('/settings');
+                  // Navigate to profile page
+                  context.go('/profile');
                 },
               ),
             ),
