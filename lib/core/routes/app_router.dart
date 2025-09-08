@@ -14,6 +14,7 @@ import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
 import '../../features/legal/pages/privacy_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
+import '../../features/settings/pages/settings_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -102,6 +103,13 @@ class AppRouter {
         path: '/user-profile',
         name: 'user-profile',
         builder: (context, state) => const UserProfilePage(),
+      ),
+
+      // Settings
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsPage(),
       ),
     ],
   );
