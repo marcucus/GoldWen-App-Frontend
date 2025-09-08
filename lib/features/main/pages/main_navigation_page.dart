@@ -31,7 +31,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
         });
         _tabController.animateTo(index);
       }),
-      const DailyMatchesPage(),
+      DailyMatchesPage(),
       const ChatListPage(),
       const UserProfilePage(),
     ];
