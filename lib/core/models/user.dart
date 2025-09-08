@@ -45,7 +45,8 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     try {
-      return User(
+      print('🔍 User.fromJson: Parsing user data: $json');
+      final user = User(
         id: (json['id'] is String ? json['id'] as String : json['id']?.toString()) ?? 
             (json['_id'] is String ? json['_id'] as String : json['_id']?.toString()) ?? '',
         email: (json['email'] is String ? json['email'] as String : json['email']?.toString()) ?? '',
@@ -83,6 +84,14 @@ class User {
                            (json['isProfileCompleted']?.toString().toLowerCase() == 'true') ? true :
                            json['isProfileCompleted'] == null ? null : false,
       );
+      
+      print('🔍 User.fromJson: Parsed completion flags:');
+      print('  - Raw isOnboardingCompleted: ${json['isOnboardingCompleted']} (type: ${json['isOnboardingCompleted'].runtimeType})');
+      print('  - Raw isProfileCompleted: ${json['isProfileCompleted']} (type: ${json['isProfileCompleted'].runtimeType})');
+      print('  - Parsed isOnboardingCompleted: ${user.isOnboardingCompleted}');
+      print('  - Parsed isProfileCompleted: ${user.isProfileCompleted}');
+      
+      return user;
     } catch (e) {
       print('Error parsing User from JSON: $e');
       print('JSON data: $json');

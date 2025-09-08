@@ -19,6 +19,7 @@ import type { Response, Request } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 
 import { AuthService } from './auth.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import {
   LoginDto,
   RegisterDto,
@@ -34,7 +35,10 @@ import { User } from '../../database/entities/user.entity';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private profilesService: ProfilesService,
+  ) {}
 
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
@@ -208,15 +212,23 @@ export class AuthController {
   @Get('me')
   async getProfile(@Req() req: Request) {
     const user = req.user as User;
+    
+    // Ensure completion status is up to date by calling the profiles service
+    // This will recalculate and update the completion flags based on actual user data
+    await this.profilesService.refreshUserCompletionStatus(user.id);
+    
+    // Get the updated user data with fresh completion flags
+    const updatedUser = await this.authService.getUserById(user.id);
+    
     return {
       success: true,
       data: {
-        id: user.id,
-        email: user.email,
-        isOnboardingCompleted: user.isOnboardingCompleted,
-        isProfileCompleted: user.isProfileCompleted,
-        isEmailVerified: user.isEmailVerified,
-        profile: user.profile,
+        id: updatedUser.id,
+        email: updatedUser.email,
+        isOnboardingCompleted: updatedUser.isOnboardingCompleted,
+        isProfileCompleted: updatedUser.isProfileCompleted,
+        isEmailVerified: updatedUser.isEmailVerified,
+        profile: updatedUser.profile,
       },
     };
   }
