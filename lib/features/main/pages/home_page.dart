@@ -6,13 +6,16 @@ import '../../auth/providers/auth_provider.dart';
 import '../../matching/providers/matching_provider.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final void Function(int)? onNavigate;
+  
+  const HomePage({super.key, this.onNavigate});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  void Function(int)? get _navigateToTab => widget.onNavigate;
   @override
   void initState() {
     super.initState();
@@ -262,8 +265,12 @@ class _HomePageState extends State<HomePage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigate to full matches page
-                    DefaultTabController.of(context)?.animateTo(0);
+                    // Navigate to full matches page - we'll use a callback or navigator
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DailyMatchesPage(),
+                      ),
+                    );
                   },
                   child: const Text('Voir tout'),
                 ),
@@ -401,7 +408,10 @@ class _HomePageState extends State<HomePage> {
               child: _buildQuickActionCard(
                 'Messages',
                 Icons.chat_bubble_outline,
-                () => DefaultTabController.of(context)?.animateTo(1),
+                () {
+                  // Navigate to messages using callback
+                  _navigateToTab?.call(2);
+                },
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -409,7 +419,10 @@ class _HomePageState extends State<HomePage> {
               child: _buildQuickActionCard(
                 'Profil',
                 Icons.person_outline,
-                () => DefaultTabController.of(context)?.animateTo(2),
+                () {
+                  // Navigate to profile using callback
+                  _navigateToTab?.call(3);
+                },
               ),
             ),
           ],
@@ -502,7 +515,7 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('Mon profil'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  DefaultTabController.of(context)?.animateTo(2);
+                  _navigateToTab?.call(3);
                 },
               ),
               

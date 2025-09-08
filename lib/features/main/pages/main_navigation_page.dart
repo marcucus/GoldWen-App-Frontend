@@ -25,7 +25,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _pages = [
-      const HomePage(),
+      HomePage(onNavigate: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+        _tabController.animateTo(index);
+      }),
       const DailyMatchesPage(),
       const ChatListPage(),
       const UserProfilePage(),
@@ -58,7 +63,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
           children: [
             // Main content
             TabBarView(
-              controller: _tabController,
               children: _pages,
             ),
             
@@ -89,51 +93,55 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
           ),
         ],
       ),
-      child: TabBar(
-        controller: _tabController,
-        onTap: (index) {
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(0, Icons.home, Icons.home_outlined, 'Accueil'),
+          _buildNavItem(1, Icons.favorite, Icons.favorite_outline, 'Découvrir'),
+          _buildNavItem(2, Icons.chat_bubble, Icons.chat_bubble_outline, 'Messages'),
+          _buildNavItem(3, Icons.person, Icons.person_outline, 'Profil'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String label) {
+    final isSelected = _currentIndex == index;
+    
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
           setState(() {
             _currentIndex = index;
           });
+          _tabController.animateTo(index);
         },
-        indicator: BoxDecoration(
-          color: AppColors.primaryGold,
-          borderRadius: BorderRadius.circular(35),
+        child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryGold : Colors.transparent,
+            borderRadius: BorderRadius.circular(35),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? activeIcon : inactiveIcon,
+                color: isSelected ? AppColors.textLight : AppColors.textSecondary,
+                size: 24,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? AppColors.textLight : AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
         ),
-        labelColor: AppColors.textLight,
-        unselectedLabelColor: AppColors.textSecondary,
-        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-        tabs: [
-          Tab(
-            icon: Icon(
-              _currentIndex == 0 ? Icons.home : Icons.home_outlined,
-              size: 24,
-            ),
-            text: 'Accueil',
-          ),
-          Tab(
-            icon: Icon(
-              _currentIndex == 1 ? Icons.favorite : Icons.favorite_outline,
-              size: 24,
-            ),
-            text: 'Découvrir',
-          ),
-          Tab(
-            icon: Icon(
-              _currentIndex == 2 ? Icons.chat_bubble : Icons.chat_bubble_outline,
-              size: 24,
-            ),
-            text: 'Messages',
-          ),
-          Tab(
-            icon: Icon(
-              _currentIndex == 3 ? Icons.person : Icons.person_outline,
-              size: 24,
-            ),
-            text: 'Profil',
-          ),
-        ],
       ),
     );
   }
