@@ -28,9 +28,12 @@ class _SplashPageState extends State<SplashPage> {
     await Future.delayed(const Duration(seconds: 1));
 
     try {
-      // For now, just check if the user is already authenticated in memory
-      // In a full implementation, this would check for stored tokens
+      // Check authentication status and refresh user data from backend
+      await authProvider.checkAuthStatus();
+      
+      // After checking auth status, refresh user data to get latest completion flags from backend
       if (authProvider.isAuthenticated && authProvider.user != null) {
+        await authProvider.refreshUser(); // Fetch fresh user data from backend
         final user = authProvider.user!;
 
         // User is authenticated, check location permission first
@@ -44,7 +47,10 @@ class _SplashPageState extends State<SplashPage> {
           return;
         }
 
-        // Has location permission, check completion status
+        // Has location permission, check completion status from backend
+        // Backend automatically updates these flags based on user progress:
+        // - isOnboardingCompleted: true when personality questionnaire is completed
+        // - isProfileCompleted: true when all requirements met (photos, prompts, personality, profile fields)
         if (user.isOnboardingCompleted == true && user.isProfileCompleted == true) {
           // Both onboarding and profile completed, initialize location service and go to main app
           LocationService().initialize();
