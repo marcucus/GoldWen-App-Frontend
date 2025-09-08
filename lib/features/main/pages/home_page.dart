@@ -268,7 +268,7 @@ class _HomePageState extends State<HomePage> {
                     // Navigate to full matches page - we'll use a callback or navigator
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const DailyMatchesPage(),
+                        builder: (context) => DailyMatchesPage(),
                       ),
                     );
                   },

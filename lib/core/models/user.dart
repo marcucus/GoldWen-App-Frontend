@@ -3,6 +3,7 @@ class User {
   final String email;
   final String? firstName;
   final String? lastName;
+  final String? photoUrl;
   final String? fcmToken;
   final bool? notificationsEnabled;
   final bool? emailNotifications;
@@ -18,6 +19,7 @@ class User {
     required this.email,
     this.firstName,
     this.lastName,
+    this.photoUrl,
     this.fcmToken,
     this.notificationsEnabled,
     this.emailNotifications,
@@ -28,6 +30,18 @@ class User {
     this.isOnboardingCompleted,
     this.isProfileCompleted,
   });
+
+  // Computed property for display name
+  String? get displayName {
+    if (firstName != null && lastName != null) {
+      return '$firstName $lastName';
+    } else if (firstName != null) {
+      return firstName;
+    } else if (lastName != null) {
+      return lastName;
+    }
+    return null;
+  }
 
   factory User.fromJson(Map<String, dynamic> json) {
     try {
@@ -41,6 +55,10 @@ class User {
         lastName: json['lastName'] is String ? json['lastName'] as String : 
                   json['last_name'] is String ? json['last_name'] as String :
                   json['lastName']?.toString(),
+        photoUrl: json['photoUrl'] is String ? json['photoUrl'] as String : 
+                  json['photo_url'] is String ? json['photo_url'] as String : 
+                  json['avatar'] is String ? json['avatar'] as String :
+                  json['photoUrl']?.toString(),
         fcmToken: json['fcmToken'] is String ? json['fcmToken'] as String : json['fcmToken']?.toString(),
         notificationsEnabled: json['notificationsEnabled'] is bool ? json['notificationsEnabled'] as bool : 
                              (json['notificationsEnabled']?.toString().toLowerCase() == 'true') ? true : 
@@ -100,6 +118,7 @@ class User {
       'email': email,
       if (firstName != null) 'firstName': firstName,
       if (lastName != null) 'lastName': lastName,
+      if (photoUrl != null) 'photoUrl': photoUrl,
       if (fcmToken != null) 'fcmToken': fcmToken,
       if (notificationsEnabled != null) 'notificationsEnabled': notificationsEnabled,
       if (emailNotifications != null) 'emailNotifications': emailNotifications,
@@ -117,6 +136,7 @@ class User {
     String? email,
     String? firstName,
     String? lastName,
+    String? photoUrl,
     String? fcmToken,
     bool? notificationsEnabled,
     bool? emailNotifications,
@@ -132,6 +152,7 @@ class User {
       email: email ?? this.email,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      photoUrl: photoUrl ?? this.photoUrl,
       fcmToken: fcmToken ?? this.fcmToken,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       emailNotifications: emailNotifications ?? this.emailNotifications,
