@@ -101,68 +101,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
     );
   }
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.cardOverlay.withOpacity(0.2),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        context.go('/settings');
-                      },
-                      icon: const Icon(
-                        Icons.person,
-                        color: AppColors.textLight,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Content container
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppBorderRadius.xLarge),
-                    topRight: Radius.circular(AppBorderRadius.xLarge),
-                  ),
-                ),
-                child: Consumer<ProfileProvider>(
-                  builder: (context, profileProvider, child) {
-                    if (profileProvider.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
-                        ),
-                      );
-                    }
-
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: AppSpacing.lg),
-                          _buildProfileHeader(),
-                          const SizedBox(height: AppSpacing.xl),
-                          _buildProfileSections(),
-                          const SizedBox(height: AppSpacing.xl),
-                          _buildSettingsSection(),
-                          const SizedBox(height: AppSpacing.xl),
-                          _buildLogoutSection(),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildProfileHeader() {
     return Consumer<ProfileProvider>(
