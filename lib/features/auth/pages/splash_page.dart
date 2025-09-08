@@ -45,8 +45,8 @@ class _SplashPageState extends State<SplashPage> {
         }
 
         // Has location permission, check completion status
-        if (user.isProfileCompleted == true) {
-          // Profile completed and has location, initialize location service and go to main app
+        if (user.isOnboardingCompleted == true && user.isProfileCompleted == true) {
+          // Both onboarding and profile completed, initialize location service and go to main app
           LocationService().initialize();
           if (mounted) {
             context.go('/home');
