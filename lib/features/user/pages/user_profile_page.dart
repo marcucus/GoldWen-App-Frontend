@@ -26,42 +26,86 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mon profil'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              _showSettingsBottomSheet(context);
-            },
-          ),
-        ],
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
       ),
-      body: Consumer<ProfileProvider>(
-        builder: (context, profileProvider, child) {
-          if (profileProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Mon profil',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardOverlay.withOpacity(0.2),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        _showSettingsBottomSheet(context);
+                      },
+                      icon: const Icon(
+                        Icons.settings,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                _buildProfileHeader(profileProvider),
-                const SizedBox(height: AppSpacing.xl),
-                _buildProfileStats(),
-                const SizedBox(height: AppSpacing.xl),
-                _buildProfileSections(context, profileProvider),
-              ],
             ),
-          );
-        },
+            
+            // Content container
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppBorderRadius.xLarge),
+                    topRight: Radius.circular(AppBorderRadius.xLarge),
+                  ),
+                ),
+                child: Consumer<ProfileProvider>(
+                  builder: (context, profileProvider, child) {
+                    if (profileProvider.isLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                        ),
+                      );
+                    }
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.lg).copyWith(
+                        bottom: 100, // Add space for floating nav
+                      ),
+                      child: Column(
+                        children: [
+                          _buildProfileHeader(profileProvider),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildProfileStats(),
+                          const SizedBox(height: AppSpacing.xl),
+                          _buildProfileSections(context, profileProvider),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

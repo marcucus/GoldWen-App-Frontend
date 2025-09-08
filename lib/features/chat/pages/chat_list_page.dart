@@ -25,41 +25,78 @@ class _ChatListPageState extends State<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Messages'),
-        automaticallyImplyLeading: false,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
       ),
-      body: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          if (chatProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Messages',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          }
-
-          if (chatProvider.error != null) {
-            return _buildErrorState(chatProvider.error!);
-          }
-
-          if (chatProvider.conversations.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async => _loadChats(),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: chatProvider.conversations.length,
-              itemBuilder: (context, index) {
-                final chat = chatProvider.conversations[index];
-                return _buildChatItem(chat, chatProvider);
-              },
             ),
-          );
-        },
+            
+            // Content container
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppBorderRadius.xLarge),
+                    topRight: Radius.circular(AppBorderRadius.xLarge),
+                  ),
+                ),
+                child: Consumer<ChatProvider>(
+                  builder: (context, chatProvider, child) {
+                    if (chatProvider.isLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                        ),
+                      );
+                    }
+
+                    if (chatProvider.error != null) {
+                      return _buildErrorState(chatProvider.error!);
+                    }
+
+                    if (chatProvider.conversations.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async => _loadChats(),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(AppSpacing.md).copyWith(
+                          bottom: 100, // Add space for floating nav
+                        ),
+                        itemCount: chatProvider.conversations.length,
+                        itemBuilder: (context, index) {
+                          final chat = chatProvider.conversations[index];
+                          return _buildChatItem(chat, chatProvider);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

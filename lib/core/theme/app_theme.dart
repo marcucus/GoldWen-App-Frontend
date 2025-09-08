@@ -11,8 +11,35 @@ class AppColors {
   static const Color dividerLight = Color(0xFFE8E8E8);
   static const Color errorRed = Color(0xFFE57373);
   static const Color successGreen = Color(0xFF81C784);
-  static const Color backgroundGrey = Color(0xFFF0F0F0);
-  static const Color textPrimary = Color(0xFF212121);
+  
+  // New colors for gradient backgrounds inspired by template
+  static const Color gradientStart = Color(0xFF8B6914); // Darker gold
+  static const Color gradientMiddle = Color(0xFFD4AF37); // Primary gold
+  static const Color gradientEnd = Color(0xFFF5E6B8); // Light gold
+  static const Color cardOverlay = Color(0xFFFFFFFF);
+  static const Color textLight = Color(0xFFFFFFFF);
+  
+  // Template-inspired gradient for main background
+  static LinearGradient get primaryGradient => const LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      gradientStart,
+      gradientMiddle,
+      gradientEnd,
+    ],
+    stops: [0.0, 0.5, 1.0],
+  );
+  
+  // Card background gradient
+  static LinearGradient get cardGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      cardOverlay.withOpacity(0.95),
+      cardOverlay.withOpacity(0.85),
+    ],
+  );
 }
 
 class AppTheme {
