@@ -100,6 +100,11 @@ class AppRouter {
 
       // User Profile
       GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const UserProfilePage(),
+      ),
+      GoRoute(
         path: '/user-profile',
         name: 'user-profile',
         builder: (context, state) => const UserProfilePage(),

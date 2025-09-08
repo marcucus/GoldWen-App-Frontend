@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/animated_widgets.dart';
+import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../matching/pages/daily_matches_page.dart';
 import '../../matching/providers/matching_provider.dart';
@@ -15,14 +17,72 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  late AnimationController _backgroundController;
+  late AnimationController _headerController;
+  late Animation<double> _backgroundAnimation;
+  late Animation<Offset> _headerSlideAnimation;
+  late Animation<double> _headerFadeAnimation;
+
   void Function(int)? get _navigateToTab => widget.onNavigate;
+
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
+      _startAnimations();
     });
+  }
+
+  void _initializeAnimations() {
+    _backgroundController = AnimationController(
+      duration: AppAnimations.verySlow,
+      vsync: this,
+    );
+    _headerController = AnimationController(
+      duration: AppAnimations.medium,
+      vsync: this,
+    );
+
+    _backgroundAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _backgroundController,
+      curve: AppAnimations.easeInOut,
+    ));
+
+    _headerSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _headerController,
+      curve: AppAnimations.elasticOut,
+    ));
+
+    _headerFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _headerController,
+      curve: AppAnimations.easeOut,
+    ));
+  }
+
+  void _startAnimations() {
+    _backgroundController.forward();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _headerController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _backgroundController.dispose();
+    _headerController.dispose();
+    super.dispose();
   }
 
   void _loadData() {
@@ -44,21 +104,50 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: _buildContent(),
+      body: AnimatedBuilder(
+        animation: _backgroundAnimation,
+        builder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.gradientStart,
+                  AppColors.gradientMiddle,
+                  AppColors.gradientEnd.withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
-            ],
-          ),
-        ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildAnimatedHeader(),
+                  Expanded(
+                    child: _buildContent(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildAnimatedHeader() {
+    return AnimatedBuilder(
+      animation: _headerController,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _headerSlideAnimation,
+          child: FadeTransition(
+            opacity: _headerFadeAnimation,
+            child: _buildHeader(),
+          ),
+        );
+      },
     );
   }
 
@@ -66,89 +155,123 @@ class _HomePageState extends State<HomePage> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final user = authProvider.user;
-        return Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              // Profile Avatar
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.cardOverlay,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+        return Container(
+          margin: const EdgeInsets.all(AppSpacing.lg),
+          child: GlassCard(
+            borderRadius: AppBorderRadius.xLarge,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                // Animated Profile Avatar
+                AnimatedPressable(
+                  onPressed: () => context.go('/profile'),
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppColors.premiumGradient,
+                      boxShadow: AppShadows.medium,
                     ),
-                  ],
-                ),
-                child: user?.photoUrl != null
-                    ? ClipOval(
-                        child: Image.network(
-                          user!.photoUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.person,
-                              color: AppColors.primaryGold,
-                              size: 30,
-                            );
-                          },
-                        ),
-                      )
-                    : const Icon(
-                        Icons.person,
-                        color: AppColors.primaryGold,
-                        size: 30,
+                    padding: const EdgeInsets.all(3),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.backgroundWhite,
                       ),
-              ),
-              
-              const SizedBox(width: AppSpacing.md),
-              
-              // Greeting and Name
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getGreeting(),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textLight,
-                        fontWeight: FontWeight.w300,
+                      child: ClipOval(
+                        child: user?.photoUrl != null
+                            ? Image.network(
+                                user!.photoUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.person,
+                                    color: AppColors.primaryGold,
+                                    size: 30,
+                                  );
+                                },
+                              )
+                            : const Icon(
+                                Icons.person,
+                                color: AppColors.primaryGold,
+                                size: 30,
+                              ),
                       ),
                     ),
-                    Text(
-                      user?.displayName ?? user?.email?.split('@').first ?? 'Utilisateur',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textLight,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Settings Button
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.cardOverlay.withOpacity(0.2),
-                ),
-                child: IconButton(
-                  onPressed: () {
-                    // Open settings or user profile
-                    _showSettingsBottomSheet();
-                  },
-                  icon: const Icon(
-                    Icons.settings,
-                    color: AppColors.textLight,
                   ),
                 ),
-              ),
-            ],
+                
+                const SizedBox(width: AppSpacing.md),
+                
+                // Greeting and Name with animation
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FadeInAnimation(
+                        delay: const Duration(milliseconds: 300),
+                        child: Text(
+                          _getGreeting(),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ),
+                      FadeInAnimation(
+                        delay: const Duration(milliseconds: 400),
+                        child: Text(
+                          user?.displayName ?? user?.email?.split('@').first ?? 'Utilisateur',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Notification icon with badge
+                FadeInAnimation(
+                  delay: const Duration(milliseconds: 500),
+                  child: AnimatedPressable(
+                    onPressed: () {
+                      // Navigate to notifications
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primaryGold.withOpacity(0.1),
+                      ),
+                      child: Stack(
+                        children: [
+                          const Icon(
+                            Icons.notifications_outlined,
+                            color: AppColors.primaryGold,
+                            size: 24,
+                          ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.errorRed,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -156,65 +279,410 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildContent() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(AppBorderRadius.xLarge),
-          topRight: Radius.circular(AppBorderRadius.xLarge),
-        ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Quick Stats Section
+          _buildQuickStats(),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Daily Matches Section
+          _buildDailyMatches(),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Quick Actions
+          _buildQuickActions(),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Recent Activity
+          _buildRecentActivity(),
+          
+          const SizedBox(height: AppSpacing.xxl),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+    );
+  }
+
+  Widget _buildQuickStats() {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 600),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Text(
+              'Votre activité',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.textLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.favorite,
+                  value: '12',
+                  label: 'Matchs',
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.errorRed.withOpacity(0.8),
+                      AppColors.errorRed,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.chat_bubble_outline,
+                  value: '8',
+                  label: 'Messages',
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.infoBlue.withOpacity(0.8),
+                      AppColors.infoBlue,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.visibility,
+                  value: '24',
+                  label: 'Vues',
+                  gradient: AppColors.premiumGradient,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Gradient gradient,
+  }) {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyMatches() {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 700),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Sélection du jour',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                AnimatedPressable(
+                  onPressed: () {
+                    if (_navigateToTab != null) {
+                      _navigateToTab!(1); // Navigate to discover tab
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.textLight.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                    ),
+                    child: Text(
+                      'Voir tout',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            height: 200,
+            child: Consumer<MatchingProvider>(
+              builder: (context, matchingProvider, child) {
+                if (matchingProvider.isLoading) {
+                  return _buildMatchesShimmer();
+                }
+                
+                final matches = matchingProvider.dailySelection;
+                if (matches.isEmpty) {
+                  return _buildEmptyMatches();
+                }
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  itemCount: matches.length,
+                  itemBuilder: (context, index) {
+                    final match = matches[index];
+                    return FadeInAnimation(
+                      delay: Duration(milliseconds: 800 + (index * 100)),
+                      child: _buildMatchCard(match, index),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchCard(dynamic match, int index) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(right: AppSpacing.md),
+      child: GlassCard(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppSpacing.md),
-            
-            // How are you feeling section
-            _buildMoodSection(),
-            
-            const SizedBox(height: AppSpacing.xl),
-            
-            // Daily Matches section
-            _buildDailyMatchesSection(),
-            
-            const SizedBox(height: AppSpacing.xl),
-            
-            // Quick Actions section
-            _buildQuickActionsSection(),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppBorderRadius.large),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.primaryGold.withOpacity(0.3),
+                      AppColors.primaryGold.withOpacity(0.1),
+                    ],
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.person,
+                    size: 50,
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Profil ${index + 1}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${20 + index} ans',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMoodSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+  Widget _buildMatchesShimmer() {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          width: 150,
+          margin: const EdgeInsets.only(right: AppSpacing.md),
+          child: ShimmerLoading(
+            isLoading: true,
+            child: GlassCard(
+              margin: EdgeInsets.zero,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundGrey,
+                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyMatches() {
+    return GlassCard(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.favorite_outline,
+              size: 48,
+              color: AppColors.textSecondary.withOpacity(0.5),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Aucun match disponible',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 800),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Text(
+              'Actions rapides',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.textLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          StaggeredList(
+            itemDelay: const Duration(milliseconds: 100),
+            children: [
+              _buildActionCard(
+                icon: Icons.search,
+                title: 'Découvrir',
+                subtitle: 'Trouvez votre match parfait',
+                onTap: () {
+                  if (_navigateToTab != null) {
+                    _navigateToTab!(1);
+                  }
+                },
+              ),
+              _buildActionCard(
+                icon: Icons.person,
+                title: 'Profil',
+                subtitle: 'Gérez votre profil et préférences',
+                onTap: () => context.go('/profile'),
+              ),
+              _buildActionCard(
+                icon: Icons.star,
+                title: 'GoldWen Plus',
+                subtitle: 'Accédez aux fonctionnalités premium',
+                onTap: () => context.go('/subscription'),
+                isHighlighted: true,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isHighlighted = false,
+  }) {
+    return FloatingCard(
+      onTap: onTap,
+      backgroundColor: isHighlighted ? AppColors.primaryGold.withOpacity(0.1) : null,
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
-              shape: BoxShape.circle,
+              gradient: isHighlighted 
+                  ? AppColors.premiumGradient
+                  : LinearGradient(
+                      colors: [
+                        AppColors.primaryGold.withOpacity(0.1),
+                        AppColors.primaryGold.withOpacity(0.2),
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
             ),
-            child: const Icon(
-              Icons.sentiment_satisfied_alt,
-              color: AppColors.primaryGold,
+            child: Icon(
+              icon,
+              color: isHighlighted ? Colors.white : AppColors.primaryGold,
               size: 24,
             ),
           ),
@@ -224,14 +692,15 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Comment vous sentez-vous ?',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: isHighlighted ? AppColors.primaryGold : AppColors.textDark,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: 2),
                 Text(
-                  'Partagez votre humeur d\'aujourd\'hui',
+                  subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -239,350 +708,118 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.arrow_forward_ios,
-            color: AppColors.textSecondary,
             size: 16,
+            color: AppColors.textSecondary,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDailyMatchesSection() {
-    return Consumer<MatchingProvider>(
-      builder: (context, matchingProvider, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildRecentActivity() {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 900),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Text(
+              'Activité récente',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.textLight,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          GlassCard(
+            child: Column(
               children: [
-                Text(
-                  'Vos sélections du jour',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                _buildActivityItem(
+                  icon: Icons.favorite,
+                  title: 'Nouveau match',
+                  subtitle: 'Vous avez un nouveau match avec Sarah',
+                  time: 'Il y a 2h',
+                  iconColor: AppColors.errorRed,
                 ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to full matches page - we'll use a callback or navigator
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const DailyMatchesPage(),
-                      ),
-                    );
-                  },
-                  child: const Text('Voir tout'),
+                const Divider(height: 1),
+                _buildActivityItem(
+                  icon: Icons.message,
+                  title: 'Nouveau message',
+                  subtitle: 'Marie vous a envoyé un message',
+                  time: 'Il y a 5h',
+                  iconColor: AppColors.infoBlue,
+                ),
+                const Divider(height: 1),
+                _buildActivityItem(
+                  icon: Icons.visibility,
+                  title: 'Profil consulté',
+                  subtitle: 'Votre profil a été consulté 3 fois aujourd\'hui',
+                  time: 'Il y a 1j',
+                  iconColor: AppColors.primaryGold,
                 ),
               ],
             ),
-            
-            const SizedBox(height: AppSpacing.md),
-            
-            SizedBox(
-              height: 120,
-              child: matchingProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : matchingProvider.dailyProfiles.isEmpty
-                      ? _buildEmptyMatchesCard()
-                      : ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: matchingProvider.dailyProfiles.length.clamp(0, 3),
-                          itemBuilder: (context, index) {
-                            final profile = matchingProvider.dailyProfiles[index];
-                            return _buildMatchCard(profile);
-                          },
-                        ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildMatchCard(dynamic profile) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+
+  Widget _buildActivityItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String time,
+    required Color iconColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryGold.withOpacity(0.3),
-                  AppColors.primaryGold.withOpacity(0.6),
-                ],
-              ),
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppBorderRadius.small),
             ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 30,
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 20,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Profil',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyMatchesCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        border: Border.all(
-          color: AppColors.dividerLight,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.schedule,
-            color: AppColors.textSecondary,
-            size: 32,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Vos sélections arrivent bientôt',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Revenez à 12h00',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActionsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Actions rapides',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        
-        const SizedBox(height: AppSpacing.md),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickActionCard(
-                'Messages',
-                Icons.chat_bubble_outline,
-                () {
-                  // Navigate to messages using callback
-                  _navigateToTab?.call(2);
-                },
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _buildQuickActionCard(
-                'Paramètres',
-                Icons.person_outline,
-                () {
-                  // Navigate to settings page
-                  context.go('/settings');
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActionCard(String title, IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.backgroundWhite,
-              AppColors.backgroundWhite.withOpacity(0.95),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(AppBorderRadius.large),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryGold.withOpacity(0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryGold.withOpacity(0.2),
-                    AppColors.primaryGold.withOpacity(0.1),
-                  ],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryGold.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                color: AppColors.primaryGold,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSettingsBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.backgroundWhite,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(AppBorderRadius.xLarge),
-            topRight: Radius.circular(AppBorderRadius.xLarge),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.dividerLight,
-                  borderRadius: BorderRadius.circular(2),
                 ),
-              ),
-              
-              const SizedBox(height: AppSpacing.lg),
-              
-              Text(
-                'Paramètres',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              
-              const SizedBox(height: AppSpacing.lg),
-              
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Mon profil'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _navigateToTab?.call(3);
-                },
-              ),
-              
-              ListTile(
-                leading: const Icon(Icons.star),
-                title: const Text('Abonnement'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  context.go('/subscription');
-                },
-              ),
-              
-              ListTile(
-                leading: const Icon(Icons.privacy_tip),
-                title: const Text('Confidentialité'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  context.go('/privacy');
-                },
-              ),
-              
-              ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('Aide'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  // Show help dialog
-                },
-              ),
-              
-              const SizedBox(height: AppSpacing.lg),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          Text(
+            time,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textTertiary,
+            ),
+          ),
+        ],
       ),
     );
-  }
 }
