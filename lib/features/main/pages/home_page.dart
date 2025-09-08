@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../matching/pages/daily_matches_page.dart';
 import '../../matching/providers/matching_provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -268,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                     // Navigate to full matches page - we'll use a callback or navigator
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => DailyMatchesPage(),
+                        builder: (context) => const DailyMatchesPage(),
                       ),
                     );
                   },
