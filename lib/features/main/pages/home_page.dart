@@ -417,11 +417,11 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: _buildQuickActionCard(
-                'Profil',
+                'Paramètres',
                 Icons.person_outline,
                 () {
-                  // Navigate to profile using callback
-                  _navigateToTab?.call(3);
+                  // Navigate to settings page
+                  context.go('/settings');
                 },
               ),
             ),
@@ -434,31 +434,62 @@ class _HomePageState extends State<HomePage> {
   Widget _buildQuickActionCard(String title, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          gradient: AppColors.cardGradient,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.backgroundWhite.withOpacity(0.95),
+            ],
+          ),
           borderRadius: BorderRadius.circular(AppBorderRadius.large),
           boxShadow: [
             BoxShadow(
+              color: AppColors.primaryGold.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
               color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
+          border: Border.all(
+            color: AppColors.primaryGold.withOpacity(0.1),
+            width: 1,
+          ),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryGold.withOpacity(0.2),
+                    AppColors.primaryGold.withOpacity(0.1),
+                  ],
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryGold.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,
                 color: AppColors.primaryGold,
-                size: 24,
+                size: 28,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

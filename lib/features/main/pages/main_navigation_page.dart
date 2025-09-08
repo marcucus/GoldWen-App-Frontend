@@ -5,7 +5,7 @@ import '../../../core/services/location_service.dart';
 import 'home_page.dart';
 import '../../matching/pages/daily_matches_page.dart';
 import '../../chat/pages/chat_list_page.dart';
-import '../../user/pages/user_profile_page.dart';
+import '../../subscription/pages/subscription_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -33,7 +33,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
       }),
       DailyMatchesPage(),
       const ChatListPage(),
-      const UserProfilePage(),
+      const SubscriptionPage(),
     ];
     
     // Initialize location service to start background tracking
@@ -56,42 +56,56 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            // Main content
-            TabBarView(
-              children: _pages,
-            ),
-            
-            // Floating Bottom Navigation
-            Positioned(
-              bottom: AppSpacing.lg,
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
-              child: _buildFloatingNavBar(),
-            ),
-          ],
-        ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Main content
+          TabBarView(
+            controller: _tabController,
+            children: _pages,
+          ),
+          
+          // Floating Bottom Navigation
+          Positioned(
+            bottom: AppSpacing.lg,
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            child: _buildFloatingNavBar(),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildFloatingNavBar() {
     return Container(
-      height: 70,
+      height: 75,
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(35),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.backgroundWhite,
+            AppColors.backgroundWhite.withOpacity(0.95),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(37.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
+            color: AppColors.primaryGold.withOpacity(0.2),
+            blurRadius: 25,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
           ),
         ],
+        border: Border.all(
+          color: AppColors.primaryGold.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -99,7 +113,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
           _buildNavItem(0, Icons.home, Icons.home_outlined, 'Accueil'),
           _buildNavItem(1, Icons.favorite, Icons.favorite_outline, 'Découvrir'),
           _buildNavItem(2, Icons.chat_bubble, Icons.chat_bubble_outline, 'Messages'),
-          _buildNavItem(3, Icons.person, Icons.person_outline, 'Profil'),
+          _buildNavItem(3, Icons.star, Icons.star_outline, 'GoldWen+'),
         ],
       ),
     );
@@ -116,27 +130,47 @@ class _MainNavigationPageState extends State<MainNavigationPage> with TickerProv
           });
           _tabController.animateTo(index);
         },
-        child: Container(
-          height: 70,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          height: 75,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryGold : Colors.transparent,
-            borderRadius: BorderRadius.circular(35),
+            gradient: isSelected ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primaryGold,
+                AppColors.primaryGold.withOpacity(0.8),
+              ],
+            ) : null,
+            borderRadius: BorderRadius.circular(37.5),
+            boxShadow: isSelected ? [
+              BoxShadow(
+                color: AppColors.primaryGold.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ] : null,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppColors.textLight : AppColors.textSecondary,
-                size: 24,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: Icon(
+                  isSelected ? activeIcon : inactiveIcon,
+                  color: isSelected ? AppColors.textLight : AppColors.textSecondary,
+                  size: isSelected ? 26 : 24,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   color: isSelected ? AppColors.textLight : AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ],
