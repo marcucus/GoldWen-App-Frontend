@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/services/location_service.dart';
 import 'home_page.dart';
 import '../../matching/pages/daily_matches_page.dart';

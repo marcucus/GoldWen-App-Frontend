@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../providers/matching_provider.dart';
-import '../../../core/models/profile.dart';
-import '../../subscription/pages/subscription_page.dart';
 
 class DailyMatchesPage extends StatefulWidget {
   const DailyMatchesPage({super.key});
@@ -15,12 +12,12 @@ class DailyMatchesPage extends StatefulWidget {
   State<DailyMatchesPage> createState() => _DailyMatchesPageState();
 }
 
-class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProviderStateMixin {
+class _DailyMatchesPageState extends State<DailyMatchesPage>
+    with TickerProviderStateMixin {
   PageController _pageController = PageController();
   int _currentIndex = 0;
   late AnimationController _backgroundController;
   late AnimationController _cardController;
-  late Animation<double> _backgroundAnimation;
 
   @override
   void initState() {
@@ -34,21 +31,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
 
   void _initializeAnimations() {
     _backgroundController = AnimationController(
-      duration: AppAnimations.verySlow,
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
     _cardController = AnimationController(
-      duration: AppAnimations.medium,
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
-    _backgroundAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _backgroundController,
-      curve: AppAnimations.easeInOut,
-    ));
   }
 
   void _startAnimations() {
@@ -67,32 +56,35 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
   }
 
   void _loadDailyMatches() {
-    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+    final matchingProvider =
+        Provider.of<MatchingProvider>(context, listen: false);
     matchingProvider.loadDailySelection();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.gradientStart,
-            AppColors.gradientMiddle,
-            AppColors.gradientEnd.withOpacity(0.8),
-          ],
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.3),
+              Theme.of(context).primaryColor.withOpacity(0.1),
+              Colors.white,
+            ],
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            _buildAnimatedHeader(),
-            Expanded(
-              child: _buildMatchesContent(),
-            ),
-          ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAnimatedHeader(),
+              Expanded(
+                child: _buildMatchesContent(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -102,10 +94,10 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
     return FadeInAnimation(
       delay: const Duration(milliseconds: 200),
       child: Container(
-        margin: const EdgeInsets.all(AppSpacing.lg),
+        margin: const EdgeInsets.all(16),
         child: GlassCard(
-          borderRadius: AppBorderRadius.xLarge,
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          borderRadius: 24,
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
@@ -114,25 +106,30 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                   children: [
                     Text(
                       'Découverte',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textDark,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Trouvez votre match parfait',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: Colors.grey[600],
+                          ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: AppColors.premiumGradient,
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.8),
+                    ],
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -155,28 +152,21 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
           return _buildLoadingState();
         }
 
-        final profiles = _generateSampleProfiles(); // Using sample data for demo
-        
+        final profiles = _generateSampleProfiles();
+
         if (profiles.isEmpty) {
           return _buildEmptyState();
         }
 
         return Column(
           children: [
-            // Profile counter
             _buildProfileCounter(profiles.length),
-            
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Swipeable cards
+            const SizedBox(height: 16),
             Expanded(
               child: _buildSwipeableCards(profiles),
             ),
-            
-            // Action buttons
             _buildActionButtons(),
-            
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 16),
           ],
         );
       },
@@ -187,21 +177,20 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
     return SlideInAnimation(
       delay: const Duration(milliseconds: 400),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
+          horizontal: 16,
+          vertical: 8,
         ),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(AppBorderRadius.large),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
           '${_currentIndex + 1} / $totalProfiles',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppColors.textLight,
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
           textAlign: TextAlign.center,
         ),
       ),
@@ -211,7 +200,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
   Widget _buildSwipeableCards(List<Map<String, dynamic>> profiles) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.6,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: PageView.builder(
         controller: _pageController,
         onPageChanged: (index) {
@@ -233,21 +222,25 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
 
   Widget _buildProfileCard(Map<String, dynamic> profile, int index) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Stack(
         children: [
-          // Main card
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
-              boxShadow: AppShadows.floating,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
+              borderRadius: BorderRadius.circular(24),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Background image/gradient
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -268,8 +261,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                       ),
                     ),
                   ),
-                  
-                  // Gradient overlay
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -284,14 +275,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                       ),
                     ),
                   ),
-                  
-                  // Profile info
                   Positioned(
                     bottom: 0,
                     left: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -301,28 +290,38 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                               Expanded(
                                 child: Text(
                                   '${profile['name']}, ${profile['age']}',
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ),
                               if (profile['isPremium'])
                                 Container(
-                                  padding: const EdgeInsets.all(6),
                                   decoration: const BoxDecoration(
-                                    gradient: AppColors.premiumGradient,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.amber,
+                                        Colors.orange,
+                                      ],
+                                    ),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
-                                    Icons.star,
-                                    color: Colors.white,
-                                    size: 16,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: Icon(
+                                      Icons.star,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                             ],
                           ),
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: 8),
                           Row(
                             children: [
                               const Icon(
@@ -333,39 +332,43 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                               const SizedBox(width: 4),
                               Text(
                                 '${profile['distance']} km',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: 8),
                           Text(
                             profile['bio'],
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: 12),
                           _buildInterestTags(profile['interests']),
                         ],
                       ),
                     ),
                   ),
-                  
-                  // Quick action buttons
                   Positioned(
-                    top: AppSpacing.lg,
-                    right: AppSpacing.lg,
+                    top: 16,
+                    right: 16,
                     child: Column(
                       children: [
                         _buildQuickActionButton(
                           icon: Icons.info_outline,
                           onPressed: () => _showProfileDetails(profile),
                         ),
-                        const SizedBox(height: AppSpacing.sm),
+                        const SizedBox(height: 8),
                         _buildQuickActionButton(
                           icon: Icons.share,
                           onPressed: () => _shareProfile(profile),
@@ -384,27 +387,29 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
 
   Widget _buildInterestTags(List<String> interests) {
     return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.xs,
-      children: interests.take(3).map((interest) {
+      spacing: 8,
+      runSpacing: 4,
+      children: interests.take(3).map<Widget>((interest) {
         return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: 4,
-          ),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(AppBorderRadius.small),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: Colors.white.withOpacity(0.3),
               width: 1,
             ),
           ),
-          child: Text(
-            interest,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+            child: Text(
+              interest,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         );
@@ -419,7 +424,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
     return AnimatedPressable(
       onPressed: onPressed,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.3),
           shape: BoxShape.circle,
@@ -441,25 +446,25 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
     return SlideInAnimation(
       delay: const Duration(milliseconds: 600),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildActionButton(
               icon: Icons.close,
-              color: AppColors.errorRed,
+              color: Colors.red,
               size: 56,
               onPressed: () => _handleReject(),
             ),
             _buildActionButton(
               icon: Icons.star,
-              color: AppColors.infoBlue,
+              color: Colors.blue,
               size: 48,
               onPressed: () => _handleSuperLike(),
             ),
             _buildActionButton(
               icon: Icons.favorite,
-              color: AppColors.successGreen,
+              color: Colors.green,
               size: 56,
               onPressed: () => _handleLike(),
             ),
@@ -483,7 +488,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          boxShadow: AppShadows.medium,
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Icon(
           icon,
@@ -502,9 +513,14 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
           Container(
             width: 60,
             height: 60,
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: AppColors.premiumGradient,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                ],
+              ),
               shape: BoxShape.circle,
             ),
             child: const CircularProgressIndicator(
@@ -512,13 +528,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
               strokeWidth: 3,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 16),
           Text(
             'Préparation de vos matchs...',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textLight,
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
@@ -528,14 +543,19 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: AppColors.premiumGradient,
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withOpacity(0.8),
+                  ],
+                ),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -544,34 +564,35 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: 24),
             Text(
               'Plus de profils pour aujourd\'hui',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textLight,
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 12),
             Text(
               'Revenez demain pour découvrir de nouveaux profils ou explorez avec GoldWen Plus',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textLight.withOpacity(0.8),
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            PremiumButton(
-              text: 'Découvrir GoldWen Plus',
-              onPressed: () => context.go('/subscription'),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.9),
-                  Colors.white,
-                ],
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // Navigation vers la page d'abonnement
+                context.go('/subscription');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
-              textColor: AppColors.primaryGold,
+              child: const Text('Découvrir GoldWen Plus'),
             ),
           ],
         ),
@@ -597,18 +618,36 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
   void _animateToNextProfile() {
     if (_currentIndex < _generateSampleProfiles().length - 1) {
       _pageController.nextPage(
-        duration: AppAnimations.medium,
-        curve: AppAnimations.easeInOut,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
       );
     }
   }
 
   void _showProfileDetails(Map<String, dynamic> profile) {
     // Show detailed profile view
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Profil de ${profile['name']}'),
+        content: Text(profile['bio']),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _shareProfile(Map<String, dynamic> profile) {
     // Handle profile sharing
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Partage du profil de ${profile['name']}'),
+      ),
+    );
   }
 
   List<Map<String, dynamic>> _generateSampleProfiles() {
@@ -617,407 +656,42 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> with TickerProvider
         'name': 'Sarah',
         'age': 25,
         'distance': 2,
-        'bio': 'Amoureuse de voyages et de bonne cuisine. Toujours partante pour de nouvelles aventures !',
+        'bio':
+            'Amoureuse de voyages et de bonne cuisine. Toujours partante pour de nouvelles aventures !',
         'interests': ['Voyage', 'Cuisine', 'Yoga', 'Photographie'],
         'isPremium': true,
-        'color': AppColors.errorRed,
+        'color': Colors.pink,
       },
       {
         'name': 'Marie',
         'age': 28,
         'distance': 5,
-        'bio': 'Passionnée d\'art et de musique. Cherche quelqu\'un pour partager de beaux moments.',
+        'bio':
+            'Passionnée d\'art et de musique. Cherche quelqu\'un pour partager de beaux moments.',
         'interests': ['Art', 'Musique', 'Lecture', 'Cinéma'],
         'isPremium': false,
-        'color': AppColors.infoBlue,
+        'color': Colors.blue,
       },
       {
         'name': 'Julie',
         'age': 26,
         'distance': 3,
-        'bio': 'Sportive et aventurière. J\'adore l\'escalade et les randonnées en montagne.',
+        'bio':
+            'Sportive et aventurière. J\'adore l\'escalade et les randonnées en montagne.',
         'interests': ['Sport', 'Escalade', 'Randonnée', 'Nature'],
         'isPremium': true,
-        'color': AppColors.successGreen,
+        'color': Colors.green,
       },
       {
         'name': 'Emma',
         'age': 24,
         'distance': 7,
-        'bio': 'Étudiante en médecine. Recherche une relation sérieuse et authentique.',
+        'bio':
+            'Étudiante en médecine. Recherche une relation sérieuse et authentique.',
         'interests': ['Médecine', 'Lecture', 'Café', 'Animaux'],
         'isPremium': false,
-        'color': AppColors.warningAmber,
+        'color': Colors.orange,
       },
     ];
-  }
-}
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.cardOverlay.withOpacity(0.3),
-                          AppColors.cardOverlay.withOpacity(0.2),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.cardOverlay.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SubscriptionPage(),
-                        ),
-                      ),
-                      icon: const Icon(
-                        Icons.star,
-                        color: AppColors.textLight,
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Content container
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppBorderRadius.xLarge),
-                    topRight: Radius.circular(AppBorderRadius.xLarge),
-                  ),
-                ),
-                child: Consumer<MatchingProvider>(
-                  builder: (context, matchingProvider, child) {
-                    if (matchingProvider.isLoading) {
-                      return const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
-                            ),
-                            SizedBox(height: AppSpacing.lg),
-                            Text('Préparation de votre sélection...'),
-                          ],
-                        ),
-                      );
-                    }
-
-                    if (matchingProvider.dailyProfiles.isEmpty) {
-                      return _buildEmptyState();
-                    }
-
-                    return RefreshIndicator(
-                      onRefresh: () async => _loadDailyMatches(),
-                      child: Column(
-                        children: [
-                          _buildHeader(matchingProvider),
-                          Expanded(
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(AppSpacing.md).copyWith(
-                                bottom: 100, // Add space for floating nav
-                              ),
-                              itemCount: matchingProvider.dailyProfiles.length,
-                              itemBuilder: (context, index) {
-                                final profile = matchingProvider.dailyProfiles[index];
-                                return _buildProfileCard(profile, matchingProvider);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(MatchingProvider matchingProvider) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.accentCream,
-        border: Border(
-          bottom: BorderSide(color: AppColors.dividerLight),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.favorite,
-                color: AppColors.primaryGold,
-                size: 24,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  'Sélections disponibles: ${matchingProvider.maxSelections - matchingProvider.selectedProfileIds.length}/${matchingProvider.maxSelections}',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-            ],
-          ),
-          if (!matchingProvider.hasSubscription) ...[
-            const SizedBox(height: AppSpacing.sm),
-            GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const SubscriptionPage(),
-                ),
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryGold.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                  border: Border.all(color: AppColors.primaryGold),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.upgrade,
-                      color: AppColors.primaryGold,
-                      size: 16,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'Passez à GoldWen Plus pour 3 sélections',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.primaryGold,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider) {
-    final isSelected = matchingProvider.isProfileSelected(profile.id);
-    final canSelect = matchingProvider.canSelectMore || isSelected;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Card(
-        elevation: isSelected ? 8 : 2,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile header with photo
-            GestureDetector(
-              onTap: () => context.go('/profile/${profile.id}'),
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryGold.withOpacity(0.3),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppBorderRadius.large),
-                    topRight: Radius.circular(AppBorderRadius.large),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Photo placeholder
-                    Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            AppColors.primaryGold.withOpacity(0.3),
-                            AppColors.primaryGold.withOpacity(0.6),
-                          ],
-                        ),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(AppBorderRadius.large),
-                          topRight: Radius.circular(AppBorderRadius.large),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        size: 80,
-                        color: Colors.white,
-                      ),
-                    ),
-                    
-                    // Selection indicator
-                    if (isSelected)
-                      Positioned(
-                        top: AppSpacing.md,
-                        left: AppSpacing.md,
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.xs),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryGold,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Profile info
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and age
-                  Row(
-                    children: [
-                      Text(
-                        'Profil ${profile.age != null ? ', ${profile.age}' : ''}',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const Spacer(),
-                      TextButton.icon(
-                        onPressed: () => context.go('/profile/${profile.id}'),
-                        icon: const Icon(Icons.visibility),
-                        label: const Text('Voir le profil'),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: AppSpacing.sm),
-                  
-                  // Bio
-                  Text(
-                    profile.bio ?? 'Aucune biographie disponible',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  
-                  const SizedBox(height: AppSpacing.lg),
-                  
-                  // Action button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: canSelect && !isSelected
-                          ? () => _selectProfile(profile.id, matchingProvider)
-                          : null,
-                      icon: Icon(
-                        isSelected ? Icons.check : Icons.favorite,
-                      ),
-                      label: Text(
-                        isSelected
-                            ? 'Sélectionné'
-                            : canSelect
-                                ? 'Choisir'
-                                : 'Limite atteinte',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isSelected
-                            ? AppColors.successGreen
-                            : AppColors.primaryGold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.schedule,
-              size: 80,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Votre sélection arrive bientôt',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Revenez demain à 12h00 pour découvrir vos nouveaux profils compatibles.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            ElevatedButton(
-              onPressed: _loadDailyMatches,
-              child: const Text('Actualiser'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _selectProfile(String profileId, MatchingProvider matchingProvider) {
-    matchingProvider.selectProfile(profileId).then((success) {
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Profil sélectionné ! Revenez demain pour votre nouvelle sélection.'),
-            backgroundColor: AppColors.successGreen,
-            action: SnackBarAction(
-              label: 'OK',
-              textColor: Colors.white,
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-          ),
-        );
-      }
-    });
   }
 }

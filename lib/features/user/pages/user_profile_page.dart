@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -14,7 +13,8 @@ class UserProfilePage extends StatefulWidget {
   State<UserProfilePage> createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> with TickerProviderStateMixin {
+class _UserProfilePageState extends State<UserProfilePage> 
+    with TickerProviderStateMixin {
   late AnimationController _backgroundController;
   late AnimationController _contentController;
   late Animation<double> _backgroundAnimation;
@@ -31,11 +31,11 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
 
   void _initializeAnimations() {
     _backgroundController = AnimationController(
-      duration: AppAnimations.verySlow,
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
     _contentController = AnimationController(
-      duration: AppAnimations.medium,
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -44,7 +44,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _backgroundController,
-      curve: AppAnimations.easeInOut,
+      curve: Curves.easeInOut,
     ));
 
     _slideAnimation = Tween<Offset>(
@@ -52,7 +52,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _contentController,
-      curve: AppAnimations.elasticOut,
+      curve: Curves.elasticOut,
     ));
 
     _fadeAnimation = Tween<double>(
@@ -60,7 +60,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _contentController,
-      curve: AppAnimations.easeOut,
+      curve: Curves.easeOut,
     ));
   }
 
@@ -95,9 +95,9 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.gradientStart,
-                  AppColors.gradientMiddle,
-                  AppColors.gradientEnd.withOpacity(0.7 + 0.3 * _backgroundAnimation.value),
+                  Theme.of(context).primaryColor.withOpacity(0.3),
+                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Colors.white,
                 ],
                 stops: const [0.0, 0.4, 1.0],
               ),
@@ -126,21 +126,20 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
   }
 
   Widget _buildHeader() {
-    return Container(
-      margin: const EdgeInsets.all(AppSpacing.lg),
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: GlassCard(
-        borderRadius: AppBorderRadius.xLarge,
+        borderRadius: 24,
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
+          horizontal: 16,
+          vertical: 12,
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
-                'Mon profil',
+                'Mon Profil',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.textDark,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -148,15 +147,14 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
             AnimatedPressable(
               onPressed: () => context.go('/home'),
               child: Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.2),
                   shape: BoxShape.circle,
-                  color: AppColors.primaryGold.withOpacity(0.1),
                 ),
                 child: const Icon(
                   Icons.close,
-                  color: AppColors.primaryGold,
-                  size: 24,
+                  color: Colors.grey,
                 ),
               ),
             ),
@@ -187,28 +185,28 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
         final user = authProvider.user;
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
               // Profile Header Card
               _buildProfileHeader(user, profileProvider),
               
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: 24),
               
               // Profile Management Section
               _buildProfileManagement(),
               
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 16),
               
               // App Settings Section
               _buildAppSettings(),
               
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 16),
               
               // Account Section
               _buildAccountSection(authProvider),
               
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: 32),
             ],
           ),
         );
@@ -219,153 +217,94 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
   Widget _buildProfileHeader(dynamic user, ProfileProvider profileProvider) {
     return SlideInAnimation(
       delay: const Duration(milliseconds: 400),
-      child: PremiumCard(
-        gradient: AppColors.premiumGradient,
-        child: Column(
-          children: [
-            // Profile Picture and Info
-            Row(
+      child: Card(
+        elevation: 4,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withOpacity(0.8),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Stack(
+                // Profile Picture and Info
+                Row(
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 3,
-                        ),
-                        boxShadow: AppShadows.medium,
-                      ),
-                      child: ClipOval(
-                        child: user?.photoUrl != null
-                            ? Image.network(
-                                user!.photoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.white,
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: AppColors.primaryGold,
-                                      size: 40,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                color: Colors.white,
-                                child: const Icon(
-                                  Icons.person,
-                                  color: AppColors.primaryGold,
-                                  size: 40,
-                                ),
-                              ),
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      child: const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.white,
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: AnimatedPressable(
-                        onPressed: () {
-                          // Open photo picker
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.displayName ?? 'Utilisateur',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: AppColors.primaryGold,
-                            size: 16,
+                          const SizedBox(height: 4),
+                          Text(
+                            user?.email ?? '',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white.withOpacity(0.9),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
                 
-                const SizedBox(width: AppSpacing.lg),
+                const SizedBox(height: 16),
                 
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.displayName ?? 'Utilisateur',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user?.email ?? '',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(AppBorderRadius.small),
-                        ),
-                        child: Text(
-                          'Profil complété à 75%',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                // Profile completion bar
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Profil complété',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Profile completion bar
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Complétez votre profil pour plus de matchs',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: 0.75,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                        Text(
+                          '75%',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: 0.75,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -376,16 +315,15 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             'Gestion du profil',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.textLight,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: 12),
         StaggeredList(
           itemDelay: const Duration(milliseconds: 100),
           children: [
@@ -394,13 +332,10 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
               title: 'Mes photos',
               subtitle: 'Gérer vos photos de profil',
               onTap: () {
-                // Navigate to photo management
+                context.go('/profile-setup');
               },
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.infoBlue.withOpacity(0.8),
-                  AppColors.infoBlue,
-                ],
+              gradient: const LinearGradient(
+                colors: [Colors.purple, Colors.deepPurple],
               ),
             ),
             _buildMenuCard(
@@ -408,13 +343,10 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
               title: 'Mes réponses',
               subtitle: 'Questions et réponses',
               onTap: () {
-                // Navigate to responses
+                context.go('/questionnaire');
               },
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.errorRed.withOpacity(0.8),
-                  AppColors.errorRed,
-                ],
+              gradient: const LinearGradient(
+                colors: [Colors.pink, Colors.red],
               ),
             ),
             _buildMenuCard(
@@ -422,13 +354,10 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
               title: 'Préférences',
               subtitle: 'Critères de recherche',
               onTap: () {
-                // Navigate to preferences
+                _showPreferencesDialog();
               },
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.successGreen.withOpacity(0.8),
-                  AppColors.successGreen,
-                ],
+              gradient: const LinearGradient(
+                colors: [Colors.blue, Colors.indigo],
               ),
             ),
             _buildMenuCard(
@@ -436,7 +365,9 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
               title: 'GoldWen Plus',
               subtitle: 'Accédez aux fonctionnalités premium',
               onTap: () => context.go('/subscription'),
-              gradient: AppColors.premiumGradient,
+              gradient: const LinearGradient(
+                colors: [Colors.amber, Colors.orange],
+              ),
               isHighlighted: true,
             ),
           ],
@@ -450,51 +381,42 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             'Paramètres de l\'app',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.textLight,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: 12),
         SlideInAnimation(
           delay: const Duration(milliseconds: 700),
           child: GlassCard(
             child: Column(
               children: [
                 _buildSettingItem(
-                  icon: Icons.description,
-                  title: 'Conditions d\'utilisation',
-                  onTap: () => context.go('/terms'),
-                ),
-                const Divider(height: 1),
-                _buildSettingItem(
-                  icon: Icons.privacy_tip,
-                  title: 'Politique de confidentialité',
-                  onTap: () => context.go('/privacy'),
-                ),
-                const Divider(height: 1),
-                _buildSettingItem(
-                  icon: Icons.help_outline,
-                  title: 'Aide et support',
+                  icon: Icons.notifications,
+                  title: 'Notifications',
                   onTap: () {
-                    // Show help dialog
+                    // Handle notifications settings
                   },
                 ),
                 const Divider(height: 1),
                 _buildSettingItem(
-                  icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  trailing: Switch(
-                    value: true,
-                    onChanged: (value) {
-                      // Handle notification toggle
-                    },
-                    activeColor: AppColors.primaryGold,
-                  ),
+                  icon: Icons.privacy_tip,
+                  title: 'Confidentialité',
+                  onTap: () {
+                    context.go('/privacy');
+                  },
+                ),
+                const Divider(height: 1),
+                _buildSettingItem(
+                  icon: Icons.help,
+                  title: 'Aide',
+                  onTap: () {
+                    _showSupportDialog();
+                  },
                 ),
               ],
             ),
@@ -509,36 +431,35 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
             'Compte',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.textLight,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: 12),
         SlideInAnimation(
           delay: const Duration(milliseconds: 800),
           child: FloatingCard(
-            backgroundColor: AppColors.errorRed.withOpacity(0.1),
+            backgroundColor: Colors.red.withOpacity(0.1),
             onTap: () => _showLogoutDialog(authProvider),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.errorRed.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.logout,
-                    color: AppColors.errorRed,
+                    color: Colors.red,
                     size: 24,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,15 +467,15 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
                       Text(
                         'Se déconnecter',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.red,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.errorRed,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Déconnectez-vous de votre compte',
+                        'Quitter votre compte',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Colors.red.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -563,7 +484,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: AppColors.errorRed,
+                  color: Colors.red,
                 ),
               ],
             ),
@@ -583,15 +504,21 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
   }) {
     return FloatingCard(
       onTap: onTap,
-      backgroundColor: isHighlighted ? AppColors.primaryGold.withOpacity(0.1) : null,
+      backgroundColor: isHighlighted ? Colors.amber.withOpacity(0.1) : null,
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: gradient,
-              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-              boxShadow: AppShadows.soft,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(
               icon,
@@ -599,7 +526,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
               size: 24,
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,14 +535,14 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isHighlighted ? AppColors.primaryGold : AppColors.textDark,
+                    color: isHighlighted ? Colors.amber[700] : null,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Colors.grey[600],
                   ),
                 ),
               ],
@@ -624,7 +551,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
           Icon(
             Icons.arrow_forward_ios,
             size: 16,
-            color: isHighlighted ? AppColors.primaryGold : AppColors.textSecondary,
+            color: isHighlighted ? Colors.amber[700] : Colors.grey[600],
           ),
         ],
       ),
@@ -640,34 +567,32 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
                 icon,
-                color: AppColors.primaryGold,
+                color: Theme.of(context).primaryColor,
                 size: 20,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
             trailing ?? const Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: AppColors.textSecondary,
+              color: Colors.grey,
             ),
           ],
         ),
@@ -686,334 +611,26 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Annuler'),
           ),
-          PremiumButton(
-            text: 'Se déconnecter',
-            width: 120,
-            height: 40,
+          ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await authProvider.signOut();
               if (mounted) {
-                context.go('/auth');
+                context.go('/login');
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Se déconnecter'),
           ),
         ],
       ),
     );
   }
-}
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withOpacity(0.2),
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          // Return to home page
-                          context.go('/home');
-                        },
-                        icon: const Icon(
-                          Icons.close,
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Content container
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundWhite,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(AppBorderRadius.xLarge),
-                      topRight: Radius.circular(AppBorderRadius.xLarge),
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: AppSpacing.lg),
-                        _buildProfileHeader(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildProfileSections(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildSettingsSection(),
-                        const SizedBox(height: AppSpacing.xl),
-                        _buildLogoutSection(),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildProfileHeader() {
-    return Consumer<ProfileProvider>(
-      builder: (context, profileProvider, child) {
-        return Column(
-          children: [
-            // Profile photo
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.3),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.primaryGold,
-                  width: 3,
-                ),
-              ),
-              child: profileProvider.photos.isNotEmpty
-                  ? ClipOval(
-                      child: Container(
-                        color: AppColors.primaryGold.withOpacity(0.6),
-                        child: const Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : const Icon(
-                      Icons.person,
-                      size: 60,
-                      color: AppColors.primaryGold,
-                    ),
-            ),
-            
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Name and age
-            Text(
-              '${profileProvider.name}, ${profileProvider.age}',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppColors.primaryGold,
-              ),
-            ),
-            
-            const SizedBox(height: AppSpacing.sm),
-            
-            // Bio
-            if (profileProvider.bio?.isNotEmpty == true)
-              Text(
-                profileProvider.bio!,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildProfileSections() {
-    return Consumer<ProfileProvider>(
-      builder: (context, profileProvider, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Mon profil',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSection(
-              context,
-              'Mes photos',
-              profileProvider.photos.isEmpty
-                  ? 'Aucune photo ajoutée'
-                  : '${profileProvider.photos.length} photo(s)',
-              Icons.photo_library,
-              () {
-                _navigateToPhotoManagement(context);
-              },
-            ),
-            
-            _buildSection(
-              context,
-              'Mes réponses',
-              profileProvider.prompts.isEmpty
-                  ? 'Questionnaire non complété'
-                  : '${profileProvider.prompts.length} réponse(s)',
-              Icons.quiz,
-              () {
-                _navigateToPromptsEditing(context);
-              },
-            ),
-            
-            _buildSection(
-              context,
-              'Préférences',
-              'Gérer mes critères de recherche',
-              Icons.tune,
-              () {
-                _navigateToPreferences(context);
-              },
-            ),
-            
-            _buildSection(
-              context,
-              'Abonnement',
-              'GoldWen Plus',
-              Icons.star,
-              () {
-                context.go('/subscription');
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildSettingsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Paramètres',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        _buildSection(
-          context,
-          'Conditions d\'utilisation',
-          'Consultez nos conditions',
-          Icons.privacy_tip,
-          () {
-            context.go('/terms');
-          },
-        ),
-        
-        _buildSection(
-          context,
-          'Politique de confidentialité',
-          'Protégez vos données',
-          Icons.security,
-          () {
-            context.go('/privacy');
-          },
-        ),
-        
-        _buildSection(
-          context,
-          'Aide et support',
-          'Besoin d\'aide ?',
-          Icons.help,
-          () {
-            _showSupportDialog(context);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLogoutSection() {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        return Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppBorderRadius.large),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.logout,
-                  color: Colors.red,
-                  size: 32,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ElevatedButton(
-                  onPressed: () async {
-                    await authProvider.signOut();
-                    if (context.mounted) {
-                      context.go('/welcome');
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Se déconnecter'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context,
-    String title,
-    String subtitle,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Card(
-        child: ListTile(
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-            ),
-            child: Icon(
-              icon,
-              color: AppColors.primaryGold,
-            ),
-          ),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: onTap,
-        ),
-      ),
-    );
-  }
-
-  // Navigation methods for button handlers
-  void _navigateToPhotoManagement(BuildContext context) {
-    // For now, navigate to profile setup where photos can be managed
-    context.go('/profile-setup');
-  }
-  
-  void _navigateToPromptsEditing(BuildContext context) {
-    // Navigate to questionnaire page to edit prompts/responses
-    context.go('/questionnaire');
-  }
-  
-  void _navigateToPreferences(BuildContext context) {
-    // Show preferences dialog or navigate to preferences page
-    _showPreferencesDialog(context);
-  }
-  
-  void _showPreferencesDialog(BuildContext context) {
+  void _showPreferencesDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1032,21 +649,19 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
     );
   }
   
-  void _showSupportDialog(BuildContext context) {
+  void _showSupportDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Aide et Support'),
-          content: Column(
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Pour toute question ou problème:'),
-              const SizedBox(height: 12),
-              const Text('📧 Email: support@goldwen.app'),
-              const Text('💬 Chat: Disponible dans l\'app'),
-              const Text('📱 Téléphone: +33 1 23 45 67 89'),
+              Text('📱 Téléphone: +33 1 23 45 67 89'),
+              SizedBox(height: 8),
+              Text('✉️ Email: support@goldwen.com'),
             ],
           ),
           actions: [
@@ -1057,10 +672,7 @@ class _UserProfilePageState extends State<UserProfilePage> with TickerProviderSt
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Could navigate to chat or open email client
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ouverture du chat support...')),
-                );
+                // Handle contact action
               },
               child: const Text('Contacter'),
             ),
