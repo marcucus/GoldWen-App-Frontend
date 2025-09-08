@@ -29,61 +29,105 @@ class _DailyMatchesPageState extends State<DailyMatchesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Votre sélection du jour'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.star_border),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SubscriptionPage(),
-              ),
-            ),
-          ),
-        ],
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
       ),
-      body: Consumer<MatchingProvider>(
-        builder: (context, matchingProvider, child) {
-          if (matchingProvider.isLoading) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
                 children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                  Expanded(
+                    child: Text(
+                      'Votre sélection du jour',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: AppSpacing.lg),
-                  Text('Préparation de votre sélection...'),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardOverlay.withOpacity(0.2),
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SubscriptionPage(),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.star_border,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            );
-          }
-
-          if (matchingProvider.dailyProfiles.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async => _loadDailyMatches(),
-            child: Column(
-              children: [
-                _buildHeader(matchingProvider),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: matchingProvider.dailyProfiles.length,
-                    itemBuilder: (context, index) {
-                      final profile = matchingProvider.dailyProfiles[index];
-                      return _buildProfileCard(profile, matchingProvider);
-                    },
+            ),
+            
+            // Content container
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppBorderRadius.xLarge),
+                    topRight: Radius.circular(AppBorderRadius.xLarge),
                   ),
                 ),
-              ],
+                child: Consumer<MatchingProvider>(
+                  builder: (context, matchingProvider, child) {
+                    if (matchingProvider.isLoading) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                            ),
+                            SizedBox(height: AppSpacing.lg),
+                            Text('Préparation de votre sélection...'),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (matchingProvider.dailyProfiles.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async => _loadDailyMatches(),
+                      child: Column(
+                        children: [
+                          _buildHeader(matchingProvider),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(AppSpacing.md).copyWith(
+                                bottom: 100, // Add space for floating nav
+                              ),
+                              itemCount: matchingProvider.dailyProfiles.length,
+                              itemBuilder: (context, index) {
+                                final profile = matchingProvider.dailyProfiles[index];
+                                return _buildProfileCard(profile, matchingProvider);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
