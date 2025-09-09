@@ -36,11 +36,20 @@ class _SplashPageState extends State<SplashPage> {
         await authProvider.refreshUser(); // Fetch fresh user data from backend
         final user = authProvider.user!;
 
+        // Debug: Log user completion status
+        print('🚀 SplashPage: User completion status:');
+        print('  - Email: ${user.email}');
+        print('  - isOnboardingCompleted: ${user.isOnboardingCompleted}');
+        print('  - isProfileCompleted: ${user.isProfileCompleted}');
+        print('  - User ID: ${user.id}');
+
         // User is authenticated, check location permission first
         bool hasLocationPermission = await LocationService.checkLocationPermission();
+        print('🚀 SplashPage: Location permission: $hasLocationPermission');
         
         if (!hasLocationPermission) {
           // No location permission, redirect to location setup regardless of profile completion
+          print('🚀 SplashPage: No location permission, redirecting to /welcome');
           if (mounted) {
             context.go('/welcome'); // Start fresh onboarding to handle location
           }
@@ -53,6 +62,7 @@ class _SplashPageState extends State<SplashPage> {
         // - isProfileCompleted: true when all requirements met (photos, prompts, personality, profile fields)
         if (user.isOnboardingCompleted == true && user.isProfileCompleted == true) {
           // Both onboarding and profile completed, initialize location service and go to main app
+          print('🚀 SplashPage: Both flags true, redirecting to /home');
           LocationService().initialize();
           if (mounted) {
             context.go('/home');
@@ -60,12 +70,14 @@ class _SplashPageState extends State<SplashPage> {
           return;
         } else if (user.isOnboardingCompleted == true) {
           // Onboarding done but profile not completed, go to profile setup
+          print('🚀 SplashPage: Only onboarding completed, redirecting to /profile-setup');
           if (mounted) {
             context.go('/profile-setup');
           }
           return;
         } else {
           // Authenticated but onboarding not completed, go to questionnaire
+          print('🚀 SplashPage: Onboarding not completed, redirecting to /questionnaire');
           if (mounted) {
             context.go('/questionnaire');
           }
