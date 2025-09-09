@@ -362,11 +362,6 @@ export class ProfilesService {
     }
   }
 
-  // Public method to refresh completion status (used by auth endpoint)
-  async refreshUserCompletionStatus(userId: string): Promise<void> {
-    await this.updateProfileCompletionStatus(userId);
-  }
-
   async getProfileCompletion(userId: string): Promise<{
     isCompleted: boolean;
     hasPhotos: boolean;
