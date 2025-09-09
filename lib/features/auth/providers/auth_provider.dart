@@ -170,24 +170,15 @@ class AuthProvider with ChangeNotifier {
     if (!isAuthenticated) return;
 
     try {
-      print('🔄 AuthProvider: Refreshing user data from backend...');
       final response = await ApiService.getCurrentUser();
-      print('🔄 AuthProvider: Backend response: $response');
-      
       final userData = response['data'] ?? response;
-      print('🔄 AuthProvider: Extracted user data: $userData');
-      
       _user = User.fromJson(userData);
-      print('🔄 AuthProvider: Parsed user completion flags:');
-      print('  - isOnboardingCompleted: ${_user?.isOnboardingCompleted}');
-      print('  - isProfileCompleted: ${_user?.isProfileCompleted}');
       
       // Update stored user data
       await _storeAuthData();
       
       notifyListeners();
     } catch (e) {
-      print('❌ AuthProvider: Error refreshing user data: $e');
       // If refresh fails, user might need to re-authenticate
       if (e is ApiException && e.isAuthError) {
         await signOut();

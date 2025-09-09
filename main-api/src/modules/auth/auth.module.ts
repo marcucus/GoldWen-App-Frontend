@@ -9,7 +9,6 @@ import { AuthController } from './auth.controller';
 import { User } from '../../database/entities/user.entity';
 import { Profile } from '../../database/entities/profile.entity';
 import { EmailService } from '../../common/email.service';
-import { ProfilesModule } from '../profiles/profiles.module';
 
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
@@ -18,7 +17,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Profile]),
-    ProfilesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
