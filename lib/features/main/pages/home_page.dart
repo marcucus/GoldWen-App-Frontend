@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/api_service.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late Animation<double> _backgroundAnimation;
   late Animation<Offset> _headerSlideAnimation;
   late Animation<double> _headerFadeAnimation;
+  String? _profilePseudo;
 
   void Function(int)? get _navigateToTab => widget.onNavigate;
 
@@ -88,6 +90,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final matchingProvider =
         Provider.of<MatchingProvider>(context, listen: false);
     matchingProvider.loadDailySelection();
+    // Récupère le pseudo du profil via ApiService.getProfile
+    Future.microtask(() async {
+      try {
+        final profile = await ApiService.getProfile();
+        setState(() {
+          _profilePseudo = profile['pseudo'] as String?;
+        });
+      } catch (e) {
+        // ignore ou log l'erreur
+      }
+    });
   }
 
   String _getGreeting() {
@@ -224,7 +237,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       FadeInAnimation(
                         delay: const Duration(milliseconds: 400),
                         child: Text(
-                          user?.displayName ?? 'Utilisateur',
+                          _profilePseudo ?? user?.displayName ?? 'Utilisateur',
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
