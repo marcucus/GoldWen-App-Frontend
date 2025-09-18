@@ -166,7 +166,7 @@ class ApiService {
   static Future<List<dynamic>> getPersonalityQuestions() async {
     final response = await _makeRequest(
       http.get(
-        Uri.parse('$baseUrl/profiles/personality-questions'),
+        Uri.parse('$baseUrl/profiles/questions'),
         headers: _headers,
       ),
     );

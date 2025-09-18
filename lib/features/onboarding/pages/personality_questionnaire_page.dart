@@ -135,80 +135,54 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
 
   Future<void> _loadPersonalityQuestions() async {
     try {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-      await profileProvider.loadPersonalityQuestions();
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      // Load questions from API service
+      final response = await ApiService.getPersonalityQuestions();
       
-      if (profileProvider.error != null) {
+      if (response is List) {
+        // Clear the hardcoded questions and use backend data
+        _questions.clear();
+        
+        for (var questionData in response) {
+          _questions.add({
+            'id': questionData['id'],
+            'question': questionData['question'],
+            'options': List<String>.from(questionData['options'] ?? []),
+            'key': questionData['key'] ?? questionData['id'],
+            'type': questionData['type'] ?? 'multiple_choice',
+            'category': questionData['category'],
+            'order': questionData['order'] ?? 0,
+          });
+        }
+
+        // Sort questions by order
+        _questions.sort((a, b) => (a['order'] as int).compareTo(b['order'] as int));
+        
         setState(() {
-          _error = profileProvider.error;
           _isLoading = false;
         });
-        return;
+      } else {
+        throw Exception('Invalid response format from personality questions API');
       }
-
-      // Create mapping between hardcoded question keys and backend UUIDs
-      _createQuestionMapping(profileProvider.personalityQuestions);
-      
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       setState(() {
-        _error = 'Erreur lors du chargement des questions: $e';
+        _error = 'Failed to load personality questions: ${e.toString()}';
         _isLoading = false;
       });
     }
   }
 
-  void _createQuestionMapping(List<PersonalityQuestion> backendQuestions) {
-    // Map hardcoded question keys to backend question UUIDs
-    // First, try to match by category if available
-    final categoryMapping = {
-      'motivation': 'motivation',
-      'free_time': 'free_time', 
-      'conflict_style': 'conflict_style',
-      'relationship_expectation': 'relationship_expectation',
-      'communication_style': 'communication_style',
-      'family_importance': 'family_importance',
-      'stress_management': 'stress_management',
-      'future_vision': 'future_vision',
-      'humor_style': 'humor_style',
-      'core_value': 'core_value',
-    };
-
-    if (backendQuestions.isEmpty) {
-      throw Exception('Aucune question de personnalité trouvée sur le serveur');
+  void _selectAnswer(String answer) {
+    final currentQuestion = _questions[_currentPage];
+    _answers[currentQuestion['id']] = answer;
+    
+    if (_currentPage < _questions.length - 1) {
+      _nextPage();
     }
-
-    // Sort backend questions by order to ensure consistent mapping
-    final sortedBackendQuestions = List<PersonalityQuestion>.from(backendQuestions)
-      ..sort((a, b) => a.order.compareTo(b.order));
-
-    // If category mapping works, use it
-    for (final backendQuestion in sortedBackendQuestions) {
-      for (final entry in categoryMapping.entries) {
-        if (backendQuestion.category == entry.value) {
-          _questionKeyToUuid[entry.key] = backendQuestion.id;
-          break;
-        }
-      }
-    }
-
-    // If category mapping didn't work (not enough matches), fall back to order-based mapping
-    if (_questionKeyToUuid.length < _questions.length && sortedBackendQuestions.length >= _questions.length) {
-      _questionKeyToUuid.clear();
-      for (int i = 0; i < _questions.length && i < sortedBackendQuestions.length; i++) {
-        final questionKey = _questions[i]['key'] as String;
-        _questionKeyToUuid[questionKey] = sortedBackendQuestions[i].id;
-      }
-    }
-
-    // Verify we have all necessary mappings
-    if (_questionKeyToUuid.length < _questions.length) {
-      throw Exception('Impossible de mapper toutes les questions. Questions trouvées: ${_questionKeyToUuid.length}, Questions nécessaires: ${_questions.length}');
-    }
-
-    print('Question mapping created: $_questionKeyToUuid');
   }
 
   @override

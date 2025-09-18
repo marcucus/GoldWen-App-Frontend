@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:convert';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/models.dart';
@@ -75,21 +77,38 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Implement Google Sign In with Firebase Auth
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      // Import google_sign_in at the top
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
       
-      // For now, use mock data - in real implementation, get data from Google Auth
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        // User canceled the sign-in
+        _status = AuthStatus.unauthenticated;
+        notifyListeners();
+        return;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Call backend OAuth endpoint - let backend handle the token validation
+      // In production, you might want to pass the idToken to backend for validation
       final response = await ApiService.socialLogin(
-        socialId: 'google_user_123',
+        socialId: googleUser.id,
         provider: 'google',
-        email: 'user@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
+        email: googleUser.email,
+        firstName: googleUser.displayName?.split(' ').first ?? '',
+        lastName: googleUser.displayName?.split(' ').skip(1).join(' '),
       );
       
       await _handleAuthSuccess(response);
     } catch (e) {
       _handleAuthError(e);
+      rethrow;
     }
   }
 
@@ -97,21 +116,27 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Implement Apple Sign In
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
-      
-      // For now, use mock data - in real implementation, get data from Apple Auth
+      // Import sign_in_with_apple at the top
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // Call backend OAuth endpoint
       final response = await ApiService.socialLogin(
-        socialId: 'apple_user_123',
+        socialId: credential.userIdentifier,
         provider: 'apple',
-        email: 'user@privaterelay.appleid.com',
-        firstName: 'Jane',
-        lastName: 'Doe',
+        email: credential.email ?? '',
+        firstName: credential.givenName ?? '',
+        lastName: credential.familyName ?? '',
       );
       
       await _handleAuthSuccess(response);
     } catch (e) {
       _handleAuthError(e);
+      rethrow;
     }
   }
 
