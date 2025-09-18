@@ -152,20 +152,30 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           return _buildLoadingState();
         }
 
-        final profiles = _generateSampleProfiles();
+        final profiles = matchingProvider.dailyProfiles;
 
         if (profiles.isEmpty) {
           return _buildEmptyState();
         }
 
+        // Filter out selected profiles for free users
+        final availableProfiles = matchingProvider.hasSubscription
+            ? profiles
+            : profiles.where((profile) => !matchingProvider.isProfileSelected(profile.id)).toList();
+
+        if (availableProfiles.isEmpty && matchingProvider.selectedProfileIds.isNotEmpty) {
+          return _buildSelectionCompleteState(matchingProvider);
+        }
+
         return Column(
           children: [
-            _buildProfileCounter(profiles.length),
+            _buildSelectionStatus(matchingProvider),
+            const SizedBox(height: 16),
+            _buildProfileCounter(availableProfiles.length),
             const SizedBox(height: 16),
             Expanded(
-              child: _buildSwipeableCards(profiles),
+              child: _buildProfileCards(availableProfiles, matchingProvider),
             ),
-            _buildActionButtons(),
             const SizedBox(height: 16),
           ],
         );

@@ -42,6 +42,7 @@ dependencies:
   # Notifications
   firebase_messaging: ^16.0.0
   flutter_local_notifications: ^19.4.1
+  timezone: ^0.9.4
   
   # Image Handling
   image_picker: ^1.0.4
