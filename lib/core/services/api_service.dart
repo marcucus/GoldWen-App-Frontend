@@ -166,7 +166,7 @@ class ApiService {
   static Future<List<dynamic>> getPersonalityQuestions() async {
     final response = await _makeRequest(
       http.get(
-        Uri.parse('$baseUrl/profiles/personality-questions'),
+        Uri.parse('$baseUrl/profiles/questions'), // Fixed endpoint to match API docs
         headers: _headers,
       ),
     );
@@ -189,6 +189,22 @@ class ApiService {
       Uri.parse('$baseUrl/profiles/me/prompt-answers'),
       headers: _headers,
       body: jsonEncode({'answers': answers}), // Wrap in answers object as expected by DTO
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> updateProfileStatus({
+    String? status,
+    bool? completed,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/profiles/me/status'),
+      headers: _headers,
+      body: jsonEncode({
+        if (status != null) 'status': status,
+        if (completed != null) 'completed': completed,
+      }),
     );
 
     return _handleResponse(response);

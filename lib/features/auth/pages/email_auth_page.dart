@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
-import '../../onboarding/pages/gender_selection_page.dart';
 
 class EmailAuthPage extends StatefulWidget {
   const EmailAuthPage({super.key});
@@ -282,22 +281,10 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
       
       if (authProvider.isAuthenticated) {
         if (mounted) {
-          print('Navigating to GenderSelectionPage...');
-          try {
-            await Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const GenderSelectionPage(),
-              ),
-            );
-            print('Navigation completed successfully');
-          } catch (e) {
-            print('Navigation failed: $e');
-            // Try alternative navigation method
-            Navigator.pushReplacementNamed(context, '/gender-selection');
-          }
-        } else {
-          print('Widget not mounted, retrying navigation in 100ms...');
-          await Future.delayed(const Duration(milliseconds: 100));
+          print('Authentication successful, navigating to splash for proper routing...');
+          context.go('/splash');
+        }
+      }
           if (mounted) {
             print('Widget now mounted, navigating...');
             try {
@@ -312,13 +299,6 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
             }
           } else {
             print('Widget still not mounted after delay');
-          }
-        }
-      } else {
-        print('User not authenticated after sign in');
-        if (authProvider.error != null) {
-          print('Auth error: ${authProvider.error}');
-        }
       }
     } catch (e) {
       setState(() {

@@ -98,13 +98,28 @@ class _AuthPageState extends State<AuthPage> {
                       onPressed: authProvider.status == AuthStatus.loading
                           ? null
                           : () async {
-                              await authProvider.signInWithGoogle();
-                              if (authProvider.isAuthenticated && mounted) {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) => const PersonalityQuestionnairePage(),
-                                  ),
-                                );
+                              try {
+                                await authProvider.signInWithGoogle();
+                                if (authProvider.isAuthenticated && mounted) {
+                                  // Let the app routing handle where to go based on completion status
+                                  context.go('/splash');
+                                } else if (authProvider.error != null && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur de connexion Google: ${authProvider.error}'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur de connexion: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             },
                       icon: authProvider.status == AuthStatus.loading
@@ -144,13 +159,28 @@ class _AuthPageState extends State<AuthPage> {
                       onPressed: authProvider.status == AuthStatus.loading
                           ? null
                           : () async {
-                              await authProvider.signInWithApple();
-                              if (authProvider.isAuthenticated && mounted) {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) => const PersonalityQuestionnairePage(),
-                                  ),
-                                );
+                              try {
+                                await authProvider.signInWithApple();
+                                if (authProvider.isAuthenticated && mounted) {
+                                  // Let the app routing handle where to go based on completion status
+                                  context.go('/splash');
+                                } else if (authProvider.error != null && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur de connexion Apple: ${authProvider.error}'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur de connexion: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             },
                       icon: authProvider.status == AuthStatus.loading
