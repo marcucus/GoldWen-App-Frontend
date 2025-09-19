@@ -382,15 +382,39 @@ class ChatProvider with ChangeNotifier {
     try {
       final chatId = data['chatId'] as String;
       
-      // Remove from conversations or mark as expired
-      _conversations.removeWhere((c) => c.id == chatId);
-      _chatMessages.remove(chatId);
+      // Add system message before marking as expired
+      _addSystemMessage(chatId, 'Cette conversation a expiré');
+      
+      // Mark conversation as expired instead of removing
+      final conversationIndex = _conversations.indexWhere((c) => c.id == chatId);
+      if (conversationIndex != -1) {
+        // Keep the conversation but mark it as expired through the model
+        // The Conversation model already has isExpired getter
+      }
+      
       _typingStatuses.remove(chatId);
       
       notifyListeners();
     } catch (e) {
       // Handle error silently
     }
+  }
+
+  void _addSystemMessage(String chatId, String content) {
+    final systemMessage = ChatMessage(
+      id: 'system_${DateTime.now().millisecondsSinceEpoch}',
+      conversationId: chatId,
+      senderId: 'system',
+      type: 'system',
+      content: content,
+      isRead: true,
+      createdAt: DateTime.now(),
+    );
+
+    if (_chatMessages[chatId] == null) {
+      _chatMessages[chatId] = [];
+    }
+    _chatMessages[chatId]!.add(systemMessage);
   }
 
   void _handleConnectionUpdate(bool isConnected) {
@@ -400,19 +424,19 @@ class ChatProvider with ChangeNotifier {
 
   void clearExpiredChats() {
     final now = DateTime.now();
-    final expiredChatIds = _conversations
+    final expiredConversations = _conversations
         .where((conv) => conv.expiresAt != null && now.isAfter(conv.expiresAt!))
-        .map((conv) => conv.id)
         .toList();
 
-    for (final chatId in expiredChatIds) {
-      _chatMessages.remove(chatId);
-      _typingStatuses.remove(chatId);
+    for (final conversation in expiredConversations) {
+      // Add system message before marking as expired
+      _addSystemMessage(conversation.id, 'Cette conversation a expiré');
+      
+      // Remove typing status but keep messages for reference
+      _typingStatuses.remove(conversation.id);
     }
     
-    _conversations.removeWhere((conv) => expiredChatIds.contains(conv.id));
-
-    if (expiredChatIds.isNotEmpty) {
+    if (expiredConversations.isNotEmpty) {
       notifyListeners();
     }
   }

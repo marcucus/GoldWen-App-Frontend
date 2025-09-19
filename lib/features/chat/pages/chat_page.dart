@@ -205,6 +205,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
+    // Handle system messages differently
+    if (message.isSystemMessage) {
+      return _buildSystemMessage(message);
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentUserId = authProvider.user?.id ?? 'current_user'; // Fallback to 'current_user' if no user
     final isFromCurrentUser = message.senderId == currentUserId;
@@ -277,6 +282,52 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildSystemMessage(ChatMessage message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
+      ),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.errorRed.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+            border: Border.all(
+              color: AppColors.errorRed.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.schedule_outlined,
+                color: AppColors.errorRed,
+                size: 16,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  message.content,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.errorRed,
+                        fontWeight: FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
