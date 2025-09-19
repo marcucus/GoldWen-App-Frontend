@@ -5,6 +5,8 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
+import '../../subscription/providers/subscription_provider.dart';
+import '../../subscription/widgets/subscription_banner.dart';
 
 class DailyMatchesPage extends StatefulWidget {
   const DailyMatchesPage({super.key});
@@ -144,8 +146,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   }
 
   Widget _buildMatchesContent() {
-    return Consumer<MatchingProvider>(
-      builder: (context, matchingProvider, child) {
+    return Consumer2<MatchingProvider, SubscriptionProvider>(
+      builder: (context, matchingProvider, subscriptionProvider, child) {
         if (matchingProvider.isLoading) {
           return _buildLoadingState();
         }
@@ -164,17 +166,40 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         }
 
         if (availableProfiles.isEmpty && profiles.isNotEmpty) {
-          return _buildSelectionCompleteState(matchingProvider);
+          return _buildSelectionCompleteState(matchingProvider, subscriptionProvider);
         }
 
         return Column(
           children: [
+            // Subscription status indicator for premium users
+            if (subscriptionProvider.hasActiveSubscription)
+              SubscriptionStatusIndicator(
+                hasActiveSubscription: true,
+                daysUntilExpiry: subscriptionProvider.daysUntilExpiry,
+                compact: true,
+              ),
+            
             _buildProfileCounter(availableProfiles.length),
-            _buildSelectionInfo(matchingProvider),
+            _buildSelectionInfo(matchingProvider, subscriptionProvider),
+            
+            // Show upgrade banner for free users who have used their daily selection
+            if (!subscriptionProvider.hasActiveSubscription && !matchingProvider.canSelectMore)
+              SubscriptionPromoBanner(
+                message: 'Limite atteinte ! Passez à GoldWen Plus pour 3 choix/jour',
+                compact: true,
+              ),
+            
             const SizedBox(height: 16),
             Expanded(
-              child: _buildProfileCards(availableProfiles, matchingProvider),
+              child: _buildProfileCards(availableProfiles, matchingProvider, subscriptionProvider),
             ),
+            
+            // Bottom banner for free users who still have selections
+            if (!subscriptionProvider.hasActiveSubscription && matchingProvider.canSelectMore)
+              SubscriptionPromoBanner(
+                compact: true,
+              ),
+              
             const SizedBox(height: 16),
           ],
         );
@@ -206,7 +231,11 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSelectionInfo(MatchingProvider matchingProvider) {
+  Widget _buildSelectionInfo(MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+    final remainingSelections = matchingProvider.remainingSelections;
+    final maxSelections = matchingProvider.maxSelections;
+    final hasSubscription = subscriptionProvider.hasActiveSubscription;
+    
     return SlideInAnimation(
       delay: const Duration(milliseconds: 300),
       child: Container(
@@ -222,25 +251,61 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Choix restants',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${matchingProvider.remainingSelections}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Choix restants',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
+                if (!hasSubscription)
+                  Text(
+                    'GoldWen Plus: 3 choix/jour',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
+            ),
+            Row(
+              children: [
+                if (hasSubscription)
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'PLUS',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: remainingSelections > 0 
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey[400],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$remainingSelections/$maxSelections',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -248,7 +313,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildProfileCards(List<Profile> profiles, MatchingProvider matchingProvider) {
+  Widget _buildProfileCards(List<Profile> profiles, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: profiles.length,
@@ -256,13 +321,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         final profile = profiles[index];
         return SlideInAnimation(
           delay: Duration(milliseconds: 300 + (index * 100)),
-          child: _buildProfileCard(profile, matchingProvider),
+          child: _buildProfileCard(profile, matchingProvider, subscriptionProvider),
         );
       },
     );
   }
 
-  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider) {
+  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -382,7 +447,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: matchingProvider.canSelectMore
-                                  ? () => _showChoiceConfirmation(profile, matchingProvider)
+                                  ? () => _showChoiceConfirmation(profile, matchingProvider, subscriptionProvider)
                                   : null,
                               icon: const Icon(Icons.favorite),
                               label: const Text('Choisir'),
@@ -558,7 +623,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSelectionCompleteState(MatchingProvider matchingProvider) {
+  Widget _buildSelectionCompleteState(MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -623,7 +688,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     context.push('/profile-detail/${profile.id}');
   }
 
-  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
+  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -674,7 +739,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _selectProfile(profile, matchingProvider);
+                _selectProfile(profile, matchingProvider, subscriptionProvider);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -688,8 +753,35 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider) async {
-    final success = await matchingProvider.selectProfile(profile.id);
+  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
+    // Check if user can select more profiles
+    if (!matchingProvider.canSelectMore) {
+      if (!subscriptionProvider.hasActiveSubscription) {
+        // Show upgrade dialog for free users
+        showDialog(
+          context: context,
+          builder: (context) => SubscriptionLimitReachedDialog(
+            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
+            maxSelections: matchingProvider.maxSelections,
+          ),
+        );
+        return;
+      } else {
+        // Premium user reached their limit
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vous avez atteint votre limite quotidienne de 3 sélections'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+    }
+    
+    final success = await matchingProvider.selectProfile(
+      profile.id, 
+      subscriptionProvider: subscriptionProvider,
+    );
     
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -700,13 +792,27 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(matchingProvider.error ?? 'Erreur lors de la sélection'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      final errorMessage = matchingProvider.error ?? 'Erreur lors de la sélection';
+      
+      // Check if error suggests upgrade
+      if (!subscriptionProvider.hasActiveSubscription && 
+          errorMessage.contains('limite')) {
+        showDialog(
+          context: context,
+          builder: (context) => SubscriptionLimitReachedDialog(
+            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
+            maxSelections: matchingProvider.maxSelections,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 }

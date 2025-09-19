@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
+import '../../subscription/providers/subscription_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -21,7 +22,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _loadProfile() {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
     profileProvider.loadProfile();
+    subscriptionProvider.loadCurrentSubscription();
+    subscriptionProvider.loadSubscriptionUsage();
   }
 
   @override
@@ -284,17 +288,168 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSubscriptionSection(BuildContext context) {
-    return Column(
-      children: [
-        _buildSettingItem(
-          context,
-          'GoldWen Plus',
-          'Débloquez toutes les fonctionnalités',
-          Icons.star,
-          () => context.go('/subscription'),
-          highlight: true,
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subscriptionProvider, child) {
+        final hasActiveSubscription = subscriptionProvider.hasActiveSubscription;
+        final currentPlanName = subscriptionProvider.currentPlanName;
+        final nextRenewalDate = subscriptionProvider.nextRenewalDate;
+        final daysUntilExpiry = subscriptionProvider.daysUntilExpiry;
+
+        return Column(
+          children: [
+            if (hasActiveSubscription) ...[
+              // Active subscription management
+              _buildSettingItem(
+                context,
+                'Abonnement GoldWen Plus',
+                currentPlanName != null 
+                  ? 'Plan actuel: $currentPlanName'
+                  : 'Abonnement actif',
+                Icons.star,
+                () => _showSubscriptionManagementDialog(context, subscriptionProvider),
+                highlight: true,
+              ),
+              if (nextRenewalDate != null && daysUntilExpiry != null)
+                _buildSubscriptionStatusCard(
+                  nextRenewalDate: nextRenewalDate,
+                  daysUntilExpiry: daysUntilExpiry,
+                  willRenew: subscriptionProvider.willRenew,
+                ),
+            ] else ...[
+              // Upgrade to premium
+              _buildSettingItem(
+                context,
+                'Passer à GoldWen Plus',
+                'Débloquez toutes les fonctionnalités premium',
+                Icons.star,
+                () => context.go('/subscription'),
+                highlight: true,
+              ),
+              _buildUpgradePromotionCard(),
+            ],
+            
+            // Restore purchases option
+            _buildSettingItem(
+              context,
+              'Restaurer les achats',
+              'Récupérer vos abonnements précédents',
+              Icons.restore,
+              () => _restorePurchases(context, subscriptionProvider),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSubscriptionStatusCard({
+    required DateTime nextRenewalDate,
+    required int daysUntilExpiry,
+    required bool willRenew,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: willRenew 
+          ? LinearGradient(
+              colors: [
+                AppColors.successGreen.withOpacity(0.1),
+                AppColors.successGreen.withOpacity(0.05),
+              ],
+            )
+          : LinearGradient(
+              colors: [
+                AppColors.warningOrange.withOpacity(0.1),
+                AppColors.warningOrange.withOpacity(0.05),
+              ],
+            ),
+        borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+        border: Border.all(
+          color: willRenew 
+            ? AppColors.successGreen.withOpacity(0.3)
+            : AppColors.warningOrange.withOpacity(0.3),
         ),
-      ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            willRenew ? Icons.check_circle : Icons.warning,
+            color: willRenew ? AppColors.successGreen : AppColors.warningOrange,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  willRenew ? 'Renouvellement automatique' : 'Abonnement expire bientôt',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: willRenew ? AppColors.successGreen : AppColors.warningOrange,
+                  ),
+                ),
+                Text(
+                  daysUntilExpiry > 0 
+                    ? '$daysUntilExpiry jours restants'
+                    : 'Expiré',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpgradePromotionCard() {
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryGold.withOpacity(0.1),
+            AppColors.primaryGold.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+        border: Border.all(
+          color: AppColors.primaryGold.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: AppColors.primaryGold,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Fonctionnalités Premium',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryGold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '• 3 sélections par jour au lieu d\'1\n• Chat illimité avec vos matches\n• Voir qui vous a sélectionné\n• Profil prioritaire dans les recommandations',
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -567,10 +722,15 @@ class _SettingsPageState extends State<SettingsPage> {
               child: const Text('Annuler'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                authProvider.signOut();
-                context.go('/welcome');
+                // Clear subscription data on logout
+                final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+                await subscriptionProvider.logout();
+                await authProvider.signOut();
+                if (context.mounted) {
+                  context.go('/welcome');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.errorRed,
@@ -581,5 +741,240 @@ class _SettingsPageState extends State<SettingsPage> {
         );
       },
     );
+  }
+
+  void _showSubscriptionManagementDialog(BuildContext context, SubscriptionProvider subscriptionProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.star, color: AppColors.primaryGold),
+              const SizedBox(width: AppSpacing.sm),
+              const Text('Gestion d\'abonnement'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (subscriptionProvider.currentPlanName != null) ...[
+                Text('Plan actuel: ${subscriptionProvider.currentPlanName}'),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              if (subscriptionProvider.nextRenewalDate != null) ...[
+                Text('Prochain renouvellement: ${_formatDate(subscriptionProvider.nextRenewalDate!)}'),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              Text(
+                subscriptionProvider.willRenew 
+                  ? 'Renouvellement automatique activé'
+                  : 'Renouvellement automatique désactivé',
+                style: TextStyle(
+                  color: subscriptionProvider.willRenew 
+                    ? AppColors.successGreen 
+                    : AppColors.warningOrange,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fermer'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showCancelSubscriptionDialog(context, subscriptionProvider);
+              },
+              child: Text(
+                'Annuler l\'abonnement',
+                style: TextStyle(color: AppColors.errorRed),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/subscription');
+              },
+              child: const Text('Modifier le plan'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCancelSubscriptionDialog(BuildContext context, SubscriptionProvider subscriptionProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Annuler l\'abonnement'),
+          content: const Text(
+            'Êtes-vous sûr de vouloir annuler votre abonnement GoldWen Plus ? '
+            'Vous perdrez l\'accès aux fonctionnalités premium à la fin de votre période de facturation actuelle.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Garder l\'abonnement'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                _cancelSubscription(context, subscriptionProvider);
+              },
+              child: Text(
+                'Annuler l\'abonnement',
+                style: TextStyle(color: AppColors.errorRed),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _cancelSubscription(BuildContext context, SubscriptionProvider subscriptionProvider) async {
+    _showLoadingDialog(context, 'Annulation en cours...');
+
+    try {
+      final success = await subscriptionProvider.cancelSubscription();
+      
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        if (success) {
+          _showSuccessDialog(
+            context,
+            'Abonnement annulé',
+            'Votre abonnement a été annulé avec succès. Vous conservez l\'accès aux fonctionnalités premium jusqu\'à la fin de votre période de facturation.',
+          );
+        } else {
+          _showErrorDialog(
+            context,
+            'Erreur',
+            subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'annulation',
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog(
+          context,
+          'Erreur',
+          'Une erreur est survenue: $e',
+        );
+      }
+    }
+  }
+
+  void _restorePurchases(BuildContext context, SubscriptionProvider subscriptionProvider) async {
+    _showLoadingDialog(context, 'Restauration en cours...');
+
+    try {
+      final success = await subscriptionProvider.restoreSubscription();
+      
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        if (success) {
+          _showSuccessDialog(
+            context,
+            'Achats restaurés',
+            'Vos achats ont été restaurés avec succès.',
+          );
+        } else {
+          _showErrorDialog(
+            context,
+            'Aucun achat trouvé',
+            'Aucun achat précédent n\'a été trouvé pour ce compte.',
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        _showErrorDialog(
+          context,
+          'Erreur',
+          'Une erreur est survenue lors de la restauration: $e',
+        );
+      }
+    }
+  }
+
+  void _showLoadingDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(child: Text(message)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: AppColors.successGreen),
+              const SizedBox(width: AppSpacing.sm),
+              Text(title),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.error, color: AppColors.errorRed),
+              const SizedBox(width: AppSpacing.sm),
+              Text(title),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

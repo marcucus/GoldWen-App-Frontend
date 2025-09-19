@@ -3,6 +3,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/services/local_notification_service.dart';
 import '../../../core/models/models.dart';
+import '../../subscription/providers/subscription_provider.dart';
 
 class MatchingProvider with ChangeNotifier {
   DailySelection? _dailySelection;
@@ -24,8 +25,18 @@ class MatchingProvider with ChangeNotifier {
   SubscriptionUsage? get subscriptionUsage => _subscriptionUsage;
 
   bool get hasSubscription => _subscriptionUsage?.canSeeWhoLikedYou ?? false;
-  int get maxSelections => _subscriptionUsage?.dailyLikesLimit ?? 1;
-  int get remainingSelections => _subscriptionUsage?.remainingLikes ?? 0;
+  int get maxSelections {
+    // Use subscription status to determine max selections
+    // Free users: 1 selection, Premium users: 3 selections
+    if (hasSubscription) {
+      return 3;
+    }
+    return 1;
+  }
+  int get remainingSelections {
+    final used = _selectedProfileIds.length;
+    return (maxSelections - used).clamp(0, maxSelections);
+  }
   bool get canSelectMore => remainingSelections > 0;
 
   void clearError() {
@@ -108,9 +119,14 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> selectProfile(String profileId) async {
+  Future<bool> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider}) async {
+    // Check if user has remaining selections
     if (!canSelectMore) {
-      _error = 'No more selections available today';
+      if (subscriptionProvider != null && !subscriptionProvider.hasActiveSubscription) {
+        _error = 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
+      } else {
+        _error = 'Limite quotidienne de sélections atteinte';
+      }
       notifyListeners();
       return false;
     }
