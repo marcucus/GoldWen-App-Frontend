@@ -25,7 +25,7 @@ dependencies:
   cached_network_image: ^3.3.0
   
   # Authentication
-  firebase_core: ^3.6.0
+  firebase_core: ^4.1.0
   firebase_auth: ^6.0.1
   google_sign_in: ^7.1.1
   sign_in_with_apple: ^7.0.1
@@ -33,7 +33,7 @@ dependencies:
   # Backend & API
   http: ^1.1.0
   dio: ^5.3.3
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^3.0.3
   
   # Local Storage
   shared_preferences: ^2.2.2
@@ -43,15 +43,15 @@ dependencies:
   # Notifications
   firebase_messaging: ^16.0.0
   flutter_local_notifications: ^19.4.1
-  timezone: ^0.9.4
+  timezone: ^0.10.1
   
   # Image Handling
   image_picker: ^1.0.4
-  image_cropper: ^9.1.0
+  image_cropper: ^10.0.0+1
   
   # Location Services
-  geolocator: ^12.0.0
-  permission_handler: ^11.3.1
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
   
   # UI Utilities
   shimmer: ^3.0.0
@@ -59,12 +59,12 @@ dependencies:
   
   # Subscriptions
   in_app_purchase: ^3.1.11
-  purchases_flutter: ^6.30.0
+  purchases_flutter: ^9.6.2
   
   # Utilities
   intl: ^0.20.2
   uuid: ^4.2.1
-  emoji_picker_flutter: ^3.0.0
+  emoji_picker_flutter: ^4.3.0
   flutter_localizations:
     sdk: flutter
 

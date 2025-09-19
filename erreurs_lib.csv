@@ -1,0 +1,68 @@
+Fichier,Ligne,Type,Severite,Description,Message_Erreur
+api_service.dart,394,Declaration dupliquee,Error,Methode updateProfileStatus definie deux fois,The name 'updateProfileStatus' is already defined
+local_notification_service.dart,91,Argument requis manquant,Error,Parametre androidScheduleMode manquant,The named parameter 'androidScheduleMode' is required but there's no corresponding argument
+local_notification_service.dart,97,Parametre non defini,Error,Parametre uiLocalNotificationDateInterpretation non defini,The named parameter 'uiLocalNotificationDateInterpretation' isn't defined
+local_notification_service.dart,97,Nom non defini,Error,UILocalNotificationDateInterpretation non defini,Undefined name 'UILocalNotificationDateInterpretation'
+local_notification_service.dart,358,Valeur constante invalide,Error,Valeur constante invalide,Const variables must be initialized with a constant value
+local_notification_service.dart,358,Valeur constante invalide,Error,Valeur constante invalide,Invalid constant value
+revenue_cat_service.dart,19,Setter non defini,Error,Setter observerMode non defini pour PurchasesConfiguration,The setter 'observerMode' isn't defined for the type 'PurchasesConfiguration'
+revenue_cat_service.dart,149,Type de retour incompatible,Error,String? ne peut pas etre retourne comme DateTime?,A value of type 'String?' can't be returned from method 'getExpirationDate'
+app_theme.dart,40,Nom deja defini,Error,textLight est deja defini,The name 'textLight' is already defined
+admin_users_page.dart,278,Getter non defini,Error,Getter age non defini pour User,The getter 'age' isn't defined for the type 'User'
+admin_users_page.dart,279,Getter non defini,Error,Getter bio non defini pour User,The getter 'bio' isn't defined for the type 'User'
+admin_users_page.dart,280,Getter non defini,Error,Getter bio non defini pour User,The getter 'bio' isn't defined for the type 'User'
+admin_users_page.dart,281,Type d'argument incompatible,Error,DateTime? ne peut pas etre assigne a DateTime,The argument type 'DateTime?' can't be assigned to parameter type 'DateTime'
+admin_users_page.dart,282,Getter non defini,Error,Getter lastActive non defini pour User,The getter 'lastActive' isn't defined for the type 'User'
+admin_users_page.dart,283,Getter non defini,Error,Getter lastActive non defini pour User,The getter 'lastActive' isn't defined for the type 'User'
+user_list_item.dart,35,Getter non defini,Error,Getter profilePicture non defini pour User,The getter 'profilePicture' isn't defined for the type 'User'
+user_list_item.dart,36,Getter non defini,Error,Getter profilePicture non defini pour User,The getter 'profilePicture' isn't defined for the type 'User'
+user_list_item.dart,38,Getter non defini,Error,Getter profilePicture non defini pour User,The getter 'profilePicture' isn't defined for the type 'User'
+user_list_item.dart,40,Methode nullable,Error,substring ne peut pas etre appele de maniere inconditionnelle,The method 'substring' can't be unconditionally invoked because receiver can be 'null'
+user_list_item.dart,40,Methode nullable,Error,substring ne peut pas etre appele de maniere inconditionnelle,The method 'substring' can't be unconditionally invoked because receiver can be 'null'
+user_list_item.dart,81,Getter non defini,Error,Getter age non defini pour User,The getter 'age' isn't defined for the type 'User'
+user_list_item.dart,87,Getter non defini,Error,Getter lastActive non defini pour User,The getter 'lastActive' isn't defined for the type 'User'
+user_list_item.dart,95,Getter non defini,Error,Getter lastActive non defini pour User,The getter 'lastActive' isn't defined for the type 'User'
+email_auth_page.dart,293,Classe non definie,Error,GenderSelectionPage n'est pas une classe,The name 'GenderSelectionPage' isn't a class
+auth_provider.dart,81,Constructeur non defini,Error,GoogleSignIn n'a pas de constructeur sans nom,The class 'GoogleSignIn' doesn't have an unnamed constructor
+auth_provider.dart,89,Methode non definie,Error,Methode signIn non definie pour GoogleSignIn,The method 'signIn' isn't defined for the type 'GoogleSignIn'
+auth_provider.dart,93,Methode non definie,Error,Methode _setUnauthenticated non definie,The method '_setUnauthenticated' isn't defined for the type 'AuthProvider'
+auth_provider.dart,100,Getter non defini,Error,Getter accessToken non defini pour GoogleSignInAuthentication,The getter 'accessToken' isn't defined for type 'GoogleSignInAuthentication'
+auth_provider.dart,149,Type d'argument incompatible,Error,String? ne peut pas etre assigne a String,The argument type 'String?' can't be assigned to parameter type 'String'
+chat_list_page.dart,130,Methode non definie,Error,Methode _getSampleChats non definie,The method '_getSampleChats' isn't defined for type '_ChatListPageState'
+chat_list_page.dart,220,Classe non definie,Error,Classe Conversation non definie,Undefined class 'Conversation'
+chat_list_page.dart,359,Classe non definie,Error,Classe Conversation non definie,Undefined class 'Conversation'
+chat_list_page.dart,504,Classe non definie,Error,Classe Conversation non definie,Undefined class 'Conversation'
+chat_page.dart,420,Parametre non defini,Error,Parametre columns non defini,The named parameter 'columns' isn't defined
+chat_page.dart,421,Parametre non defini,Error,Parametre emojiSizeMax non defini,The named parameter 'emojiSizeMax' isn't defined
+chat_page.dart,422,Parametre non defini,Error,Parametre verticalSpacing non defini,The named parameter 'verticalSpacing' isn't defined
+chat_page.dart,423,Parametre non defini,Error,Parametre horizontalSpacing non defini,The named parameter 'horizontalSpacing' isn't defined
+chat_page.dart,424,Parametre non defini,Error,Parametre gridPadding non defini,The named parameter 'gridPadding' isn't defined
+chat_page.dart,425,Parametre non defini,Error,Parametre initCategory non defini,The named parameter 'initCategory' isn't defined
+chat_page.dart,426,Parametre non defini,Error,Parametre bgColor non defini,The named parameter 'bgColor' isn't defined
+chat_page.dart,427,Parametre non defini,Error,Parametre indicatorColor non defini,The named parameter 'indicatorColor' isn't defined
+chat_page.dart,428,Parametre non defini,Error,Parametre iconColor non defini,The named parameter 'iconColor' isn't defined
+chat_page.dart,429,Parametre non defini,Error,Parametre iconColorSelected non defini,The named parameter 'iconColorSelected' isn't defined
+chat_page.dart,430,Parametre non defini,Error,Parametre backspaceColor non defini,The named parameter 'backspaceColor' isn't defined
+chat_page.dart,431,Parametre non defini,Error,Parametre skinToneDialogBgColor non defini,The named parameter 'skinToneDialogBgColor' isn't defined
+chat_page.dart,432,Parametre non defini,Error,Parametre skinToneIndicatorColor non defini,The named parameter 'skinToneIndicatorColor' isn't defined
+chat_page.dart,433,Parametre non defini,Error,Parametre enableSkinTones non defini,The named parameter 'enableSkinTones' isn't defined
+chat_page.dart,434,Parametre non defini,Error,Parametre recentTabBehavior non defini,The named parameter 'recentTabBehavior' isn't defined
+chat_page.dart,435,Parametre non defini,Error,Parametre recentsLimit non defini,The named parameter 'recentsLimit' isn't defined
+chat_page.dart,436,Parametre non defini,Error,Parametre replaceEmojiOnLimitExceed non defini,The named parameter 'replaceEmojiOnLimitExceed' isn't defined
+chat_page.dart,437,Parametre non defini,Error,Parametre noRecents non defini,The named parameter 'noRecents' isn't defined
+chat_page.dart,442,Parametre non defini,Error,Parametre loadingIndicator non defini,The named parameter 'loadingIndicator' isn't defined
+chat_page.dart,443,Parametre non defini,Error,Parametre tabIndicatorAnimDuration non defini,The named parameter 'tabIndicatorAnimDuration' isn't defined
+chat_page.dart,444,Parametre non defini,Error,Parametre categoryIcons non defini,The named parameter 'categoryIcons' isn't defined
+chat_page.dart,445,Parametre non defini,Error,Parametre buttonMode non defini,The named parameter 'buttonMode' isn't defined
+daily_matches_page.dart,401,Getter non defini,Error,Getter firstName non defini pour Profile,The getter 'firstName' isn't defined for the type 'Profile'
+daily_matches_page.dart,401,Getter non defini,Error,Getter lastName non defini pour Profile,The getter 'lastName' isn't defined for the type 'Profile'
+daily_matches_page.dart,411,Propriete nullable,Error,isNotEmpty ne peut pas etre accede inconditionnellement,The property 'isNotEmpty' can't be unconditionally accessed
+daily_matches_page.dart,413,Type d'argument incompatible,Error,String? ne peut pas etre assigne a String,The argument type 'String?' can't be assigned to parameter type 'String'
+daily_matches_page.dart,714,Getter non defini,Error,Getter firstName non defini pour Profile,The getter 'firstName' isn't defined for the type 'Profile'
+daily_matches_page.dart,789,Getter non defini,Error,Getter firstName non defini pour Profile,The getter 'firstName' isn't defined for the type 'Profile'
+personality_questionnaire_page.dart,323,Propriete nullable,Error,isNotEmpty ne peut pas etre accede inconditionnellement,The property 'isNotEmpty' can't be unconditionally accessed
+personality_questionnaire_page.dart,325,Propriete nullable,Error,length ne peut pas etre accede inconditionnellement,The property 'length' can't be unconditionally accessed
+personality_questionnaire_page.dart,327,Methode nullable,Error,[] ne peut pas etre invoque inconditionnellement,The method '[]' can't be unconditionally invoked
+subscription_page.dart,69,Declaration dupliquee,Error,initState est deja defini,The name 'initState' is already defined
+subscription_page.dart,76,Declaration dupliquee,Error,_loadSubscriptionData est deja defini,The name '_loadSubscriptionData' is already defined
+subscription_page.dart,885,Getter non defini,Error,Getter error non defini pour AppColors,The getter 'error' isn't defined for the type 'AppColors'
