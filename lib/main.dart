@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
+import 'core/config/firebase_config.dart';
 import 'core/services/location_service.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'core/services/navigation_service.dart';
@@ -25,15 +27,15 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // Set background message handler (only if Firebase is available)
+  // Initialize app services (includes Firebase initialization)
+  await AppInitializationService.initialize();
+
+  // Set background message handler if Firebase is available
   try {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
-    print('Firebase not available: $e');
+    print('Background message handler not set: $e');
   }
-
-  // Initialize app services
-  await AppInitializationService.initialize();
 
   runApp(const GoldWenApp());
 }

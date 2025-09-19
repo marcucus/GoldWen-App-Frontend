@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart';
@@ -104,6 +105,12 @@ class _NotificationsPageState extends State<NotificationsPage>
           _buildNotificationSettings(),
         ],
       ),
+      // Add test page FAB in debug mode only
+      floatingActionButton: kDebugMode ? FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(context, '/notifications/test'),
+        backgroundColor: AppColors.primaryGold,
+        child: const Icon(Icons.bug_report, color: Colors.white),
+      ) : null,
     );
   }
 

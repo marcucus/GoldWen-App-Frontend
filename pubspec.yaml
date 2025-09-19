@@ -25,6 +25,7 @@ dependencies:
   cached_network_image: ^3.3.0
   
   # Authentication
+  firebase_core: ^3.6.0
   firebase_auth: ^6.0.1
   google_sign_in: ^7.1.1
   sign_in_with_apple: ^7.0.1
