@@ -1,0 +1,124 @@
+﻿
+erreurs_flutter.txt:18:  error - The name 'updateProfileStatus' is already defined - lib\core\services\api_service.dart:394:39 - duplicate_definition
+erreurs_flutter.txt:43:  error - The named parameter 'androidScheduleMode' is required, but there's no corresponding argument - 
+lib\core\services\local_notification_service.dart:91:26 - missing_required_argument
+erreurs_flutter.txt:44:  error - The named parameter 'uiLocalNotificationDateInterpretation' isn't defined - lib\core\services\local_notification_service.dart:97:7 - 
+undefined_named_parameter
+erreurs_flutter.txt:45:  error - Undefined name 'UILocalNotificationDateInterpretation' - lib\core\services\local_notification_service.dart:97:46 - undefined_identifier
+erreurs_flutter.txt:50:  error - Const variables must be initialized with a constant value - lib\core\services\local_notification_service.dart:358:16 - 
+const_initialized_with_non_constant_value
+erreurs_flutter.txt:51:  error - Invalid constant value - lib\core\services\local_notification_service.dart:358:16 - invalid_constant
+erreurs_flutter.txt:59:  error - The setter 'observerMode' isn't defined for the type 'PurchasesConfiguration' - lib\core\services\revenue_cat_service.dart:19:13 - 
+undefined_setter
+erreurs_flutter.txt:72:  error - A value of type 'String?' can't be returned from the method 'getExpirationDate' because it has a return type of 'DateTime?' - 
+lib\core\services\revenue_cat_service.dart:149:12 - return_of_invalid_type
+erreurs_flutter.txt:78:  error - The name 'textLight' is already defined - lib\core\theme\app_theme.dart:40:22 - duplicate_definition
+erreurs_flutter.txt:136:  error - The getter 'age' isn't defined for the type 'User' - lib\features\admin\pages\admin_users_page.dart:278:55 - undefined_getter
+erreurs_flutter.txt:137:  error - The getter 'bio' isn't defined for the type 'User' - lib\features\admin\pages\admin_users_page.dart:279:24 - undefined_getter
+erreurs_flutter.txt:138:  error - The getter 'bio' isn't defined for the type 'User' - lib\features\admin\pages\admin_users_page.dart:280:54 - undefined_getter
+erreurs_flutter.txt:139:  error - The argument type 'DateTime?' can't be assigned to the parameter type 'DateTime'.  - lib\features\admin\pages\admin_users_page.dart:281:63 
+- argument_type_not_assignable
+erreurs_flutter.txt:140:  error - The getter 'lastActive' isn't defined for the type 'User' - lib\features\admin\pages\admin_users_page.dart:282:24 - undefined_getter
+erreurs_flutter.txt:141:  error - The getter 'lastActive' isn't defined for the type 'User' - lib\features\admin\pages\admin_users_page.dart:283:80 - undefined_getter
+erreurs_flutter.txt:163:  error - The getter 'profilePicture' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:35:39 - undefined_getter
+erreurs_flutter.txt:164:  error - The getter 'profilePicture' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:36:41 - undefined_getter
+erreurs_flutter.txt:165:  error - The getter 'profilePicture' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:38:29 - undefined_getter
+erreurs_flutter.txt:166:  error - The method 'substring' can't be unconditionally invoked because the receiver can be 'null' - 
+lib\features\admin\widgets\user_list_item.dart:40:43 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:167:  error - The method 'substring' can't be unconditionally invoked because the receiver can be 'null' - 
+lib\features\admin\widgets\user_list_item.dart:40:75 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:170:  error - The getter 'age' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:81:35 - undefined_getter
+erreurs_flutter.txt:171:  error - The getter 'lastActive' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:87:34 - undefined_getter
+erreurs_flutter.txt:173:  error - The getter 'lastActive' isn't defined for the type 'User' - lib\features\admin\widgets\user_list_item.dart:95:53 - undefined_getter
+erreurs_flutter.txt:195:  error - The name 'GenderSelectionPage' isn't a class - lib\features\auth\pages\email_auth_page.dart:293:47 - creation_with_non_type
+erreurs_flutter.txt:203:  error - The class 'GoogleSignIn' doesn't have an unnamed constructor - lib\features\auth\providers\auth_provider.dart:81:41 - 
+new_with_undefined_constructor_default
+erreurs_flutter.txt:204:  error - The method 'signIn' isn't defined for the type 'GoogleSignIn' - lib\features\auth\providers\auth_provider.dart:89:66 - undefined_method
+erreurs_flutter.txt:205:  error - The method '_setUnauthenticated' isn't defined for the type 'AuthProvider' - lib\features\auth\providers\auth_provider.dart:93:9 - 
+undefined_method
+erreurs_flutter.txt:207:  error - The getter 'accessToken' isn't defined for the type 'GoogleSignInAuthentication' - lib\features\auth\providers\auth_provider.dart:100:22 - 
+undefined_getter
+erreurs_flutter.txt:209:  error - The argument type 'String?' can't be assigned to the parameter type 'String'.  - lib\features\auth\providers\auth_provider.dart:149:19 - 
+argument_type_not_assignable
+erreurs_flutter.txt:227:  error - The method '_getSampleChats' isn't defined for the type '_ChatListPageState' - lib\features\chat\pages\chat_list_page.dart:130:45 - 
+undefined_method
+erreurs_flutter.txt:228:  error - Undefined class 'Conversation' - lib\features\chat\pages\chat_list_page.dart:220:33 - undefined_class
+erreurs_flutter.txt:230:  error - Undefined class 'Conversation' - lib\features\chat\pages\chat_list_page.dart:359:31 - undefined_class
+erreurs_flutter.txt:235:  error - Undefined class 'Conversation' - lib\features\chat\pages\chat_list_page.dart:504:26 - undefined_class
+erreurs_flutter.txt:250:  error - The named parameter 'columns' isn't defined - lib\features\chat\pages\chat_page.dart:420:17 - undefined_named_parameter
+erreurs_flutter.txt:251:  error - The named parameter 'emojiSizeMax' isn't defined - lib\features\chat\pages\chat_page.dart:421:17 - undefined_named_parameter
+erreurs_flutter.txt:252:  error - The named parameter 'verticalSpacing' isn't defined - lib\features\chat\pages\chat_page.dart:422:17 - undefined_named_parameter
+erreurs_flutter.txt:253:  error - The named parameter 'horizontalSpacing' isn't defined - lib\features\chat\pages\chat_page.dart:423:17 - undefined_named_parameter
+erreurs_flutter.txt:254:  error - The named parameter 'gridPadding' isn't defined - lib\features\chat\pages\chat_page.dart:424:17 - undefined_named_parameter
+erreurs_flutter.txt:255:  error - The named parameter 'initCategory' isn't defined - lib\features\chat\pages\chat_page.dart:425:17 - undefined_named_parameter
+erreurs_flutter.txt:256:  error - The named parameter 'bgColor' isn't defined - lib\features\chat\pages\chat_page.dart:426:17 - undefined_named_parameter
+erreurs_flutter.txt:257:  error - The named parameter 'indicatorColor' isn't defined - lib\features\chat\pages\chat_page.dart:427:17 - undefined_named_parameter
+erreurs_flutter.txt:258:  error - The named parameter 'iconColor' isn't defined - lib\features\chat\pages\chat_page.dart:428:17 - undefined_named_parameter
+erreurs_flutter.txt:259:  error - The named parameter 'iconColorSelected' isn't defined - lib\features\chat\pages\chat_page.dart:429:17 - undefined_named_parameter
+erreurs_flutter.txt:260:  error - The named parameter 'backspaceColor' isn't defined - lib\features\chat\pages\chat_page.dart:430:17 - undefined_named_parameter
+erreurs_flutter.txt:261:  error - The named parameter 'skinToneDialogBgColor' isn't defined - lib\features\chat\pages\chat_page.dart:431:17 - undefined_named_parameter
+erreurs_flutter.txt:262:  error - The named parameter 'skinToneIndicatorColor' isn't defined - lib\features\chat\pages\chat_page.dart:432:17 - undefined_named_parameter
+erreurs_flutter.txt:263:  error - The named parameter 'enableSkinTones' isn't defined - lib\features\chat\pages\chat_page.dart:433:17 - undefined_named_parameter
+erreurs_flutter.txt:264:  error - The named parameter 'recentTabBehavior' isn't defined - lib\features\chat\pages\chat_page.dart:434:17 - undefined_named_parameter
+erreurs_flutter.txt:265:  error - The named parameter 'recentsLimit' isn't defined - lib\features\chat\pages\chat_page.dart:435:17 - undefined_named_parameter
+erreurs_flutter.txt:266:  error - The named parameter 'replaceEmojiOnLimitExceed' isn't defined - lib\features\chat\pages\chat_page.dart:436:17 - undefined_named_parameter
+erreurs_flutter.txt:267:  error - The named parameter 'noRecents' isn't defined - lib\features\chat\pages\chat_page.dart:437:17 - undefined_named_parameter
+erreurs_flutter.txt:270:  error - The named parameter 'loadingIndicator' isn't defined - lib\features\chat\pages\chat_page.dart:442:17 - undefined_named_parameter
+erreurs_flutter.txt:271:  error - The named parameter 'tabIndicatorAnimDuration' isn't defined - lib\features\chat\pages\chat_page.dart:443:17 - undefined_named_parameter
+erreurs_flutter.txt:272:  error - The named parameter 'categoryIcons' isn't defined - lib\features\chat\pages\chat_page.dart:444:17 - undefined_named_parameter
+erreurs_flutter.txt:273:  error - The named parameter 'buttonMode' isn't defined - lib\features\chat\pages\chat_page.dart:445:17 - undefined_named_parameter
+erreurs_flutter.txt:328:  error - The getter 'firstName' isn't defined for the type 'Profile' - lib\features\matching\pages\daily_matches_page.dart:401:46 - undefined_getter
+erreurs_flutter.txt:329:  error - The getter 'lastName' isn't defined for the type 'Profile' - lib\features\matching\pages\daily_matches_page.dart:401:67 - undefined_getter
+erreurs_flutter.txt:330:  error - The property 'isNotEmpty' can't be unconditionally accessed because the receiver can be 'null' - 
+lib\features\matching\pages\daily_matches_page.dart:411:49 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:331:  error - The argument type 'String?' can't be assigned to the parameter type 'String'.  - 
+lib\features\matching\pages\daily_matches_page.dart:413:37 - argument_type_not_assignable
+erreurs_flutter.txt:337:  error - The getter 'firstName' isn't defined for the type 'Profile' - lib\features\matching\pages\daily_matches_page.dart:714:57 - undefined_getter
+erreurs_flutter.txt:340:  error - The getter 'firstName' isn't defined for the type 'Profile' - lib\features\matching\pages\daily_matches_page.dart:789:53 - undefined_getter
+erreurs_flutter.txt:376:  error - The property 'isNotEmpty' can't be unconditionally accessed because the receiver can be 'null' - 
+lib\features\onboarding\pages\personality_questionnaire_page.dart:323:64 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:377:  error - The property 'length' can't be unconditionally accessed because the receiver can be 'null' - 
+lib\features\onboarding\pages\personality_questionnaire_page.dart:325:37 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:378:  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - 
+lib\features\onboarding\pages\personality_questionnaire_page.dart:327:42 - unchecked_use_of_nullable_value
+erreurs_flutter.txt:461:  error - The name 'initState' is already defined - lib\features\subscription\pages\subscription_page.dart:69:8 - duplicate_definition
+erreurs_flutter.txt:463:  error - The name '_loadSubscriptionData' is already defined - lib\features\subscription\pages\subscription_page.dart:76:8 - duplicate_definition
+erreurs_flutter.txt:497:  error - The getter 'error' isn't defined for the type 'AppColors' - lib\features\subscription\pages\subscription_page.dart:885:56 - 
+undefined_getter
+erreurs_flutter.txt:540:  error - The named parameter 'navigatorKey' isn't defined - lib\main.dart:74:9 - undefined_named_parameter
+erreurs_flutter.txt:547:  error - Target of URI doesn't exist: 'package:mockito/mockito.dart' - test\daily_matches_page_test.dart:4:8 - uri_does_not_exist
+erreurs_flutter.txt:548:  error - Missing concrete implementations of 'class MatchingProvider with ChangeNotifier.clearDailySelection', 'class MatchingProvider with 
+ChangeNotifier.clearError', 'class MatchingProvider with ChangeNotifier.deleteMatch', 'class MatchingProvider with ChangeNotifier.getCompatibility', and 31 more - 
+test\daily_matches_page_test.dart:11:7 - non_abstract_class_inherits_abstract_member
+erreurs_flutter.txt:549:  error - Classes can only extend other classes - test\daily_matches_page_test.dart:11:36 - extends_non_class
+erreurs_flutter.txt:550:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:33:7 - undefined_function
+erreurs_flutter.txt:551:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:34:7 - undefined_function
+erreurs_flutter.txt:552:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:35:7 - undefined_function
+erreurs_flutter.txt:553:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:36:7 - undefined_function
+erreurs_flutter.txt:554:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:48:7 - undefined_function
+erreurs_flutter.txt:555:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:49:7 - undefined_function
+erreurs_flutter.txt:556:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:50:7 - undefined_function
+erreurs_flutter.txt:557:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:51:7 - undefined_function
+erreurs_flutter.txt:558:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:64:7 - undefined_function
+erreurs_flutter.txt:559:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:65:7 - undefined_function
+erreurs_flutter.txt:560:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:66:7 - undefined_function
+erreurs_flutter.txt:561:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:67:7 - undefined_function
+erreurs_flutter.txt:562:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:80:7 - undefined_function
+erreurs_flutter.txt:563:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:81:7 - undefined_function
+erreurs_flutter.txt:564:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:82:7 - undefined_function
+erreurs_flutter.txt:565:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:83:7 - undefined_function
+erreurs_flutter.txt:566:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:95:7 - undefined_function
+erreurs_flutter.txt:567:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:96:7 - undefined_function
+erreurs_flutter.txt:568:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:97:7 - undefined_function
+erreurs_flutter.txt:569:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:98:7 - undefined_function
+erreurs_flutter.txt:570:  error - The function 'verify' isn't defined - test\daily_matches_page_test.dart:111:7 - undefined_function
+erreurs_flutter.txt:571:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:120:7 - undefined_function
+erreurs_flutter.txt:572:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:121:7 - undefined_function
+erreurs_flutter.txt:573:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:122:7 - undefined_function
+erreurs_flutter.txt:574:  error - The function 'when' isn't defined - test\daily_matches_page_test.dart:123:7 - undefined_function
+erreurs_flutter.txt:577:  error - Target of URI doesn't exist: 'package:mockito/mockito.dart' - test\location_test.dart:2:8 - uri_does_not_exist
+erreurs_flutter.txt:582:  error - Target of URI doesn't exist: 'package:mockito/mockito.dart' - test\matching_provider_test.dart:3:8 - uri_does_not_exist
+erreurs_flutter.txt:584:  error - Target of URI doesn't exist: 'package:mockito/annotations.dart' - test\matching_provider_test.dart:4:8 - uri_does_not_exist
+erreurs_flutter.txt:632:    + FullyQualifiedErrorId : NativeCommandError
+
+
