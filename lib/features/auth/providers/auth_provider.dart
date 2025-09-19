@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:convert';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/models.dart';
@@ -75,20 +77,42 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Implement Google Sign In with Firebase Auth
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      // Initialize Google Sign In
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Sign out any existing user first to ensure fresh sign-in
+      await googleSignIn.signOut();
       
-      // For now, use mock data - in real implementation, get data from Google Auth
+      // Trigger the Google Sign In flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        _setUnauthenticated();
+        return;
+      }
+
+      // Get the auth details from the Google Sign In
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      if (googleAuth.accessToken == null) {
+        throw Exception('Failed to obtain Google access token');
+      }
+
+      // Use the Google user information to authenticate with our backend
       final response = await ApiService.socialLogin(
-        socialId: 'google_user_123',
+        socialId: googleUser.id,
         provider: 'google',
-        email: 'user@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
+        email: googleUser.email,
+        firstName: googleUser.displayName?.split(' ').first ?? '',
+        lastName: googleUser.displayName?.split(' ').skip(1).join(' '),
       );
       
       await _handleAuthSuccess(response);
     } catch (e) {
+      print('Google Sign-In Error: $e');
       _handleAuthError(e);
     }
   }
@@ -97,20 +121,41 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      // TODO: Implement Apple Sign In
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      // Check if Apple Sign In is available on this device
+      final isAvailable = await SignInWithApple.isAvailable();
+      if (!isAvailable) {
+        throw Exception('Apple Sign In is not available on this device');
+      }
+
+      // Trigger the Apple Sign In flow
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // Extract user information
+      String? firstName;
+      String? lastName;
       
-      // For now, use mock data - in real implementation, get data from Apple Auth
+      if (credential.givenName != null || credential.familyName != null) {
+        firstName = credential.givenName;
+        lastName = credential.familyName;
+      }
+
+      // Use the Apple credential to authenticate with our backend
       final response = await ApiService.socialLogin(
-        socialId: 'apple_user_123',
+        socialId: credential.userIdentifier,
         provider: 'apple',
-        email: 'user@privaterelay.appleid.com',
-        firstName: 'Jane',
-        lastName: 'Doe',
+        email: credential.email ?? 'noemail@appleid.com', // Apple might not provide email
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
       );
       
       await _handleAuthSuccess(response);
     } catch (e) {
+      print('Apple Sign-In Error: $e');
       _handleAuthError(e);
     }
   }
