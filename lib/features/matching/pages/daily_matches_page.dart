@@ -103,7 +103,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Découverte',
+                      'Sélection du jour',
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -111,7 +111,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Trouvez votre match parfait',
+                      'Découvrez vos matchs parfaits',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -201,6 +201,48 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 fontWeight: FontWeight.w600,
               ),
           textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectionInfo(MatchingProvider matchingProvider) {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 300),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Choix restants',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${matchingProvider.remainingSelections}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -366,153 +408,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  void _showProfileDetails(Profile profile) {
-    // Navigate to profile detail page
-    context.push('/profile-detail/${profile.id}');
-  }
-
-  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-                                        Colors.amber,
-                                        Colors.orange,
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(6),
-                                    child: Icon(
-                                      Icons.star,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${profile['distance']} km',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: Colors.white.withOpacity(0.9),
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            profile['bio'],
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 12),
-                          _buildInterestTags(profile['interests']),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Column(
-                      children: [
-                        _buildQuickActionButton(
-                          icon: Icons.info_outline,
-                          onPressed: () => _showProfileDetails(profile),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildQuickActionButton(
-                          icon: Icons.share,
-                          onPressed: () => _shareProfile(profile),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInterestTags(List<String> interests) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children: interests.take(3).map<Widget>((interest) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
-            child: Text(
-              interest,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildQuickActionButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return AnimatedPressable(
-      onPressed: onPressed,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 20,
-        ),
-      ),
-    );
-  }
-
   Widget _buildLoadingState() {
     return Center(
       child: Column(
@@ -567,14 +462,14 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.favorite_outline,
-                size: 60,
+                Icons.search,
                 color: Colors.white,
+                size: 48,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
-              'Plus de profils pour aujourd\'hui',
+              'Aucun profil disponible',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -606,98 +501,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ),
       ),
     );
-  }
-
-  void _showProfileDetails(Profile profile) {
-    // Navigate to profile detail page
-    context.push('/profile-detail/${profile.id}');
-  }
-
-  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.favorite,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              const Text('Confirmer votre choix'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Voulez-vous vraiment choisir ${profile.firstName} ?',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _selectProfile(profile, matchingProvider);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Confirmer'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider) async {
-    final success = await matchingProvider.selectProfile(profile.id);
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Vous avez choisi ${profile.firstName} !'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(matchingProvider.error ?? 'Erreur lors de la sélection'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
   }
 
   Widget _buildErrorState(String error) {
@@ -815,45 +618,95 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSelectionInfo(MatchingProvider matchingProvider) {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 300),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Choix restants',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
+  void _showProfileDetails(Profile profile) {
+    // Navigate to profile detail page
+    context.push('/profile-detail/${profile.id}');
+  }
+
+  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.favorite,
                 color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                '${matchingProvider.remainingSelections}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              const Text('Confirmer votre choix'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Voulez-vous vraiment choisir ${profile.firstName} ?',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _selectProfile(profile, matchingProvider);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Confirmer'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider) async {
+    final success = await matchingProvider.selectProfile(profile.id);
+    
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Vous avez choisi ${profile.firstName} !'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(matchingProvider.error ?? 'Erreur lors de la sélection'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }

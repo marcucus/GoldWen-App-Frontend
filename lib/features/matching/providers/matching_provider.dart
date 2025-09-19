@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
+import '../../../core/services/local_notification_service.dart';
 import '../../../core/models/models.dart';
 
 class MatchingProvider with ChangeNotifier {
@@ -46,10 +47,35 @@ class MatchingProvider with ChangeNotifier {
       
       // Load subscription usage to know limits
       await _loadSubscriptionUsage();
+      
+      // Schedule next day's notification
+      await _scheduleDailyNotifications();
     } catch (e) {
       _handleError(e, 'Failed to load daily selection');
     } finally {
       _setLoaded();
+    }
+  }
+
+  Future<void> _scheduleDailyNotifications() async {
+    try {
+      await LocalNotificationService().scheduleDailySelectionNotification();
+    } catch (e) {
+      // Don't fail the whole operation if notifications fail
+      print('Failed to schedule daily notifications: $e');
+    }
+  }
+
+  Future<void> initializeNotifications() async {
+    try {
+      await LocalNotificationService().initialize();
+      final permissionGranted = await LocalNotificationService().requestPermissions();
+      
+      if (permissionGranted) {
+        await _scheduleDailyNotifications();
+      }
+    } catch (e) {
+      print('Failed to initialize notifications: $e');
     }
   }
 
@@ -98,9 +124,18 @@ class MatchingProvider with ChangeNotifier {
       
       // Check if it's a match
       final isMatch = response['data']?['isMatch'] ?? false;
+      final matchedUserName = response['data']?['matchedUserName'] as String?;
+      
       if (isMatch) {
         // Reload matches to include the new one
         await loadMatches();
+        
+        // Show match notification
+        if (matchedUserName != null) {
+          await LocalNotificationService().showMatchNotification(
+            matchedUserName: matchedUserName,
+          );
+        }
       }
       
       _selectedProfileIds.add(profileId);

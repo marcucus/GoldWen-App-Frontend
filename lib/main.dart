@@ -30,7 +30,12 @@ class GoldWenApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => MatchingProvider()),
+        ChangeNotifierProvider(create: (context) {
+          final provider = MatchingProvider();
+          // Initialize notifications when provider is created
+          provider.initializeNotifications();
+          return provider;
+        }),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),
       ],
