@@ -20,6 +20,7 @@ import '../../features/admin/pages/admin_dashboard_page.dart';
 import '../../features/admin/pages/admin_users_page.dart';
 import '../../features/admin/pages/admin_reports_page.dart';
 import '../../features/admin/pages/admin_support_page.dart';
+import '../../features/admin/guards/admin_auth_guard.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
