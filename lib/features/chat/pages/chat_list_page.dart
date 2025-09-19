@@ -186,9 +186,9 @@ class _ChatListPageState extends State<ChatListPage>
           return _buildLoadingState();
         }
 
-        final chats = _getSampleChats(); // Using sample data
+        final conversations = chatProvider.conversations;
 
-        if (chats.isEmpty) {
+        if (conversations.isEmpty) {
           return _buildEmptyState();
         }
 
@@ -200,12 +200,12 @@ class _ChatListPageState extends State<ChatListPage>
               Expanded(
                 child: ListView.builder(
                   physics: const BouncingScrollPhysics(),
-                  itemCount: chats.length,
+                  itemCount: conversations.length,
                   itemBuilder: (context, index) {
-                    final chat = chats[index];
+                    final conversation = conversations[index];
                     return FadeInAnimation(
                       delay: Duration(milliseconds: 600 + (index * 100)),
-                      child: _buildChatItem(chat, index),
+                      child: _buildConversationItem(conversation, index),
                     );
                   },
                 ),
@@ -217,9 +217,12 @@ class _ChatListPageState extends State<ChatListPage>
     );
   }
 
-  Widget _buildChatItem(Map<String, dynamic> chat, int index) {
+  Widget _buildConversationItem(Conversation conversation, int index) {
+    final isExpired = conversation.isExpired;
+    final remainingTime = isExpired ? null : _formatRemainingTime(conversation);
+    
     return AnimatedPressable(
-      onPressed: () => _openChat(chat),
+      onPressed: () => _openConversation(conversation),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         child: GlassCard(
@@ -227,51 +230,30 @@ class _ChatListPageState extends State<ChatListPage>
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              // Avatar with online status
-              Stack(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          chat['avatarColor'].withOpacity(0.8),
-                          chat['avatarColor'],
-                        ],
-                      ),
-                      boxShadow: AppShadows.soft,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+              // Avatar
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGold.withOpacity(0.8),
+                      AppColors.primaryGold,
+                    ],
                   ),
-                  if (chat['isOnline'])
-                    Positioned(
-                      bottom: 2,
-                      right: 2,
-                      child: Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: AppColors.successGreen,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                  boxShadow: AppShadows.soft,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
 
               const SizedBox(width: AppSpacing.md),
 
-              // Chat info
+              // Conversation info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +262,7 @@ class _ChatListPageState extends State<ChatListPage>
                       children: [
                         Expanded(
                           child: Text(
-                            chat['name'],
+                            conversation.otherParticipant?.firstName ?? 'Utilisateur',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -290,42 +272,48 @@ class _ChatListPageState extends State<ChatListPage>
                                 ),
                           ),
                         ),
-                        Text(
-                          chat['time'],
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                        ),
+                        if (remainingTime != null)
+                          Text(
+                            remainingTime,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.primaryGold,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        if (isExpired)
+                          Text(
+                            'Expiré',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.errorRed,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        if (chat['isTyping'])
-                          Expanded(
-                            child: _buildTypingIndicator(),
-                          )
-                        else
-                          Expanded(
-                            child: Text(
-                              chat['lastMessage'],
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: chat['unreadCount'] > 0
-                                        ? AppColors.textDark
-                                        : AppColors.textSecondary,
-                                    fontWeight: chat['unreadCount'] > 0
-                                        ? FontWeight.w500
-                                        : FontWeight.normal,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        Expanded(
+                          child: Text(
+                            conversation.lastMessage?.content ?? 
+                            (isExpired ? 'Conversation expirée' : 'Félicitations! Vous avez un match'),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: conversation.hasUnreadMessages
+                                      ? AppColors.textDark
+                                      : AppColors.textSecondary,
+                                  fontWeight: conversation.hasUnreadMessages
+                                      ? FontWeight.w500
+                                      : FontWeight.normal,
+                                  fontStyle: isExpired ? FontStyle.italic : null,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        if (chat['unreadCount'] > 0)
+                        ),
+                        if (conversation.hasUnreadMessages && !isExpired)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.sm,
@@ -337,7 +325,7 @@ class _ChatListPageState extends State<ChatListPage>
                                   BorderRadius.circular(AppBorderRadius.small),
                             ),
                             child: Text(
-                              '${chat['unreadCount']}',
+                              '${conversation.unreadCount}',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -355,27 +343,29 @@ class _ChatListPageState extends State<ChatListPage>
 
               const SizedBox(width: AppSpacing.sm),
 
-              // Action menu
-              AnimatedPressable(
-                onPressed: () => _showChatMenu(chat),
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.small),
-                  ),
-                  child: const Icon(
-                    Icons.more_vert,
-                    color: AppColors.primaryGold,
-                    size: 20,
-                  ),
-                ),
+              // Status icon
+              Icon(
+                isExpired ? Icons.schedule_outlined : Icons.message,
+                color: isExpired ? AppColors.errorRed : AppColors.primaryGold,
+                size: 20,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _formatRemainingTime(Conversation conversation) {
+    if (conversation.expiresAt == null) return '';
+    
+    final remaining = conversation.expiresAt!.difference(DateTime.now());
+    if (remaining.isNegative) return '';
+    
+    final hours = remaining.inHours;
+    final minutes = remaining.inMinutes % 60;
+    
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   Widget _buildTypingIndicator() {
@@ -511,110 +501,20 @@ class _ChatListPageState extends State<ChatListPage>
     );
   }
 
-  void _openChat(Map<String, dynamic> chat) {
+  void _openConversation(Conversation conversation) {
+    if (conversation.isExpired) {
+      // Show expired conversation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cette conversation a expiré'),
+          backgroundColor: AppColors.errorRed,
+        ),
+      );
+      return;
+    }
+    
     // Navigate to chat detail page
+    context.push('/chat/${conversation.id}');
   }
 
-  void _showChatMenu(Map<String, dynamic> chat) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppBorderRadius.xLarge),
-          ),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.dividerLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: const Text('Voir le profil'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications_off_outlined),
-              title: const Text('Désactiver les notifications'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading:
-                  const Icon(Icons.delete_outline, color: AppColors.errorRed),
-              title: const Text('Supprimer la conversation'),
-              textColor: AppColors.errorRed,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Map<String, dynamic>> _getSampleChats() {
-    return [
-      {
-        'name': 'Sarah',
-        'lastMessage': 'Salut ! Comment ça va ?',
-        'time': '14:30',
-        'unreadCount': 2,
-        'isOnline': true,
-        'isTyping': false,
-        'avatarColor': AppColors.errorRed,
-      },
-      {
-        'name': 'Marie',
-        'lastMessage': 'On se voit toujours ce soir ?',
-        'time': '12:15',
-        'unreadCount': 0,
-        'isOnline': false,
-        'isTyping': false,
-        'avatarColor': AppColors.infoBlue,
-      },
-      {
-        'name': 'Julie',
-        'lastMessage': '',
-        'time': '11:45',
-        'unreadCount': 0,
-        'isOnline': true,
-        'isTyping': true,
-        'avatarColor': AppColors.successGreen,
-      },
-      {
-        'name': 'Emma',
-        'lastMessage': 'Merci pour cette soirée ! 😊',
-        'time': 'Hier',
-        'unreadCount': 0,
-        'isOnline': false,
-        'isTyping': false,
-        'avatarColor': AppColors.warningAmber,
-      },
-      {
-        'name': 'Sophie',
-        'lastMessage': 'À bientôt !',
-        'time': 'Hier',
-        'unreadCount': 1,
-        'isOnline': false,
-        'isTyping': false,
-        'avatarColor': AppColors.primaryGold,
-      },
-    ];
-  }
 }
