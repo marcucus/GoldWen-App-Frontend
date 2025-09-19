@@ -194,6 +194,22 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static Future<Map<String, dynamic>> updateProfileStatus({
+    String? status,
+    bool? completed,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/profiles/me/status'),
+      headers: _headers,
+      body: jsonEncode({
+        if (status != null) 'status': status,
+        if (completed != null) 'completed': completed,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Authentication extensions
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(

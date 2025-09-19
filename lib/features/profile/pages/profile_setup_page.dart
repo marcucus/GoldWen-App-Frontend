@@ -610,13 +610,61 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       );
 
       if (image != null) {
-        // For now, we'll add the image path as a mock URL
-        // In a real app, you would upload the image to a server
-        profileProvider.addPhoto('file://${image.path}');
-        
-        // TODO: In production, upload the image to backend
-        // final uploadedUrl = await ApiService.uploadPhoto(image.path);
-        // profileProvider.addPhoto(uploadedUrl);
+        // Show loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Upload de la photo...'),
+              ],
+            ),
+          ),
+        );
+
+        try {
+          // Upload the image to backend
+          final response = await ApiService.uploadPhoto(
+            image.path,
+            order: profileProvider.photos.length + 1,
+          );
+          
+          // Extract photo URL from response
+          final photoUrl = response['data']['url'] ?? response['url'] ?? 'uploaded_photo_${profileProvider.photos.length + 1}';
+          profileProvider.addPhoto(photoUrl);
+          
+          // Close loading dialog
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Photo ajoutée avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } catch (uploadError) {
+          // Close loading dialog
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+          
+          // For development, still add a placeholder if upload fails
+          print('Photo upload failed: $uploadError');
+          profileProvider.addPhoto('file://${image.path}'); // Fallback for development
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erreur d\'upload: $uploadError'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
     } catch (e) {
       // Show error message to user
