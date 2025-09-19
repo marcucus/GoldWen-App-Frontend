@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
+import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
 
 class DailyMatchesPage extends StatefulWidget {
@@ -14,8 +15,6 @@ class DailyMatchesPage extends StatefulWidget {
 
 class _DailyMatchesPageState extends State<DailyMatchesPage>
     with TickerProviderStateMixin {
-  PageController _pageController = PageController();
-  int _currentIndex = 0;
   late AnimationController _backgroundController;
   late AnimationController _cardController;
 
@@ -51,7 +50,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   void dispose() {
     _backgroundController.dispose();
     _cardController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -152,20 +150,31 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           return _buildLoadingState();
         }
 
-        final profiles = _generateSampleProfiles();
+        if (matchingProvider.error != null) {
+          return _buildErrorState(matchingProvider.error!);
+        }
+
+        final profiles = matchingProvider.dailyProfiles;
+        final availableProfiles = profiles.where((profile) => 
+          !matchingProvider.isProfileSelected(profile.id)
+        ).toList();
 
         if (profiles.isEmpty) {
           return _buildEmptyState();
         }
 
+        if (availableProfiles.isEmpty && profiles.isNotEmpty) {
+          return _buildSelectionCompleteState(matchingProvider);
+        }
+
         return Column(
           children: [
-            _buildProfileCounter(profiles.length),
+            _buildProfileCounter(availableProfiles.length),
+            _buildSelectionInfo(matchingProvider),
             const SizedBox(height: 16),
             Expanded(
-              child: _buildSwipeableCards(profiles),
+              child: _buildProfileCards(availableProfiles, matchingProvider),
             ),
-            _buildActionButtons(),
             const SizedBox(height: 16),
           ],
         );
@@ -187,7 +196,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
-          '${_currentIndex + 1} / $totalProfiles',
+          '$totalProfiles profil${totalProfiles > 1 ? 's' : ''} disponible${totalProfiles > 1 ? 's' : ''}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -197,99 +206,92 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSwipeableCards(List<Map<String, dynamic>> profiles) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
+  Widget _buildProfileCards(List<Profile> profiles, MatchingProvider matchingProvider) {
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        itemCount: profiles.length,
-        itemBuilder: (context, index) {
-          final profile = profiles[index];
-          return SlideInAnimation(
-            delay: Duration(milliseconds: 500 + (index * 100)),
-            child: _buildProfileCard(profile, index),
-          );
-        },
-      ),
+      itemCount: profiles.length,
+      itemBuilder: (context, index) {
+        final profile = profiles[index];
+        return SlideInAnimation(
+          delay: Duration(milliseconds: 300 + (index * 100)),
+          child: _buildProfileCard(profile, matchingProvider),
+        );
+      },
     );
   }
 
-  Widget _buildProfileCard(Map<String, dynamic> profile, int index) {
+  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          height: 400,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.3),
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor,
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          profile['color'].withOpacity(0.3),
-                          profile['color'].withOpacity(0.8),
-                          profile['color'],
-                        ],
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.person,
-                        size: 120,
-                        color: Colors.white,
-                      ),
-                    ),
+          ),
+          child: Stack(
+            children: [
+              // Profile image placeholder
+              const Center(
+                child: Icon(
+                  Icons.person,
+                  size: 120,
+                  color: Colors.white,
+                ),
+              ),
+              // Gradient overlay
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+                ),
+              ),
+              // Profile info
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '${profile['name']}, ${profile['age']}',
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${profile.firstName} ${profile.lastName}, ${profile.age}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium
@@ -298,12 +300,81 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
+                                const SizedBox(height: 4),
+                                if (profile.bio.isNotEmpty)
+                                  Text(
+                                    profile.bio,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withOpacity(0.9),
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Action buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                _showProfileDetails(profile);
+                              },
+                              icon: const Icon(Icons.info_outline),
+                              label: const Text('Détails'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              if (profile['isPremium'])
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: matchingProvider.canSelectMore
+                                  ? () => _showChoiceConfirmation(profile, matchingProvider)
+                                  : null,
+                              icon: const Icon(Icons.favorite),
+                              label: const Text('Choisir'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: matchingProvider.canSelectMore
+                                    ? Colors.red
+                                    : Colors.grey,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showProfileDetails(Profile profile) {
+    // Navigate to profile detail page
+    context.push('/profile-detail/${profile.id}');
+  }
+
+  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
                                         Colors.amber,
                                         Colors.orange,
                                       ],
@@ -442,69 +513,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildActionButtons() {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 600),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              icon: Icons.close,
-              color: Colors.red,
-              size: 56,
-              onPressed: () => _handleReject(),
-            ),
-            _buildActionButton(
-              icon: Icons.star,
-              color: Colors.blue,
-              size: 48,
-              onPressed: () => _handleSuperLike(),
-            ),
-            _buildActionButton(
-              icon: Icons.favorite,
-              color: Colors.green,
-              size: 56,
-              onPressed: () => _handleLike(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required double size,
-    required VoidCallback onPressed,
-  }) {
-    return AnimatedPressable(
-      onPressed: onPressed,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: size * 0.4,
-        ),
-      ),
-    );
-  }
-
   Widget _buildLoadingState() {
     return Center(
       child: Column(
@@ -600,98 +608,252 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  void _handleLike() {
-    _animateToNextProfile();
-    // Handle like logic
+  void _showProfileDetails(Profile profile) {
+    // Navigate to profile detail page
+    context.push('/profile-detail/${profile.id}');
   }
 
-  void _handleReject() {
-    _animateToNextProfile();
-    // Handle reject logic
+  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.favorite,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(width: 8),
+              const Text('Confirmer votre choix'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Voulez-vous vraiment choisir ${profile.firstName} ?',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _selectProfile(profile, matchingProvider);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Confirmer'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  void _handleSuperLike() {
-    _animateToNextProfile();
-    // Handle super like logic
-  }
-
-  void _animateToNextProfile() {
-    if (_currentIndex < _generateSampleProfiles().length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.easeInOut,
+  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider) async {
+    final success = await matchingProvider.selectProfile(profile.id);
+    
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Vous avez choisi ${profile.firstName} !'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(matchingProvider.error ?? 'Erreur lors de la sélection'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
       );
     }
   }
 
-  void _showProfileDetails(Map<String, dynamic> profile) {
-    // Show detailed profile view
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Profil de ${profile['name']}'),
-        content: Text(profile['bio']),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fermer'),
-          ),
-        ],
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Oups !',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+                matchingProvider.loadDailySelection();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('Réessayer'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _shareProfile(Map<String, dynamic> profile) {
-    // Handle profile sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Partage du profil de ${profile['name']}'),
+  Widget _buildSelectionCompleteState(MatchingProvider matchingProvider) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withOpacity(0.8),
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Sélection terminée !',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Vous avez fait vos choix pour aujourd\'hui. Revenez demain pour de nouveaux profils.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            if (!matchingProvider.hasSubscription)
+              ElevatedButton(
+                onPressed: () {
+                  context.go('/subscription');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text('Découvrir GoldWen Plus'),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  List<Map<String, dynamic>> _generateSampleProfiles() {
-    return [
-      {
-        'name': 'Sarah',
-        'age': 25,
-        'distance': 2,
-        'bio':
-            'Amoureuse de voyages et de bonne cuisine. Toujours partante pour de nouvelles aventures !',
-        'interests': ['Voyage', 'Cuisine', 'Yoga', 'Photographie'],
-        'isPremium': true,
-        'color': Colors.pink,
-      },
-      {
-        'name': 'Marie',
-        'age': 28,
-        'distance': 5,
-        'bio':
-            'Passionnée d\'art et de musique. Cherche quelqu\'un pour partager de beaux moments.',
-        'interests': ['Art', 'Musique', 'Lecture', 'Cinéma'],
-        'isPremium': false,
-        'color': Colors.blue,
-      },
-      {
-        'name': 'Julie',
-        'age': 26,
-        'distance': 3,
-        'bio':
-            'Sportive et aventurière. J\'adore l\'escalade et les randonnées en montagne.',
-        'interests': ['Sport', 'Escalade', 'Randonnée', 'Nature'],
-        'isPremium': true,
-        'color': Colors.green,
-      },
-      {
-        'name': 'Emma',
-        'age': 24,
-        'distance': 7,
-        'bio':
-            'Étudiante en médecine. Recherche une relation sérieuse et authentique.',
-        'interests': ['Médecine', 'Lecture', 'Café', 'Animaux'],
-        'isPremium': false,
-        'color': Colors.orange,
-      },
-    ];
+  Widget _buildSelectionInfo(MatchingProvider matchingProvider) {
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 300),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Choix restants',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${matchingProvider.remainingSelections}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
