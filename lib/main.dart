@@ -9,6 +9,8 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
 import 'features/matching/providers/matching_provider.dart';
 import 'features/chat/providers/chat_provider.dart';
+import 'features/admin/providers/admin_auth_provider.dart';
+import 'features/admin/providers/admin_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,9 @@ class GoldWenApp extends StatelessWidget {
         }),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),
+        // Admin providers
+        ChangeNotifierProvider(create: (_) => AdminAuthProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: MaterialApp.router(
         title: 'GoldWen',
