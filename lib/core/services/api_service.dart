@@ -719,6 +719,17 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static Future<Map<String, dynamic>> registerDeviceToken(
+      Map<String, String> deviceInfo) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/notifications/register-device'),
+      headers: _headers,
+      body: jsonEncode(deviceInfo),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Admin endpoints
   static Future<Map<String, dynamic>> adminLogin({
     required String email,
