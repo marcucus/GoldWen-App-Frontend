@@ -37,7 +37,7 @@ class UserListItem extends StatelessWidget {
                     : null,
                 child: user.profilePicture == null 
                     ? Text(
-                        '${user.firstName.substring(0, 1)}${user.lastName.substring(0, 1)}',
+                        '${user.firstName?.substring(0, 1) ?? ''}${user.lastName?.substring(0, 1) ?? ''}',
                         style: TextStyle(
                           color: AppColors.primaryGold,
                           fontWeight: FontWeight.bold,

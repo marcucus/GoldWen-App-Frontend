@@ -137,6 +137,10 @@ class Profile {
     }
     return age;
   }
+
+  // Add missing getters expected by daily matches component
+  String? get firstName => pseudo?.split(' ').first;
+  String? get lastName => pseudo?.split(' ').length > 1 ? pseudo?.split(' ').skip(1).join(' ') : null;
 }
 
 class Photo {
