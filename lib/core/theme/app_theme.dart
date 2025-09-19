@@ -37,7 +37,6 @@ class AppColors {
   static const Color gradientMiddle = Color(0xFFD4AF37);
   static const Color gradientEnd = Color(0xFFF5E6B8);
   static const Color cardOverlay = Color(0xFFFFFFFF);
-  static const Color textLight = Color(0xFFFFFFFF);
   
   // Glass Morphism Colors
   static const Color glassBackground = Color(0x40FFFFFF);

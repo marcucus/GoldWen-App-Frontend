@@ -398,7 +398,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${profile.firstName} ${profile.lastName}, ${profile.age}',
+                                  '${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium
@@ -408,9 +408,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                       ),
                                 ),
                                 const SizedBox(height: 4),
-                                if (profile.bio.isNotEmpty)
+                                if (profile.bio?.isNotEmpty == true)
                                   Text(
-                                    profile.bio,
+                                    profile.bio!,
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -711,7 +711,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Voulez-vous vraiment choisir ${profile.firstName} ?',
+                'Voulez-vous vraiment choisir ${profile.firstName ?? 'cette personne'} ?',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
@@ -786,7 +786,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vous avez choisi ${profile.firstName} !'),
+          content: Text('Vous avez choisi ${profile.firstName ?? 'cette personne'} !'),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 3),
         ),

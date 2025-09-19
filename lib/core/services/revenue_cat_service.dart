@@ -15,8 +15,7 @@ class RevenueCatService {
     try {
       await Purchases.configure(
         PurchasesConfiguration(_apiKey)
-          ..appUserID = null // Let RevenueCat generate the user ID
-          ..observerMode = false,
+          ..appUserID = null, // Let RevenueCat generate the user ID
       );
       _isInitialized = true;
     } catch (e) {
@@ -146,7 +145,16 @@ class RevenueCatService {
 
   static DateTime? getExpirationDate(CustomerInfo customerInfo) {
     final entitlement = getActiveEntitlement(customerInfo);
-    return entitlement?.expirationDate;
+    final expirationDateString = entitlement?.expirationDate;
+    if (expirationDateString != null) {
+      try {
+        return DateTime.parse(expirationDateString);
+      } catch (e) {
+        print('Error parsing expiration date: $expirationDateString');
+        return null;
+      }
+    }
+    return null;
   }
 
   static bool willRenew(CustomerInfo customerInfo) {

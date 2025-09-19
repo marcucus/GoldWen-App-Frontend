@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../providers/chat_provider.dart';
+import '../../../core/models/chat.dart';
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
@@ -127,8 +128,8 @@ class _ChatListPageState extends State<ChatListPage>
                     const SizedBox(height: 4),
                     Consumer<ChatProvider>(
                       builder: (context, chatProvider, child) {
-                        final unreadCount = _getSampleChats()
-                            .where((chat) => chat['unreadCount'] > 0)
+                        final unreadCount = chatProvider.conversations
+                            .where((chat) => chat.unreadCount > 0)
                             .length;
                         return Text(
                           unreadCount > 0
