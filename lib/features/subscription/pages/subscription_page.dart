@@ -65,22 +65,6 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     },
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeAnimations();
-    _startAnimations();
-    _loadSubscriptionData();
-  }
-
-  void _loadSubscriptionData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
-      subscriptionProvider.loadSubscriptionPlans();
-      subscriptionProvider.loadCurrentSubscription();
-    });
-  }
-
   void _initializeAnimations() {
     _backgroundController = AnimationController(
       duration: AppAnimations.verySlow,
@@ -882,7 +866,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         ),
         title: Row(
           children: [
-            Icon(Icons.error_outline, color: AppColors.error),
+            Icon(Icons.error_outline, color: AppColors.errorRed),
             SizedBox(width: AppSpacing.sm),
             Text('Erreur d\'abonnement'),
           ],

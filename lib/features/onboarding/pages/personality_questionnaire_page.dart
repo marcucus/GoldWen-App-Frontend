@@ -320,11 +320,11 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   }
 
   Widget _buildQuestionOptions(PersonalityQuestion question, dynamic selectedAnswer) {
-    if (question.type == 'multiple_choice' && question.options.isNotEmpty) {
+    if (question.type == 'multiple_choice' && question.options?.isNotEmpty == true) {
       return ListView.builder(
-        itemCount: question.options.length,
+        itemCount: question.options!.length,
         itemBuilder: (context, index) {
-          final option = question.options[index];
+          final option = question.options![index];
           final isSelected = selectedAnswer == option;
           
           return Padding(
