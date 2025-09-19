@@ -22,9 +22,10 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   bool _isSubmitting = false;
   bool _isLoading = true;
   String? _error;
-  Map<String, String> _questionKeyToUuid = {};
+  List<PersonalityQuestion> _questions = [];
 
-  final List<Map<String, dynamic>> _questions = [
+  // Hardcoded fallback questions in case API fails
+  final List<Map<String, dynamic>> _fallbackQuestions = [
     {
       'question': 'Qu\'est-ce qui vous motive le plus dans la vie ?',
       'options': [
@@ -146,69 +147,27 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         return;
       }
 
-      // Create mapping between hardcoded question keys and backend UUIDs
-      _createQuestionMapping(profileProvider.personalityQuestions);
-      
+      // Use dynamic questions from API
+      final backendQuestions = profileProvider.personalityQuestions;
+      if (backendQuestions.isEmpty) {
+        throw Exception('Aucune question de personnalité trouvée sur le serveur');
+      }
+
+      // Sort questions by order
+      final sortedQuestions = List<PersonalityQuestion>.from(backendQuestions)
+        ..sort((a, b) => a.order.compareTo(b.order));
+
       setState(() {
+        _questions = sortedQuestions;
         _isLoading = false;
       });
     } catch (e) {
+      print('Error loading personality questions: $e');
       setState(() {
         _error = 'Erreur lors du chargement des questions: $e';
         _isLoading = false;
       });
     }
-  }
-
-  void _createQuestionMapping(List<PersonalityQuestion> backendQuestions) {
-    // Map hardcoded question keys to backend question UUIDs
-    // First, try to match by category if available
-    final categoryMapping = {
-      'motivation': 'motivation',
-      'free_time': 'free_time', 
-      'conflict_style': 'conflict_style',
-      'relationship_expectation': 'relationship_expectation',
-      'communication_style': 'communication_style',
-      'family_importance': 'family_importance',
-      'stress_management': 'stress_management',
-      'future_vision': 'future_vision',
-      'humor_style': 'humor_style',
-      'core_value': 'core_value',
-    };
-
-    if (backendQuestions.isEmpty) {
-      throw Exception('Aucune question de personnalité trouvée sur le serveur');
-    }
-
-    // Sort backend questions by order to ensure consistent mapping
-    final sortedBackendQuestions = List<PersonalityQuestion>.from(backendQuestions)
-      ..sort((a, b) => a.order.compareTo(b.order));
-
-    // If category mapping works, use it
-    for (final backendQuestion in sortedBackendQuestions) {
-      for (final entry in categoryMapping.entries) {
-        if (backendQuestion.category == entry.value) {
-          _questionKeyToUuid[entry.key] = backendQuestion.id;
-          break;
-        }
-      }
-    }
-
-    // If category mapping didn't work (not enough matches), fall back to order-based mapping
-    if (_questionKeyToUuid.length < _questions.length && sortedBackendQuestions.length >= _questions.length) {
-      _questionKeyToUuid.clear();
-      for (int i = 0; i < _questions.length && i < sortedBackendQuestions.length; i++) {
-        final questionKey = _questions[i]['key'] as String;
-        _questionKeyToUuid[questionKey] = sortedBackendQuestions[i].id;
-      }
-    }
-
-    // Verify we have all necessary mappings
-    if (_questionKeyToUuid.length < _questions.length) {
-      throw Exception('Impossible de mapper toutes les questions. Questions trouvées: ${_questionKeyToUuid.length}, Questions nécessaires: ${_questions.length}');
-    }
-
-    print('Question mapping created: $_questionKeyToUuid');
   }
 
   @override
@@ -302,9 +261,8 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     );
   }
 
-  Widget _buildQuestionPage(Map<String, dynamic> questionData) {
-    final questionKey = questionData['key'];
-    final selectedAnswer = _answers[questionKey];
+  Widget _buildQuestionPage(PersonalityQuestion question) {
+    final selectedAnswer = _answers[question.id];
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -314,50 +272,16 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           
           // Question
           Text(
-            questionData['question'],
+            question.question,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           
           const SizedBox(height: AppSpacing.xxl),
           
-          // Options
+          // Options - render based on question type
           Expanded(
-            child: ListView.builder(
-              itemCount: questionData['options'].length,
-              itemBuilder: (context, index) {
-                final option = questionData['options'][index];
-                final isSelected = selectedAnswer == option;
-                
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: Card(
-                    elevation: isSelected ? 4 : 1,
-                    color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(AppSpacing.md),
-                      title: Text(
-                        option,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: isSelected ? AppColors.primaryGold : null,
-                          fontWeight: isSelected ? FontWeight.w600 : null,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              Icons.check_circle,
-                              color: AppColors.primaryGold,
-                            )
-                          : const Icon(
-                              Icons.radio_button_unchecked,
-                              color: AppColors.textSecondary,
-                            ),
-                      onTap: () => _selectAnswer(questionKey, option),
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: _buildQuestionOptions(question, selectedAnswer),
           ),
           
           // Navigation buttons
@@ -395,9 +319,141 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     );
   }
 
-  void _selectAnswer(String questionKey, String answer) {
+  Widget _buildQuestionOptions(PersonalityQuestion question, dynamic selectedAnswer) {
+    if (question.type == 'multiple_choice' && question.options.isNotEmpty) {
+      return ListView.builder(
+        itemCount: question.options.length,
+        itemBuilder: (context, index) {
+          final option = question.options[index];
+          final isSelected = selectedAnswer == option;
+          
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Card(
+              elevation: isSelected ? 4 : 1,
+              color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(AppSpacing.md),
+                title: Text(
+                  option,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: isSelected ? AppColors.primaryGold : null,
+                    fontWeight: isSelected ? FontWeight.w600 : null,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(
+                        Icons.check_circle,
+                        color: AppColors.primaryGold,
+                      )
+                    : const Icon(
+                        Icons.radio_button_unchecked,
+                        color: AppColors.textSecondary,
+                      ),
+                onTap: () => _selectAnswer(question.id, option),
+              ),
+            ),
+          );
+        },
+      );
+    } else if (question.type == 'scale') {
+      // Handle scale questions (e.g., 1-5 rating)
+      return Column(
+        children: [
+          Text(
+            'Évaluez de 1 à 5',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(5, (index) {
+              final value = index + 1;
+              final isSelected = selectedAnswer == value;
+              
+              return GestureDetector(
+                onTap: () => _selectAnswer(question.id, value),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected ? AppColors.primaryGold : Colors.transparent,
+                    border: Border.all(
+                      color: isSelected ? AppColors.primaryGold : AppColors.textSecondary,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      value.toString(),
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : AppColors.textDark,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      );
+    } else if (question.type == 'boolean') {
+      // Handle yes/no questions
+      return Column(
+        children: [
+          _buildBooleanOption(question.id, true, 'Oui', selectedAnswer),
+          const SizedBox(height: AppSpacing.md),
+          _buildBooleanOption(question.id, false, 'Non', selectedAnswer),
+        ],
+      );
+    } else {
+      // Fallback for text input or unknown types
+      return TextField(
+        decoration: const InputDecoration(
+          hintText: 'Tapez votre réponse...',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (value) => _selectAnswer(question.id, value),
+        controller: TextEditingController(text: selectedAnswer?.toString()),
+      );
+    }
+  }
+
+  Widget _buildBooleanOption(String questionId, bool value, String label, dynamic selectedAnswer) {
+    final isSelected = selectedAnswer == value;
+    
+    return Card(
+      elevation: isSelected ? 4 : 1,
+      color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
+        title: Text(
+          label,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: isSelected ? AppColors.primaryGold : null,
+            fontWeight: isSelected ? FontWeight.w600 : null,
+          ),
+        ),
+        trailing: isSelected
+            ? Icon(
+                Icons.check_circle,
+                color: AppColors.primaryGold,
+              )
+            : const Icon(
+                Icons.radio_button_unchecked,
+                color: AppColors.textSecondary,
+              ),
+        onTap: () => _selectAnswer(questionId, value),
+      ),
+    );
+  }
+
+  void _selectAnswer(String questionId, dynamic answer) {
     setState(() {
-      _answers[questionKey] = answer;
+      _answers[questionId] = answer;
     });
   }
 
@@ -430,38 +486,35 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
-      profileProvider.setPersonalityAnswers(_answers);
-      
       // Verify we have all answers
       if (_answers.length < _questions.length) {
         throw Exception('Veuillez répondre à toutes les questions');
       }
       
-      // Convert answers to API format using actual UUIDs
+      // Convert answers to API format using actual question IDs
       final List<Map<String, dynamic>> apiAnswers = _answers.entries.map((entry) {
-        final questionUuid = _questionKeyToUuid[entry.key];
-        if (questionUuid == null) {
-          throw Exception('Question UUID not found for key: ${entry.key}');
-        }
+        final questionId = entry.key;
+        final answerValue = entry.value;
         
-        // Find the backend question to determine correct answer format
-        final backendQuestion = Provider.of<ProfileProvider>(context, listen: false)
-            .personalityQuestions
-            .firstWhere((q) => q.id == questionUuid, orElse: () => throw Exception('Backend question not found'));
+        // Find the question to determine correct answer format
+        final question = _questions.firstWhere(
+          (q) => q.id == questionId, 
+          orElse: () => throw Exception('Question not found: $questionId')
+        );
         
         Map<String, dynamic> answerData = {
-          'questionId': questionUuid,
+          'questionId': questionId,
         };
         
         // Set the appropriate answer field based on question type
-        if (backendQuestion.type == 'multiple_choice') {
-          answerData['textAnswer'] = entry.value.toString();
-        } else if (backendQuestion.type == 'scale') {
-          answerData['numericAnswer'] = entry.value is int ? entry.value : int.tryParse(entry.value.toString()) ?? 0;
-        } else if (backendQuestion.type == 'boolean') {
-          answerData['booleanAnswer'] = entry.value is bool ? entry.value : entry.value.toString().toLowerCase() == 'true';
+        if (question.type == 'multiple_choice') {
+          answerData['textAnswer'] = answerValue.toString();
+        } else if (question.type == 'scale') {
+          answerData['numericAnswer'] = answerValue is int ? answerValue : int.tryParse(answerValue.toString()) ?? 0;
+        } else if (question.type == 'boolean') {
+          answerData['booleanAnswer'] = answerValue is bool ? answerValue : answerValue.toString().toLowerCase() == 'true';
         } else {
-          answerData['textAnswer'] = entry.value.toString();
+          answerData['textAnswer'] = answerValue.toString();
         }
         
         return answerData;
@@ -487,32 +540,24 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         String errorMessage = 'Erreur lors de la sauvegarde: ${e.toString()}';
         
         // Provide more specific error messages
-        if (e.toString().contains('UUID not found')) {
+        if (e.toString().contains('not found')) {
           errorMessage = 'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
         } else if (e.toString().contains('Validation failed')) {
           errorMessage = 'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
-        } else if (e.toString().contains('Network error') || e.toString().contains('timeout')) {
-          errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
         }
+        
+        setState(() {
+          _error = errorMessage;
+          _isSubmitting = false;
+        });
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 8),
-            action: SnackBarAction(
-              label: 'Réessayer',
-              textColor: Colors.white,
-              onPressed: _finishQuestionnaire,
-            ),
+            duration: const Duration(seconds: 5),
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
       }
     }
   }
