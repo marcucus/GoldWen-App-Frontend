@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
 import '../providers/chat_provider.dart';
@@ -21,6 +24,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late AnimationController _timerAnimationController;
+  bool _showEmojiPicker = false;
+  final FocusNode _focusNode = FocusNode();
+  Timer? _countdownTimer;
 
   @override
   void initState() {
@@ -30,8 +36,18 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       duration: const Duration(hours: 24),
     );
 
+    // Close emoji picker when keyboard appears
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus && _showEmojiPicker) {
+        setState(() {
+          _showEmojiPicker = false;
+        });
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadChatMessages();
+      _startCountdownTimer();
     });
   }
 
@@ -50,6 +66,29 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       _timerAnimationController.value = progress;
       _timerAnimationController.animateTo(1.0);
     }
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      final remainingTime = chatProvider.getRemainingTime(widget.chatId);
+      
+      if (remainingTime == null || remainingTime.inSeconds <= 0) {
+        timer.cancel();
+        // Check if chat is expired and handle accordingly
+        if (chatProvider.isChatExpired(widget.chatId)) {
+          setState(() {
+            // This will trigger a rebuild and show expired message
+          });
+        }
+      } else {
+        // Update the UI every second for countdown
+        setState(() {
+          // This triggers rebuild to update the timer display
+        });
+      }
+    });
   }
 
   @override
@@ -91,11 +130,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
                       final hours = remainingTime.inHours;
                       final minutes = remainingTime.inMinutes % 60;
+                      final seconds = remainingTime.inSeconds % 60;
 
                       return Text(
-                        'Expire dans ${hours}h ${minutes}m',
+                        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.primaryGold,
+                              fontWeight: FontWeight.bold,
+                              fontFeatures: [const FontFeature.tabularFigures()],
                             ),
                       );
                     },
@@ -163,6 +205,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
+    // Handle system messages differently
+    if (message.isSystemMessage) {
+      return _buildSystemMessage(message);
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentUserId = authProvider.user?.id ?? 'current_user'; // Fallback to 'current_user' if no user
     final isFromCurrentUser = message.senderId == currentUserId;
@@ -239,49 +286,183 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildMessageInput(ChatProvider chatProvider) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        border: Border(
-          top: BorderSide(color: AppColors.dividerLight),
-        ),
+  Widget _buildSystemMessage(ChatMessage message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Tapez votre message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: AppColors.accentCream,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.errorRed.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+            border: Border.all(
+              color: AppColors.errorRed.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.schedule_outlined,
+                color: AppColors.errorRed,
+                size: 16,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  message.content,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.errorRed,
+                        fontWeight: FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-            ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.sm),
-          FloatingActionButton(
-            onPressed: () => _sendMessage(chatProvider),
-            backgroundColor: AppColors.primaryGold,
-            mini: true,
-            child: const Icon(
-              Icons.send,
-              color: Colors.white,
-            ),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildMessageInput(ChatProvider chatProvider) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundWhite,
+            border: Border(
+              top: BorderSide(color: AppColors.dividerLight),
+            ),
+          ),
+          child: Row(
+            children: [
+              // Emoji button
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _showEmojiPicker = !_showEmojiPicker;
+                  });
+                  if (_showEmojiPicker) {
+                    _focusNode.unfocus();
+                  } else {
+                    _focusNode.requestFocus();
+                  }
+                },
+                icon: Icon(
+                  _showEmojiPicker ? Icons.keyboard : Icons.emoji_emotions,
+                  color: AppColors.primaryGold,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              // Text input
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  focusNode: _focusNode,
+                  onTap: () {
+                    if (_showEmojiPicker) {
+                      setState(() {
+                        _showEmojiPicker = false;
+                      });
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Tapez votre message...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.accentCream,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                  ),
+                  maxLines: null,
+                  textCapitalization: TextCapitalization.sentences,
+                  onSubmitted: (_) => _sendMessage(chatProvider),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // Send button
+              FloatingActionButton(
+                onPressed: () => _sendMessage(chatProvider),
+                backgroundColor: AppColors.primaryGold,
+                mini: true,
+                child: const Icon(
+                  Icons.send,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Emoji picker
+        if (_showEmojiPicker)
+          SizedBox(
+            height: 250,
+            child: EmojiPicker(
+              onEmojiSelected: (category, emoji) {
+                _onEmojiSelected(emoji);
+              },
+              config: Config(
+                columns: 7,
+                emojiSizeMax: 32 * 1.2,
+                verticalSpacing: 0,
+                horizontalSpacing: 0,
+                gridPadding: EdgeInsets.zero,
+                initCategory: Category.RECENT,
+                bgColor: AppColors.backgroundWhite,
+                indicatorColor: AppColors.primaryGold,
+                iconColor: Colors.grey,
+                iconColorSelected: AppColors.primaryGold,
+                backspaceColor: AppColors.primaryGold,
+                skinToneDialogBgColor: Colors.white,
+                skinToneIndicatorColor: Colors.grey,
+                enableSkinTones: true,
+                recentTabBehavior: RecentTabBehavior.RECENT,
+                recentsLimit: 28,
+                replaceEmojiOnLimitExceed: false,
+                noRecents: Text(
+                  'Aucun emoji récent',
+                  style: TextStyle(fontSize: 20, color: Colors.black26),
+                  textAlign: TextAlign.center,
+                ),
+                loadingIndicator: const SizedBox.shrink(),
+                tabIndicatorAnimDuration: kTabScrollDuration,
+                categoryIcons: const CategoryIcons(),
+                buttonMode: ButtonMode.MATERIAL,
+                checkPlatformCompatibility: true,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _onEmojiSelected(Emoji emoji) {
+    final currentText = _messageController.text;
+    final selection = _messageController.selection;
+    final newText = currentText.replaceRange(
+      selection.start,
+      selection.end,
+      emoji.emoji,
+    );
+    
+    _messageController.text = newText;
+    _messageController.selection = TextSelection.fromPosition(
+      TextPosition(offset: selection.start + emoji.emoji.length),
     );
   }
 
@@ -471,6 +652,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     _messageController.dispose();
     _scrollController.dispose();
     _timerAnimationController.dispose();
+    _focusNode.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 }
