@@ -58,6 +58,7 @@ dependencies:
   
   # Subscriptions
   in_app_purchase: ^3.1.11
+  purchases_flutter: ^6.30.0
   
   # Utilities
   intl: ^0.20.2

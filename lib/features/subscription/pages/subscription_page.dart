@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
+import '../../../core/models/models.dart';
+import '../providers/subscription_provider.dart';
 import '../../legal/pages/terms_page.dart';
 import '../../legal/pages/privacy_page.dart';
 
@@ -23,63 +26,42 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   late Animation<double> _backgroundAnimation;
   late Animation<double> _scaleAnimation;
 
-  final List<Map<String, dynamic>> _plans = [
-    {
-      'duration': 'Mensuel',
-      'price': '19,99 €',
-      'pricePerMonth': '19,99 €/mois',
-      'saving': null,
-      'popular': false,
-      'color': AppColors.infoBlue,
-    },
-    {
-      'duration': 'Trimestriel',
-      'price': '49,99 €',
-      'pricePerMonth': '16,66 €/mois',
-      'saving': 'Économisez 17%',
-      'popular': true,
-      'color': AppColors.primaryGold,
-    },
-    {
-      'duration': 'Semestriel',
-      'price': '89,99 €',
-      'pricePerMonth': '14,99 €/mois',
-      'saving': 'Économisez 25%',
-      'popular': false,
-      'color': AppColors.successGreen,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+    _startAnimations();
+    _loadSubscriptionData();
+  }
+
+  void _loadSubscriptionData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+      subscriptionProvider.loadSubscriptionPlans();
+      subscriptionProvider.loadCurrentSubscription();
+    });
+  }
 
   final List<Map<String, dynamic>> _features = [
     {
       'icon': Icons.favorite,
-      'title': 'Likes illimités',
-      'description': 'Aimez autant de profils que vous voulez',
+      'title': '3 sélections par jour',
+      'description': 'Choisissez jusqu\'à 3 profils dans votre sélection quotidienne',
+    },
+    {
+      'icon': Icons.chat_bubble,
+      'title': 'Chat illimité',
+      'description': 'Échangez sans limite avec vos matches',
     },
     {
       'icon': Icons.visibility,
-      'title': 'Voir qui vous a liké',
-      'description': 'Découvrez qui s\'intéresse à vous',
+      'title': 'Voir qui vous a sélectionné',
+      'description': 'Découvrez qui s\'intéresse à vous en priorité',
     },
     {
       'icon': Icons.star,
-      'title': 'Super Likes',
-      'description': '5 Super Likes par jour pour vous démarquer',
-    },
-    {
-      'icon': Icons.refresh,
-      'title': 'Retours en arrière',
-      'description': 'Annulez vos derniers swipes',
-    },
-    {
-      'icon': Icons.flash_on,
-      'title': 'Boost',
-      'description': '1 Boost par mois pour 10x plus de vues',
-    },
-    {
-      'icon': Icons.location_on,
-      'title': 'Passeport',
-      'description': 'Rencontrez des personnes partout dans le monde',
+      'title': 'Profil prioritaire',
+      'description': 'Votre profil apparaît en priorité dans les sélections',
     },
   ];
 
@@ -88,6 +70,15 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     super.initState();
     _initializeAnimations();
     _startAnimations();
+    _loadSubscriptionData();
+  }
+
+  void _loadSubscriptionData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+      subscriptionProvider.loadSubscriptionPlans();
+      subscriptionProvider.loadCurrentSubscription();
+    });
   }
 
   void _initializeAnimations() {
@@ -133,37 +124,41 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnimatedBuilder(
-        animation: _backgroundAnimation,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.primaryGoldDark,
-                  AppColors.primaryGold,
-                  AppColors.primaryGoldLight
-                      .withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _buildAnimatedHeader(),
-                  Expanded(
-                    child: _buildAnimatedContent(),
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subscriptionProvider, child) {
+        return Scaffold(
+          body: AnimatedBuilder(
+            animation: _backgroundAnimation,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.primaryGoldDark,
+                      AppColors.primaryGold,
+                      AppColors.primaryGoldLight
+                          .withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      _buildAnimatedHeader(),
+                      Expanded(
+                        child: _buildAnimatedContent(subscriptionProvider),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -230,7 +225,70 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     );
   }
 
-  Widget _buildAnimatedContent() {
+  Widget _buildAnimatedContent(SubscriptionProvider subscriptionProvider) {
+    if (subscriptionProvider.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              'Chargement des plans...',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (subscriptionProvider.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.white,
+              size: 48,
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              'Erreur lors du chargement',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: AppSpacing.sm),
+            Text(
+              subscriptionProvider.error!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withOpacity(0.8),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: AppSpacing.xl),
+            ElevatedButton(
+              onPressed: () {
+                subscriptionProvider.clearError();
+                _loadSubscriptionData();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryGold,
+              ),
+              child: Text('Réessayer'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
@@ -247,12 +305,12 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 const SizedBox(height: AppSpacing.xl),
 
                 // Pricing Plans
-                _buildPricingSection(),
+                _buildPricingSection(subscriptionProvider),
 
                 const SizedBox(height: AppSpacing.xl),
 
                 // Subscribe Button
-                _buildSubscribeButton(),
+                _buildSubscribeButton(subscriptionProvider),
 
                 const SizedBox(height: AppSpacing.lg),
 
@@ -354,7 +412,56 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     );
   }
 
-  Widget _buildPricingSection() {
+  Widget _buildPricingSection(SubscriptionProvider subscriptionProvider) {
+    final plans = subscriptionProvider.activePlans;
+    
+    if (plans.isEmpty) {
+      return SlideInAnimation(
+        delay: const Duration(milliseconds: 600),
+        child: Column(
+          children: [
+            Text(
+              'Plans d\'abonnement',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                ),
+              ),
+              child: Text(
+                'Aucun plan disponible pour le moment',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withOpacity(0.8),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Auto-select the most popular plan or first available
+    if (_selectedPlanIndex >= plans.length) {
+      _selectedPlanIndex = 0;
+      for (int i = 0; i < plans.length; i++) {
+        if (plans[i].metadata['popular'] == true) {
+          _selectedPlanIndex = i;
+          break;
+        }
+      }
+    }
+
     return SlideInAnimation(
       delay: const Duration(milliseconds: 600),
       child: Column(
@@ -368,10 +475,10 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
-          ...List.generate(_plans.length, (index) {
+          ...List.generate(plans.length, (index) {
             return FadeInAnimation(
               delay: Duration(milliseconds: 700 + (index * 100)),
-              child: _buildPlanCard(index),
+              child: _buildPlanCard(index, plans[index]),
             );
           }),
         ],
@@ -379,10 +486,31 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     );
   }
 
-  Widget _buildPlanCard(int index) {
-    final plan = _plans[index];
+  Widget _buildPlanCard(int index, SubscriptionPlan plan) {
     final isSelected = _selectedPlanIndex == index;
-    final isPopular = plan['popular'] == true;
+    final isPopular = plan.metadata['popular'] == true;
+    
+    // Calculate monthly price for display
+    double monthlyPrice = plan.price;
+    if (plan.interval == 'month' && plan.intervalCount > 1) {
+      monthlyPrice = plan.price / plan.intervalCount;
+    } else if (plan.interval == 'year') {
+      monthlyPrice = plan.price / (12 * plan.intervalCount);
+    }
+    
+    String durationText = plan.name;
+    String priceText = '${plan.price.toStringAsFixed(2)} ${plan.currency}';
+    String monthlyPriceText = '${monthlyPrice.toStringAsFixed(2)} ${plan.currency}/mois';
+    
+    // Calculate savings percentage
+    String? savingsText;
+    if (plan.interval != 'month' || plan.intervalCount > 1) {
+      double regularMonthlyPrice = 19.99; // Base monthly price
+      double savingsPercent = ((regularMonthlyPrice - monthlyPrice) / regularMonthlyPrice * 100);
+      if (savingsPercent > 0) {
+        savingsText = 'Économisez ${savingsPercent.round()}%';
+      }
+    }
 
     return AnimatedPressable(
       onPressed: () {
@@ -424,7 +552,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                         Row(
                           children: [
                             Text(
-                              plan['duration'],
+                              durationText,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
@@ -462,16 +590,16 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          plan['pricePerMonth'],
+                          monthlyPriceText,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.white.withOpacity(0.8),
                                   ),
                         ),
-                        if (plan['saving'] != null) ...[
+                        if (savingsText != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            plan['saving'],
+                            savingsText,
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: AppColors.successGreen,
@@ -488,7 +616,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        plan['price'],
+                        priceText,
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   color: Colors.white,
@@ -555,12 +683,15 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     );
   }
 
-  Widget _buildSubscribeButton() {
+  Widget _buildSubscribeButton(SubscriptionProvider subscriptionProvider) {
+    final plans = subscriptionProvider.activePlans;
+    final isLoading = _isLoading || subscriptionProvider.isLoading;
+    
     return SlideInAnimation(
       delay: const Duration(milliseconds: 900),
       child: PremiumButton(
-        text: _isLoading ? 'Traitement...' : 'S\'abonner maintenant',
-        isLoading: _isLoading,
+        text: isLoading ? 'Traitement...' : 'S\'abonner maintenant',
+        isLoading: isLoading,
         gradient: LinearGradient(
           colors: [
             Colors.white,
@@ -568,7 +699,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
           ],
         ),
         textColor: AppColors.primaryGold,
-        onPressed: _isLoading ? null : _handleSubscription,
+        onPressed: (isLoading || plans.isEmpty) ? null : () => _handleSubscription(subscriptionProvider),
       ),
     );
   }
@@ -632,21 +763,46 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     );
   }
 
-  void _handleSubscription() async {
+  void _handleSubscription(SubscriptionProvider subscriptionProvider) async {
+    final plans = subscriptionProvider.activePlans;
+    if (plans.isEmpty || _selectedPlanIndex >= plans.length) return;
+
+    final selectedPlan = plans[_selectedPlanIndex];
+    
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate subscription process
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // TODO: Integrate RevenueCat for actual payment processing
+      // For now, simulate subscription process
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+      // Simulate successful purchase
+      final success = await subscriptionProvider.purchaseSubscription(
+        planId: selectedPlan.id,
+        platform: Theme.of(context).platform == TargetPlatform.iOS ? 'ios' : 'android',
+        receiptData: 'simulated_receipt_data', // This would come from RevenueCat
+      );
 
-      // Show success dialog
-      _showSuccessDialog();
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (success) {
+          _showSuccessDialog();
+        } else {
+          _showErrorDialog(subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'abonnement');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showErrorDialog('Une erreur est survenue lors de l\'abonnement: $e');
+      }
     }
   }
 
@@ -689,7 +845,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Vous êtes maintenant membre GoldWen Plus',
+                'Vous êtes maintenant membre GoldWen Plus\nVous pouvez désormais choisir jusqu\'à 3 profils par jour !',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.white.withOpacity(0.9),
                     ),
@@ -713,6 +869,31 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppBorderRadius.large),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: AppColors.error),
+            SizedBox(width: AppSpacing.sm),
+            Text('Erreur d\'abonnement'),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }

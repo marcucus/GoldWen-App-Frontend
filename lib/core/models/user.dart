@@ -13,6 +13,9 @@ class User {
   final String? status;
   final bool? isOnboardingCompleted;
   final bool? isProfileCompleted;
+  final bool? hasActiveSubscription;
+  final String? subscriptionPlan;
+  final DateTime? subscriptionExpiresAt;
 
   User({
     required this.id,
@@ -29,6 +32,9 @@ class User {
     this.status,
     this.isOnboardingCompleted,
     this.isProfileCompleted,
+    this.hasActiveSubscription,
+    this.subscriptionPlan,
+    this.subscriptionExpiresAt,
   });
 
   // Computed property for display name
@@ -82,6 +88,13 @@ class User {
         isProfileCompleted: json['isProfileCompleted'] is bool ? json['isProfileCompleted'] as bool :
                            (json['isProfileCompleted']?.toString().toLowerCase() == 'true') ? true :
                            json['isProfileCompleted'] == null ? null : false,
+        hasActiveSubscription: json['hasActiveSubscription'] is bool ? json['hasActiveSubscription'] as bool :
+                              (json['hasActiveSubscription']?.toString().toLowerCase() == 'true') ? true :
+                              json['hasActiveSubscription'] == null ? null : false,
+        subscriptionPlan: json['subscriptionPlan'] is String ? json['subscriptionPlan'] as String : json['subscriptionPlan']?.toString(),
+        subscriptionExpiresAt: json['subscriptionExpiresAt'] != null 
+                  ? _parseDateTime(json['subscriptionExpiresAt']) 
+                  : null,
       );
     } catch (e) {
       print('Error parsing User from JSON: $e');
@@ -128,6 +141,9 @@ class User {
       if (status != null) 'status': status,
       if (isOnboardingCompleted != null) 'isOnboardingCompleted': isOnboardingCompleted,
       if (isProfileCompleted != null) 'isProfileCompleted': isProfileCompleted,
+      if (hasActiveSubscription != null) 'hasActiveSubscription': hasActiveSubscription,
+      if (subscriptionPlan != null) 'subscriptionPlan': subscriptionPlan,
+      if (subscriptionExpiresAt != null) 'subscriptionExpiresAt': subscriptionExpiresAt!.toIso8601String(),
     };
   }
 
@@ -146,6 +162,9 @@ class User {
     String? status,
     bool? isOnboardingCompleted,
     bool? isProfileCompleted,
+    bool? hasActiveSubscription,
+    String? subscriptionPlan,
+    DateTime? subscriptionExpiresAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -162,6 +181,9 @@ class User {
       status: status ?? this.status,
       isOnboardingCompleted: isOnboardingCompleted ?? this.isOnboardingCompleted,
       isProfileCompleted: isProfileCompleted ?? this.isProfileCompleted,
+      hasActiveSubscription: hasActiveSubscription ?? this.hasActiveSubscription,
+      subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
+      subscriptionExpiresAt: subscriptionExpiresAt ?? this.subscriptionExpiresAt,
     );
   }
 }

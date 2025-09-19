@@ -1,43 +1,99 @@
 import 'package:flutter/material.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/revenue_cat_service.dart';
 import '../../../core/models/models.dart';
 
 class SubscriptionProvider with ChangeNotifier {
   List<SubscriptionPlan> _plans = [];
+  List<Package> _revenueCatPackages = [];
   Subscription? _currentSubscription;
   SubscriptionUsage? _usage;
+  CustomerInfo? _customerInfo;
   bool _isLoading = false;
   String? _error;
 
   List<SubscriptionPlan> get plans => _plans;
+  List<Package> get revenueCatPackages => _revenueCatPackages;
   Subscription? get currentSubscription => _currentSubscription;
   SubscriptionUsage? get usage => _usage;
+  CustomerInfo? get customerInfo => _customerInfo;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  bool get hasActiveSubscription => _currentSubscription?.isActive ?? false;
+  bool get hasActiveSubscription => _customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!);
   bool get hasExpiredSubscription => _currentSubscription?.isExpired ?? false;
-  bool get willRenew => _currentSubscription?.willRenew ?? false;
+  bool get willRenew => _customerInfo != null && RevenueCatService.willRenew(_customerInfo!);
 
-  String? get currentPlanName => _currentSubscription?.plan?.name;
-  DateTime? get nextRenewalDate => _currentSubscription?.currentPeriodEnd;
-  int? get daysUntilExpiry => _currentSubscription?.daysUntilExpiry;
+  String? get currentPlanName => _customerInfo != null ? RevenueCatService.getProductIdentifier(_customerInfo!) : null;
+  DateTime? get nextRenewalDate => _customerInfo != null ? RevenueCatService.getExpirationDate(_customerInfo!) : null;
+  int? get daysUntilExpiry {
+    final expiryDate = nextRenewalDate;
+    if (expiryDate == null) return null;
+    final now = DateTime.now();
+    if (now.isAfter(expiryDate)) return 0;
+    return expiryDate.difference(now).inDays;
+  }
 
   void clearError() {
     _error = null;
     notifyListeners();
   }
 
+  Future<void> initializeWithUser(String userId) async {
+    try {
+      await RevenueCatService.initialize();
+      await RevenueCatService.setUserId(userId);
+      _customerInfo = await RevenueCatService.getCurrentCustomerInfo();
+      notifyListeners();
+    } catch (e) {
+      print('Error initializing RevenueCat with user: $e');
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await RevenueCatService.logOut();
+      _customerInfo = null;
+      _currentSubscription = null;
+      _usage = null;
+      notifyListeners();
+    } catch (e) {
+      print('Error logging out of RevenueCat: $e');
+    }
+  }
+
   Future<void> loadSubscriptionPlans() async {
     _setLoading();
 
     try {
-      final response = await ApiService.getSubscriptionPlans();
-      final plansData = response['data'] ?? response['plans'] ?? [];
+      // Initialize RevenueCat if not already initialized
+      await RevenueCatService.initialize();
       
-      _plans = (plansData as List)
-          .map((p) => SubscriptionPlan.fromJson(p as Map<String, dynamic>))
+      // Load packages from RevenueCat
+      _revenueCatPackages = await RevenueCatService.getAvailablePackages();
+      
+      // Convert packages to subscription plans
+      _plans = _revenueCatPackages
+          .map((package) => RevenueCatService.packageToSubscriptionPlan(package))
           .toList();
+      
+      // Also try to load plans from API as fallback
+      try {
+        final response = await ApiService.getSubscriptionPlans();
+        final plansData = response['data'] ?? response['plans'] ?? [];
+        
+        final apiPlans = (plansData as List)
+            .map((p) => SubscriptionPlan.fromJson(p as Map<String, dynamic>))
+            .toList();
+        
+        // Merge or prioritize RevenueCat plans
+        if (_plans.isEmpty && apiPlans.isNotEmpty) {
+          _plans = apiPlans;
+        }
+      } catch (apiError) {
+        print('API plans loading failed, using RevenueCat only: $apiError');
+      }
       
       _error = null;
     } catch (e) {
@@ -49,6 +105,10 @@ class SubscriptionProvider with ChangeNotifier {
 
   Future<void> loadCurrentSubscription() async {
     try {
+      // Load from RevenueCat
+      _customerInfo = await RevenueCatService.getCurrentCustomerInfo();
+      
+      // Load from API
       final response = await ApiService.getCurrentSubscription();
       final subscriptionData = response['data'] ?? response;
       
@@ -98,6 +158,32 @@ class SubscriptionProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Find the corresponding RevenueCat package
+      final package = _revenueCatPackages
+          .where((p) => p.storeProduct.identifier == planId)
+          .firstOrNull;
+      
+      if (package != null) {
+        // Use RevenueCat for purchase
+        _customerInfo = await RevenueCatService.purchasePackage(package);
+        
+        if (_customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!)) {
+          // Verify with backend
+          final verified = await RevenueCatService.verifySubscriptionWithBackend(_customerInfo!);
+          
+          if (verified) {
+            // Reload data
+            await loadCurrentSubscription();
+            await loadSubscriptionUsage();
+            
+            _error = null;
+            _setLoaded();
+            return true;
+          }
+        }
+      }
+      
+      // Fallback to API purchase
       final response = await ApiService.purchaseSubscription(
         plan: planId,
         platform: platform,
@@ -166,6 +252,23 @@ class SubscriptionProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Use RevenueCat to restore purchases
+      _customerInfo = await RevenueCatService.restorePurchases();
+      
+      if (_customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!)) {
+        // Verify with backend
+        final verified = await RevenueCatService.verifySubscriptionWithBackend(_customerInfo!);
+        
+        if (verified) {
+          await loadCurrentSubscription();
+          await loadSubscriptionUsage();
+          _error = null;
+          _setLoaded();
+          return true;
+        }
+      }
+      
+      // Fallback to API restore
       final response = await ApiService.restoreSubscription();
       
       final subscriptionData = response['data'] ?? response;
