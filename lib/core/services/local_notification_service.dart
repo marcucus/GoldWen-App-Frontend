@@ -218,6 +218,156 @@ class LocalNotificationService {
     print('Chat expiring notification tapped');
   }
 
+  // Method to show immediate notifications (for foreground FCM messages)
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+    String? type,
+    String? imageUrl,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'general',
+      'General Notifications',
+      channelDescription: 'General app notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      id,
+      title,
+      body,
+      notificationDetails,
+      payload: payload ?? type,
+    );
+  }
+
+  // Method to show notification with custom sound for different types
+  Future<void> showTypedNotification({
+    required String type,
+    required String title,
+    required String body,
+    String? payload,
+    String? imageUrl,
+  }) async {
+    late AndroidNotificationDetails androidDetails;
+    late DarwinNotificationDetails iosDetails;
+    late int notificationId;
+
+    switch (type) {
+      case 'daily_selection':
+        notificationId = 1;
+        androidDetails = const AndroidNotificationDetails(
+          'daily_selection',
+          'Daily Selection',
+          channelDescription: 'Daily profile selection notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        );
+        iosDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+        break;
+        
+      case 'new_match':
+        notificationId = 2;
+        androidDetails = const AndroidNotificationDetails(
+          'matches',
+          'New Matches',
+          channelDescription: 'New match notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        );
+        iosDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+        break;
+        
+      case 'new_message':
+        notificationId = 3;
+        androidDetails = const AndroidNotificationDetails(
+          'messages',
+          'New Messages',
+          channelDescription: 'New message notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        );
+        iosDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+        break;
+        
+      case 'chat_expiring':
+        notificationId = 4;
+        androidDetails = const AndroidNotificationDetails(
+          'chat_expiring',
+          'Chat Expiring',
+          channelDescription: 'Chat expiration notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        );
+        iosDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+        break;
+        
+      default:
+        notificationId = 999;
+        androidDetails = const AndroidNotificationDetails(
+          'general',
+          'General Notifications',
+          channelDescription: 'General app notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        );
+        iosDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+    }
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      notificationId,
+      title,
+      body,
+      notificationDetails,
+      payload: payload ?? type,
+    );
+  }
+
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
   }

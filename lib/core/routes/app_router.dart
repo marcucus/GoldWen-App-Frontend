@@ -15,6 +15,8 @@ import '../../features/legal/pages/terms_page.dart';
 import '../../features/legal/pages/privacy_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
+import '../../features/notifications/pages/notifications_page.dart';
+import '../../features/notifications/pages/notification_test_page.dart';
 import '../../features/admin/pages/admin_login_page.dart';
 import '../../features/admin/pages/admin_dashboard_page.dart';
 import '../../features/admin/pages/admin_users_page.dart';
@@ -121,6 +123,20 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+
+      // Notifications
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationsPage(),
+      ),
+
+      // Notification Testing (Development only)
+      GoRoute(
+        path: '/notifications/test',
+        name: 'notification-test',
+        builder: (context, state) => const NotificationTestPage(),
       ),
 
       // Admin Routes
