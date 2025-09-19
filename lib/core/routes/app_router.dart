@@ -16,6 +16,12 @@ import '../../features/legal/pages/privacy_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
 import '../../features/notifications/pages/notifications_page.dart';
+import '../../features/admin/pages/admin_login_page.dart';
+import '../../features/admin/pages/admin_dashboard_page.dart';
+import '../../features/admin/pages/admin_users_page.dart';
+import '../../features/admin/pages/admin_reports_page.dart';
+import '../../features/admin/pages/admin_support_page.dart';
+import '../../features/admin/guards/admin_auth_guard.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -123,6 +129,31 @@ class AppRouter {
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
+      // Admin Routes
+      GoRoute(
+        path: '/admin/login',
+        name: 'admin-login',
+        builder: (context, state) => const AdminLoginPage(),
+      ),
+      GoRoute(
+        path: '/admin/dashboard',
+        name: 'admin-dashboard',
+        builder: (context, state) => const AdminDashboardPage(),
+      ),
+      GoRoute(
+        path: '/admin/users',
+        name: 'admin-users',
+        builder: (context, state) => const AdminUsersPage(),
+      ),
+      GoRoute(
+        path: '/admin/reports',
+        name: 'admin-reports',
+        builder: (context, state) => const AdminReportsPage(),
+      ),
+      GoRoute(
+        path: '/admin/support',
+        name: 'admin-support',
+        builder: (context, state) => const AdminSupportPage(),
       ),
     ],
   );
