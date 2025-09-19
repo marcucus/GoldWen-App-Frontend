@@ -16,14 +16,20 @@ class AppColors {
   static const Color textDark = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF6B6B6B);
   static const Color textTertiary = Color(0xFF9E9E9E);
+  static const Color textMuted = Color(0xFF9E9E9E); // Alias for textTertiary
   static const Color backgroundWhite = Color(0xFFFFFFF8);
   static const Color backgroundGrey = Color(0xFFF8F9FA);
+  static const Color backgroundLight = Color(0xFFFFFFF8); // Alias for backgroundWhite
   static const Color dividerLight = Color(0xFFE8E8E8);
+  static const Color border = Color(0xFFE8E8E8); // Alias for dividerLight
+  static const Color cardBackground = Color(0xFFFFFFFF);
+  static const Color textLight = Color(0xFFFFFFFF);
   
   // Semantic Colors
   static const Color errorRed = Color(0xFFE57373);
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color warningAmber = Color(0xFFFFC107);
+  static const Color warningOrange = Color(0xFFF57C00); // Additional warning color
   static const Color infoBlue = Color(0xFF2196F3);
   
   // Modern Gradient Colors

@@ -7,14 +7,13 @@ import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
 import 'core/services/location_service.dart';
 import 'core/services/firebase_messaging_service.dart';
+import 'core/services/navigation_service.dart';
+import 'core/services/app_initialization_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
 import 'features/matching/providers/matching_provider.dart';
 import 'features/chat/providers/chat_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
-
-// Import the background handler
-import 'core/services/firebase_messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +23,15 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // Set background message handler
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Set background message handler (only if Firebase is available)
+  try {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    print('Firebase not available: $e');
+  }
+
+  // Initialize app services
+  await AppInitializationService.initialize();
 
   runApp(const GoldWenApp());
 }
@@ -48,7 +54,9 @@ class GoldWenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),
         ChangeNotifierProvider(
-          create: (_) => NotificationProvider()..loadNotificationSettings(),
+          create: (_) => NotificationProvider()
+            ..loadNotificationSettings()
+            ..loadNotifications().catchError((e) => print('Failed to load notifications: $e')),
         ),
       ],
       child: MaterialApp.router(

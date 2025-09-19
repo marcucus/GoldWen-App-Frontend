@@ -7,6 +7,7 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../matching/providers/matching_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(int)? onNavigate;
@@ -257,6 +258,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   child: AnimatedPressable(
                     onPressed: () {
                       // Navigate to notifications
+                      Navigator.pushNamed(context, '/notifications');
                     },
                     child: Container(
                       padding: const EdgeInsets.all(AppSpacing.sm),
@@ -271,17 +273,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             color: AppColors.primaryGold,
                             size: 24,
                           ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.errorRed,
-                              ),
-                            ),
+                          Consumer<NotificationProvider>(
+                            builder: (context, notificationProvider, _) {
+                              final unreadCount = notificationProvider.unreadCount;
+                              if (unreadCount == 0) return const SizedBox.shrink();
+                              
+                              return Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: EdgeInsets.all(unreadCount > 9 ? 4 : 6),
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.errorRed,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: unreadCount <= 9 
+                                    ? const SizedBox.shrink() // Just show dot for small counts
+                                    : Text(
+                                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

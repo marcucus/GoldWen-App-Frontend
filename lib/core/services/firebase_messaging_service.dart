@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'local_notification_service.dart';
 import 'api_service.dart';
+import 'navigation_service.dart';
 
 class FirebaseMessagingService {
   static final FirebaseMessagingService _instance = FirebaseMessagingService._internal();
@@ -95,10 +97,13 @@ class FirebaseMessagingService {
 
   Future<void> _registerDeviceWithBackend(String token) async {
     try {
+      // Determine platform
+      final platform = Platform.isIOS ? 'ios' : 'android';
+      
       // Register device token with backend
       await ApiService.registerDeviceToken({
         'deviceToken': token,
-        'platform': Theme.of(NavigationService.navigatorKey.currentContext!).platform == TargetPlatform.iOS ? 'ios' : 'android',
+        'platform': platform,
         'appVersion': '1.0.0', // This should come from package info
       });
       print('Device token registered with backend successfully');
@@ -234,29 +239,4 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   
   // Handle background notification data processing here if needed
   // Note: UI operations cannot be performed in background handler
-}
-
-// Navigation service for handling deep links
-class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
-  static NavigatorState? get navigator => navigatorKey.currentState;
-  
-  static void navigateToDiscoverTab() {
-    // Implementation depends on your routing setup
-    navigator?.pushNamedAndRemoveUntil('/main', (route) => false);
-    // Additional logic to switch to discover tab
-  }
-  
-  static void navigateToMatches() {
-    navigator?.pushNamed('/matches');
-  }
-  
-  static void navigateToChat(String conversationId) {
-    navigator?.pushNamed('/chat/$conversationId');
-  }
-  
-  static void navigateToNotifications() {
-    navigator?.pushNamed('/notifications');
-  }
 }
