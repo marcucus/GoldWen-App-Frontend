@@ -62,7 +62,8 @@ class GoldWenApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => NotificationProvider()
             ..loadNotificationSettings()
-            ..loadNotifications().catchError((e) => print('Failed to load notifications: $e')),
+            ..loadNotifications()
+                .catchError((e) => print('Failed to load notifications: $e')),
         ),
       ],
       child: MaterialApp.router(
