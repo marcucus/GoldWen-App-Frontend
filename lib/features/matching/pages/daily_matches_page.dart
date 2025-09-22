@@ -398,7 +398,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age}',
+                                  '${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'N/A'}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium
