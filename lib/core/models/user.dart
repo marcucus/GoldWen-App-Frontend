@@ -49,6 +49,12 @@ class User {
     return null;
   }
 
+  // Add missing getters that are expected by admin and user list components
+  int? get age => null; // Age should come from profile, not user
+  String? get bio => null; // Bio should come from profile, not user  
+  DateTime? get lastActive => updatedAt; // Use updatedAt as lastActive
+  String? get profilePicture => photoUrl; // Alias for photoUrl
+
   factory User.fromJson(Map<String, dynamic> json) {
     try {
       return User(

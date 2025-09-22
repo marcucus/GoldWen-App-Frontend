@@ -278,7 +278,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               _DetailRow(label: 'Âge', value: '${user.age} ans'),
               if (user.bio?.isNotEmpty == true)
                 _DetailRow(label: 'Bio', value: user.bio!),
-              _DetailRow(label: 'Créé le', value: _formatDate(user.createdAt)),
+              _DetailRow(label: 'Créé le', value: user.createdAt != null ? _formatDate(user.createdAt!) : 'Non disponible'),
               if (user.lastActive != null)
                 _DetailRow(label: 'Dernière activité', value: _formatDate(user.lastActive!)),
             ],

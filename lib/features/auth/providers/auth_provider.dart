@@ -90,15 +90,15 @@ class AuthProvider with ChangeNotifier {
       
       if (googleUser == null) {
         // User cancelled the sign-in
-        _setUnauthenticated();
+        _handleAuthError('Google sign-in was cancelled');
         return;
       }
 
       // Get the auth details from the Google Sign In
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       
-      if (googleAuth.accessToken == null) {
-        throw Exception('Failed to obtain Google access token');
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw Exception('Failed to obtain Google authentication tokens');
       }
 
       // Use the Google user information to authenticate with our backend
@@ -146,7 +146,7 @@ class AuthProvider with ChangeNotifier {
 
       // Use the Apple credential to authenticate with our backend
       final response = await ApiService.socialLogin(
-        socialId: credential.userIdentifier,
+        socialId: credential.userIdentifier ?? '',
         provider: 'apple',
         email: credential.email ?? 'noemail@appleid.com', // Apple might not provide email
         firstName: firstName ?? '',

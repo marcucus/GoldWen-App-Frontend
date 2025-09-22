@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../onboarding/pages/gender_selection_page.dart';
 
 class EmailAuthPage extends StatefulWidget {
   const EmailAuthPage({super.key});
