@@ -71,8 +71,6 @@ class GoldWenApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         routerConfig: AppRouter.router,
-        // Add the navigator key for deep linking
-        navigatorKey: NavigationService.navigatorKey,
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

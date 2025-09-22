@@ -53,6 +53,21 @@ class Profile {
     required this.updatedAt,
   });
 
+  // Add missing getters that are expected by components
+  String? get firstName => pseudo?.split(' ').first;
+  String? get lastName => pseudo?.split(' ').length > 1 ? pseudo?.split(' ').skip(1).join(' ') : null;
+  
+  int? get age {
+    if (birthDate == null) return null;
+    final now = DateTime.now();
+    int age = now.year - birthDate!.year;
+    if (now.month < birthDate!.month || 
+        (now.month == birthDate!.month && now.day < birthDate!.day)) {
+      age--;
+    }
+    return age;
+  }
+
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
       id: json['id'] as String,
