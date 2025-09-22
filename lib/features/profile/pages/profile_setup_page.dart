@@ -21,11 +21,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final ImagePicker _picker = ImagePicker();
-  
+
   final _nameController = TextEditingController();
   DateTime? _birthDate;
   final _bioController = TextEditingController();
-  final List<TextEditingController> _promptControllers = List.generate(3, (index) => TextEditingController());
+  final List<TextEditingController> _promptControllers =
+      List.generate(3, (index) => TextEditingController());
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
@@ -39,16 +40,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     for (final controller in _promptControllers) {
       controller.addListener(_updateButtonState);
     }
-    
+
     // Load prompts from backend
     _loadPrompts();
   }
 
   void _loadPrompts() async {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
     try {
       await profileProvider.loadPrompts();
-      
+
       // Select first 3 prompts automatically
       if (profileProvider.availablePrompts.length >= 3) {
         setState(() {
@@ -63,7 +65,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         });
       } else {
         // If we don't have enough prompts, show error
-        throw Exception('Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)');
+        throw Exception(
+            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)');
       }
     } catch (e) {
       print('Error loading prompts: $e');
@@ -109,9 +112,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           LinearProgressIndicator(
             value: (_currentPage + 1) / 4,
             backgroundColor: AppColors.dividerLight,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
-          
+
           Expanded(
             child: PageView(
               controller: _pageController,
@@ -139,25 +143,25 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
+
           Text(
             'Parlez-nous de vous',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
-          
+
           Text(
             'Ces informations aideront les autres à mieux vous connaître',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.xxl),
-          
+
           // Name field
           TextFormField(
             controller: _nameController,
@@ -167,9 +171,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             ),
             textCapitalization: TextCapitalization.words,
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
-          
+
           // Birth date field
           GestureDetector(
             onTap: _selectBirthDate,
@@ -196,10 +200,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           ? DateFormat('dd/MM/yyyy').format(_birthDate!)
                           : 'Date de naissance',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: _birthDate != null
-                            ? AppColors.textDark
-                            : AppColors.textSecondary,
-                      ),
+                            color: _birthDate != null
+                                ? AppColors.textDark
+                                : AppColors.textSecondary,
+                          ),
                     ),
                   ),
                   Icon(
@@ -210,9 +214,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
-          
+
           // Bio field
           TextFormField(
             controller: _bioController,
@@ -223,9 +227,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             maxLines: 3,
             maxLength: 200,
           ),
-          
+
           const Spacer(),
-          
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -233,7 +237,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: const Text('Continuer'),
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
@@ -246,25 +250,20 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
           Text(
             'Ajoutez vos photos',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.md),
-          
           Text(
             'Ajoutez au moins 3 photos pour continuer',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.xxl),
-          
           Expanded(
             child: Consumer<ProfileProvider>(
               builder: (context, profileProvider, child) {
@@ -278,13 +277,14 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   itemCount: 6,
                   itemBuilder: (context, index) {
                     final hasPhoto = index < profileProvider.photos.length;
-                    
+
                     return GestureDetector(
                       onTap: hasPhoto ? null : () => _addPhoto(profileProvider),
                       child: Container(
                         decoration: BoxDecoration(
                           color: hasPhoto ? null : AppColors.accentCream,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.large),
                           border: Border.all(
                             color: AppColors.dividerLight,
                             width: 1,
@@ -294,16 +294,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             ? Stack(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                                    borderRadius: BorderRadius.circular(
+                                        AppBorderRadius.large),
                                     child: Container(
                                       width: double.infinity,
                                       height: double.infinity,
-                                      color: AppColors.primaryGold.withOpacity(0.3),
-                                      child: profileProvider.photos[index].startsWith('file://')
+                                      color: AppColors.primaryGold
+                                          .withOpacity(0.3),
+                                      child: profileProvider.photos[index]
+                                              .startsWith('file://')
                                           ? Image.file(
-                                              File(profileProvider.photos[index].replaceFirst('file://', '')),
+                                              File(profileProvider.photos[index]
+                                                  .replaceFirst('file://', '')),
                                               fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) {
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
                                                 return const Icon(
                                                   Icons.image,
                                                   size: 40,
@@ -322,7 +327,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                     top: 8,
                                     right: 8,
                                     child: GestureDetector(
-                                      onTap: () => profileProvider.removePhoto(index),
+                                      onTap: () =>
+                                          profileProvider.removePhoto(index),
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: const BoxDecoration(
@@ -349,8 +355,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
                                   Text(
-                                    index == 0 ? 'Photo principale' : 'Ajouter une photo',
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    index == 0
+                                        ? 'Photo principale'
+                                        : 'Ajouter une photo',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -362,19 +371,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               },
             ),
           ),
-          
           Consumer<ProfileProvider>(
             builder: (context, profileProvider, child) {
               return SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: profileProvider.photos.length >= 3 ? _nextPage : null,
+                  onPressed:
+                      profileProvider.photos.length >= 3 ? _nextPage : null,
                   child: Text('Continuer (${profileProvider.photos.length}/3)'),
                 ),
               );
             },
           ),
-          
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
@@ -387,25 +395,20 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
           Text(
             'Complétez ces phrases',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.md),
-          
           Text(
             'Cela aide les autres à mieux vous connaître',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.xxl),
-          
           Expanded(
             child: _promptQuestions.isEmpty
                 ? const Center(child: CircularProgressIndicator())
@@ -413,10 +416,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     itemCount: 3,
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
-                      final questionText = index < _promptQuestions.length 
+                      final questionText = index < _promptQuestions.length
                           ? _promptQuestions[index]
                           : 'Question ${index + 1}...';
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                         child: Column(
@@ -441,7 +444,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     },
                   ),
           ),
-          
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -449,7 +451,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: const Text('Continuer'),
             ),
           ),
-          
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
@@ -462,25 +463,20 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
           Text(
             'Parfait !',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.md),
-          
           Text(
             'Votre profil est maintenant prêt. Vous recevrez votre première sélection demain à midi.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: AppSpacing.xxl),
-          
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
@@ -498,8 +494,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 Text(
                   'Votre rituel quotidien',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.primaryGold,
-                  ),
+                        color: AppColors.primaryGold,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -511,9 +507,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ],
             ),
           ),
-          
           const Spacer(),
-          
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -521,7 +515,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: const Text('Commencer mon aventure'),
             ),
           ),
-          
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
@@ -530,8 +523,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   bool _isBasicInfoValid() {
     return _nameController.text.isNotEmpty &&
-           _birthDate != null &&
-           _bioController.text.isNotEmpty;
+        _birthDate != null &&
+        _bioController.text.isNotEmpty;
   }
 
   bool _arePromptsValid() {
@@ -541,7 +534,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   int _calculateAge(DateTime birthDate) {
     final now = DateTime.now();
     int age = now.year - birthDate.year;
-    if (now.month < birthDate.month || 
+    if (now.month < birthDate.month ||
         (now.month == birthDate.month && now.day < birthDate.day)) {
       age--;
     }
@@ -551,7 +544,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   Future<void> _selectBirthDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
+      initialDate:
+          _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
       firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
       lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
       locale: const Locale('fr', 'FR'),
@@ -559,8 +553,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primaryGold,
-            ),
+                  primary: AppColors.primaryGold,
+                ),
           ),
           child: child!,
         );
@@ -632,16 +626,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             image.path,
             order: profileProvider.photos.length + 1,
           );
-          
+
           // Extract photo URL from response
-          final photoUrl = response['data']['url'] ?? response['url'] ?? 'uploaded_photo_${profileProvider.photos.length + 1}';
+          final photoUrl = response['data']['url'] ??
+              response['url'] ??
+              'uploaded_photo_${profileProvider.photos.length + 1}';
           profileProvider.addPhoto(photoUrl);
-          
+
           // Close loading dialog
           if (mounted) {
             Navigator.of(context).pop();
           }
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Photo ajoutée avec succès'),
@@ -653,11 +649,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           if (mounted) {
             Navigator.of(context).pop();
           }
-          
+
           // For development, still add a placeholder if upload fails
           print('Photo upload failed: $uploadError');
-          profileProvider.addPhoto('file://${image.path}'); // Fallback for development
-          
+          profileProvider
+              .addPhoto('file://${image.path}'); // Fallback for development
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Erreur d\'upload: $uploadError'),
@@ -718,9 +715,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _finishSetup() {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // Validate required fields
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -731,7 +729,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       );
       return;
     }
-    
+
     if (_birthDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -741,7 +739,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       );
       return;
     }
-    
+
     if (_bioController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -751,19 +749,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       );
       return;
     }
-    
+
     // Validate that we have valid prompt IDs before proceeding
-    if (_selectedPromptIds.isEmpty || _selectedPromptIds.any((id) => id.startsWith('fallback'))) {
+    if (_selectedPromptIds.isEmpty ||
+        _selectedPromptIds.any((id) => id.startsWith('fallback'))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: Les prompts n\'ont pas été chargés correctement. Veuillez redémarrer l\'application.'),
+          content: Text(
+              'Erreur: Les prompts n\'ont pas été chargés correctement. Veuillez redémarrer l\'application.'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 5),
         ),
       );
       return;
     }
-    
+
     // Validate prompt answers
     for (int i = 0; i < _promptControllers.length; i++) {
       if (_promptControllers[i].text.trim().isEmpty) {
@@ -776,27 +776,32 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         return;
       }
     }
-    
+
     profileProvider.setBasicInfo(
       _nameController.text.trim(),
       _calculateAge(_birthDate!),
       _bioController.text.trim(),
       birthDate: _birthDate,
     );
-    
+
     // Set prompt answers using real prompt IDs
-    for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
+    for (int i = 0;
+        i < _promptControllers.length && i < _selectedPromptIds.length;
+        i++) {
       if (_promptControllers[i].text.isNotEmpty) {
-        print('Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
-        profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text.trim());
+        print(
+            'Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
+        profileProvider.setPromptAnswer(
+            _selectedPromptIds[i], _promptControllers[i].text.trim());
       }
     }
-    
+
     // Submit to backend and mark completion
     _saveProfileToBackend(profileProvider, authProvider);
   }
 
-  Future<void> _saveProfileToBackend(ProfileProvider profileProvider, AuthProvider authProvider) async {
+  Future<void> _saveProfileToBackend(
+      ProfileProvider profileProvider, AuthProvider authProvider) async {
     // Show loading dialog
     showDialog(
       context: context,
@@ -812,56 +817,55 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ),
       ),
     );
-    
+
     try {
       print('Starting profile save process...');
       await profileProvider.saveProfile();
       print('Profile basic data saved successfully');
-      
+
       await profileProvider.submitPromptAnswers();
       print('Prompt answers submitted successfully');
-      
+
       // Mark profile as active and completed
       await ApiService.updateProfileStatus(
         status: 'active',
         completed: true,
       );
-      print('Profile status updated successfully - backend sets completion flags automatically');
-      
+      print(
+          'Profile status updated successfully - backend sets completion flags automatically');
+
       // Refresh user data to get updated completion status from backend
       await authProvider.refreshUser();
       print('User data refreshed successfully');
-      
-      // Close loading dialog
+
+      // Close loading dialog and navigate using GoRouter
       if (mounted) {
-        Navigator.of(context).pop();
-      }
-      
-      // Navigate to main navigation page only after successful save
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MainNavigationPage(),
-          ),
-        );
+        // Close dialog first
+        context.pop(); // This closes the dialog
+
+        // Navigate to main page using GoRouter
+        context.pushReplacement(
+            '/home'); // ou '/main' selon votre configuration de routes
       }
     } catch (e) {
       // Close loading dialog
       if (mounted) {
-        Navigator.of(context).pop();
+        context.pop(); // Close dialog using GoRouter
       }
-      
+
       // Show error to user
       debugPrint('Error saving profile: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
+            content:
+                Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
             backgroundColor: Colors.red,
             action: SnackBarAction(
               label: 'Réessayer',
               textColor: Colors.white,
-              onPressed: () => _saveProfileToBackend(profileProvider, authProvider),
+              onPressed: () =>
+                  _saveProfileToBackend(profileProvider, authProvider),
             ),
             duration: const Duration(seconds: 10),
           ),
@@ -878,7 +882,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     for (final controller in _promptControllers) {
       controller.removeListener(_updateButtonState);
     }
-    
+
     _nameController.dispose();
     _bioController.dispose();
     for (final controller in _promptControllers) {

@@ -22,9 +22,10 @@ class AuthProvider with ChangeNotifier {
 
   String? get userId => _user?.id;
   String? get email => _user?.email;
-  String? get name => '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim().isNotEmpty 
-      ? '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim() 
-      : null;
+  String? get name =>
+      '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim().isNotEmpty
+          ? '${_user?.firstName ?? ''} ${_user?.lastName ?? ''}'.trim()
+          : null;
 
   void clearError() {
     _error = null;
@@ -42,7 +43,7 @@ class AuthProvider with ChangeNotifier {
         email: email,
         password: password,
       );
-      
+
       await _handleAuthSuccess(response);
     } catch (e) {
       _handleAuthError(e);
@@ -65,7 +66,7 @@ class AuthProvider with ChangeNotifier {
         firstName: firstName,
         lastName: lastName,
       );
-      
+
       await _handleAuthSuccess(response);
     } catch (e) {
       _handleAuthError(e);
@@ -84,10 +85,10 @@ class AuthProvider with ChangeNotifier {
 
       // Sign out any existing user first to ensure fresh sign-in
       await googleSignIn.signOut();
-      
+
       // Trigger the Google Sign In flow
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         // User cancelled the sign-in
         _handleAuthError('Google sign-in was cancelled');
@@ -95,9 +96,10 @@ class AuthProvider with ChangeNotifier {
       }
 
       // Get the auth details from the Google Sign In
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      if (googleAuth.idToken == null) {
         throw Exception('Failed to obtain Google authentication tokens');
       }
 
@@ -109,7 +111,7 @@ class AuthProvider with ChangeNotifier {
         firstName: googleUser.displayName?.split(' ').first ?? '',
         lastName: googleUser.displayName?.split(' ').skip(1).join(' '),
       );
-      
+
       await _handleAuthSuccess(response);
     } catch (e) {
       print('Google Sign-In Error: $e');
@@ -138,7 +140,7 @@ class AuthProvider with ChangeNotifier {
       // Extract user information
       String? firstName;
       String? lastName;
-      
+
       if (credential.givenName != null || credential.familyName != null) {
         firstName = credential.givenName;
         lastName = credential.familyName;
@@ -148,11 +150,12 @@ class AuthProvider with ChangeNotifier {
       final response = await ApiService.socialLogin(
         socialId: credential.userIdentifier ?? '',
         provider: 'apple',
-        email: credential.email ?? 'noemail@appleid.com', // Apple might not provide email
+        email: credential.email ??
+            'noemail@appleid.com', // Apple might not provide email
         firstName: firstName ?? '',
         lastName: lastName ?? '',
       );
-      
+
       await _handleAuthSuccess(response);
     } catch (e) {
       print('Apple Sign-In Error: $e');
@@ -186,7 +189,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
     _setLoading();
 
     try {
@@ -218,10 +222,10 @@ class AuthProvider with ChangeNotifier {
       final response = await ApiService.getCurrentUser();
       final userData = response['data'] ?? response;
       _user = User.fromJson(userData);
-      
+
       // Update stored user data
       await _storeAuthData();
-      
+
       notifyListeners();
     } catch (e) {
       // If refresh fails, user might need to re-authenticate
@@ -235,40 +239,41 @@ class AuthProvider with ChangeNotifier {
     try {
       // Debug: Print the full response to understand its structure
       print('Auth response received: $response');
-      
+
       // The backend returns: { "success": true, "message": "...", "data": { "user": {...}, "accessToken": "..." } }
       final data = response['data'] as Map<String, dynamic>?;
       if (data == null) {
         throw Exception('Response data is null');
       }
       print('Extracted data: $data');
-      
+
       // Extract user data
       final userData = data['user'] as Map<String, dynamic>?;
       if (userData == null) {
         throw Exception('User data not found in response');
       }
       print('User data: $userData');
-      
+
       // Extract token - backend returns it as 'accessToken'
       final token = data['accessToken'] as String?;
       if (token == null || token.isEmpty) {
         throw Exception('Access token not found in response');
       }
       print('Token: ${token.substring(0, 10)}...');
-      
+
       _user = User.fromJson(userData);
       _token = token;
       _status = AuthStatus.authenticated;
       _error = null;
-      
+
       // Set token for subsequent API calls
       ApiService.setToken(_token!);
-      
+
       // Store token and user data for session persistence
       await _storeAuthData();
-      
-      print('Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
+
+      print(
+          'Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
       print('User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
       notifyListeners();
     } catch (e) {
@@ -280,13 +285,13 @@ class AuthProvider with ChangeNotifier {
 
   void _handleAuthError(dynamic error) {
     _status = AuthStatus.unauthenticated;
-    
+
     if (error is ApiException) {
       _error = error.message;
     } else {
       _error = 'An unexpected error occurred';
     }
-    
+
     notifyListeners();
   }
 
@@ -309,15 +314,15 @@ class AuthProvider with ChangeNotifier {
           print('Logout API call failed: $e');
         }
       }
-      
+
       _user = null;
       _token = null;
       _status = AuthStatus.unauthenticated;
       _error = null;
-      
+
       // Clear token from API service
       ApiService.clearToken();
-      
+
       // Clear stored auth data
       await _clearAuthData();
     } catch (e) {
@@ -329,7 +334,7 @@ class AuthProvider with ChangeNotifier {
       ApiService.clearToken();
       await _clearAuthData();
     }
-    
+
     notifyListeners();
   }
 
@@ -341,24 +346,24 @@ class AuthProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final storedToken = prefs.getString('auth_token');
       final storedUserData = prefs.getString('user_data');
-      
+
       if (storedToken != null && storedUserData != null) {
         print('Found stored auth data, attempting to restore session...');
-        
+
         // Set the token for API calls
         ApiService.setToken(storedToken);
-        
+
         // Verify the token is still valid by getting current user
         try {
           final response = await ApiService.getCurrentUser();
           final userData = response['data'] ?? response;
-          
+
           // Update with fresh user data from server
           _user = User.fromJson(userData);
           _token = storedToken;
           _status = AuthStatus.authenticated;
           _error = null;
-          
+
           print('Session restored successfully for user: ${_user?.email}');
           notifyListeners();
           return;
@@ -367,14 +372,14 @@ class AuthProvider with ChangeNotifier {
           await _clearAuthData();
         }
       }
-      
+
       // No valid stored data, user needs to authenticate
       _status = AuthStatus.unauthenticated;
     } catch (e) {
       print('Error checking auth status: $e');
       _status = AuthStatus.unauthenticated;
     }
-    
+
     notifyListeners();
   }
 
@@ -396,7 +401,8 @@ class AuthProvider with ChangeNotifier {
       });
       await refreshUser();
     } catch (e) {
-      _error = e is ApiException ? e.message : 'Failed to mark profile as completed';
+      _error =
+          e is ApiException ? e.message : 'Failed to mark profile as completed';
       notifyListeners();
     }
   }
@@ -408,7 +414,9 @@ class AuthProvider with ChangeNotifier {
       });
       await refreshUser();
     } catch (e) {
-      _error = e is ApiException ? e.message : 'Failed to mark onboarding as completed';
+      _error = e is ApiException
+          ? e.message
+          : 'Failed to mark onboarding as completed';
       notifyListeners();
     }
   }

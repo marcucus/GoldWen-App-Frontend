@@ -55,13 +55,15 @@ class Profile {
 
   // Add missing getters that are expected by components
   String? get firstName => pseudo?.split(' ').first;
-  String? get lastName => pseudo?.split(' ').length > 1 ? pseudo?.split(' ').skip(1).join(' ') : null;
-  
+  String? get lastName => pseudo!.split(' ').length > 1
+      ? pseudo?.split(' ').skip(1).join(' ')
+      : null;
+
   int? get age {
     if (birthDate == null) return null;
     final now = DateTime.now();
     int age = now.year - birthDate!.year;
-    if (now.month < birthDate!.month || 
+    if (now.month < birthDate!.month ||
         (now.month == birthDate!.month && now.day < birthDate!.day)) {
       age--;
     }
@@ -73,13 +75,14 @@ class Profile {
       id: json['id'] as String,
       userId: json['userId'] as String,
       pseudo: json['pseudo'] as String?,
-      birthDate: json['birthDate'] != null 
+      birthDate: json['birthDate'] != null
           ? DateTime.parse(json['birthDate'] as String)
           : null,
       gender: json['gender'] as String?,
       interestedInGenders: (json['interestedInGenders'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ?? [],
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       bio: json['bio'] as String?,
       jobTitle: json['jobTitle'] as String?,
       company: json['company'] as String?,
@@ -91,21 +94,27 @@ class Profile {
       minAge: json['minAge'] as int? ?? 18,
       maxAge: json['maxAge'] as int? ?? 99,
       interests: (json['interests'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ?? [],
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       languages: (json['languages'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ?? [],
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       height: json['height'] as int?,
       photos: (json['photos'] as List<dynamic>?)
-          ?.map((e) => Photo.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((e) => Photo.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       personalityAnswers: (json['personalityAnswers'] as List<dynamic>?)
-          ?.map((e) => PersonalityAnswer.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map(
+                  (e) => PersonalityAnswer.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       promptAnswers: (json['promptAnswers'] as List<dynamic>?)
-          ?.map((e) => PromptAnswer.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((e) => PromptAnswer.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       isComplete: json['isComplete'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -141,21 +150,6 @@ class Profile {
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
-
-  int? get age {
-    if (birthDate == null) return null;
-    final now = DateTime.now();
-    final age = now.year - birthDate!.year;
-    if (now.month < birthDate!.month ||
-        (now.month == birthDate!.month && now.day < birthDate!.day)) {
-      return age - 1;
-    }
-    return age;
-  }
-
-  // Add missing getters expected by daily matches component
-  String? get firstName => pseudo?.split(' ').first;
-  String? get lastName => pseudo?.split(' ').length > 1 ? pseudo?.split(' ').skip(1).join(' ') : null;
 }
 
 class Photo {
@@ -312,9 +306,8 @@ class PersonalityQuestion {
       id: json['id'] as String,
       question: json['question'] as String,
       type: json['type'] as String,
-      options: (json['options'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      options:
+          (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
       minValue: json['minValue'] as int?,
       maxValue: json['maxValue'] as int?,
       isRequired: json['isRequired'] as bool? ?? true,

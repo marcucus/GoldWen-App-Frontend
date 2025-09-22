@@ -73,7 +73,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
       final remainingTime = chatProvider.getRemainingTime(widget.chatId);
-      
+
       if (remainingTime == null || remainingTime.inSeconds <= 0) {
         timer.cancel();
         // Check if chat is expired and handle accordingly
@@ -135,10 +135,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       return Text(
                         '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.primaryGold,
-                              fontWeight: FontWeight.bold,
-                              fontFeatures: [const FontFeature.tabularFigures()],
-                            ),
+                          color: AppColors.primaryGold,
+                          fontWeight: FontWeight.bold,
+                          fontFeatures: [const FontFeature.tabularFigures()],
+                        ),
                       );
                     },
                   ),
@@ -211,7 +211,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final currentUserId = authProvider.user?.id ?? 'current_user'; // Fallback to 'current_user' if no user
+    final currentUserId = authProvider.user?.id ??
+        'current_user'; // Fallback to 'current_user' if no user
     final isFromCurrentUser = message.senderId == currentUserId;
     final timestamp = message.createdAt;
 
@@ -379,7 +380,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   decoration: InputDecoration(
                     hintText: 'Tapez votre message...',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                      borderRadius:
+                          BorderRadius.circular(AppBorderRadius.large),
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
@@ -416,20 +418,17 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               onEmojiSelected: (category, emoji) {
                 _onEmojiSelected(emoji);
               },
-              config: Config(
+              config: const Config(
                 height: 256,
-                bgColor: const Color(0xFFFFFFF8),
-                indicatorColor: const Color(0xFFD4AF37),
-                iconColor: Colors.grey,
-                iconColorSelected: const Color(0xFFD4AF37),
-                backspaceColor: const Color(0xFFD4AF37),
-                skinToneDialogBgColor: Colors.white,
-                skinToneIndicatorColor: Colors.grey,
-                enableSkinTones: true,
-                recentTabBehavior: RecentTabBehavior.RECENT,
-                recentsLimit: 28,
-                replaceEmojiOnLimitExceed: false,
                 checkPlatformCompatibility: true,
+                bottomActionBarConfig: BottomActionBarConfig(),
+                skinToneConfig: SkinToneConfig(
+                  dialogBackgroundColor: Colors.white,
+                  indicatorColor: Colors.grey,
+                ),
+                categoryViewConfig: CategoryViewConfig(
+                  recentTabBehavior: RecentTabBehavior.RECENT,
+                ),
               ),
             ),
           ),
@@ -445,7 +444,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       selection.end,
       emoji.emoji,
     );
-    
+
     _messageController.text = newText;
     _messageController.selection = TextSelection.fromPosition(
       TextPosition(offset: selection.start + emoji.emoji.length),
