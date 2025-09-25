@@ -7,6 +7,7 @@ import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
 import '../../subscription/widgets/subscription_banner.dart';
+import '../../chat/widgets/match_acceptance_dialog.dart';
 
 class DailyMatchesPage extends StatefulWidget {
   const DailyMatchesPage({super.key});
@@ -818,28 +819,60 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
       }
     }
     
-    final success = await matchingProvider.selectProfile(
+    final result = await matchingProvider.selectProfile(
       profile.id, 
       subscriptionProvider: subscriptionProvider,
     );
     
-    if (success) {
-      final remaining = matchingProvider.remainingSelections;
-      String message;
+    if (result != null) {
+      final isMatch = result['isMatch'] ?? false;
       
-      if (remaining <= 0 || matchingProvider.isSelectionComplete) {
-        message = '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
+      if (isMatch) {
+        // Show match acceptance dialog
+        final matchId = result['matchId'] as String?;
+        final matchedProfile = result['profile'] as Profile?;
+        
+        if (matchId != null && matchedProfile != null && mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => MatchAcceptanceDialog(
+              matchId: matchId,
+              otherUser: matchedProfile,
+              onAccepted: () {
+                // Chat will be created and user navigated to it
+              },
+              onDeclined: () {
+                // Match declined, show appropriate feedback
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Match décliné'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              },
+            ),
+          );
+        }
       } else {
-        message = '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
+        // No match, show regular success message
+        final remaining = matchingProvider.remainingSelections;
+        String message;
+        
+        if (remaining <= 0 || matchingProvider.isSelectionComplete) {
+          message = '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
+        } else {
+          message = '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
+        }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 4),
-        ),
-      );
     } else {
       final errorMessage = matchingProvider.error ?? 'Erreur lors de la sélection';
       

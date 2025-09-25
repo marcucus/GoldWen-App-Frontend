@@ -130,7 +130,7 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider}) async {
+  Future<Map<String, dynamic>?> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider}) async {
     // Check if user has remaining selections
     if (!canSelectMore) {
       if (subscriptionProvider != null && !subscriptionProvider.hasActiveSubscription) {
@@ -139,13 +139,13 @@ class MatchingProvider with ChangeNotifier {
         _error = 'Limite quotidienne de sélections atteinte';
       }
       notifyListeners();
-      return false;
+      return null;
     }
 
     if (_selectedProfileIds.contains(profileId)) {
       _error = 'Profil déjà sélectionné';
       notifyListeners();
-      return false;
+      return null;
     }
 
     try {
@@ -155,48 +155,56 @@ class MatchingProvider with ChangeNotifier {
       final responseData = response['data'] ?? response;
       final isMatch = responseData['isMatch'] ?? false;
       final matchedUserName = responseData['matchedUserName'] as String?;
+      final matchId = responseData['matchId'] as String?;
       final choicesRemaining = responseData['choicesRemaining'] as int?;
       
       if (isMatch) {
         // Reload matches to include the new one
         await loadMatches();
         
-        // Show match notification
-        if (matchedUserName != null) {
-          await LocalNotificationService().showMatchNotification(
-            matchedUserName: matchedUserName,
-          );
-        }
+        // Return match information for UI to handle
+        final matchInfo = {
+          'isMatch': true,
+          'matchedUserName': matchedUserName,
+          'matchId': matchId,
+          'profile': _dailyProfiles.firstWhere((p) => p.id == profileId),
+        };
+        
+        _selectedProfileIds.add(profileId);
+        _updateDailySelectionAfterChoice(choicesRemaining);
+        _error = null;
+        notifyListeners();
+        
+        return matchInfo;
       }
       
       _selectedProfileIds.add(profileId);
-      
-      // Update daily selection metadata based on API response
-      if (_dailySelection != null) {
-        final newChoicesRemaining = choicesRemaining ?? (_dailySelection!.choicesRemaining - 1).clamp(0, _dailySelection!.maxChoices);
-        
-        _dailySelection = DailySelection(
-          profiles: _dailySelection!.profiles,
-          generatedAt: _dailySelection!.generatedAt,
-          expiresAt: _dailySelection!.expiresAt,
-          remainingLikes: _dailySelection!.remainingLikes,
-          hasUsedSuperLike: _dailySelection!.hasUsedSuperLike,
-          choicesRemaining: newChoicesRemaining,
-          choicesMade: _dailySelection!.choicesMade + 1,
-          maxChoices: _dailySelection!.maxChoices,
-          refreshTime: _dailySelection!.refreshTime,
-        );
-      }
-      
-      // Update subscription usage
-      await _loadSubscriptionUsage();
-      
+      _updateDailySelectionAfterChoice(choicesRemaining);
       _error = null;
       notifyListeners();
-      return true;
+      
+      return {'isMatch': false};
     } catch (e) {
       _handleError(e, 'Failed to select profile');
-      return false;
+      return null;
+    }
+  }
+
+  void _updateDailySelectionAfterChoice(int? choicesRemaining) {
+    if (_dailySelection != null) {
+      final newChoicesRemaining = choicesRemaining ?? (_dailySelection!.choicesRemaining - 1).clamp(0, _dailySelection!.maxChoices);
+      
+      _dailySelection = DailySelection(
+        profiles: _dailySelection!.profiles,
+        generatedAt: _dailySelection!.generatedAt,
+        expiresAt: _dailySelection!.expiresAt,
+        remainingLikes: _dailySelection!.remainingLikes,
+        hasUsedSuperLike: _dailySelection!.hasUsedSuperLike,
+        choicesRemaining: newChoicesRemaining,
+        choicesMade: _dailySelection!.choicesMade + 1,
+        maxChoices: _dailySelection!.maxChoices,
+        refreshTime: _dailySelection!.refreshTime,
+      );
     }
   }
 

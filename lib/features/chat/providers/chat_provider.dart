@@ -298,6 +298,21 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
+  Future<String?> getChatIdFromMatch(String matchId) async {
+    try {
+      final response = await ApiService.getChatByMatchId(matchId);
+      final chatData = response['data'] ?? response;
+      
+      if (chatData != null && chatData['id'] != null) {
+        return chatData['id'] as String;
+      }
+      return null;
+    } catch (e) {
+      // Chat may not exist yet, which is normal
+      return null;
+    }
+  }
+
   Future<void> deleteMessage(String messageId) async {
     try {
       await ApiService.deleteMessage(messageId);
