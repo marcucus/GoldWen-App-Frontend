@@ -26,6 +26,7 @@ import '../../features/admin/pages/admin_users_page.dart';
 import '../../features/admin/pages/admin_reports_page.dart';
 import '../../features/admin/pages/admin_support_page.dart';
 import '../../features/admin/guards/admin_auth_guard.dart';
+import '../../features/reports/pages/user_reports_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -150,6 +151,13 @@ class AppRouter {
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
+      ),
+
+      // User Reports
+      GoRoute(
+        path: '/reports',
+        name: 'reports',
+        builder: (context, state) => const UserReportsPage(),
       ),
 
       // Notification Testing (Development only)
