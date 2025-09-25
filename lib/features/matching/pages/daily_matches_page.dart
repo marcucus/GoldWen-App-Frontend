@@ -157,6 +157,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         }
 
         final profiles = matchingProvider.dailyProfiles;
+        
+        // If selection is complete, don't show any profiles
+        if (matchingProvider.isSelectionComplete) {
+          return _buildSelectionCompleteState(matchingProvider, subscriptionProvider);
+        }
+        
         final availableProfiles = profiles.where((profile) => 
           !matchingProvider.isProfileSelected(profile.id)
         ).toList();
@@ -657,6 +663,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             ),
             const SizedBox(height: 12),
             Text(
+              matchingProvider.selectionCompleteMessage ?? 
               'Vous avez fait vos choix pour aujourd\'hui. Revenez demain pour de nouveaux profils.',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
@@ -722,13 +729,46 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
+                  matchingProvider.remainingSelections - 1 <= 0
+                      ? 'Ce sera votre dernier choix aujourd\'hui.'
+                      : 'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
+              if (matchingProvider.remainingSelections - 1 <= 0 && !subscriptionProvider.hasActiveSubscription)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.upgrade,
+                          color: Colors.amber[700],
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'GoldWen Plus : 3 choix/jour',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -784,11 +824,20 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
     
     if (success) {
+      final remaining = matchingProvider.remainingSelections;
+      String message;
+      
+      if (remaining <= 0 || matchingProvider.isSelectionComplete) {
+        message = '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
+      } else {
+        message = '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vous avez choisi ${profile.firstName ?? 'cette personne'} !'),
+          content: Text(message),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
         ),
       );
     } else {
