@@ -11,6 +11,7 @@ import 'core/services/location_service.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/app_initialization_service.dart';
+import 'core/services/gdpr_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
 import 'features/matching/providers/matching_provider.dart';
@@ -59,6 +60,7 @@ class GoldWenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),
+        ChangeNotifierProvider(create: (_) => GdprService()),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider()
             ..loadNotificationSettings()

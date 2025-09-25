@@ -13,6 +13,7 @@ import '../../features/chat/pages/chat_page.dart';
 import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
 import '../../features/legal/pages/privacy_page.dart';
+import '../../features/legal/pages/privacy_settings_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
 import '../../features/notifications/pages/notifications_page.dart';
@@ -104,6 +105,11 @@ class AppRouter {
         path: '/privacy',
         name: 'privacy',
         builder: (context, state) => const PrivacyPage(),
+      ),
+      GoRoute(
+        path: '/privacy-settings',
+        name: 'privacy-settings',
+        builder: (context, state) => const PrivacySettingsPage(),
       ),
 
       // User Profile

@@ -493,6 +493,13 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         _buildSettingItem(
           context,
+          'Paramètres de confidentialité',
+          'Gérer vos données et consentements RGPD',
+          Icons.security,
+          () => context.go('/privacy-settings'),
+        ),
+        _buildSettingItem(
+          context,
           'Confidentialité',
           'Politique de confidentialité',
           Icons.privacy_tip,
