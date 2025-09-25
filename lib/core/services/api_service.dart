@@ -353,7 +353,7 @@ class ApiService {
     var request =
         http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
     request.headers.addAll(_headers);
-    request.files.add(await http.MultipartFile.fromPath('photo', filePath));
+    request.files.add(await http.MultipartFile.fromPath('photos', filePath));
     if (order != null) {
       request.fields['order'] = order.toString();
     }
@@ -363,12 +363,26 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static Future<Map<String, dynamic>> uploadPhotos(List<String> filePaths) async {
+    var request =
+        http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
+    request.headers.addAll(_headers);
+    
+    for (int i = 0; i < filePaths.length; i++) {
+      request.files.add(await http.MultipartFile.fromPath('photos', filePaths[i]));
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
+
   static Future<Map<String, dynamic>> updatePhotoOrder(
-      String photoId, int order) async {
+      String photoId, int newOrder) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me/photos/$photoId'),
+      Uri.parse('$baseUrl/profiles/me/photos/$photoId/order'),
       headers: _headers,
-      body: jsonEncode({'order': order}),
+      body: jsonEncode({'newOrder': newOrder}),
     );
 
     return _handleResponse(response);

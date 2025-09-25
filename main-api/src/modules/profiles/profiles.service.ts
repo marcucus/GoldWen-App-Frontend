@@ -238,6 +238,66 @@ export class ProfilesService {
     return this.photoRepository.save(photo);
   }
 
+  async updatePhotoOrder(
+    userId: string,
+    photoId: string,
+    newOrder: number,
+  ): Promise<Photo> {
+    const profile = await this.profileRepository.findOne({
+      where: { userId },
+      relations: ['photos'],
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const photo = profile.photos?.find((p) => p.id === photoId);
+    if (!photo) {
+      throw new NotFoundException('Photo not found');
+    }
+
+    if (newOrder < 1 || newOrder > profile.photos.length) {
+      throw new BadRequestException(
+        `Invalid order position. Must be between 1 and ${profile.photos.length}`,
+      );
+    }
+
+    const oldOrder = photo.order;
+    
+    // If the order hasn't changed, return the photo as is
+    if (oldOrder === newOrder) {
+      return photo;
+    }
+
+    // Update order of other photos
+    if (newOrder < oldOrder) {
+      // Moving photo to an earlier position - increment order of photos in between
+      await this.photoRepository
+        .createQueryBuilder()
+        .update(Photo)
+        .set({ order: () => '"order" + 1' })
+        .where('profileId = :profileId', { profileId: profile.id })
+        .andWhere('order >= :newOrder', { newOrder })
+        .andWhere('order < :oldOrder', { oldOrder })
+        .execute();
+    } else {
+      // Moving photo to a later position - decrement order of photos in between
+      await this.photoRepository
+        .createQueryBuilder()
+        .update(Photo)
+        .set({ order: () => '"order" - 1' })
+        .where('profileId = :profileId', { profileId: profile.id })
+        .andWhere('order > :oldOrder', { oldOrder })
+        .andWhere('order <= :newOrder', { newOrder })
+        .execute();
+    }
+
+    // Update the photo's order
+    photo.order = newOrder;
+    return this.photoRepository.save(photo);
+  }
+
   async getPrompts(): Promise<Prompt[]> {
     return this.promptRepository.find({
       where: { isActive: true },

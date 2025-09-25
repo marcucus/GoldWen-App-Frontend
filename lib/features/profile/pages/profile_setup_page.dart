@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/models/profile.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/photo_management_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
 
@@ -267,106 +269,14 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           Expanded(
             child: Consumer<ProfileProvider>(
               builder: (context, profileProvider, child) {
-                return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: AppSpacing.md,
-                    mainAxisSpacing: AppSpacing.md,
-                    childAspectRatio: 0.8,
-                  ),
-                  itemCount: 6,
-                  itemBuilder: (context, index) {
-                    final hasPhoto = index < profileProvider.photos.length;
-
-                    return GestureDetector(
-                      onTap: hasPhoto ? null : () => _addPhoto(profileProvider),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: hasPhoto ? null : AppColors.accentCream,
-                          borderRadius:
-                              BorderRadius.circular(AppBorderRadius.large),
-                          border: Border.all(
-                            color: AppColors.dividerLight,
-                            width: 1,
-                          ),
-                        ),
-                        child: hasPhoto
-                            ? Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        AppBorderRadius.large),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      color: AppColors.primaryGold
-                                          .withOpacity(0.3),
-                                      child: profileProvider.photos[index]
-                                              .startsWith('file://')
-                                          ? Image.file(
-                                              File(profileProvider.photos[index]
-                                                  .replaceFirst('file://', '')),
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return const Icon(
-                                                  Icons.image,
-                                                  size: 40,
-                                                  color: Colors.white,
-                                                );
-                                              },
-                                            )
-                                          : const Icon(
-                                              Icons.image,
-                                              size: 40,
-                                              color: Colors.white,
-                                            ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () =>
-                                          profileProvider.removePhoto(index),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.add_photo_alternate,
-                                    size: 40,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  Text(
-                                    index == 0
-                                        ? 'Photo principale'
-                                        : 'Ajouter une photo',
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                      ),
-                    );
+                return PhotoManagementWidget(
+                  photos: profileProvider.photos,
+                  onPhotosChanged: (photos) {
+                    profileProvider.updatePhotos(photos);
                   },
+                  minPhotos: 3,
+                  maxPhotos: 6,
+                  showAddButton: true,
                 );
               },
             ),
@@ -584,134 +494,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         curve: Curves.easeInOut,
       );
     }
-  }
-
-  Future<void> _addPhoto(ProfileProvider profileProvider) async {
-    if (profileProvider.photos.length >= 6) {
-      return; // Maximum photos reached
-    }
-
-    try {
-      // Show dialog to choose between camera and gallery
-      final ImageSource? source = await _showImageSourceDialog();
-      if (source == null) return;
-
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        // Show loading indicator
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Upload de la photo...'),
-              ],
-            ),
-          ),
-        );
-
-        try {
-          // Upload the image to backend
-          final response = await ApiService.uploadPhoto(
-            image.path,
-            order: profileProvider.photos.length + 1,
-          );
-
-          // Extract photo URL from response
-          final photoUrl = response['data']['url'] ??
-              response['url'] ??
-              'uploaded_photo_${profileProvider.photos.length + 1}';
-          profileProvider.addPhoto(photoUrl);
-
-          // Close loading dialog
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Photo ajoutée avec succès'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } catch (uploadError) {
-          // Close loading dialog
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-
-          // For development, still add a placeholder if upload fails
-          print('Photo upload failed: $uploadError');
-          profileProvider
-              .addPhoto('file://${image.path}'); // Fallback for development
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur d\'upload: $uploadError'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      // Show error message to user
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'ajout de la photo: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<ImageSource?> _showImageSourceDialog() async {
-    return showDialog<ImageSource>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Choisir une source'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Appareil photo'),
-                onTap: () {
-                  Navigator.of(context).pop(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galerie'),
-                onTap: () {
-                  Navigator.of(context).pop(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _finishSetup() {
