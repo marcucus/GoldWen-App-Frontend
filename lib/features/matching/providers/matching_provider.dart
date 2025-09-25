@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/services/local_notification_service.dart';
+import '../../../core/services/notification_manager.dart';
 import '../../../core/models/models.dart';
 import '../../subscription/providers/subscription_provider.dart';
 
@@ -81,6 +82,9 @@ class MatchingProvider with ChangeNotifier {
 
   Future<void> _scheduleDailyNotifications() async {
     try {
+      // Note: This would need a context, which should be passed from the UI level
+      // For now, we'll keep the direct local notification service call
+      // In a real implementation, this should be called from a context-aware component
       await LocalNotificationService().scheduleDailySelectionNotification();
     } catch (e) {
       // Don't fail the whole operation if notifications fail
@@ -98,6 +102,15 @@ class MatchingProvider with ChangeNotifier {
       }
     } catch (e) {
       print('Failed to initialize notifications: $e');
+    }
+  }
+
+  /// Schedule daily notifications with context (should be called from UI)
+  Future<void> scheduleDailyNotificationsWithContext(BuildContext context) async {
+    try {
+      await NotificationManager().scheduleDailySelectionNotifications(context);
+    } catch (e) {
+      print('Failed to schedule daily notifications: $e');
     }
   }
 
@@ -161,6 +174,18 @@ class MatchingProvider with ChangeNotifier {
       if (isMatch) {
         // Reload matches to include the new one
         await loadMatches();
+        
+        // Trigger new match notification
+        if (matchedUserName != null) {
+          try {
+            await LocalNotificationService().showMatchNotification(
+              matchedUserName: matchedUserName,
+            );
+          } catch (e) {
+            print('Failed to show match notification: $e');
+            // Don't fail the entire operation if notification fails
+          }
+        }
         
         // Return match information for UI to handle
         final matchInfo = {

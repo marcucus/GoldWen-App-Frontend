@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:flutter/material.dart';
 import '../config/app_config.dart';
+import 'notification_manager.dart';
 
 class WebSocketService {
   static String get baseUrl => AppConfig.isDevelopment 
@@ -12,6 +14,7 @@ class WebSocketService {
   WebSocketChannel? _channel;
   String? _token;
   bool _isConnected = false;
+  BuildContext? _context; // Add context for notification management
   
   // Stream controllers for different event types
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
@@ -31,6 +34,10 @@ class WebSocketService {
 
   void setToken(String token) {
     _token = token;
+  }
+
+  void setContext(BuildContext context) {
+    _context = context;
   }
 
   Future<void> connect() async {
@@ -72,6 +79,7 @@ class WebSocketService {
       switch (eventType) {
         case 'new_message':
           _messageController.add(data);
+          _handleNewMessageNotification(data);
           break;
         case 'message_read':
           _readReceiptController.add(data);
@@ -82,12 +90,70 @@ class WebSocketService {
           break;
         case 'chat_expired':
           _chatExpiredController.add(data);
+          _handleChatExpiringNotification(data);
+          break;
+        case 'chat_expiring_soon':
+          _handleChatExpiringSoonNotification(data);
           break;
         default:
           print('Unknown WebSocket event type: $eventType');
       }
     } catch (e) {
       print('Error handling WebSocket message: $e');
+    }
+  }
+
+  void _handleNewMessageNotification(Map<String, dynamic> data) {
+    if (_context == null) return;
+    
+    try {
+      final senderName = data['senderName'] as String?;
+      final isFromCurrentUser = data['isFromCurrentUser'] as bool? ?? false;
+      
+      // Only show notification if message is not from current user
+      if (!isFromCurrentUser && senderName != null) {
+        NotificationManager().showNewMessageNotification(_context!, senderName);
+      }
+    } catch (e) {
+      print('Failed to show new message notification: $e');
+    }
+  }
+
+  void _handleChatExpiringNotification(Map<String, dynamic> data) {
+    if (_context == null) return;
+    
+    try {
+      final partnerName = data['partnerName'] as String?;
+      if (partnerName != null) {
+        NotificationManager().showNotificationIfAllowed(
+          context: _context!,
+          type: 'system',
+          title: 'Conversation expirée',
+          body: 'Votre conversation avec $partnerName a expiré',
+          payload: 'chat_expired',
+        );
+      }
+    } catch (e) {
+      print('Failed to show chat expired notification: $e');
+    }
+  }
+
+  void _handleChatExpiringSoonNotification(Map<String, dynamic> data) {
+    if (_context == null) return;
+    
+    try {
+      final partnerName = data['partnerName'] as String?;
+      final hoursLeft = data['hoursLeft'] as int?;
+      
+      if (partnerName != null && hoursLeft != null) {
+        NotificationManager().showChatExpiringNotification(
+          _context!, 
+          partnerName, 
+          hoursLeft
+        );
+      }
+    } catch (e) {
+      print('Failed to show chat expiring soon notification: $e');
     }
   }
 
