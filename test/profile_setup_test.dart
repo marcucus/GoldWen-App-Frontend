@@ -99,4 +99,61 @@ void main() {
       // Similar to above - would need refactoring for unit testing
     });
   });
+
+  group('Prompt Validation Tests', () {
+    testWidgets('Prompts page should show completion counter', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider(
+            create: (context) => ProfileProvider(),
+            child: const ProfileSetupPage(),
+          ),
+        ),
+      );
+
+      // Wait for the page to initialize
+      await tester.pumpAndSettle();
+
+      // Navigate to the prompts page (assuming we can reach it)
+      // Check if the completion counter text exists
+      expect(find.textContaining('Réponses complétées:'), findsOneWidget);
+      expect(find.textContaining('0/3'), findsOneWidget);
+    });
+
+    testWidgets('Continue button should be disabled when prompts are incomplete', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider(
+            create: (context) => ProfileProvider(),
+            child: const ProfileSetupPage(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Check if continue button text shows requirement when incomplete
+      final incompleteButton = find.textContaining('Complétez les 3 réponses');
+      expect(incompleteButton, findsWidgets);
+    });
+
+    testWidgets('Prompt text fields should have 300 character limit', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider(
+            create: (context) => ProfileProvider(),
+            child: const ProfileSetupPage(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Look for the character counter text
+      expect(find.textContaining('/300'), findsWidgets);
+      
+      // Look for the updated hint text
+      expect(find.text('Votre réponse... (max 300 caractères)'), findsWidgets);
+    });
+  });
 }

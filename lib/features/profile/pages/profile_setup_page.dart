@@ -342,11 +342,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             const SizedBox(height: AppSpacing.sm),
                             TextFormField(
                               controller: _promptControllers[index],
-                              decoration: const InputDecoration(
-                                hintText: 'Votre réponse...',
+                              decoration: InputDecoration(
+                                hintText: 'Votre réponse... (max 300 caractères)',
+                                counterText: '${_promptControllers[index].text.length}/300',
                               ),
-                              maxLines: 2,
-                              maxLength: 100,
+                              maxLines: 3,
+                              maxLength: 300,
+                              onChanged: (text) {
+                                setState(() {
+                                  // This will trigger a rebuild to update validation and counter
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -354,11 +360,37 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     },
                   ),
           ),
+          // Progress indicator for prompts validation
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _getValidAnswersCount() == 3 ? Icons.check_circle : Icons.pending,
+                  color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
+                  size: 20,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Réponses complétées: ${_getValidAnswersCount()}/3',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
+                    fontWeight: _getValidAnswersCount() == 3 ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _arePromptsValid() ? _nextPage : null,
-              child: const Text('Continuer'),
+              child: Text(
+                _arePromptsValid() 
+                  ? 'Continuer' 
+                  : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -438,7 +470,29 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    return _promptControllers.every((controller) => controller.text.isNotEmpty);
+    // According to specifications: exactly 3 prompts required
+    if (_promptControllers.length != 3) return false;
+    
+    // All 3 controllers must have non-empty text within character limit
+    for (final controller in _promptControllers) {
+      final text = controller.text.trim();
+      if (text.isEmpty || text.length > 300) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  int _getValidAnswersCount() {
+    int count = 0;
+    for (final controller in _promptControllers) {
+      final text = controller.text.trim();
+      if (text.isNotEmpty && text.length <= 300) {
+        count++;
+      }
+    }
+    return count;
   }
 
   int _calculateAge(DateTime birthDate) {
@@ -546,12 +600,33 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       return;
     }
 
-    // Validate prompt answers
+    // Validate prompt answers - must have exactly 3 valid responses
+    if (_promptControllers.length != 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur: 3 prompts requis pour continuer'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     for (int i = 0; i < _promptControllers.length; i++) {
-      if (_promptControllers[i].text.trim().isEmpty) {
+      final text = _promptControllers[i].text.trim();
+      if (text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Veuillez répondre à la question ${i + 1}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
+      if (text.length > 300) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('La réponse ${i + 1} dépasse 300 caractères (${text.length}/300)'),
             backgroundColor: Colors.red,
           ),
         );
