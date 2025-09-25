@@ -718,6 +718,23 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
   "type?": "MessageType enum (optionnel, défaut: TEXT)"
 }
 ```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "messageId": "string",
+    "message": "Message object",
+    "chat": {
+      "id": "string",
+      "status": "ChatStatus enum",
+      "expiresAt": "ISO date string",
+      "timeRemaining": "number (secondes)"
+    }
+  },
+  "error?": "string (si chat expiré ou autre erreur)"
+}
+```
 
 ### PUT /chat/:chatId/messages/read
 **Description**: Marquer les messages comme lus  
@@ -866,6 +883,23 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 
 ### POST /notifications/trigger-daily-selection
 **Description**: Déclencher manuellement les notifications de sélection quotidienne (dev uniquement)  
+**Body**:
+```json
+{
+  "targetUsers?": "string[] (userIds, optionnel - défaut: tous les utilisateurs)",
+  "customMessage?": "string (message personnalisé, optionnel)"
+}
+```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "notificationsSent": "number",
+    "errors": "string[]"
+  }
+}
+```  
 
 ---
 
@@ -918,6 +952,36 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 ### GET /subscriptions/usage
 **Description**: Obtenir les statistiques d'utilisation de l'abonnement  
 **Authentification**: Bearer Token  
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "currentPeriod": {
+      "startDate": "string (YYYY-MM-DD)",
+      "endDate": "string (YYYY-MM-DD)"
+    },
+    "dailyChoices": {
+      "limit": "number",
+      "used": "number",
+      "remaining": "number",
+      "resetTime": "ISO date string"
+    },
+    "features": {
+      "unlimitedChats": "boolean",
+      "whoLikedMe": "boolean",
+      "extendChats": "boolean",
+      "priorityProfile": "boolean"
+    },
+    "subscription": {
+      "tier": "SubscriptionTier enum",
+      "plan": "SubscriptionPlan enum",
+      "isActive": "boolean",
+      "expiresAt": "ISO date string"
+    }
+  }
+}
+```  
 
 ### PUT /subscriptions/:subscriptionId/activate
 **Description**: Activer un abonnement  

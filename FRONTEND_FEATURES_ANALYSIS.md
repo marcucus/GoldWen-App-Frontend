@@ -239,4 +239,47 @@ Le frontend GoldWen présente une **architecture solide** avec environ **75% de 
 
 Le projet nécessite **1-2 mois de développement supplémentaire** pour atteindre 100% de conformité avec le cahier des charges et livrer un MVP complet.
 
+---
+
+## 🔗 RÉSUMÉ DES ROUTES BACKEND REQUISES
+
+### Routes existantes utilisées (31):
+- `POST /profiles/me/photos` - Upload photos
+- `GET /profiles/completion` - Validation profil
+- `GET /profiles/prompts` + `POST /profiles/me/prompt-answers` - Prompts
+- `GET /matching/daily-selection` + `POST /matching/choose/:targetUserId` - Sélection quotidienne
+- `GET /subscriptions/usage` + `GET /subscriptions/features` - Limites abonnement
+- `GET /matching/matches` + `GET /chat` - Matches et chats
+- `POST /notifications/trigger-daily-selection` - Notifications quotidiennes
+- `POST /chat/:chatId/messages` - Chat avec expiration
+- Et 21 autres routes existantes...
+
+### Nouvelles routes créées (15):
+- `PUT /profiles/me/photos/:photoId/order` - Réorganiser photos
+- `PUT /profiles/me/prompt-answers` - Modifier prompts
+- `GET /matching/user-choices` - Choix quotidiens
+- `GET /matching/pending-matches` - Matches en attente
+- `GET /matching/history` - Historique sélections
+- `GET /matching/who-liked-me` - Qui m'a sélectionné (premium)
+- `POST /chat/accept/:matchId` - Accepter match
+- `PUT /chat/:chatId/expire` - Expiration chat
+- `POST /users/consent` - Consentement RGPD
+- `GET /users/me/export-data` - Export données
+- `PUT /users/me/privacy-settings` - Paramètres confidentialité
+- `POST /reports` - Signaler contenu
+- `GET /legal/privacy-policy` - Politique confidentialité
+- `POST /feedback` - Feedback utilisateur
+- `GET /users/me/accessibility-settings` - Paramètres accessibilité
+
+### Routes modifiées/enrichies (8):
+- `GET /matching/daily-selection` - Ajout preload + métadonnées
+- `POST /matching/choose/:targetUserId` - Réponse enrichie avec statut
+- `GET /profiles/completion` - Détails complétion profil
+- `GET /subscriptions/usage` - Limites quotidiennes détaillées
+- `POST /chat/:chatId/messages` - Vérification expiration
+- `POST /notifications/trigger-daily-selection` - Configuration flexible
+- Et 2 autres routes existantes enrichies...
+
+**Total : 54 routes backend** pour supporter toutes les fonctionnalités frontend critiques.
+
 *Dernière mise à jour : September 2025*
