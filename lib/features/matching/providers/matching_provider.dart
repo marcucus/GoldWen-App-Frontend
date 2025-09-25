@@ -62,14 +62,10 @@ class MatchingProvider with ChangeNotifier {
       final response = await ApiService.getDailySelection();
       final selectionData = response['data'] ?? response;
       
-      print('Debug: Daily selection response: $selectionData');
-      
       _dailySelection = DailySelection.fromJson(selectionData);
       _dailyProfiles = _dailySelection!.profiles;
       _lastUpdateTime = DateTime.now();
       _error = null;
-      
-      print('Debug: Parsed daily selection - choices remaining: ${_dailySelection!.choicesRemaining}, max choices: ${_dailySelection!.maxChoices}');
       
       // Load subscription usage to know limits
       await _loadSubscriptionUsage();
@@ -248,7 +244,6 @@ class MatchingProvider with ChangeNotifier {
     } catch (e) {
       // Don't handle error here as it's not critical
       // User might not have a subscription
-      print('Debug: Failed to load subscription usage: $e');
     }
   }
 
