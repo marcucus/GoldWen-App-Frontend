@@ -12,6 +12,8 @@ import 'core/services/firebase_messaging_service.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/app_initialization_service.dart';
 import 'core/services/gdpr_service.dart';
+import 'core/services/accessibility_service.dart';
+import 'core/services/performance_cache_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
 import 'features/matching/providers/matching_provider.dart';
@@ -49,6 +51,11 @@ class GoldWenApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Core services
+        ChangeNotifierProvider(create: (_) => AccessibilityService()..initialize()),
+        ChangeNotifierProvider(create: (_) => PerformanceCacheService()..initialize()),
+        
+        // App providers
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (context) {
@@ -68,20 +75,35 @@ class GoldWenApp extends StatelessWidget {
                 .catchError((e) => print('Failed to load notifications: $e')),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'GoldWen',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        routerConfig: AppRouter.router,
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', ''),
-          Locale('fr', ''),
-        ],
+      child: Consumer<AccessibilityService>(
+        builder: (context, accessibilityService, child) {
+          return MaterialApp.router(
+            title: 'GoldWen',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme(
+              highContrast: accessibilityService.highContrast,
+              textScaleFactor: accessibilityService.textScaleFactor,
+            ),
+            routerConfig: AppRouter.router,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en', ''),
+              Locale('fr', ''),
+            ],
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(accessibilityService.textScaleFactor),
+                ),
+                child: child!,
+              );
+            },
+          );
+        },
       ),
     );
   }
