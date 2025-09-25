@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/match_profile.dart';
 import '../providers/matching_provider.dart';
+import '../providers/report_provider.dart';
+import '../widgets/report_dialog.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   final String profileId;
@@ -51,6 +53,22 @@ class ProfileDetailPage extends StatelessWidget {
               ),
               onPressed: () => context.pop(),
             ),
+            actions: [
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.flag,
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () => _showReportDialog(context, profile),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -385,5 +403,13 @@ class ProfileDetailPage extends StatelessWidget {
         context.go('/home');
       }
     });
+  }
+
+  void _showReportDialog(BuildContext context, MatchProfile profile) {
+    ReportDialog.show(
+      context,
+      targetUserId: profile.id,
+      targetUserName: profile.name,
+    );
   }
 }

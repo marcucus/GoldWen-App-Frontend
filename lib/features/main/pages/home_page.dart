@@ -680,6 +680,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 },
               ),
               _buildActionCard(
+                icon: Icons.favorite,
+                title: 'Mes Matches',
+                subtitle: 'Voir tous vos matches',
+                onTap: () => context.go('/matches'),
+              ),
+              _buildActionCard(
+                icon: Icons.history,
+                title: 'Historique',
+                subtitle: 'Vos sélections passées',
+                onTap: () => context.go('/history'),
+              ),
+              _buildActionCard(
                 icon: Icons.person,
                 title: 'Profil',
                 subtitle: 'Gérez votre profil et préférences',

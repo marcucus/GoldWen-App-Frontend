@@ -15,6 +15,7 @@ import 'core/services/gdpr_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
 import 'features/matching/providers/matching_provider.dart';
+import 'features/matching/providers/report_provider.dart';
 import 'features/chat/providers/chat_provider.dart';
 import 'features/subscription/providers/subscription_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
@@ -57,6 +58,7 @@ class GoldWenApp extends StatelessWidget {
           provider.initializeNotifications();
           return provider;
         }),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),

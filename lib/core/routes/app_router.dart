@@ -9,6 +9,8 @@ import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/main/pages/main_navigation_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
+import '../../features/matching/pages/matches_page.dart';
+import '../../features/matching/pages/history_page.dart';
 import '../../features/chat/pages/chat_page.dart';
 import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
@@ -86,6 +88,18 @@ class AppRouter {
           final chatId = state.pathParameters['chatId']!;
           return ChatPage(chatId: chatId);
         },
+      ),
+
+      // Matching Features
+      GoRoute(
+        path: '/matches',
+        name: 'matches',
+        builder: (context, state) => const MatchesPage(),
+      ),
+      GoRoute(
+        path: '/history',
+        name: 'history',
+        builder: (context, state) => const HistoryPage(),
       ),
 
       // Subscription
