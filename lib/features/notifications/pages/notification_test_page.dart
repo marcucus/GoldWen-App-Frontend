@@ -403,15 +403,34 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
 
   Future<void> _sendTestNotification() async {
     try {
+      // Test both local and backend notifications
       await _localNotificationService.showTypedNotification(
         type: _selectedType,
         title: _titleController.text,
         body: _bodyController.text,
       );
       
-      _showSnackBar('Test notification sent successfully', AppColors.successGreen);
+      // Also test sending through backend API (if authenticated)
+      final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+      await notificationProvider.sendTestNotification(
+        title: _titleController.text,
+        body: _bodyController.text,
+        type: _selectedType,
+      );
+      
+      _showSnackBar('Test notification sent successfully (local + backend)', AppColors.successGreen);
     } catch (e) {
-      _showSnackBar('Failed to send notification: $e', AppColors.errorRed);
+      // Fallback to local only if backend fails
+      try {
+        await _localNotificationService.showTypedNotification(
+          type: _selectedType,
+          title: _titleController.text,
+          body: _bodyController.text,
+        );
+        _showSnackBar('Local test notification sent (backend failed: $e)', AppColors.warningAmber);
+      } catch (e2) {
+        _showSnackBar('Failed to send notification: $e2', AppColors.errorRed);
+      }
     }
   }
 

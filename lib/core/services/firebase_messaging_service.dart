@@ -100,12 +100,12 @@ class FirebaseMessagingService {
       // Determine platform
       final platform = Platform.isIOS ? 'ios' : 'android';
       
-      // Register device token with backend
-      await ApiService.registerDeviceToken({
-        'deviceToken': token,
-        'platform': platform,
-        'appVersion': '1.0.0', // This should come from package info
-      });
+      // Register device token with backend using the correct API endpoint
+      await ApiService.registerPushToken(
+        token: token,
+        platform: platform,
+        appVersion: '1.0.0', // This should come from package info
+      );
       print('Device token registered with backend successfully');
     } catch (e) {
       print('Error registering device token with backend: $e');
@@ -219,6 +219,12 @@ class FirebaseMessagingService {
 
   Future<void> deleteToken() async {
     try {
+      // Remove token from backend first
+      if (_deviceToken != null) {
+        await ApiService.removePushToken(token: _deviceToken!);
+      }
+      
+      // Then delete from Firebase
       await _firebaseMessaging.deleteToken();
       _deviceToken = null;
       print('FCM token deleted');

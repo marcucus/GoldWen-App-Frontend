@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'navigation_service.dart';
 
 class LocalNotificationService {
   static final LocalNotificationService _instance = LocalNotificationService._internal();
@@ -104,6 +105,10 @@ class LocalNotificationService {
     await _notifications.cancel(_dailySelectionNotificationId);
   }
 
+  Future<void> cancelAll() async {
+    await _notifications.cancelAll();
+  }
+
   Future<void> showInstantNotification({
     required String title,
     required String body,
@@ -201,21 +206,23 @@ class LocalNotificationService {
   }
 
   void _handleDailySelectionTap() {
-    // Implementation would depend on your navigation setup
-    // Could use GetIt to get a navigation service, or use a global navigator key
-    print('Daily selection notification tapped');
+    NavigationService.navigateToDiscoverTab();
+    print('Daily selection notification tapped - navigating to discover');
   }
 
   void _handleNewMatchTap() {
-    print('New match notification tapped');
+    NavigationService.navigateToMatches();
+    print('New match notification tapped - navigating to matches');
   }
 
   void _handleNewMessageTap() {
-    print('New message notification tapped');  
+    NavigationService.navigateToNotifications(); // Could be improved to go to specific chat
+    print('New message notification tapped - navigating to notifications');  
   }
 
   void _handleChatExpiringTap() {
-    print('Chat expiring notification tapped');
+    NavigationService.navigateToNotifications(); // Could be improved to go to specific chat
+    print('Chat expiring notification tapped - navigating to notifications');
   }
 
   // Method to show immediate notifications (for foreground FCM messages)
