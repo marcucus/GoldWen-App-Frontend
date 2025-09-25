@@ -28,11 +28,11 @@ Après analyse approfondie du code frontend Flutter vs le cahier des charges (`s
 - [ ] **Refresh quotidien à midi** : Nouvelle sélection chaque jour à 12h
 - [ ] **Persistance des sélections** : Éviter les double-sélections
 
-### 4. **Système de Match Mutuel** (CRITIQUE)
-- [ ] **Match bidirectionnel requis** : Chat accessible uniquement si A choisit B ET B choisit A
+### 4. **Système de Match** (CRITIQUE)
+- [ ] **Match unidirectionnel requis** : Chat accessible si A choisit B ou B choisit A, l'autre choisis ou non de chatter (quand l'autre clique sur un chat pas encore accepté le profile de l'autre personne s'affiche avec un bouton accepter chat ou refuser chat)
 - [ ] **Notification de match** : "Félicitations ! Vous avez un match avec [Prénom]"
-- [ ] **Page de matches** : Liste des matches obtenus (bidirectionnels)
-- [ ] **Distinction sélections/matches** : Interface différente pour sélections vs matches
+- [ ] **Page de matches** : Liste des matches obtenus (undirectionnels)
+- [ ] **Distinction sélections/matches** : Interface différente pour sélections(l'un des deux demande le chat) vs matches (quand une demande de chat à été acceptée)
 
 ## 🔧 FONCTIONNALITÉS PARTIELLEMENT IMPLÉMENTÉES À COMPLÉTER
 
