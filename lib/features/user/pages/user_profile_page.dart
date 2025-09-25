@@ -5,6 +5,7 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
+import '../../profile/widgets/profile_completion_widget.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -81,6 +82,7 @@ class _UserProfilePageState extends State<UserProfilePage>
   void _loadProfile() {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     profileProvider.loadProfile();
+    profileProvider.loadProfileCompletion(); // Also load completion status
   }
 
   @override
@@ -190,6 +192,17 @@ class _UserProfilePageState extends State<UserProfilePage>
             children: [
               // Profile Header Card
               _buildProfileHeader(user, profileProvider),
+              
+              const SizedBox(height: 24),
+              
+              // Profile Completion Status
+              SlideInAnimation(
+                delay: const Duration(milliseconds: 300),
+                child: ProfileCompletionWidget(
+                  showProgress: true,
+                  onMissingStepTap: () => context.go('/profile-setup'),
+                ),
+              ),
               
               const SizedBox(height: 24),
               

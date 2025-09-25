@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/services/location_service.dart';
+import '../../auth/providers/auth_provider.dart';
 import 'home_page.dart';
 import '../../matching/pages/daily_matches_page.dart';
 import '../../chat/pages/chat_list_page.dart';
@@ -138,20 +140,37 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Main content
-          TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: _pages,
-          ),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Check if profile is completed - if not, redirect to complete it
+        final user = authProvider.user;
+        if (user != null && (user.isProfileCompleted != true)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              context.go('/profile-setup');
+            }
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          // Floating bottom navigation
-          _buildFloatingNavigation(),
-        ],
-      ),
+        return Scaffold(
+          body: Stack(
+            children: [
+              // Main content
+              TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: _pages,
+              ),
+
+              // Floating bottom navigation
+              _buildFloatingNavigation(),
+            ],
+          ),
+        );
+      },
     );
   }
 
