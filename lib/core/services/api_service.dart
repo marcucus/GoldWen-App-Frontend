@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
+import '../models/models.dart';
 
 class ApiService {
   static String get baseUrl => AppConfig.isDevelopment
@@ -1185,6 +1186,140 @@ class MatchingServiceApi {
     );
 
     return _handleMatchingResponse(response);
+  }
+
+  // Matches API methods
+  static Future<Map<String, dynamic>> getMatches({String? status}) async {
+    final queryParams = <String, String>{};
+    if (status != null) queryParams['status'] = status;
+
+    final uri = Uri.parse('$baseUrl/matching/matches').replace(
+      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+    );
+
+    final response = await _makeRequest(
+      http.get(uri, headers: _headers),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getMatchDetails(String matchId) async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/matching/matches/$matchId'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
+  // History API methods
+  static Future<Map<String, dynamic>> getHistory({
+    int page = 1,
+    int limit = 20,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    
+    if (startDate != null) queryParams['startDate'] = startDate;
+    if (endDate != null) queryParams['endDate'] = endDate;
+
+    final uri = Uri.parse('$baseUrl/matching/history').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _makeRequest(
+      http.get(uri, headers: _headers),
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Reports API methods
+  static Future<Map<String, dynamic>> submitReport({
+    required String targetUserId,
+    required ReportType type,
+    required String reason,
+    String? messageId,
+    String? chatId,
+    List<String>? evidence,
+  }) async {
+    final body = {
+      'targetUserId': targetUserId,
+      'type': _reportTypeToString(type),
+      'reason': reason,
+      if (messageId != null) 'messageId': messageId,
+      if (chatId != null) 'chatId': chatId,
+      if (evidence != null) 'evidence': evidence,
+    };
+
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/reports'),
+        headers: _headers,
+        body: jsonEncode(body),
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getMyReports({
+    int page = 1,
+    int limit = 20,
+    ReportStatus? status,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    
+    if (status != null) queryParams['status'] = _reportStatusToString(status);
+
+    final uri = Uri.parse('$baseUrl/reports/me').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _makeRequest(
+      http.get(uri, headers: _headers),
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Helper methods for report enums
+  static String _reportTypeToString(ReportType type) {
+    switch (type) {
+      case ReportType.inappropriateContent:
+        return 'inappropriate_content';
+      case ReportType.harassment:
+        return 'harassment';
+      case ReportType.fakeProfile:
+        return 'fake_profile';
+      case ReportType.spam:
+        return 'spam';
+      case ReportType.other:
+        return 'other';
+    }
+  }
+
+  static String _reportStatusToString(ReportStatus status) {
+    switch (status) {
+      case ReportStatus.pending:
+        return 'pending';
+      case ReportStatus.reviewed:
+        return 'reviewed';
+      case ReportStatus.resolved:
+        return 'resolved';
+      case ReportStatus.dismissed:
+        return 'dismissed';
+    }
   }
 
   static Map<String, dynamic> _handleMatchingResponse(http.Response response) {

@@ -339,6 +339,72 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
+  // History management
+  List<HistoryItem> _historyItems = [];
+  bool _hasMoreHistory = true;
+
+  List<HistoryItem> get historyItems => _historyItems;
+  bool get hasMoreHistory => _hasMoreHistory;
+
+  Future<void> loadHistory({
+    int page = 1,
+    int limit = 20,
+    String? startDate,
+    String? endDate,
+    bool refresh = false,
+  }) async {
+    if (refresh) {
+      _historyItems.clear();
+      _hasMoreHistory = true;
+    }
+
+    _setLoading();
+
+    try {
+      final response = await ApiService.getHistory(
+        page: page,
+        limit: limit,
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      final historyData = PaginatedHistory.fromJson(response);
+      
+      if (refresh || page == 1) {
+        _historyItems = historyData.data;
+      } else {
+        _historyItems.addAll(historyData.data);
+      }
+
+      _hasMoreHistory = historyData.hasMore;
+      _error = null;
+    } catch (e) {
+      _handleError(e, 'Failed to load history');
+    } finally {
+      _setLoaded();
+    }
+  }
+
+  // Matches management
+  Future<void> loadMatches({String? status}) async {
+    _setLoading();
+
+    try {
+      final response = await ApiService.getMatches(status: status);
+      final matchesData = response['data'] as List<dynamic>? ?? [];
+      
+      _matches = matchesData
+          .map((data) => Match.fromJson(data as Map<String, dynamic>))
+          .toList();
+      
+      _error = null;
+    } catch (e) {
+      _handleError(e, 'Failed to load matches');
+    } finally {
+      _setLoaded();
+    }
+  }
+
   // Utility methods
   void _setLoading() {
     _isLoading = true;
