@@ -715,7 +715,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> updateNotificationSettings(
-      Map<String, bool> settings) async {
+      Map<String, dynamic> settings) async {
     final response = await http.put(
       Uri.parse('$baseUrl/notifications/settings'),
       headers: _headers,
@@ -743,15 +743,88 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> registerDeviceToken(
-      Map<String, String> deviceInfo) async {
+  static Future<Map<String, dynamic>> triggerDailySelectionNotifications({
+    List<String>? targetUsers,
+    String? customMessage,
+  }) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/notifications/register-device'),
+      Uri.parse('$baseUrl/notifications/trigger-daily-selection'),
       headers: _headers,
-      body: jsonEncode(deviceInfo),
+      body: jsonEncode({
+        if (targetUsers != null) 'targetUsers': targetUsers,
+        if (customMessage != null) 'customMessage': customMessage,
+      }),
     );
 
     return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> sendGroupNotification({
+    required List<String> userIds,
+    required String type,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/notifications/send-group'),
+      headers: _headers,
+      body: jsonEncode({
+        'userIds': userIds,
+        'type': type,
+        'title': title,
+        'body': body,
+        if (data != null) 'data': data,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> registerPushToken({
+    required String token,
+    required String platform,
+    String? appVersion,
+    String? deviceId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/me/push-tokens'),
+      headers: _headers,
+      body: jsonEncode({
+        'token': token,
+        'platform': platform,
+        if (appVersion != null) 'appVersion': appVersion,
+        if (deviceId != null) 'deviceId': deviceId,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> removePushToken({
+    required String token,
+  }) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/users/me/push-tokens'),
+      headers: _headers,
+      body: jsonEncode({
+        'token': token,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Legacy method for backward compatibility
+  @Deprecated('Use registerPushToken instead')
+  static Future<Map<String, dynamic>> registerDeviceToken(
+      Map<String, String> deviceInfo) async {
+    return registerPushToken(
+      token: deviceInfo['deviceToken'] ?? deviceInfo['token']!,
+      platform: deviceInfo['platform']!,
+      appVersion: deviceInfo['appVersion'],
+      deviceId: deviceInfo['deviceId'],
+    );
   }
 
   // Admin endpoints

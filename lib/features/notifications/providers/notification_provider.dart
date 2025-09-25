@@ -300,6 +300,36 @@ class NotificationProvider with ChangeNotifier {
     _unreadCount = unreadNotifications.length;
   }
 
+  // Check if a specific notification type should be shown
+  bool shouldShowNotification(String type) {
+    if (_settings == null || !_settings!.pushEnabled) return false;
+    if (_settings!.isInQuietHours && !_settings!.soundEnabled) return false;
+
+    switch (type) {
+      case 'daily_selection':
+        return _settings!.dailySelection;
+      case 'new_match':
+        return _settings!.newMatches;
+      case 'new_message':
+        return _settings!.newMessages;
+      case 'chat_expiring':
+        return _settings!.chatExpiring;
+      case 'system':
+        return _settings!.systemUpdates;
+      default:
+        return true;
+    }
+  }
+
+  // Get notification style based on settings (sound, vibration etc.)
+  Map<String, bool> getNotificationStyle() {
+    return {
+      'sound': _settings?.soundEnabled ?? true,
+      'vibration': _settings?.vibrationEnabled ?? true,
+      'badge': _settings?.pushEnabled ?? true,
+    };
+  }
+
   // Utility methods
   void _setLoading() {
     _isLoading = true;
