@@ -845,6 +845,103 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // GDPR Compliance endpoints
+  static Future<Map<String, dynamic>> submitGdprConsent({
+    required bool dataProcessing,
+    bool? marketing,
+    bool? analytics,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/consent'),
+      headers: _headers,
+      body: jsonEncode({
+        'dataProcessing': dataProcessing,
+        if (marketing != null) 'marketing': marketing,
+        if (analytics != null) 'analytics': analytics,
+        'consentedAt': DateTime.now().toIso8601String(),
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getPrivacyPolicy({
+    String? version,
+    String format = 'json',
+  }) async {
+    final queryParams = <String, String>{};
+    if (version != null) queryParams['version'] = version;
+    queryParams['format'] = format;
+
+    final uri = Uri.parse('$baseUrl/legal/privacy-policy')
+        .replace(queryParameters: queryParams);
+    final response = await http.get(uri, headers: _headers);
+
+    return _handleResponse(response);
+  }
+
+  static Future<dynamic> exportUserData({String format = 'json'}) async {
+    final queryParams = <String, String>{'format': format};
+    
+    final uri = Uri.parse('$baseUrl/users/me/export-data')
+        .replace(queryParameters: queryParams);
+    final response = await http.get(uri, headers: _headers);
+
+    // For file downloads, we might need to handle differently
+    if (format == 'pdf') {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return response.bodyBytes; // Return raw bytes for PDF
+      } else {
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: 'Failed to export data as PDF',
+          code: 'EXPORT_ERROR',
+        );
+      }
+    }
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> updatePrivacySettings({
+    required bool analytics,
+    required bool marketing,
+    required bool functionalCookies,
+    int? dataRetention,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/users/me/privacy-settings'),
+      headers: _headers,
+      body: jsonEncode({
+        'analytics': analytics,
+        'marketing': marketing,
+        'functionalCookies': functionalCookies,
+        if (dataRetention != null) 'dataRetention': dataRetention,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getPrivacySettings() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/me/privacy-settings'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Enhanced delete account with GDPR compliance notice
+  static Future<Map<String, dynamic>> deleteAccountWithGdpr() async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/users/me'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
   static dynamic _handleResponse(http.Response response) {
     try {
       if (AppConfig.isDevelopment) {

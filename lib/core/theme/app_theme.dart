@@ -48,6 +48,10 @@ class AppColors {
   static const Color shadowLight = Color(0x10000000);
   static const Color shadowMedium = Color(0x20000000);
   static const Color shadowDark = Color(0x30000000);
+  static const Color shadowColor = Color(0x20000000); // General shadow color
+  
+  // Border Colors
+  static const Color borderColor = Color(0xFFE8E8E8);
   
   // Premium Gradients
   static LinearGradient get primaryGradient => const LinearGradient(
