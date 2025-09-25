@@ -84,10 +84,15 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
   }
 
   Widget _buildPhotoGrid() {
-    return ReorderableListView.builder(
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      onReorder: _onReorder,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
+        childAspectRatio: 0.8,
+      ),
       itemCount: widget.maxPhotos,
       itemBuilder: (context, index) {
         final hasPhoto = index < _photos.length;
@@ -101,157 +106,232 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
   }
 
   Widget _buildPhotoTile(Photo photo, int index) {
-    return Card(
-      key: ValueKey('photo_${photo.id}'),
-      child: Container(
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-          image: DecorationImage(
-            image: _getImageProvider(photo.url),
-            fit: BoxFit.cover,
-            onError: (error, stackTrace) {
-              debugPrint('Error loading image: $error');
-            },
+    return LongPressDraggable<int>(
+      data: index,
+      feedback: Material(
+        elevation: 8,
+        child: Container(
+          width: 120,
+          height: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+            image: DecorationImage(
+              image: _getImageProvider(photo.url),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        child: Stack(
-          children: [
-            // Primary photo indicator
-            if (photo.isPrimary)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGold,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.small),
-                  ),
-                  child: Text(
-                    'Principal',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+      ),
+      childWhenDragging: Container(
+        decoration: BoxDecoration(
+          color: AppColors.accentCream.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+          border: Border.all(
+            color: AppColors.primaryGold.withOpacity(0.3),
+            width: 2,
+            style: BorderStyle.dashed,
+          ),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.drag_indicator,
+            color: AppColors.primaryGold,
+            size: 32,
+          ),
+        ),
+      ),
+      child: DragTarget<int>(
+        onAccept: (draggedIndex) {
+          if (draggedIndex != index) {
+            _onReorder(draggedIndex, index);
+          }
+        },
+        builder: (context, candidateData, rejectedData) {
+          final isReceiving = candidateData.isNotEmpty;
+          return Card(
+            key: ValueKey('photo_${photo.id}'),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                border: isReceiving
+                    ? Border.all(
+                        color: AppColors.primaryGold,
+                        width: 2,
+                      )
+                    : null,
+                image: DecorationImage(
+                  image: _getImageProvider(photo.url),
+                  fit: BoxFit.cover,
+                  onError: (error, stackTrace) {
+                    debugPrint('Error loading image: $error');
+                  },
                 ),
               ),
-            
-            // Actions overlay
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Stack(
                 children: [
-                  // Set as primary button
-                  if (!photo.isPrimary)
-                    _buildActionButton(
-                      icon: Icons.star_border,
-                      onPressed: () => _setPrimaryPhoto(photo),
-                      tooltip: 'Définir comme principale',
+                  // Primary photo indicator
+                  if (photo.isPrimary)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGold,
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.small),
+                        ),
+                        child: Text(
+                          'Principal',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
                     ),
-                  
-                  const SizedBox(width: 4),
-                  
-                  // Delete button
-                  _buildActionButton(
-                    icon: Icons.delete,
-                    onPressed: () => _deletePhoto(photo),
-                    tooltip: 'Supprimer',
-                    color: AppColors.error,
+
+                  // Actions overlay
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Set as primary button
+                        if (!photo.isPrimary)
+                          _buildActionButton(
+                            icon: Icons.star_border,
+                            onPressed: () => _setPrimaryPhoto(photo),
+                            tooltip: 'Définir comme principale',
+                          ),
+
+                        const SizedBox(width: 4),
+
+                        // Delete button
+                        _buildActionButton(
+                          icon: Icons.delete,
+                          onPressed: () => _deletePhoto(photo),
+                          tooltip: 'Supprimer',
+                          color: AppColors.error,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Order indicator
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryGold,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${index + 1}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Drag handle hint
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.drag_indicator,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            // Reorder handle
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.drag_handle,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-            ),
-
-            // Order indicator
-            Positioned(
-              bottom: 8,
-              left: 8,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryGold,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '${index + 1}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildEmptyPhotoTile(int index) {
-    return Card(
-      key: ValueKey('empty_$index'),
-      child: InkWell(
-        onTap: widget.showAddButton && _photos.length < widget.maxPhotos
-            ? _addPhoto
-            : null,
-        child: Container(
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.accentCream,
-            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-            border: Border.all(
-              color: AppColors.dividerLight,
-              style: BorderStyle.solid,
+    return DragTarget<int>(
+      onAccept: (draggedIndex) {
+        // Move dragged photo to this empty position
+        if (draggedIndex < _photos.length && index >= _photos.length) {
+          _onReorder(draggedIndex, index);
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isReceiving = candidateData.isNotEmpty;
+        return Card(
+          key: ValueKey('empty_$index'),
+          child: InkWell(
+            onTap: widget.showAddButton && _photos.length < widget.maxPhotos
+                ? _addPhoto
+                : null,
+            child: Container(
+              decoration: BoxDecoration(
+                color: isReceiving 
+                    ? AppColors.primaryGold.withOpacity(0.1)
+                    : AppColors.accentCream,
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                border: Border.all(
+                  color: isReceiving 
+                      ? AppColors.primaryGold
+                      : AppColors.dividerLight,
+                  width: isReceiving ? 2 : 1,
+                  style: isReceiving ? BorderStyle.dashed : BorderStyle.solid,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isReceiving 
+                        ? Icons.move_to_inbox
+                        : Icons.add_photo_alternate,
+                    size: 32,
+                    color: isReceiving 
+                        ? AppColors.primaryGold
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    isReceiving 
+                        ? 'Déposer ici'
+                        : (index == 0 ? 'Photo principale' : 'Ajouter une photo'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isReceiving 
+                              ? AppColors.primaryGold
+                              : AppColors.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_photo_alternate,
-                size: 32,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                index == 0 ? 'Photo principale' : 'Ajouter une photo',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -548,7 +628,13 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
   }
 
   void _onReorder(int oldIndex, int newIndex) {
-    if (oldIndex >= _photos.length || newIndex > _photos.length) return;
+    if (oldIndex >= _photos.length) return;
+    
+    // If moving to an empty position, just reorder
+    if (newIndex >= _photos.length) {
+      // This would extend beyond current photos, so we just move to the end
+      newIndex = _photos.length - 1;
+    }
 
     setState(() {
       if (newIndex > oldIndex) {
