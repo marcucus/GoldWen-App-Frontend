@@ -6,6 +6,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
 import '../providers/chat_provider.dart';
+import '../widgets/chat_countdown_timer.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -106,43 +107,32 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Sophie'),
-                  Consumer<ChatProvider>(
-                    builder: (context, chatProvider, child) {
-                      final remainingTime =
-                          chatProvider.getRemainingTime(widget.chatId);
-                      if (remainingTime == null) return const SizedBox.shrink();
-
-                      final isExpired =
-                          chatProvider.isChatExpired(widget.chatId);
-                      if (isExpired) {
-                        return Text(
-                          'Conversation expirée',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.errorRed,
-                                  ),
-                        );
-                      }
-
-                      final hours = remainingTime.inHours;
-                      final minutes = remainingTime.inMinutes % 60;
-                      final seconds = remainingTime.inSeconds % 60;
-
-                      return Text(
-                        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primaryGold,
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [const FontFeature.tabularFigures()],
+              child: Consumer<ChatProvider>(
+                builder: (context, chatProvider, child) {
+                  final conversation = chatProvider.getConversation(widget.chatId);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        conversation?.otherParticipant?.firstName ?? 'Chat',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Lato',
                         ),
-                      );
-                    },
-                  ),
-                ],
+                      ),
+                      if (conversation?.expiresAt != null)
+                        ChatCountdownTimer(
+                          expiresAt: conversation!.expiresAt!,
+                          onExpired: () {
+                            // Refresh chat provider when expired
+                            chatProvider.clearExpiredChats();
+                          },
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -367,45 +357,64 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               const SizedBox(width: AppSpacing.xs),
               // Text input
               Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _focusNode,
-                  onTap: () {
-                    if (_showEmojiPicker) {
-                      setState(() {
-                        _showEmojiPicker = false;
-                      });
-                    }
+                child: Consumer<ChatProvider>(
+                  builder: (context, chatProvider, child) {
+                    final isExpired = chatProvider.isChatExpired(widget.chatId);
+                    
+                    return TextField(
+                      controller: _messageController,
+                      focusNode: _focusNode,
+                      enabled: !isExpired,
+                      onTap: () {
+                        if (_showEmojiPicker) {
+                          setState(() {
+                            _showEmojiPicker = false;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: isExpired 
+                            ? 'Cette conversation a expiré' 
+                            : 'Tapez votre message...',
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.large),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: isExpired 
+                            ? AppColors.backgroundGrey 
+                            : AppColors.accentCream,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                      ),
+                      maxLines: null,
+                      textCapitalization: TextCapitalization.sentences,
+                      onSubmitted: isExpired ? null : (_) => _sendMessage(chatProvider),
+                    );
                   },
-                  decoration: InputDecoration(
-                    hintText: 'Tapez votre message...',
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppBorderRadius.large),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.accentCream,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                  ),
-                  maxLines: null,
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (_) => _sendMessage(chatProvider),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               // Send button
-              FloatingActionButton(
-                onPressed: () => _sendMessage(chatProvider),
-                backgroundColor: AppColors.primaryGold,
-                mini: true,
-                child: const Icon(
-                  Icons.send,
-                  color: Colors.white,
-                ),
+              Consumer<ChatProvider>(
+                builder: (context, chatProvider, child) {
+                  final isExpired = chatProvider.isChatExpired(widget.chatId);
+                  
+                  return FloatingActionButton(
+                    onPressed: isExpired ? null : () => _sendMessage(chatProvider),
+                    backgroundColor: isExpired 
+                        ? AppColors.backgroundGrey 
+                        : AppColors.primaryGold,
+                    mini: true,
+                    child: Icon(
+                      Icons.send,
+                      color: isExpired ? AppColors.textTertiary : Colors.white,
+                    ),
+                  );
+                },
               ),
             ],
           ),

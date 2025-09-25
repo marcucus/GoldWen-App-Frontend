@@ -70,6 +70,32 @@ class Conversation {
   }
 
   bool get hasUnreadMessages => unreadCount > 0;
+
+  Conversation copyWith({
+    String? id,
+    String? matchId,
+    List<String>? participantIds,
+    ChatMessage? lastMessage,
+    int? unreadCount,
+    String? status,
+    DateTime? expiresAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Profile? otherParticipant,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      matchId: matchId ?? this.matchId,
+      participantIds: participantIds ?? this.participantIds,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      status: status ?? this.status,
+      expiresAt: expiresAt ?? this.expiresAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      otherParticipant: otherParticipant ?? this.otherParticipant,
+    );
+  }
 }
 
 class ChatMessage {
@@ -130,6 +156,30 @@ class ChatMessage {
   bool get isTextMessage => type == 'text';
   bool get isImageMessage => type == 'image';
   bool get isSystemMessage => type == 'system';
+
+  ChatMessage copyWith({
+    String? id,
+    String? conversationId,
+    String? senderId,
+    String? type,
+    String? content,
+    bool? isRead,
+    DateTime? createdAt,
+    DateTime? readAt,
+    User? sender,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      senderId: senderId ?? this.senderId,
+      type: type ?? this.type,
+      content: content ?? this.content,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      readAt: readAt ?? this.readAt,
+      sender: sender ?? this.sender,
+    );
+  }
 }
 
 class TypingStatus {

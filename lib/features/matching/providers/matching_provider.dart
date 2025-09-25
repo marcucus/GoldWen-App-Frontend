@@ -212,6 +212,29 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>?> acceptMatch(String matchId, {required bool accept}) async {
+    try {
+      _setLoading();
+      
+      final response = await ApiService.acceptMatch(matchId, accept: accept);
+      final result = response['data'] ?? response;
+      
+      if (accept && result != null) {
+        // If accepted, the response should contain chat details
+        return result;
+      }
+      
+      _error = null;
+      notifyListeners();
+      return result;
+    } catch (e) {
+      _handleError(e, accept ? 'Failed to accept match' : 'Failed to decline match');
+      return null;
+    } finally {
+      _setLoaded();
+    }
+  }
+
   Future<void> deleteMatch(String matchId) async {
     try {
       await ApiService.deleteMatch(matchId);
