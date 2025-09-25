@@ -385,25 +385,7 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  // Matches management
-  Future<void> loadMatches({String? status}) async {
-    _setLoading();
 
-    try {
-      final response = await ApiService.getMatches(status: status);
-      final matchesData = response['data'] as List<dynamic>? ?? [];
-      
-      _matches = matchesData
-          .map((data) => Match.fromJson(data as Map<String, dynamic>))
-          .toList();
-      
-      _error = null;
-    } catch (e) {
-      _handleError(e, 'Failed to load matches');
-    } finally {
-      _setLoaded();
-    }
-  }
 
   // Utility methods
   void _setLoading() {
