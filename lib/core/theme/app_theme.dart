@@ -52,6 +52,13 @@ class AppColors {
   
   // Border Colors
   static const Color borderColor = Color(0xFFE8E8E8);
+
+  // High Contrast Colors (WCAG AAA compliant)
+  static const Color highContrastPrimary = Color(0xFF8B6914);
+  static const Color highContrastText = Color(0xFF000000);
+  static const Color highContrastBackground = Color(0xFFFFFFFF);
+  static const Color highContrastSecondary = Color(0xFF4A4A4A);
+  static const Color highContrastBorder = Color(0xFF000000);
   
   // Premium Gradients
   static LinearGradient get primaryGradient => const LinearGradient(
@@ -102,89 +109,71 @@ class AppColors {
     ),
     borderRadius: BorderRadius.circular(20),
   );
+
+  /// Get color with proper contrast ratio for accessibility
+  static Color getAccessibleColor(Color backgroundColor, {bool highContrast = false}) {
+    if (highContrast) {
+      return _isLight(backgroundColor) ? highContrastText : highContrastBackground;
+    }
+    return _isLight(backgroundColor) ? textDark : textLight;
+  }
+
+  /// Check if color is light (for contrast calculations)
+  static bool _isLight(Color color) {
+    final luminance = color.computeLuminance();
+    return luminance > 0.5;
+  }
+
+  /// Get high contrast version of primary colors
+  static Color getHighContrastPrimary(bool enabled) {
+    return enabled ? highContrastPrimary : primaryGold;
+  }
+
+  /// Get high contrast text color
+  static Color getHighContrastText(bool enabled) {
+    return enabled ? highContrastText : textDark;
+  }
+
+  /// Get high contrast background color
+  static Color getHighContrastBackground(bool enabled) {
+    return enabled ? highContrastBackground : backgroundWhite;
+  }
 }
 
 class AppTheme {
-  static ThemeData get lightTheme {
+  static ThemeData lightTheme({
+    bool highContrast = false,
+    double textScaleFactor = 1.0,
+  }) {
+    final primaryColor = AppColors.getHighContrastPrimary(highContrast);
+    final textColor = AppColors.getHighContrastText(highContrast);
+    final backgroundColor = AppColors.getHighContrastBackground(highContrast);
+    
     return ThemeData(
       useMaterial3: true,
-      primaryColor: AppColors.primaryGold,
-      scaffoldBackgroundColor: AppColors.backgroundWhite,
+      primaryColor: primaryColor,
+      scaffoldBackgroundColor: backgroundColor,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primaryGold,
+        seedColor: primaryColor,
         brightness: Brightness.light,
-        primary: AppColors.primaryGold,
-        secondary: AppColors.secondaryBeige,
-        surface: AppColors.backgroundWhite,
-        onSurface: AppColors.textDark,
+        primary: primaryColor,
+        secondary: highContrast ? AppColors.highContrastSecondary : AppColors.secondaryBeige,
+        surface: backgroundColor,
+        onSurface: textColor,
       ),
 
-      // Typography
-      textTheme: TextTheme(
-        // Headlines use Playfair Display (Serif)
-        headlineLarge: GoogleFonts.playfairDisplay(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textDark,
-          height: 1.2,
-        ),
-        headlineMedium: GoogleFonts.playfairDisplay(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textDark,
-          height: 1.3,
-        ),
-        headlineSmall: GoogleFonts.playfairDisplay(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textDark,
-          height: 1.3,
-        ),
-
-        // Body text uses Lato (Sans-Serif)
-        bodyLarge: GoogleFonts.lato(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textDark,
-          height: 1.5,
-        ),
-        bodyMedium: GoogleFonts.lato(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textDark,
-          height: 1.5,
-        ),
-        bodySmall: GoogleFonts.lato(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textSecondary,
-          height: 1.4,
-        ),
-
-        // Labels
-        labelLarge: GoogleFonts.lato(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textDark,
-          height: 1.4,
-        ),
-        labelMedium: GoogleFonts.lato(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textSecondary,
-          height: 1.4,
-        ),
-      ),
+      // Typography with accessibility scaling
+      textTheme: _buildTextTheme(highContrast, textScaleFactor, textColor),
 
       // App Bar Theme
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.backgroundWhite,
-        foregroundColor: AppColors.textDark,
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
         elevation: 0,
         titleTextStyle: GoogleFonts.playfairDisplay(
-          fontSize: 20,
+          fontSize: 20 * textScaleFactor,
           fontWeight: FontWeight.w600,
-          color: AppColors.textDark,
+          color: textColor,
         ),
         centerTitle: true,
       ),
@@ -192,15 +181,16 @@ class AppTheme {
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGold,
-          foregroundColor: Colors.white,
+          backgroundColor: primaryColor,
+          foregroundColor: AppColors.getAccessibleColor(primaryColor, highContrast: highContrast),
           textStyle: GoogleFonts.lato(
-            fontSize: 16,
+            fontSize: 16 * textScaleFactor,
             fontWeight: FontWeight.w600,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: highContrast ? const BorderSide(color: AppColors.highContrastBorder, width: 2) : BorderSide.none,
           ),
           elevation: 2,
         ),
@@ -209,58 +199,134 @@ class AppTheme {
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryGold,
+          foregroundColor: primaryColor,
           textStyle: GoogleFonts.lato(
-            fontSize: 14,
+            fontSize: 14 * textScaleFactor,
             fontWeight: FontWeight.w600,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
 
-      // Input Decoration Theme
+      // Input Decoration Theme with enhanced contrast
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.accentCream,
+        fillColor: highContrast ? AppColors.highContrastBackground : AppColors.accentCream,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: highContrast ? 
+              const BorderSide(color: AppColors.highContrastBorder, width: 2) : 
+              BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.dividerLight),
+          borderSide: BorderSide(
+            color: highContrast ? AppColors.highContrastBorder : AppColors.dividerLight,
+            width: highContrast ? 2 : 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+          borderSide: BorderSide(
+            color: primaryColor,
+            width: highContrast ? 3 : 2,
+          ),
         ),
         labelStyle: GoogleFonts.lato(
-          color: AppColors.textSecondary,
-          fontSize: 14,
+          color: highContrast ? AppColors.highContrastText : AppColors.textSecondary,
+          fontSize: 14 * textScaleFactor,
         ),
         hintStyle: GoogleFonts.lato(
-          color: AppColors.textSecondary,
-          fontSize: 14,
+          color: highContrast ? AppColors.highContrastSecondary : AppColors.textSecondary,
+          fontSize: 14 * textScaleFactor,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
 
-      // Card Theme
+      // Card Theme with enhanced borders for high contrast
       cardTheme: CardThemeData(
-        color: AppColors.backgroundWhite,
+        color: backgroundColor,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: highContrast ? 
+              const BorderSide(color: AppColors.highContrastBorder, width: 1) : 
+              BorderSide.none,
         ),
         margin: const EdgeInsets.all(8),
       ),
 
-      // Divider Theme
-      dividerTheme: const DividerThemeData(
-        color: AppColors.dividerLight,
-        thickness: 1,
+      // Divider Theme with enhanced visibility
+      dividerTheme: DividerThemeData(
+        color: highContrast ? AppColors.highContrastBorder : AppColors.dividerLight,
+        thickness: highContrast ? 2 : 1,
         space: 20,
+      ),
+
+      // Focus theme for keyboard navigation
+      focusTheme: FocusThemeData(
+        glowColor: primaryColor.withOpacity(0.3),
+        glowRadius: highContrast ? 6 : 4,
+      ),
+    );
+  }
+
+  static TextTheme _buildTextTheme(bool highContrast, double textScaleFactor, Color textColor) {
+    final secondaryColor = highContrast ? AppColors.highContrastSecondary : AppColors.textSecondary;
+    
+    return TextTheme(
+      // Headlines use Playfair Display (Serif)
+      headlineLarge: GoogleFonts.playfairDisplay(
+        fontSize: 32 * textScaleFactor,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+        height: 1.2,
+      ),
+      headlineMedium: GoogleFonts.playfairDisplay(
+        fontSize: 28 * textScaleFactor,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+        height: 1.3,
+      ),
+      headlineSmall: GoogleFonts.playfairDisplay(
+        fontSize: 24 * textScaleFactor,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+        height: 1.3,
+      ),
+
+      // Body text uses Lato (Sans-Serif)
+      bodyLarge: GoogleFonts.lato(
+        fontSize: 16 * textScaleFactor,
+        fontWeight: FontWeight.normal,
+        color: textColor,
+        height: 1.5,
+      ),
+      bodyMedium: GoogleFonts.lato(
+        fontSize: 14 * textScaleFactor,
+        fontWeight: FontWeight.normal,
+        color: textColor,
+        height: 1.5,
+      ),
+      bodySmall: GoogleFonts.lato(
+        fontSize: 12 * textScaleFactor,
+        fontWeight: FontWeight.normal,
+        color: secondaryColor,
+        height: 1.4,
+      ),
+
+      // Labels with enhanced contrast
+      labelLarge: GoogleFonts.lato(
+        fontSize: 14 * textScaleFactor,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+        height: 1.4,
+      ),
+      labelMedium: GoogleFonts.lato(
+        fontSize: 12 * textScaleFactor,
+        fontWeight: FontWeight.w500,
+        color: secondaryColor,
+        height: 1.4,
       ),
     );
   }
@@ -283,7 +349,7 @@ class AppBorderRadius {
 }
 
 class AppAnimations {
-  // Duration constants
+  // Duration constants with accessibility support
   static const Duration fast = Duration(milliseconds: 200);
   static const Duration medium = Duration(milliseconds: 300);
   static const Duration slow = Duration(milliseconds: 500);
@@ -308,62 +374,96 @@ class AppAnimations {
   static const Offset slideInFromTop = Offset(0, -1);
   static const Offset slideInFromLeft = Offset(-1, 0);
   static const Offset slideInFromRight = Offset(1, 0);
+
+  /// Get duration based on accessibility settings
+  static Duration getDuration(Duration defaultDuration, {bool reducedMotion = false}) {
+    return reducedMotion ? Duration.zero : defaultDuration;
+  }
+
+  /// Get curve based on accessibility settings
+  static Curve getCurve(Curve defaultCurve, {bool reducedMotion = false}) {
+    return reducedMotion ? Curves.linear : defaultCurve;
+  }
 }
 
 class AppShadows {
-  static List<BoxShadow> get soft => [
+  static List<BoxShadow> soft({bool highContrast = false}) => [
     BoxShadow(
-      color: AppColors.shadowLight,
-      blurRadius: 8,
+      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.3) : AppColors.shadowLight,
+      blurRadius: highContrast ? 2 : 8,
       offset: const Offset(0, 2),
     ),
   ];
   
-  static List<BoxShadow> get medium => [
+  static List<BoxShadow> medium({bool highContrast = false}) => [
     BoxShadow(
-      color: AppColors.shadowMedium,
-      blurRadius: 12,
+      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.5) : AppColors.shadowMedium,
+      blurRadius: highContrast ? 4 : 12,
       offset: const Offset(0, 4),
     ),
   ];
   
-  static List<BoxShadow> get strong => [
+  static List<BoxShadow> strong({bool highContrast = false}) => [
     BoxShadow(
-      color: AppColors.shadowDark,
-      blurRadius: 16,
+      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.7) : AppColors.shadowDark,
+      blurRadius: highContrast ? 6 : 16,
       offset: const Offset(0, 6),
     ),
   ];
   
-  static List<BoxShadow> get floating => [
+  static List<BoxShadow> floating({bool highContrast = false}) => [
     BoxShadow(
-      color: AppColors.shadowMedium,
-      blurRadius: 20,
+      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.5) : AppColors.shadowMedium,
+      blurRadius: highContrast ? 8 : 20,
       offset: const Offset(0, 8),
     ),
   ];
 }
 
 class AppDecorations {
-  static BoxDecoration get modernCard => BoxDecoration(
-    color: AppColors.cardOverlay,
+  static BoxDecoration modernCard({bool highContrast = false}) => BoxDecoration(
+    color: highContrast ? AppColors.highContrastBackground : AppColors.cardOverlay,
     borderRadius: BorderRadius.circular(AppBorderRadius.large),
-    boxShadow: AppShadows.soft,
+    boxShadow: AppShadows.soft(highContrast: highContrast),
+    border: highContrast ? 
+        Border.all(color: AppColors.highContrastBorder, width: 1) : 
+        null,
   );
   
-  static BoxDecoration get premiumCard => BoxDecoration(
-    gradient: AppColors.cardGradient,
+  static BoxDecoration premiumCard({bool highContrast = false}) => BoxDecoration(
+    gradient: highContrast ? null : AppColors.cardGradient,
+    color: highContrast ? AppColors.highContrastBackground : null,
     borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
-    boxShadow: AppShadows.medium,
+    boxShadow: AppShadows.medium(highContrast: highContrast),
     border: Border.all(
-      color: AppColors.primaryGold.withOpacity(0.3),
-      width: 1,
+      color: highContrast ? 
+          AppColors.highContrastBorder : 
+          AppColors.primaryGold.withOpacity(0.3),
+      width: highContrast ? 2 : 1,
     ),
   );
   
-  static BoxDecoration get floatingCard => BoxDecoration(
-    color: AppColors.cardOverlay,
+  static BoxDecoration floatingCard({bool highContrast = false}) => BoxDecoration(
+    color: highContrast ? AppColors.highContrastBackground : AppColors.cardOverlay,
     borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
-    boxShadow: AppShadows.floating,
+    boxShadow: AppShadows.floating(highContrast: highContrast),
+    border: highContrast ? 
+        Border.all(color: AppColors.highContrastBorder, width: 1) : 
+        null,
   );
+}
+
+/// Extension for accessibility-aware theming
+extension AccessibleTheme on ThemeData {
+  /// Check if high contrast is enabled
+  bool get isHighContrast => 
+      colorScheme.primary == AppColors.highContrastPrimary;
+
+  /// Get accessible text color for background
+  Color getAccessibleTextColor(Color backgroundColor) =>
+      AppColors.getAccessibleColor(backgroundColor, highContrast: isHighContrast);
+
+  /// Get focus color with proper contrast
+  Color get accessibleFocusColor =>
+      isHighContrast ? AppColors.highContrastPrimary : colorScheme.primary;
 }
