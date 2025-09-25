@@ -86,20 +86,29 @@ class DailySelection {
 
   factory DailySelection.fromJson(Map<String, dynamic> json) {
     final metadata = json['metadata'] as Map<String, dynamic>?;
+    final profiles = json['profiles'] as List<dynamic>? ?? [];
+    
+    // Handle case where backend sends selection data directly without metadata wrapper  
+    final choicesRemaining = metadata?['choicesRemaining'] as int? ?? 
+                            json['choicesRemaining'] as int? ?? 1;
+    final choicesMade = metadata?['choicesMade'] as int? ?? 
+                       json['choicesMade'] as int? ?? 0;
+    final maxChoices = metadata?['maxChoices'] as int? ?? 
+                      json['maxChoices'] as int? ?? 1;
     
     return DailySelection(
-      profiles: (json['profiles'] as List<dynamic>)
+      profiles: profiles
           .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList(),
       generatedAt: DateTime.parse(json['generatedAt'] as String? ?? DateTime.now().toIso8601String()),
       expiresAt: DateTime.parse(json['expiresAt'] as String? ?? DateTime.now().add(Duration(hours: 24)).toIso8601String()),
       remainingLikes: json['remainingLikes'] as int? ?? 0,
       hasUsedSuperLike: json['hasUsedSuperLike'] as bool? ?? false,
-      choicesRemaining: metadata?['choicesRemaining'] as int? ?? 1,
-      choicesMade: metadata?['choicesMade'] as int? ?? 0,
-      maxChoices: metadata?['maxChoices'] as int? ?? 1,
-      refreshTime: metadata?['refreshTime'] != null 
-          ? DateTime.parse(metadata!['refreshTime'] as String)
+      choicesRemaining: choicesRemaining,
+      choicesMade: choicesMade,
+      maxChoices: maxChoices,
+      refreshTime: (metadata?['refreshTime'] ?? json['refreshTime']) != null 
+          ? DateTime.parse((metadata?['refreshTime'] ?? json['refreshTime']) as String)
           : null,
     );
   }

@@ -62,10 +62,14 @@ class MatchingProvider with ChangeNotifier {
       final response = await ApiService.getDailySelection();
       final selectionData = response['data'] ?? response;
       
+      print('Debug: Daily selection response: $selectionData');
+      
       _dailySelection = DailySelection.fromJson(selectionData);
       _dailyProfiles = _dailySelection!.profiles;
       _lastUpdateTime = DateTime.now();
       _error = null;
+      
+      print('Debug: Parsed daily selection - choices remaining: ${_dailySelection!.choicesRemaining}, max choices: ${_dailySelection!.maxChoices}');
       
       // Load subscription usage to know limits
       await _loadSubscriptionUsage();
@@ -143,6 +147,8 @@ class MatchingProvider with ChangeNotifier {
     }
 
     if (_selectedProfileIds.contains(profileId)) {
+      _error = 'Profil déjà sélectionné';
+      notifyListeners();
       return false;
     }
 
@@ -150,9 +156,10 @@ class MatchingProvider with ChangeNotifier {
       final response = await ApiService.chooseProfile(profileId);
       
       // Check if it's a match
-      final isMatch = response['data']?['isMatch'] ?? false;
-      final matchedUserName = response['data']?['matchedUserName'] as String?;
-      final choicesRemaining = response['data']?['choicesRemaining'] as int?;
+      final responseData = response['data'] ?? response;
+      final isMatch = responseData['isMatch'] ?? false;
+      final matchedUserName = responseData['matchedUserName'] as String?;
+      final choicesRemaining = responseData['choicesRemaining'] as int?;
       
       if (isMatch) {
         // Reload matches to include the new one
@@ -169,14 +176,16 @@ class MatchingProvider with ChangeNotifier {
       _selectedProfileIds.add(profileId);
       
       // Update daily selection metadata based on API response
-      if (_dailySelection != null && choicesRemaining != null) {
+      if (_dailySelection != null) {
+        final newChoicesRemaining = choicesRemaining ?? (_dailySelection!.choicesRemaining - 1).clamp(0, _dailySelection!.maxChoices);
+        
         _dailySelection = DailySelection(
           profiles: _dailySelection!.profiles,
           generatedAt: _dailySelection!.generatedAt,
           expiresAt: _dailySelection!.expiresAt,
           remainingLikes: _dailySelection!.remainingLikes,
           hasUsedSuperLike: _dailySelection!.hasUsedSuperLike,
-          choicesRemaining: choicesRemaining,
+          choicesRemaining: newChoicesRemaining,
           choicesMade: _dailySelection!.choicesMade + 1,
           maxChoices: _dailySelection!.maxChoices,
           refreshTime: _dailySelection!.refreshTime,
@@ -239,6 +248,7 @@ class MatchingProvider with ChangeNotifier {
     } catch (e) {
       // Don't handle error here as it's not critical
       // User might not have a subscription
+      print('Debug: Failed to load subscription usage: $e');
     }
   }
 
