@@ -27,7 +27,9 @@ class AppColors {
   
   // Semantic Colors
   static const Color errorRed = Color(0xFFE57373);
+  static const Color error = errorRed; // Alias for errorRed
   static const Color successGreen = Color(0xFF4CAF50);
+  static const Color success = successGreen; // Alias for successGreen
   static const Color warningAmber = Color(0xFFFFC107);
   static const Color warningOrange = Color(0xFFF57C00); // Additional warning color
   static const Color infoBlue = Color(0xFF2196F3);

@@ -117,6 +117,24 @@ export class ProfilesController {
     return this.profilesService.setPrimaryPhoto(req.user.id, photoId);
   }
 
+  @Put('me/photos/:photoId/order')
+  @ApiOperation({ summary: 'Update photo order' })
+  @ApiResponse({
+    status: 200,
+    description: 'Photo order updated successfully',
+  })
+  async updatePhotoOrder(
+    @Request() req: any,
+    @Param('photoId') photoId: string,
+    @Body() orderDto: { newOrder: number },
+  ) {
+    return this.profilesService.updatePhotoOrder(
+      req.user.id,
+      photoId,
+      orderDto.newOrder,
+    );
+  }
+
   @Get('prompts')
   @ApiOperation({ summary: 'Get available prompts' })
   @ApiResponse({ status: 200, description: 'Prompts retrieved successfully' })

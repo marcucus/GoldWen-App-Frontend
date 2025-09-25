@@ -7,7 +7,7 @@ class ProfileProvider with ChangeNotifier {
   int? _age;
   DateTime? _birthDate;
   String? _bio;
-  List<String> _photos = [];
+  List<Photo> _photos = [];
   List<String> _prompts = [];
   Map<String, dynamic> _personalityAnswers = {};
   List<PersonalityQuestion> _personalityQuestions = [];
@@ -37,7 +37,7 @@ class ProfileProvider with ChangeNotifier {
   int? get age => _age;
   DateTime? get birthDate => _birthDate;
   String? get bio => _bio;
-  List<String> get photos => _photos;
+  List<Photo> get photos => _photos;
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
   List<PersonalityQuestion> get personalityQuestions => _personalityQuestions;
@@ -72,20 +72,87 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addPhoto(String photoUrl) {
+  void addPhoto(Photo photo) {
     if (_photos.length < 6) {
-      _photos.add(photoUrl);
+      _photos.add(photo);
       _checkProfileCompletion();
       notifyListeners();
     }
   }
 
-  void removePhoto(int index) {
-    if (index < _photos.length) {
-      _photos.removeAt(index);
+  void addPhotoFromUrl(String photoUrl) {
+    if (_photos.length < 6) {
+      // Create a temporary Photo object for compatibility
+      final photo = Photo(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        url: photoUrl,
+        order: _photos.length + 1,
+        isPrimary: _photos.isEmpty,
+        createdAt: DateTime.now(),
+      );
+      _photos.add(photo);
       _checkProfileCompletion();
       notifyListeners();
     }
+  }
+
+  void updatePhotos(List<Photo> photos) {
+    _photos = List.from(photos);
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void removePhoto(int index) {
+    if (index < _photos.length) {
+      _photos.removeAt(index);
+      // Update order for remaining photos
+      for (int i = 0; i < _photos.length; i++) {
+        _photos[i] = Photo(
+          id: _photos[i].id,
+          url: _photos[i].url,
+          order: i + 1,
+          isPrimary: _photos[i].isPrimary,
+          createdAt: _photos[i].createdAt,
+        );
+      }
+      _checkProfileCompletion();
+      notifyListeners();
+    }
+  }
+
+  void reorderPhotos(int oldIndex, int newIndex) {
+    if (oldIndex >= _photos.length || newIndex > _photos.length) return;
+    
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+    
+    final Photo photo = _photos.removeAt(oldIndex);
+    _photos.insert(newIndex, photo);
+    
+    // Update order for all photos
+    for (int i = 0; i < _photos.length; i++) {
+      _photos[i] = Photo(
+        id: _photos[i].id,
+        url: _photos[i].url,
+        order: i + 1,
+        isPrimary: _photos[i].isPrimary,
+        createdAt: _photos[i].createdAt,
+      );
+    }
+    
+    notifyListeners();
+  }
+
+  void setPrimaryPhoto(String photoId) {
+    _photos = _photos.map((photo) => Photo(
+      id: photo.id,
+      url: photo.url,
+      order: photo.order,
+      isPrimary: photo.id == photoId,
+      createdAt: photo.createdAt,
+    )).toList();
+    notifyListeners();
   }
 
   void addPrompt(String prompt) {
@@ -385,8 +452,28 @@ class ProfileProvider with ChangeNotifier {
         }
       }
 
-      // Load photos and prompts
-      _photos = List<String>.from(profileData['photos'] ?? []);
+      // Load photos from profile data
+      if (profileData['photos'] != null && profileData['photos'] is List) {
+        try {
+          _photos = (profileData['photos'] as List)
+              .map((photoData) => Photo.fromJson(photoData))
+              .toList();
+        } catch (e) {
+          debugPrint('Error parsing photos: $e');
+          // Fallback to string URLs if Photo parsing fails
+          _photos = (profileData['photos'] as List)
+              .map((photoUrl) => Photo(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    url: photoUrl.toString(),
+                    order: 1,
+                    isPrimary: false,
+                  ))
+              .toList();
+        }
+      } else {
+        _photos.clear();
+      }
+      
       _prompts = List<String>.from(profileData['prompts'] ?? []);
       _personalityAnswers =
           Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
