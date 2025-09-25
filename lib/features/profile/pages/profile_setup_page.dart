@@ -9,6 +9,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
+import '../widgets/profile_completion_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
 
@@ -100,7 +101,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Étape ${_currentPage + 1}/4'),
+        title: Text('Étape ${_currentPage + 1}/5'),
         leading: _currentPage > 0
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -112,7 +113,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         children: [
           // Progress indicator
           LinearProgressIndicator(
-            value: (_currentPage + 1) / 4,
+            value: (_currentPage + 1) / 5,
             backgroundColor: AppColors.dividerLight,
             valueColor:
                 const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
@@ -130,6 +131,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 _buildBasicInfoPage(),
                 _buildPhotosPage(),
                 _buildPromptsPage(),
+                _buildValidationPage(),
                 _buildReviewPage(),
               ],
             ),
@@ -399,6 +401,96 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     );
   }
 
+  Widget _buildValidationPage() {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'Validation du profil',
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Vérifiez que votre profil est complet avant activation',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          
+          Expanded(
+            child: SingleChildScrollView(
+              child: Consumer<ProfileProvider>(
+                builder: (context, profileProvider, child) {
+                  return ProfileCompletionWidget(
+                    showProgress: true,
+                    onMissingStepTap: _handleMissingStepTap,
+                  );
+                },
+              ),
+            ),
+          ),
+          
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: Consumer<ProfileProvider>(
+              builder: (context, profileProvider, child) {
+                final isComplete = profileProvider.profileCompletion?.isCompleted ?? false;
+                return ElevatedButton(
+                  onPressed: isComplete ? _nextPage : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isComplete ? AppColors.primaryGold : AppColors.textTertiary,
+                  ),
+                  child: Text(
+                    isComplete ? 'Continuer' : 'Profil incomplet',
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  void _handleMissingStepTap() {
+    // Navigate to the appropriate page based on missing steps
+    final completion = Provider.of<ProfileProvider>(context, listen: false).profileCompletion;
+    if (completion == null) return;
+    
+    if (!completion.hasRequiredProfileFields) {
+      // Go to basic info page
+      _goToPage(0);
+    } else if (!completion.hasPhotos) {
+      // Go to photos page
+      _goToPage(1);
+    } else if (!completion.hasPrompts) {
+      // Go to prompts page
+      _goToPage(2);
+    } else if (!completion.hasPersonalityAnswers) {
+      // Show message about personality questionnaire
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez d\'abord compléter le questionnaire de personnalité'),
+        ),
+      );
+    }
+  }
+
+  void _goToPage(int pageIndex) {
+    _pageController.animateToPage(
+      pageIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Widget _buildReviewPage() {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -532,8 +624,34 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
   }
 
-  void _nextPage() {
-    if (_currentPage < 3) {
+  void _nextPage() async {
+    if (_currentPage < 4) {
+      // If we're moving to the validation page, load completion status
+      if (_currentPage == 2) { // Moving from prompts to validation
+        final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+        try {
+          // Save current data first
+          profileProvider.setBasicInfo(
+            _nameController.text.trim(),
+            _calculateAge(_birthDate!),
+            _bioController.text.trim(),
+            birthDate: _birthDate,
+          );
+          
+          // Set prompt answers
+          for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
+            if (_promptControllers[i].text.isNotEmpty) {
+              profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text.trim());
+            }
+          }
+          
+          // Load completion status
+          await profileProvider.loadProfileCompletion();
+        } catch (e) {
+          print('Error loading profile completion: $e');
+        }
+      }
+      
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -683,26 +801,33 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       await profileProvider.submitPromptAnswers();
       print('Prompt answers submitted successfully');
 
-      // Mark profile as active and completed
-      await ApiService.updateProfileStatus(
-        status: 'active',
-        completed: true,
-      );
-      print(
-          'Profile status updated successfully - backend sets completion flags automatically');
+      // Check if profile is complete and validate for activation
+      await profileProvider.loadProfileCompletion();
+      
+      if (profileProvider.profileCompletion?.isCompleted ?? false) {
+        // Profile is complete, can activate
+        await profileProvider.validateAndActivateProfile();
+        print('Profile validated and activated successfully');
+        
+        // Refresh user data to get updated completion status from backend
+        await authProvider.refreshUser();
+        print('User data refreshed successfully');
+        
+        // Close loading dialog and navigate using GoRouter
+        if (mounted) {
+          // Close dialog first
+          context.pop(); // This closes the dialog
 
-      // Refresh user data to get updated completion status from backend
-      await authProvider.refreshUser();
-      print('User data refreshed successfully');
-
-      // Close loading dialog and navigate using GoRouter
-      if (mounted) {
-        // Close dialog first
-        context.pop(); // This closes the dialog
-
-        // Navigate to main page using GoRouter
-        context.pushReplacement(
-            '/home'); // ou '/main' selon votre configuration de routes
+          // Navigate to main page using GoRouter
+          context.pushReplacement('/home');
+        }
+      } else {
+        // Profile is not complete, show missing steps
+        if (mounted) {
+          context.pop(); // Close loading dialog
+          
+          _showProfileIncompleteDialog(profileProvider.profileCompletion);
+        }
       }
     } catch (e) {
       // Close loading dialog
@@ -729,6 +854,40 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         );
       }
     }
+  }
+
+  void _showProfileIncompleteDialog(ProfileCompletion? completion) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Profil incomplet'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Votre profil n\'est pas encore complet. Étapes manquantes:'),
+            const SizedBox(height: 8),
+            if (completion?.missingSteps.isNotEmpty ?? false)
+              ...completion!.missingSteps.map((step) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.arrow_right, size: 16, color: AppColors.warningAmber),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(step, style: Theme.of(context).textTheme.bodySmall)),
+                  ],
+                ),
+              )).toList(),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Compris'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

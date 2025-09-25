@@ -32,6 +32,7 @@ class ProfileProvider with ChangeNotifier {
   int? _height;
   List<String> _interests = [];
   List<String> _languages = [];
+  ProfileCompletion? _profileCompletion;
 
   String? get name => _name;
   int? get age => _age;
@@ -62,6 +63,7 @@ class ProfileProvider with ChangeNotifier {
   int? get height => _height;
   List<String> get interests => _interests;
   List<String> get languages => _languages;
+  ProfileCompletion? get profileCompletion => _profileCompletion;
 
   void setBasicInfo(String name, int age, String bio, {DateTime? birthDate}) {
     _name = name;
@@ -392,7 +394,7 @@ class ProfileProvider with ChangeNotifier {
       await ApiService.updateProfile(profileData);
       print('Profile saved successfully');
       
-      // Refresh profile data after successful save
+      // Refresh profile data and completion status after successful save
       await loadProfile();
     } catch (e) {
       print('Error in saveProfile: $e');
@@ -416,7 +418,7 @@ class ProfileProvider with ChangeNotifier {
       await ApiService.submitPromptAnswers(promptAnswers);
       print('Prompt answers submitted successfully');
       
-      // Refresh profile data after successful submission
+      // Refresh profile data and completion status after successful submission
       await loadProfile();
     } catch (e) {
       print('Error in submitPromptAnswers: $e');
@@ -479,6 +481,9 @@ class ProfileProvider with ChangeNotifier {
           Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
 
       _checkProfileCompletion();
+      
+      // Also load the detailed completion status from backend
+      await loadProfileCompletion();
     } catch (e) {
       // If API call fails, keep default empty state
       _name = null;
@@ -489,9 +494,43 @@ class ProfileProvider with ChangeNotifier {
       _prompts.clear();
       _personalityAnswers.clear();
       _isProfileComplete = false;
+      _profileCompletion = null;
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> loadProfileCompletion() async {
+    try {
+      final response = await ApiService.getProfileCompletion();
+      final completionData = response['data'] ?? response;
+      
+      _profileCompletion = ProfileCompletion.fromJson(completionData);
+      _isProfileComplete = _profileCompletion!.isCompleted;
+      
+      notifyListeners();
+    } catch (e) {
+      print('Error loading profile completion: $e');
+      _profileCompletion = null;
+    }
+  }
+
+  Future<void> validateAndActivateProfile() async {
+    try {
+      // First check if profile is complete
+      await loadProfileCompletion();
+      
+      if (_profileCompletion?.isCompleted ?? false) {
+        // Profile is complete, update status to mark as validated
+        await ApiService.updateProfileStatus(completed: true);
+        await loadProfileCompletion(); // Reload to get updated status
+      } else {
+        throw Exception('Profile is not complete. Missing steps: ${_profileCompletion?.missingSteps.join(', ') ?? 'Unknown'}');
+      }
+    } catch (e) {
+      print('Error validating profile: $e');
+      rethrow;
     }
   }
 }

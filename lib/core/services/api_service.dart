@@ -212,6 +212,17 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static Future<Map<String, dynamic>> getProfileCompletion() async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/profiles/completion'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Authentication extensions
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(
