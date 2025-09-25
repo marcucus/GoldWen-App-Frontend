@@ -472,7 +472,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getConversations() async {
     final response = await _makeRequest(
       http.get(
-        Uri.parse('$baseUrl/chat/conversations'),
+        Uri.parse('$baseUrl/chat'),
         headers: _headers,
       ),
     );
@@ -484,7 +484,18 @@ class ApiService {
       String chatId) async {
     final response = await _makeRequest(
       http.get(
-        Uri.parse('$baseUrl/chat/conversations/$chatId'),
+        Uri.parse('$baseUrl/chat/$chatId'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getChatByMatchId(String matchId) async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/chat/match/$matchId'),
         headers: _headers,
       ),
     );
@@ -499,7 +510,7 @@ class ApiService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (before != null) queryParams['before'] = before;
 
-    final uri = Uri.parse('$baseUrl/chat/conversations/$chatId/messages')
+    final uri = Uri.parse('$baseUrl/chat/$chatId/messages')
         .replace(queryParameters: queryParams);
     final response = await _makeRequest(
       http.get(uri, headers: _headers),
@@ -510,55 +521,69 @@ class ApiService {
 
   static Future<Map<String, dynamic>> sendMessage(String chatId,
       {required String type, required String content}) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/chat/conversations/$chatId/messages'),
-      headers: _headers,
-      body: jsonEncode({
-        'type': type,
-        'content': content,
-      }),
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/chat/$chatId/messages'),
+        headers: _headers,
+        body: jsonEncode({
+          'type': type,
+          'content': content,
+        }),
+      ),
     );
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> markMessageAsRead(
-      String chatId, String messageId) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/chat/conversations/$chatId/messages/$messageId/read'),
-      headers: _headers,
+  static Future<Map<String, dynamic>> acceptMatch(String matchId,
+      {required bool accept}) async {
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/chat/accept/$matchId'),
+        headers: _headers,
+        body: jsonEncode({
+          'accept': accept,
+        }),
+      ),
     );
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> deleteMessage(
-      String chatId, String messageId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/chat/conversations/$chatId/messages/$messageId'),
-      headers: _headers,
+  static Future<Map<String, dynamic>> markMessagesAsRead(String chatId) async {
+    final response = await _makeRequest(
+      http.put(
+        Uri.parse('$baseUrl/chat/$chatId/messages/read'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getTypingStatus(String chatId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/chat/conversations/$chatId/typing'),
-      headers: _headers,
+  static Future<Map<String, dynamic>> deleteMessage(String messageId) async {
+    final response = await _makeRequest(
+      http.delete(
+        Uri.parse('$baseUrl/chat/messages/$messageId'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> setTyping(String chatId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/chat/conversations/$chatId/typing'),
-      headers: _headers,
+  static Future<Map<String, dynamic>> expireChat(String chatId) async {
+    final response = await _makeRequest(
+      http.put(
+        Uri.parse('$baseUrl/chat/$chatId/expire'),
+        headers: _headers,
+      ),
     );
 
     return _handleResponse(response);
   }
+
+
 
   // Subscription endpoints
   static Future<Map<String, dynamic>> getSubscriptionPlans() async {

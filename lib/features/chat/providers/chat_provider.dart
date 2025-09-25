@@ -272,37 +272,57 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> markMessageAsRead(String chatId, String messageId) async {
+  Future<void> markMessagesAsRead(String chatId) async {
     try {
-      await ApiService.markMessageAsRead(chatId, messageId);
+      await ApiService.markMessagesAsRead(chatId);
       
       // Update local message status
       final messages = _chatMessages[chatId] ?? [];
-      final messageIndex = messages.indexWhere((m) => m.id == messageId);
-      if (messageIndex != -1) {
-        messages[messageIndex] = messages[messageIndex].copyWith(
-          isRead: true,
-          readAt: DateTime.now(),
-        );
-        _chatMessages[chatId] = messages;
-        notifyListeners();
-      }
+      final updatedMessages = messages.map((message) {
+        if (!message.isRead) {
+          return message.copyWith(
+            isRead: true,
+            readAt: DateTime.now(),
+          );
+        }
+        return message;
+      }).toList();
+      
+      _chatMessages[chatId] = updatedMessages;
+      notifyListeners();
 
       // Send read receipt via WebSocket
-      _webSocketService?.markMessageAsRead(chatId, messageId);
+      _webSocketService?.markMessagesAsRead(chatId);
     } catch (e) {
       // Read receipts are not critical, so don't show error to user
     }
   }
 
-  Future<void> deleteMessage(String chatId, String messageId) async {
+  Future<String?> getChatIdFromMatch(String matchId) async {
     try {
-      await ApiService.deleteMessage(chatId, messageId);
+      final response = await ApiService.getChatByMatchId(matchId);
+      final chatData = response['data'] ?? response;
       
-      // Remove message from local list
-      final messages = _chatMessages[chatId] ?? [];
-      messages.removeWhere((m) => m.id == messageId);
-      _chatMessages[chatId] = messages;
+      if (chatData != null && chatData['id'] != null) {
+        return chatData['id'] as String;
+      }
+      return null;
+    } catch (e) {
+      // Chat may not exist yet, which is normal
+      return null;
+    }
+  }
+
+  Future<void> deleteMessage(String messageId) async {
+    try {
+      await ApiService.deleteMessage(messageId);
+      
+      // Remove message from all chats (since we only have the messageId)
+      for (final chatId in _chatMessages.keys) {
+        final messages = _chatMessages[chatId] ?? [];
+        messages.removeWhere((m) => m.id == messageId);
+        _chatMessages[chatId] = messages;
+      }
       
       notifyListeners();
     } catch (e) {
