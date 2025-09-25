@@ -10,11 +10,15 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 - [Routes d'Authentification](#routes-dauthentification)
 - [Routes Utilisateurs](#routes-utilisateurs)
 - [Routes Profils](#routes-profils)
+- [Routes Questions Personnalité](#routes-questions-personnalité)
 - [Routes Matching](#routes-matching)
 - [Routes Chat](#routes-chat)
 - [Routes Conversations](#routes-conversations)
 - [Routes Notifications](#routes-notifications)
 - [Routes Abonnements](#routes-abonnements)
+- [Routes Signalements](#routes-signalements)
+- [Routes Légales](#routes-légales)
+- [Routes Feedback](#routes-feedback)
 - [Routes Admin](#routes-admin)
 - [Types et Enums](#types-et-enums)
 
@@ -322,6 +326,56 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 }
 ```
 
+### POST /users/consent
+**Description**: Enregistrer le consentement RGPD utilisateur  
+**Authentification**: Bearer Token  
+**Body**:
+```json
+{
+  "dataProcessing": "boolean",
+  "marketing": "boolean (optionnel)",
+  "analytics": "boolean (optionnel)",
+  "consentedAt": "ISO date string"
+}
+```
+
+### GET /users/me/export-data
+**Description**: Exporter toutes les données utilisateur (RGPD)  
+**Authentification**: Bearer Token  
+**Query Parameters**:
+- `format?`: string (json|pdf, défaut: json)
+**Réponse**: Fichier téléchargeable avec toutes les données utilisateur
+
+### PUT /users/me/privacy-settings
+**Description**: Gérer les paramètres de confidentialité et cookies  
+**Authentification**: Bearer Token  
+**Body**:
+```json
+{
+  "analytics": "boolean",
+  "marketing": "boolean",
+  "functionalCookies": "boolean",
+  "dataRetention": "number (jours, optionnel)"
+}
+```
+
+### GET /users/me/accessibility-settings
+**Description**: Obtenir les paramètres d'accessibilité utilisateur  
+**Authentification**: Bearer Token  
+
+### PUT /users/me/accessibility-settings
+**Description**: Mettre à jour les paramètres d'accessibilité  
+**Authentification**: Bearer Token  
+**Body**:
+```json
+{
+  "fontSize": "string (small|medium|large|xlarge)",
+  "highContrast": "boolean",
+  "reducedMotion": "boolean",
+  "screenReader": "boolean"
+}
+```
+
 ---
 
 ## Routes Profils
@@ -361,6 +415,32 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 
 ### GET /profiles/completion
 **Description**: Obtenir le statut de complétion du profil  
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "isComplete": "boolean",
+    "completionPercentage": "number (0-100)",
+    "missingSteps": "string[]",
+    "requirements": {
+      "personalityQuestionnaire": "boolean",
+      "minimumPhotos": {
+        "required": 3,
+        "current": "number",
+        "satisfied": "boolean"
+      },
+      "promptAnswers": {
+        "required": 3,
+        "current": "number",
+        "satisfied": "boolean"
+      },
+      "basicInfo": "boolean"
+    },
+    "nextStep": "string (prochaine étape recommandée)"
+  }
+}
+```  
 
 ### GET /profiles/personality-questions
 **Description**: Obtenir les questions du questionnaire de personnalité  
@@ -395,6 +475,17 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 **Description**: Définir une photo comme principale  
 **Paramètres**: `photoId` (string)
 
+### PUT /profiles/me/photos/:photoId/order
+**Description**: Réorganiser l'ordre des photos de profil  
+**Authentification**: Bearer Token  
+**Paramètres**: `photoId` (string)  
+**Body**:
+```json
+{
+  "newOrder": "number (position dans la liste, min: 1)"
+}
+```
+
 ### GET /profiles/prompts
 **Description**: Obtenir les prompts disponibles  
 
@@ -412,6 +503,21 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 }
 ```
 **Note**: Minimum 3 réponses requises
+
+### PUT /profiles/me/prompt-answers
+**Description**: Modifier les réponses aux prompts existantes  
+**Authentification**: Bearer Token  
+**Body**:
+```json
+{
+  "answers": [
+    {
+      "promptId": "string (UUID)",
+      "answer": "string (max 300 caractères)"
+    }
+  ]
+}
+```
 
 ### PUT /profiles/me/status
 **Description**: Mettre à jour le statut du profil  
@@ -447,13 +553,50 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 
 ### GET /matching/daily-selection
 **Description**: Obtenir la sélection quotidienne de profils  
+**Query Parameters**:
+- `preload?`: boolean (défaut: false, charge les prochains profils)
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "profiles": "User[] (profils de la sélection)",
+    "metadata": {
+      "date": "string (YYYY-MM-DD)",
+      "choicesRemaining": "number",
+      "choicesMade": "number",
+      "maxChoices": "number",
+      "refreshTime": "ISO date string (prochaine génération)"
+    }
+  }
+}
+```  
 
 ### POST /matching/daily-selection/generate
 **Description**: Générer manuellement la sélection quotidienne (test)  
 
 ### POST /matching/choose/:targetUserId
 **Description**: Choisir un profil dans la sélection quotidienne  
-**Paramètres**: `targetUserId` (string)
+**Paramètres**: `targetUserId` (string)  
+**Body**:
+```json
+{
+  "choice": "string (like|pass)"
+}
+```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "isMatch": "boolean",
+    "matchId?": "string (si match)",
+    "choicesRemaining": "number",
+    "message": "string (message de confirmation)",
+    "canContinue": "boolean (peut continuer à faire des choix)"
+  }
+}
+```
 
 ### GET /matching/matches
 **Description**: Obtenir les matches utilisateur  
@@ -471,6 +614,75 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 ### GET /matching/compatibility/:targetUserId
 **Description**: Obtenir le score de compatibilité  
 **Paramètres**: `targetUserId` (string)
+
+### GET /matching/user-choices
+**Description**: Obtenir les choix utilisateur du jour actuel  
+**Authentification**: Bearer Token  
+**Query Parameters**:
+- `date?`: string (format YYYY-MM-DD, défaut: aujourd'hui)
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "date": "string (YYYY-MM-DD)",
+    "choicesRemaining": "number",
+    "choicesMade": "number",
+    "maxChoices": "number",
+    "choices": [
+      {
+        "targetUserId": "string",
+        "chosenAt": "ISO date string"
+      }
+    ]
+  }
+}
+```
+
+### GET /matching/pending-matches
+**Description**: Obtenir les matches en attente d'acceptation de chat  
+**Authentification**: Bearer Token  
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": [
+    {
+      "matchId": "string",
+      "targetUser": "User profile object",
+      "status": "pending",
+      "matchedAt": "ISO date string",
+      "canInitiateChat": "boolean"
+    }
+  ]
+}
+```
+
+### GET /matching/history
+**Description**: Obtenir l'historique des sélections passées  
+**Authentification**: Bearer Token  
+**Query Parameters**:
+- `page?`: number (défaut: 1)
+- `limit?`: number (défaut: 20)
+- `startDate?`: string (YYYY-MM-DD)
+- `endDate?`: string (YYYY-MM-DD)
+
+### GET /matching/who-liked-me
+**Description**: Voir qui a sélectionné l'utilisateur (fonctionnalité premium)  
+**Authentification**: Bearer Token + Premium Subscription  
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": [
+    {
+      "userId": "string",
+      "user": "User profile object",
+      "likedAt": "ISO date string"
+    }
+  ]
+}
+```
 
 ---
 
@@ -506,6 +718,23 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
   "type?": "MessageType enum (optionnel, défaut: TEXT)"
 }
 ```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "messageId": "string",
+    "message": "Message object",
+    "chat": {
+      "id": "string",
+      "status": "ChatStatus enum",
+      "expiresAt": "ISO date string",
+      "timeRemaining": "number (secondes)"
+    }
+  },
+  "error?": "string (si chat expiré ou autre erreur)"
+}
+```
 
 ### PUT /chat/:chatId/messages/read
 **Description**: Marquer les messages comme lus  
@@ -524,6 +753,33 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
   "hours?": "number (défaut: 24, min: 1, max: 168)"
 }
 ```
+
+### POST /chat/accept/:matchId
+**Description**: Accepter un match et créer/activer le chat  
+**Authentification**: Bearer Token  
+**Paramètres**: `matchId` (string)  
+**Body**:
+```json
+{
+  "accept": "boolean"
+}
+```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "chatId": "string",
+    "match": "Match object",
+    "expiresAt": "ISO date string"
+  }
+}
+```
+
+### PUT /chat/:chatId/expire
+**Description**: Marquer un chat comme expiré (processus automatique)  
+**Authentification**: Bearer Token  
+**Paramètres**: `chatId` (string)
 
 ---
 
@@ -627,6 +883,23 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 
 ### POST /notifications/trigger-daily-selection
 **Description**: Déclencher manuellement les notifications de sélection quotidienne (dev uniquement)  
+**Body**:
+```json
+{
+  "targetUsers?": "string[] (userIds, optionnel - défaut: tous les utilisateurs)",
+  "customMessage?": "string (message personnalisé, optionnel)"
+}
+```
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "notificationsSent": "number",
+    "errors": "string[]"
+  }
+}
+```  
 
 ---
 
@@ -679,6 +952,36 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 ### GET /subscriptions/usage
 **Description**: Obtenir les statistiques d'utilisation de l'abonnement  
 **Authentification**: Bearer Token  
+**Réponse**:
+```json
+{
+  "success": "boolean",
+  "data": {
+    "currentPeriod": {
+      "startDate": "string (YYYY-MM-DD)",
+      "endDate": "string (YYYY-MM-DD)"
+    },
+    "dailyChoices": {
+      "limit": "number",
+      "used": "number",
+      "remaining": "number",
+      "resetTime": "ISO date string"
+    },
+    "features": {
+      "unlimitedChats": "boolean",
+      "whoLikedMe": "boolean",
+      "extendChats": "boolean",
+      "priorityProfile": "boolean"
+    },
+    "subscription": {
+      "tier": "SubscriptionTier enum",
+      "plan": "SubscriptionPlan enum",
+      "isActive": "boolean",
+      "expiresAt": "ISO date string"
+    }
+  }
+}
+```  
 
 ### PUT /subscriptions/:subscriptionId/activate
 **Description**: Activer un abonnement  
@@ -748,6 +1051,77 @@ Cette documentation complète liste toutes les routes API disponibles dans le ba
 ### GET /subscriptions/admin/stats
 **Description**: Obtenir les statistiques d'abonnement (Admin uniquement)  
 **Authentification**: Bearer Token + Admin Guard  
+
+---
+
+## Routes Signalements
+
+**Préfixe**: `/reports`  
+**Authentification**: Bearer Token (toutes les routes)
+
+### POST /reports
+**Description**: Signaler un utilisateur ou contenu inapproprié  
+**Body**:
+```json
+{
+  "targetUserId": "string (UUID)",
+  "type": "ReportType enum",
+  "reason": "string (max 500 caractères)",
+  "messageId?": "string (UUID, optionnel)",
+  "chatId?": "string (UUID, optionnel)",
+  "evidence?": "string[] (URLs, optionnel)"
+}
+```
+
+### GET /reports/me
+**Description**: Obtenir les signalements soumis par l'utilisateur  
+**Query Parameters**:
+- `page?`: number (défaut: 1)
+- `limit?`: number (défaut: 20)
+- `status?`: ReportStatus enum
+
+---
+
+## Routes Légales
+
+**Préfixe**: `/legal`  
+**Authentification**: Aucune
+
+### GET /legal/privacy-policy
+**Description**: Obtenir la politique de confidentialité  
+**Query Parameters**:
+- `version?`: string (version spécifique, optionnel)
+- `format?`: string (html|json, défaut: json)
+
+### GET /legal/terms-of-service
+**Description**: Obtenir les conditions d'utilisation  
+**Query Parameters**:
+- `version?`: string (version spécifique, optionnel)
+- `format?`: string (html|json, défaut: json)
+
+---
+
+## Routes Feedback
+
+**Préfixe**: `/feedback`  
+**Authentification**: Bearer Token
+
+### POST /feedback
+**Description**: Envoyer un feedback utilisateur  
+**Body**:
+```json
+{
+  "type": "string (bug|feature|general)",
+  "subject": "string (max 100 caractères)",
+  "message": "string (max 1000 caractères)",
+  "rating?": "number (1-5, optionnel)",
+  "metadata?": {
+    "page": "string",
+    "userAgent": "string",
+    "appVersion": "string"
+  }
+}
+```
 
 ---
 
