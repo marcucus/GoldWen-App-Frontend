@@ -157,6 +157,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         }
 
         final profiles = matchingProvider.dailyProfiles;
+        
+        // If selection is complete, don't show any profiles
+        if (matchingProvider.isSelectionComplete) {
+          return _buildSelectionCompleteState(matchingProvider, subscriptionProvider);
+        }
+        
         final availableProfiles = profiles.where((profile) => 
           !matchingProvider.isProfileSelected(profile.id)
         ).toList();
@@ -657,6 +663,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             ),
             const SizedBox(height: 12),
             Text(
+              matchingProvider.selectionCompleteMessage ?? 
               'Vous avez fait vos choix pour aujourd\'hui. Revenez demain pour de nouveaux profils.',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,

@@ -5,24 +5,34 @@ import 'package:mockito/mockito.dart';
 
 import 'package:goldwen_app/features/matching/pages/daily_matches_page.dart';
 import 'package:goldwen_app/features/matching/providers/matching_provider.dart';
+import 'package:goldwen_app/features/subscription/providers/subscription_provider.dart';
 import 'package:goldwen_app/core/theme/app_theme.dart';
 
-// Mock MatchingProvider for testing
-class MockMatchingProvider extends Mock implements MatchingProvider {}
+// Import the generated mocks
+import 'mocks.mocks.dart';
 
 void main() {
   group('DailyMatchesPage Widget Tests', () {
     late MockMatchingProvider mockMatchingProvider;
+    late MockSubscriptionProvider mockSubscriptionProvider;
 
     setUp(() {
       mockMatchingProvider = MockMatchingProvider();
+      mockSubscriptionProvider = MockSubscriptionProvider();
     });
 
     Widget createTestWidget() {
       return MaterialApp(
         theme: AppTheme.lightTheme,
-        home: ChangeNotifierProvider<MatchingProvider>.value(
-          value: mockMatchingProvider,
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<MatchingProvider>.value(
+              value: mockMatchingProvider,
+            ),
+            ChangeNotifierProvider<SubscriptionProvider>.value(
+              value: mockSubscriptionProvider,
+            ),
+          ],
           child: const DailyMatchesPage(),
         ),
       );
@@ -34,6 +44,8 @@ void main() {
       when(mockMatchingProvider.error).thenReturn(null);
       when(mockMatchingProvider.dailyProfiles).thenReturn([]);
       when(mockMatchingProvider.selectedProfileIds).thenReturn([]);
+      when(mockMatchingProvider.isSelectionComplete).thenReturn(false);
+      when(mockSubscriptionProvider.hasActiveSubscription).thenReturn(false);
 
       // Act
       await tester.pumpWidget(createTestWidget());
@@ -49,6 +61,8 @@ void main() {
       when(mockMatchingProvider.error).thenReturn('Test error message');
       when(mockMatchingProvider.dailyProfiles).thenReturn([]);
       when(mockMatchingProvider.selectedProfileIds).thenReturn([]);
+      when(mockMatchingProvider.isSelectionComplete).thenReturn(false);
+      when(mockSubscriptionProvider.hasActiveSubscription).thenReturn(false);
 
       // Act
       await tester.pumpWidget(createTestWidget());
@@ -134,6 +148,25 @@ void main() {
 
       // Basic test to ensure widget doesn't crash
       expect(find.byType(DailyMatchesPage), findsOneWidget);
+    });
+
+    testWidgets('shows selection complete state when all choices are used', (WidgetTester tester) async {
+      // Arrange
+      when(mockMatchingProvider.isLoading).thenReturn(false);
+      when(mockMatchingProvider.error).thenReturn(null);
+      when(mockMatchingProvider.dailyProfiles).thenReturn([]);
+      when(mockMatchingProvider.isSelectionComplete).thenReturn(true);
+      when(mockMatchingProvider.selectionCompleteMessage).thenReturn('Votre choix est fait. Revenez demain pour votre nouvelle sélection !');
+      when(mockMatchingProvider.hasSubscription).thenReturn(false);
+      when(mockSubscriptionProvider.hasActiveSubscription).thenReturn(false);
+
+      // Act
+      await tester.pumpWidget(createTestWidget());
+
+      // Assert
+      expect(find.text('Sélection terminée !'), findsOneWidget);
+      expect(find.text('Votre choix est fait. Revenez demain pour votre nouvelle sélection !'), findsOneWidget);
+      expect(find.text('Découvrir GoldWen Plus'), findsOneWidget);
     });
   });
 }

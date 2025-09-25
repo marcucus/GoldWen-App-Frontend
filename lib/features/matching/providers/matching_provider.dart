@@ -26,18 +26,29 @@ class MatchingProvider with ChangeNotifier {
 
   bool get hasSubscription => _subscriptionUsage?.canSeeWhoLikedYou ?? false;
   int get maxSelections {
+    // Use daily selection metadata if available, otherwise fall back to subscription usage
+    if (_dailySelection != null) {
+      return _dailySelection!.maxChoices;
+    }
     // Use subscription status to determine max selections
     // Free users: 1 selection, Premium users: 3 selections
-    if (hasSubscription) {
-      return 3;
-    }
-    return 1;
+    return (_subscriptionUsage?.dailyChoicesLimit ?? (hasSubscription ? 3 : 1));
   }
   int get remainingSelections {
-    final used = _selectedProfileIds.length;
-    return (maxSelections - used).clamp(0, maxSelections);
+    // Use daily selection metadata if available
+    if (_dailySelection != null) {
+      return _dailySelection!.choicesRemaining;
+    }
+    // Fall back to subscription usage
+    return _subscriptionUsage?.remainingChoices ?? 1;
   }
-  bool get canSelectMore => remainingSelections > 0;
+  bool get canSelectMore {
+    // Use daily selection metadata if available
+    if (_dailySelection != null) {
+      return _dailySelection!.canSelectMore;
+    }
+    return remainingSelections > 0;
+  }
 
   void clearError() {
     _error = null;
@@ -141,6 +152,7 @@ class MatchingProvider with ChangeNotifier {
       // Check if it's a match
       final isMatch = response['data']?['isMatch'] ?? false;
       final matchedUserName = response['data']?['matchedUserName'] as String?;
+      final choicesRemaining = response['data']?['choicesRemaining'] as int?;
       
       if (isMatch) {
         // Reload matches to include the new one
@@ -155,6 +167,21 @@ class MatchingProvider with ChangeNotifier {
       }
       
       _selectedProfileIds.add(profileId);
+      
+      // Update daily selection metadata based on API response
+      if (_dailySelection != null && choicesRemaining != null) {
+        _dailySelection = DailySelection(
+          profiles: _dailySelection!.profiles,
+          generatedAt: _dailySelection!.generatedAt,
+          expiresAt: _dailySelection!.expiresAt,
+          remainingLikes: _dailySelection!.remainingLikes,
+          hasUsedSuperLike: _dailySelection!.hasUsedSuperLike,
+          choicesRemaining: choicesRemaining,
+          choicesMade: _dailySelection!.choicesMade + 1,
+          maxChoices: _dailySelection!.maxChoices,
+          refreshTime: _dailySelection!.refreshTime,
+        );
+      }
       
       // Update subscription usage
       await _loadSubscriptionUsage();
@@ -224,6 +251,17 @@ class MatchingProvider with ChangeNotifier {
     
     // Check if daily selection is expired
     return _dailySelection!.isExpired;
+  }
+
+  bool get isSelectionComplete {
+    return _dailySelection?.isSelectionComplete ?? false;
+  }
+
+  String? get selectionCompleteMessage {
+    if (isSelectionComplete) {
+      return 'Votre choix est fait. Revenez demain pour votre nouvelle sélection !';
+    }
+    return null;
   }
 
   void clearDailySelection() {

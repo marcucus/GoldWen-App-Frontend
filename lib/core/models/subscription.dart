@@ -160,6 +160,8 @@ class Subscription {
 class SubscriptionUsage {
   final int dailyLikesUsed;
   final int dailyLikesLimit;
+  final int dailyChoicesUsed;
+  final int dailyChoicesLimit;
   final int superLikesUsed;
   final int superLikesLimit;
   final int boostsUsed;
@@ -172,6 +174,8 @@ class SubscriptionUsage {
   SubscriptionUsage({
     required this.dailyLikesUsed,
     required this.dailyLikesLimit,
+    required this.dailyChoicesUsed,
+    required this.dailyChoicesLimit,
     required this.superLikesUsed,
     required this.superLikesLimit,
     required this.boostsUsed,
@@ -183,9 +187,13 @@ class SubscriptionUsage {
   });
 
   factory SubscriptionUsage.fromJson(Map<String, dynamic> json) {
+    final dailyChoices = json['dailyChoices'] as Map<String, dynamic>?;
+    
     return SubscriptionUsage(
       dailyLikesUsed: json['dailyLikesUsed'] as int? ?? 0,
       dailyLikesLimit: json['dailyLikesLimit'] as int? ?? 5,
+      dailyChoicesUsed: dailyChoices?['used'] as int? ?? 0,
+      dailyChoicesLimit: dailyChoices?['limit'] as int? ?? 1,
       superLikesUsed: json['superLikesUsed'] as int? ?? 0,
       superLikesLimit: json['superLikesLimit'] as int? ?? 1,
       boostsUsed: json['boostsUsed'] as int? ?? 0,
@@ -193,7 +201,7 @@ class SubscriptionUsage {
       canSeeWhoLikedYou: json['canSeeWhoLikedYou'] as bool? ?? false,
       canUseAdvancedFilters: json['canUseAdvancedFilters'] as bool? ?? false,
       hasUnlimitedRewinds: json['hasUnlimitedRewinds'] as bool? ?? false,
-      resetDate: DateTime.parse(json['resetDate'] as String),
+      resetDate: DateTime.parse(json['resetDate'] as String? ?? dailyChoices?['resetTime'] as String? ?? DateTime.now().add(Duration(days: 1)).toIso8601String()),
     );
   }
 
@@ -201,6 +209,8 @@ class SubscriptionUsage {
     return {
       'dailyLikesUsed': dailyLikesUsed,
       'dailyLikesLimit': dailyLikesLimit,
+      'dailyChoicesUsed': dailyChoicesUsed,
+      'dailyChoicesLimit': dailyChoicesLimit,
       'superLikesUsed': superLikesUsed,
       'superLikesLimit': superLikesLimit,
       'boostsUsed': boostsUsed,
@@ -213,10 +223,12 @@ class SubscriptionUsage {
   }
 
   bool get hasRemainingLikes => dailyLikesUsed < dailyLikesLimit;
+  bool get hasRemainingChoices => dailyChoicesUsed < dailyChoicesLimit;
   bool get hasRemainingSuperLikes => superLikesUsed < superLikesLimit;
   bool get hasRemainingBoosts => boostsUsed < boostsLimit;
 
   int get remainingLikes => (dailyLikesLimit - dailyLikesUsed).clamp(0, dailyLikesLimit);
+  int get remainingChoices => (dailyChoicesLimit - dailyChoicesUsed).clamp(0, dailyChoicesLimit);
   int get remainingSuperLikes => (superLikesLimit - superLikesUsed).clamp(0, superLikesLimit);
   int get remainingBoosts => (boostsLimit - boostsUsed).clamp(0, boostsLimit);
 }

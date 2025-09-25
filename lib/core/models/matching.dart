@@ -67,6 +67,10 @@ class DailySelection {
   final DateTime expiresAt;
   final int remainingLikes;
   final bool hasUsedSuperLike;
+  final int choicesRemaining;
+  final int choicesMade;
+  final int maxChoices;
+  final DateTime? refreshTime;
 
   DailySelection({
     required this.profiles,
@@ -74,17 +78,29 @@ class DailySelection {
     required this.expiresAt,
     required this.remainingLikes,
     required this.hasUsedSuperLike,
+    required this.choicesRemaining,
+    required this.choicesMade,
+    required this.maxChoices,
+    this.refreshTime,
   });
 
   factory DailySelection.fromJson(Map<String, dynamic> json) {
+    final metadata = json['metadata'] as Map<String, dynamic>?;
+    
     return DailySelection(
       profiles: (json['profiles'] as List<dynamic>)
           .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList(),
-      generatedAt: DateTime.parse(json['generatedAt'] as String),
-      expiresAt: DateTime.parse(json['expiresAt'] as String),
-      remainingLikes: json['remainingLikes'] as int,
+      generatedAt: DateTime.parse(json['generatedAt'] as String? ?? DateTime.now().toIso8601String()),
+      expiresAt: DateTime.parse(json['expiresAt'] as String? ?? DateTime.now().add(Duration(hours: 24)).toIso8601String()),
+      remainingLikes: json['remainingLikes'] as int? ?? 0,
       hasUsedSuperLike: json['hasUsedSuperLike'] as bool? ?? false,
+      choicesRemaining: metadata?['choicesRemaining'] as int? ?? 1,
+      choicesMade: metadata?['choicesMade'] as int? ?? 0,
+      maxChoices: metadata?['maxChoices'] as int? ?? 1,
+      refreshTime: metadata?['refreshTime'] != null 
+          ? DateTime.parse(metadata!['refreshTime'] as String)
+          : null,
     );
   }
 
@@ -95,10 +111,18 @@ class DailySelection {
       'expiresAt': expiresAt.toIso8601String(),
       'remainingLikes': remainingLikes,
       'hasUsedSuperLike': hasUsedSuperLike,
+      'metadata': {
+        'choicesRemaining': choicesRemaining,
+        'choicesMade': choicesMade,
+        'maxChoices': maxChoices,
+        'refreshTime': refreshTime?.toIso8601String(),
+      },
     };
   }
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
+  bool get canSelectMore => choicesRemaining > 0;
+  bool get isSelectionComplete => choicesMade >= maxChoices;
 }
 
 class CompatibilityResult {
