@@ -256,7 +256,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
+        borderRadius: BorderRadius.circular(AppBorderRadius.medium),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -350,7 +350,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
       ),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+        borderRadius: BorderRadius.circular(AppBorderRadius.small),
       ),
       child: Text(
         label,
