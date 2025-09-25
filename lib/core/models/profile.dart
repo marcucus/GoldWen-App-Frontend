@@ -370,3 +370,46 @@ class Prompt {
     };
   }
 }
+
+class ProfileCompletion {
+  final bool isCompleted;
+  final bool hasPhotos;
+  final bool hasPrompts;
+  final bool hasPersonalityAnswers;
+  final bool hasRequiredProfileFields;
+  final List<String> missingSteps;
+
+  ProfileCompletion({
+    required this.isCompleted,
+    required this.hasPhotos,
+    required this.hasPrompts,
+    required this.hasPersonalityAnswers,
+    required this.hasRequiredProfileFields,
+    required this.missingSteps,
+  });
+
+  factory ProfileCompletion.fromJson(Map<String, dynamic> json) {
+    return ProfileCompletion(
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      hasPhotos: json['hasPhotos'] as bool? ?? false,
+      hasPrompts: json['hasPrompts'] as bool? ?? false,
+      hasPersonalityAnswers: json['hasPersonalityAnswers'] as bool? ?? false,
+      hasRequiredProfileFields: json['hasRequiredProfileFields'] as bool? ?? false,
+      missingSteps: (json['missingSteps'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'isCompleted': isCompleted,
+      'hasPhotos': hasPhotos,
+      'hasPrompts': hasPrompts,
+      'hasPersonalityAnswers': hasPersonalityAnswers,
+      'hasRequiredProfileFields': hasRequiredProfileFields,
+      'missingSteps': missingSteps,
+    };
+  }
+}
