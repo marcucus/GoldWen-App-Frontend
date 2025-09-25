@@ -5,7 +5,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
-import '../../legal/pages/privacy_settings_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -497,11 +496,7 @@ class _SettingsPageState extends State<SettingsPage> {
           'Paramètres de confidentialité',
           'Gérer vos données et consentements RGPD',
           Icons.security,
-          () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PrivacySettingsPage(),
-            ),
-          ),
+          () => context.go('/privacy-settings'),
         ),
         _buildSettingItem(
           context,

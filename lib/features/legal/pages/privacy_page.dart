@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/gdpr_service.dart';
+import '../widgets/gdpr_consent_modal.dart';
 
-class PrivacyPage extends StatelessWidget {
+class PrivacyPage extends StatefulWidget {
   const PrivacyPage({super.key});
+
+  @override
+  State<PrivacyPage> createState() => _PrivacyPageState();
+}
+
+class _PrivacyPageState extends State<PrivacyPage> {
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacyPolicy();
+  }
+
+  Future<void> _loadPrivacyPolicy() async {
+    final gdprService = Provider.of<GdprService>(context, listen: false);
+    await gdprService.loadPrivacyPolicy();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,26 +36,69 @@ class PrivacyPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Politique de confidentialité de GoldWen',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppColors.primaryGold,
-              ),
-            ),
-            
-            const SizedBox(height: AppSpacing.lg),
-            
-            Text(
-              'Dernière mise à jour : ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            
-            const SizedBox(height: AppSpacing.xl),
+        child: Consumer<GdprService>(
+          builder: (context, gdprService, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Politique de confidentialité de GoldWen',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // Dynamic version and date from GDPR service
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        gdprService.currentPrivacyPolicy != null
+                            ? 'Version ${gdprService.currentPrivacyPolicy!.version} - Dernière mise à jour : ${_formatDate(gdprService.currentPrivacyPolicy!.lastUpdated)}'
+                            : 'Dernière mise à jour : ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    if (!gdprService.hasValidConsent)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.warningOrange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                          border: Border.all(
+                            color: AppColors.warningOrange.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.warning,
+                              size: 16,
+                              color: AppColors.warningOrange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Consentement requis',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.warningOrange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                
+                const SizedBox(height: AppSpacing.xl),
             
             _buildSection(
               context,
@@ -142,9 +204,102 @@ class PrivacyPage extends StatelessWidget {
             ),
             
             const SizedBox(height: AppSpacing.xl),
-          ],
+
+            // Quick actions for consent management
+            if (!gdprService.hasValidConsent || gdprService.needsConsentRenewal())
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGold.withOpacity(0.1),
+                      AppColors.primaryGold.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                  border: Border.all(
+                    color: AppColors.primaryGold.withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.privacy_tip,
+                          color: AppColors.primaryGold,
+                          size: 24,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          gdprService.needsConsentRenewal() 
+                              ? 'Renouvellement du consentement'
+                              : 'Consentement RGPD requis',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryGold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      gdprService.needsConsentRenewal()
+                          ? 'Votre consentement doit être renouvelé. Cliquez ci-dessous pour mettre à jour vos préférences.'
+                          : 'Pour utiliser GoldWen, nous avons besoin de votre consentement pour traiter vos données personnelles.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showConsentModal(),
+                        icon: const Icon(Icons.check_circle),
+                        label: Text(
+                          gdprService.needsConsentRenewal() 
+                              ? 'Renouveler le consentement'
+                              : 'Donner mon consentement',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryGold,
+                          foregroundColor: AppColors.textLight,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+                ],
+              );
+            },
+          ),
         ),
       ),
+    );
+  }
+  
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _showConsentModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return GdprConsentModal(
+          canDismiss: true,
+          onConsentGiven: () {
+            setState(() {
+              // Refresh the page to update consent status
+            });
+          },
+        );
+      },
     );
   }
   
