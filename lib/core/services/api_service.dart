@@ -1200,20 +1200,6 @@ class MatchingServiceApi {
   }
 
   // Matches API methods
-  static Future<Map<String, dynamic>> getMatches({String? status}) async {
-    final queryParams = <String, String>{};
-    if (status != null) queryParams['status'] = status;
-
-    final uri = Uri.parse('$baseUrl/matching/matches').replace(
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
-    );
-
-    final response = await _makeRequest(
-      http.get(uri, headers: _headers),
-    );
-
-    return _handleResponse(response);
-  }
 
   static Future<Map<String, dynamic>> getMatchDetails(String matchId) async {
     final response = await _makeRequest(
