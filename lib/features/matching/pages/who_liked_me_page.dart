@@ -397,10 +397,8 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
   Widget _buildProfileCard(WhoLikedMeItem item) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: ModernCard(
-        elevation: 8,
+      child: GlassCard(
         borderRadius: AppBorderRadius.large,
-        gradient: AppColors.cardGradient,
         child: InkWell(
           onTap: () => context.push('/profile/${item.userId}'),
           borderRadius: BorderRadius.circular(AppBorderRadius.large),
