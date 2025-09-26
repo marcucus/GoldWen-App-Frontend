@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
+import '../../feedback/pages/feedback_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -486,6 +487,13 @@ class _SettingsPageState extends State<SettingsPage> {
       children: [
         _buildSettingItem(
           context,
+          'Envoyer un feedback',
+          'Partager votre avis sur l\'application',
+          Icons.feedback,
+          () => _navigateToFeedback(context),
+        ),
+        _buildSettingItem(
+          context,
           'Mes signalements',
           'Voir l\'historique de vos signalements',
           Icons.report,
@@ -610,6 +618,14 @@ class _SettingsPageState extends State<SettingsPage> {
   
   void _navigateToPreferences(BuildContext context) {
     _showPreferencesDialog(context);
+  }
+
+  void _navigateToFeedback(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const FeedbackPage(),
+      ),
+    );
   }
 
   // Dialog methods

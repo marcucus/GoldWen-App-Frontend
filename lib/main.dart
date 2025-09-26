@@ -23,6 +23,7 @@ import 'features/subscription/providers/subscription_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/admin/providers/admin_auth_provider.dart';
 import 'features/admin/providers/admin_provider.dart';
+import 'features/feedback/providers/feedback_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +69,7 @@ class GoldWenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ReportProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
+        ChangeNotifierProvider(create: (_) => FeedbackProvider()),
         ChangeNotifierProvider(create: (_) => LocationService()),
         ChangeNotifierProvider(create: (_) => GdprService()),
         ChangeNotifierProvider(

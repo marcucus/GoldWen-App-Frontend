@@ -975,6 +975,31 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // Feedback endpoints
+  static Future<Map<String, dynamic>> submitFeedback({
+    required String type,
+    required String subject,
+    required String message,
+    int? rating,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/feedback'),
+        headers: _headers,
+        body: jsonEncode({
+          'type': type,
+          'subject': subject,
+          'message': message,
+          if (rating != null) 'rating': rating,
+          if (metadata != null) 'metadata': metadata,
+        }),
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
   static Future<Map<String, dynamic>> getPrivacyPolicy({
     String? version,
     String format = 'json',
