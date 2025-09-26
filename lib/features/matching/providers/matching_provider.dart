@@ -379,7 +379,7 @@ class MatchingProvider with ChangeNotifier {
       _hasMoreHistory = historyData.hasMore;
       _error = null;
     } catch (e) {
-      _handleError(e, 'Failed to load history');
+      _handleError(e, 'Impossible de charger l\'historique');
     } finally {
       _setLoaded();
     }
@@ -404,6 +404,11 @@ class MatchingProvider with ChangeNotifier {
     
     if (error is ApiException) {
       _error = error.message;
+    } else if (error.toString().contains('SocketException') || 
+               error.toString().contains('NetworkException')) {
+      _error = 'Vérifiez votre connexion internet et réessayez';
+    } else if (error.toString().contains('TimeoutException')) {
+      _error = 'La requête a pris trop de temps. Réessayez plus tard';
     } else {
       _error = fallbackMessage;
     }

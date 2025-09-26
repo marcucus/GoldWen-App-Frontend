@@ -20,6 +20,7 @@ class AppColors {
   static const Color backgroundWhite = Color(0xFFFFFFF8);
   static const Color backgroundGrey = Color(0xFFF8F9FA);
   static const Color backgroundLight = Color(0xFFFFFFF8); // Alias for backgroundWhite
+  static const Color backgroundCream = Color(0xFFFAF0E6); // Cream background for history page
   static const Color dividerLight = Color(0xFFE8E8E8);
   static const Color border = Color(0xFFE8E8E8); // Alias for dividerLight
   static const Color cardBackground = Color(0xFFFFFFFF);
