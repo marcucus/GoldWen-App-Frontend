@@ -8,6 +8,7 @@ import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../matching/providers/matching_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
+import '../../subscription/providers/subscription_provider.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(int)? onNavigate;
@@ -650,64 +651,84 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildQuickActions() {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 800),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: Text(
-              'Actions rapides',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          StaggeredList(
-            itemDelay: const Duration(milliseconds: 100),
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subscriptionProvider, child) {
+        return SlideInAnimation(
+          delay: const Duration(milliseconds: 800),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildActionCard(
-                icon: Icons.search,
-                title: 'Découvrir',
-                subtitle: 'Trouvez votre match parfait',
-                onTap: () {
-                  if (_navigateToTab != null) {
-                    _navigateToTab!(1);
-                  }
-                },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Text(
+                  'Actions rapides',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
               ),
-              _buildActionCard(
-                icon: Icons.favorite,
-                title: 'Mes Matches',
-                subtitle: 'Voir tous vos matches',
-                onTap: () => context.go('/matches'),
-              ),
-              _buildActionCard(
-                icon: Icons.history,
-                title: 'Historique',
-                subtitle: 'Vos sélections passées',
-                onTap: () => context.go('/history'),
-              ),
-              _buildActionCard(
-                icon: Icons.person,
-                title: 'Profil',
-                subtitle: 'Gérez votre profil et préférences',
-                onTap: () => context.go('/profile'),
-              ),
-              _buildActionCard(
-                icon: Icons.star,
-                title: 'GoldWen Plus',
-                subtitle: 'Accédez aux fonctionnalités premium',
-                onTap: () => context.go('/subscription'),
-                isHighlighted: true,
+              const SizedBox(height: AppSpacing.md),
+              StaggeredList(
+                itemDelay: const Duration(milliseconds: 100),
+                children: [
+                  _buildActionCard(
+                    icon: Icons.search,
+                    title: 'Découvrir',
+                    subtitle: 'Trouvez votre match parfait',
+                    onTap: () {
+                      if (_navigateToTab != null) {
+                        _navigateToTab!(1);
+                      }
+                    },
+                  ),
+                  _buildActionCard(
+                    icon: Icons.favorite,
+                    title: 'Mes Matches',
+                    subtitle: 'Voir tous vos matches',
+                    onTap: () => context.go('/matches'),
+                  ),
+                  // Premium feature: Who liked me
+                  _buildActionCard(
+                    icon: Icons.visibility,
+                    title: 'Qui m\'a sélectionné',
+                    subtitle: subscriptionProvider.canSeeWhoLikedYou 
+                        ? 'Découvrez qui s\'intéresse à vous'
+                        : 'Fonctionnalité premium - Abonnez-vous',
+                    onTap: () {
+                      if (subscriptionProvider.canSeeWhoLikedYou) {
+                        context.go('/who-liked-me');
+                      } else {
+                        context.go('/subscription');
+                      }
+                    },
+                    isHighlighted: !subscriptionProvider.canSeeWhoLikedYou,
+                  ),
+                  _buildActionCard(
+                    icon: Icons.history,
+                    title: 'Historique',
+                    subtitle: 'Vos sélections passées',
+                    onTap: () => context.go('/history'),
+                  ),
+                  _buildActionCard(
+                    icon: Icons.person,
+                    title: 'Profil',
+                    subtitle: 'Gérez votre profil et préférences',
+                    onTap: () => context.go('/profile'),
+                  ),
+                  _buildActionCard(
+                    icon: Icons.star,
+                    title: 'GoldWen Plus',
+                    subtitle: 'Accédez aux fonctionnalités premium',
+                    onTap: () => context.go('/subscription'),
+                    isHighlighted: true,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

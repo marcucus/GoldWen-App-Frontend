@@ -177,3 +177,31 @@ class CompatibilityResult {
     };
   }
 }
+
+class WhoLikedMeItem {
+  final String userId;
+  final Profile user;
+  final DateTime likedAt;
+
+  WhoLikedMeItem({
+    required this.userId,
+    required this.user,
+    required this.likedAt,
+  });
+
+  factory WhoLikedMeItem.fromJson(Map<String, dynamic> json) {
+    return WhoLikedMeItem(
+      userId: json['userId'] as String,
+      user: Profile.fromJson(json['user'] as Map<String, dynamic>),
+      likedAt: DateTime.parse(json['likedAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'user': user.toJson(),
+      'likedAt': likedAt.toIso8601String(),
+    };
+  }
+}

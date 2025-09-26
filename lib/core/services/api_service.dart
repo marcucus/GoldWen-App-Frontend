@@ -480,6 +480,18 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // Premium feature: Who liked me
+  static Future<Map<String, dynamic>> getWhoLikedMe() async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/matching/who-liked-me'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Chat endpoints
   static Future<Map<String, dynamic>> getConversations() async {
     final response = await _makeRequest(

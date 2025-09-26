@@ -11,6 +11,7 @@ import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
 import '../../features/matching/pages/matches_page.dart';
 import '../../features/matching/pages/history_page.dart';
+import '../../features/matching/pages/who_liked_me_page.dart';
 import '../../features/chat/pages/chat_page.dart';
 import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
@@ -101,6 +102,11 @@ class AppRouter {
         path: '/history',
         name: 'history',
         builder: (context, state) => const HistoryPage(),
+      ),
+      GoRoute(
+        path: '/who-liked-me',
+        name: 'who-liked-me',
+        builder: (context, state) => const WhoLikedMePage(),
       ),
 
       // Subscription
