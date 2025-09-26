@@ -8,6 +8,8 @@ import '../../../core/services/accessibility_service.dart';
 import '../../../core/services/performance_cache_service.dart';
 import '../../../shared/widgets/optimized_image.dart';
 import '../../../shared/widgets/loading_animation.dart';
+import '../../../shared/widgets/enhanced_card.dart';
+import '../../../shared/widgets/enhanced_button.dart';
 import '../providers/matching_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
 import '../../subscription/widgets/subscription_banner.dart';
