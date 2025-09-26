@@ -11,7 +11,9 @@ class MatchingProvider with ChangeNotifier {
   List<Match> _matches = [];
   List<Profile> _dailyProfiles = [];
   List<String> _selectedProfileIds = [];
+  List<WhoLikedMeItem> _whoLikedMe = [];
   bool _isLoading = false;
+  bool _isLoadingWhoLikedMe = false;
   DateTime? _lastUpdateTime;
   String? _error;
   SubscriptionUsage? _subscriptionUsage;
@@ -20,7 +22,9 @@ class MatchingProvider with ChangeNotifier {
   List<Match> get matches => _matches;
   List<Profile> get dailyProfiles => _dailySelection?.profiles ?? _dailyProfiles;
   List<String> get selectedProfileIds => _selectedProfileIds;
+  List<WhoLikedMeItem> get whoLikedMe => _whoLikedMe;
   bool get isLoading => _isLoading;
+  bool get isLoadingWhoLikedMe => _isLoadingWhoLikedMe;
   DateTime? get lastUpdateTime => _lastUpdateTime;
   String? get error => _error;
   SubscriptionUsage? get subscriptionUsage => _subscriptionUsage;
@@ -438,4 +442,32 @@ class MatchingProvider with ChangeNotifier {
   int get boostsRemaining => _subscriptionUsage?.remainingBoosts ?? 0;
 
   DateTime? get usageResetDate => _subscriptionUsage?.resetDate;
+
+  // Premium feature: Who liked me
+  Future<void> loadWhoLikedMe() async {
+    _isLoadingWhoLikedMe = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.getWhoLikedMe();
+      final data = response['data'] as List<dynamic>? ?? [];
+      
+      _whoLikedMe = data
+          .map((item) => WhoLikedMeItem.fromJson(item as Map<String, dynamic>))
+          .toList();
+      
+      _error = null;
+    } catch (e) {
+      _handleError(e, 'Failed to load who liked you');
+    } finally {
+      _isLoadingWhoLikedMe = false;
+      notifyListeners();
+    }
+  }
+
+  void clearWhoLikedMe() {
+    _whoLikedMe.clear();
+    notifyListeners();
+  }
 }
