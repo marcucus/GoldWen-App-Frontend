@@ -486,6 +486,13 @@ class _SettingsPageState extends State<SettingsPage> {
       children: [
         _buildSettingItem(
           context,
+          'Mes signalements',
+          'Voir l\'historique de vos signalements',
+          Icons.report,
+          () => context.go('/reports'),
+        ),
+        _buildSettingItem(
+          context,
           'Aide et support',
           'Besoin d\'aide ?',
           Icons.help,
