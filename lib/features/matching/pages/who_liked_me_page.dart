@@ -439,7 +439,7 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.user.firstName,
+                        item.user.firstName ?? 'Anonymous',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
