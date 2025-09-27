@@ -95,7 +95,7 @@ class LocalNotificationService {
       'Découvrez vos nouveaux profils compatibles',
       scheduledTZ,
       notificationDetails,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time, // Repeat daily at same time
       payload: 'daily_selection',
     );

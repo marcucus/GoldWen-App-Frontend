@@ -18,7 +18,7 @@ class HistoryDemoApp extends StatelessWidget {
       create: (_) => MockMatchingProvider(),
       child: MaterialApp(
         title: 'History Demo',
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme(),
         home: const HistoryPage(),
       ),
     );

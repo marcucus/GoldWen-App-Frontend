@@ -278,8 +278,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
             },
           ),
         ),
-      ),
-    );
+      );
   }
   
   String _formatDate(DateTime date) {
