@@ -1,0 +1,36 @@
+Numéro,Fichier,Ligne,Colonne,Type d'erreur,Message,Priorité
+1,lib/core/services/accessibility_service.dart,163,7,undefined_identifier,"Undefined name 'SemanticsService'",Haute
+2,lib/core/services/local_notification_service.dart,92,26,missing_required_argument,"The named parameter 'androidScheduleMode' is required but missing",Haute
+3,lib/core/services/local_notification_service.dart,98,7,undefined_named_parameter,"The named parameter 'uiLocalNotificationDateInterpretation' isn't defined",Haute
+4,lib/core/services/local_notification_service.dart,98,46,undefined_identifier,"Undefined name 'UILocalNotificationDateInterpretation'",Haute
+5,lib/demo/history_demo.dart,21,16,argument_type_not_assignable,"ThemeData Function incompatible avec ThemeData?",Moyenne
+6,lib/features/legal/pages/privacy_page.dart,281,7,expected_token,"Expected to find ';'",Critique
+7,lib/features/legal/pages/privacy_page.dart,281,8,missing_identifier,"Expected an identifier",Critique
+8,lib/features/legal/pages/privacy_page.dart,281,8,unexpected_token,"Unexpected text ';'",Critique
+9,lib/features/legal/pages/privacy_page.dart,281,8,expected_token,"Expected to find ';'",Critique
+10,lib/features/legal/pages/privacy_page.dart,282,5,missing_identifier,"Expected an identifier",Critique
+11,lib/features/legal/pages/privacy_page.dart,282,5,unexpected_token,"Unexpected text ';'",Critique
+12,lib/features/matching/pages/daily_matches_page.dart,1047,30,undefined_identifier,"Undefined name 'context'",Critique
+13,lib/features/matching/pages/daily_matches_page.dart,1048,30,undefined_identifier,"Undefined name 'context'",Critique
+14,lib/features/matching/pages/daily_matches_page.dart,1062,31,undefined_identifier,"Undefined name 'context'",Critique
+15,lib/features/matching/pages/daily_matches_page.dart,1070,31,undefined_identifier,"Undefined name 'context'",Critique
+16,lib/features/matching/pages/daily_matches_page.dart,1077,17,undefined_identifier,"Undefined name 'context'",Critique
+17,lib/features/matching/pages/daily_matches_page.dart,1080,43,undefined_identifier,"Undefined name 'context'",Critique
+18,lib/features/matching/pages/daily_matches_page.dart,1117,31,undefined_identifier,"Undefined name 'context'",Critique
+19,lib/features/matching/pages/daily_matches_page.dart,1125,31,undefined_identifier,"Undefined name 'context'",Critique
+20,lib/features/matching/pages/daily_matches_page.dart,1131,72,undefined_identifier,"Undefined name 'context'",Critique
+21,lib/features/matching/pages/daily_matches_page.dart,1135,43,undefined_identifier,"Undefined name 'context'",Critique
+22,lib/features/matching/pages/daily_matches_page.dart,1162,30,undefined_identifier,"Undefined name 'context'",Critique
+23,lib/features/matching/pages/daily_matches_page.dart,1163,30,undefined_identifier,"Undefined name 'context'",Critique
+24,lib/features/matching/pages/daily_matches_page.dart,1177,31,undefined_identifier,"Undefined name 'context'",Critique
+25,lib/features/matching/pages/daily_matches_page.dart,1186,31,undefined_identifier,"Undefined name 'context'",Critique
+26,lib/features/matching/pages/daily_matches_page.dart,1193,19,undefined_identifier,"Undefined name 'context'",Critique
+27,lib/features/matching/pages/daily_matches_page.dart,1196,45,undefined_identifier,"Undefined name 'context'",Critique
+28,lib/features/matching/pages/daily_matches_page.dart,1213,5,undefined_identifier,"Undefined name 'context'",Critique
+29,lib/features/matching/pages/daily_matches_page.dart,1218,16,undefined_identifier,"Undefined name 'context'",Critique
+30,lib/features/matching/pages/daily_matches_page.dart,1300,17,undefined_function,"The function '_selectProfile' isn't defined",Haute
+31,lib/features/matching/pages/daily_matches_page.dart,1313,1,expected_executable,"Expected a method getter setter or operator declaration",Critique
+32,lib/features/matching/pages/who_liked_me_page.dart,442,25,argument_type_not_assignable,"The argument type 'String?' can't be assigned to parameter type 'String'",Haute
+33,lib/features/matching/providers/matching_provider.dart,368,41,undefined_method,"The method 'getHistory' isn't defined for type 'ApiService'",Haute
+34,lib/features/matching/providers/report_provider.dart,32,41,undefined_method,"The method 'submitReport' isn't defined for type 'ApiService'",Haute
+35,lib/features/matching/providers/report_provider.dart,69,41,undefined_method,"The method 'getMyReports' isn't defined for type 'ApiService'",Haute
