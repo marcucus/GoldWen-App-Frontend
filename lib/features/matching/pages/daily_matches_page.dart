@@ -1030,7 +1030,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
       }
     }
   }
-}
 
   Widget _buildEmptyState() {
     return Center(
@@ -1205,109 +1204,6 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           ],
         ),
       ),
-    );
-  }
-
-  void _showProfileDetails(Profile profile) {
-    // Navigate to profile detail page
-    context.push('/profile-detail/${profile.id}');
-  }
-
-  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.favorite,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              const Text('Confirmer votre choix'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Voulez-vous vraiment choisir ${profile.firstName ?? 'cette personne'} ?',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  matchingProvider.remainingSelections - 1 <= 0
-                      ? 'Ce sera votre dernier choix aujourd\'hui.'
-                      : 'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (matchingProvider.remainingSelections - 1 <= 0 && !subscriptionProvider.hasActiveSubscription)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.amber.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.upgrade,
-                          color: Colors.amber[700],
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'GoldWen Plus : 3 choix/jour',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _selectProfile(profile, matchingProvider, subscriptionProvider);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Confirmer'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
