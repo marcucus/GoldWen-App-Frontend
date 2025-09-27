@@ -275,9 +275,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             children: [
               _DetailRow(label: 'Email', value: user.email),
               _DetailRow(label: 'ID', value: user.id),
-              _DetailRow(label: 'Âge', value: '${user.age} ans'),
-              if (user.bio?.isNotEmpty == true)
-                _DetailRow(label: 'Bio', value: user.bio!),
+              _DetailRow(label: 'Nom', value: '${user.firstName ?? ''} ${user.lastName ?? ''}'),
+              _DetailRow(label: 'Statut', value: user.status ?? 'Actif'),
               _DetailRow(label: 'Créé le', value: user.createdAt != null ? _formatDate(user.createdAt!) : 'Non disponible'),
               if (user.lastActive != null)
                 _DetailRow(label: 'Dernière activité', value: _formatDate(user.lastActive!)),

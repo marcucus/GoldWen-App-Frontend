@@ -469,6 +469,7 @@ class ProfileProvider with ChangeNotifier {
                     url: photoUrl.toString(),
                     order: 1,
                     isPrimary: false,
+                    createdAt: DateTime.now(),
                   ))
               .toList();
         }
