@@ -1,0 +1,75 @@
+Type d'erreur,Message,Fichier,Ligne,Colonne,Sévérité
+undefined_named_parameter,"The named parameter 'focusTheme' isn't defined.",lib/core/theme/app_theme.dart,267,6,1
+undefined_method,"The method 'FocusThemeData' isn't defined for the type 'AppTheme'.",lib/core/theme/app_theme.dart,267,18,1
+undefined_identifier,"Undefined name 'SemanticsService'.",lib/core/services/accessibility_service.dart,161,4,1
+undefined_method,"The method '_makeRequest' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1241,27,1
+undefined_method,"The method '_handleResponse' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1248,11,1
+undefined_method,"The method '_makeRequest' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1270,27,1
+undefined_method,"The method '_handleResponse' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1274,11,1
+undefined_method,"The method '_makeRequest' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1295,27,1
+undefined_method,"The method '_handleResponse' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1303,11,1
+undefined_method,"The method '_makeRequest' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1322,27,1
+undefined_method,"The method '_handleResponse' isn't defined for the type 'MatchingServiceApi'.",lib/core/services/api_service.dart,1326,11,1
+duplicate_definition,"The name 'cancelAll' is already defined.",lib/core/services/local_notification_service.dart,381,15,1
+argument_type_not_assignable,"The argument type 'Object' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/core/widgets/modern_cards.dart,36,19,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/core/widgets/modern_cards.dart,88,19,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/core/widgets/modern_cards.dart,206,29,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})?' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/core/widgets/modern_cards.dart,324,21,1
+undefined_method,"The method 'submitReport' isn't defined for the type 'ApiService'.",lib/features/matching/providers/report_provider.dart,31,40,1
+undefined_method,"The method 'getMyReports' isn't defined for the type 'ApiService'.",lib/features/matching/providers/report_provider.dart,68,40,1
+undefined_method,"The method 'getHistory' isn't defined for the type 'ApiService'.",lib/features/matching/providers/matching_provider.dart,367,40,1
+undefined_method,"The method 'DelayedAnimationWidget' isn't defined for the type '_HistoryPageState'.",lib/features/matching/pages/history_page.dart,261,19,1
+undefined_method,"The method 'ModernCard' isn't defined for the type '_HistoryPageState'.",lib/features/matching/pages/history_page.dart,272,11,1
+undefined_getter,"The getter 'backgroundDark' isn't defined for the type 'AppColors'.",lib/features/matching/pages/who_liked_me_page.dart,66,33,1
+undefined_getter,"The getter 'backgroundDark' isn't defined for the type 'AppColors'.",lib/features/matching/pages/who_liked_me_page.dart,93,33,1
+argument_type_not_assignable,"The argument type 'String?' can't be assigned to the parameter type 'String'.",lib/features/matching/pages/who_liked_me_page.dart,441,24,1
+expected_executable,"Expected a method, getter, setter or operator declaration.",lib/features/matching/pages/daily_matches_page.dart,1416,0,1
+argument_type_not_assignable,"The argument type 'Photo?' can't be assigned to the parameter type 'String?'.",lib/features/matching/pages/daily_matches_page.dart,452,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1046,29,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1047,29,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1061,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1069,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1079,42,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1076,16,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1116,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1124,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1134,42,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1130,71,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1161,29,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1162,29,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1176,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1185,30,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1195,44,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1192,18,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1212,4,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1217,15,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1319,19,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1328,29,1
+undefined_identifier,"Undefined name 'mounted'.",lib/features/matching/pages/daily_matches_page.dart,1351,57,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1353,21,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1384,29,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1399,19,1
+undefined_identifier,"Undefined name 'context'.",lib/features/matching/pages/daily_matches_page.dart,1406,29,1
+undefined_method,"The method 'DelayedAnimationWidget' isn't defined for the type '_MatchesPageState'.",lib/features/matching/pages/matches_page.dart,224,19,1
+argument_type_not_assignable,"The argument type 'Photo' can't be assigned to the parameter type 'String'.",lib/features/matching/pages/matches_page.dart,270,26,1
+undefined_getter,"The getter 'name' isn't defined for the type 'Profile'.",lib/features/matching/pages/matches_page.dart,297,31,1
+undefined_method,"The method 'ModernCard' isn't defined for the type '_MatchesPageState'.",lib/features/matching/pages/matches_page.dart,239,11,1
+undefined_method,"The method 'show' isn't defined for the type 'ReportDialog'.",lib/features/matching/pages/profile_detail_page.dart,408,17,1
+undefined_method,"The method '_announceChange' isn't defined for the type 'AccessibilityService'.",lib/features/settings/pages/accessibility_settings_page.dart,511,24,1
+undefined_method,"The method 'markMessagesAsRead' isn't defined for the type 'WebSocketService'.",lib/features/chat/providers/chat_provider.dart,294,25,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/features/chat/pages/chat_list_page.dart,245,29,1
+undefined_named_parameter,"The named parameter 'alignedLabelStyle' isn't defined.",lib/features/feedback/pages/feedback_page.dart,392,8,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})?' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/features/subscription/pages/subscription_page.dart,526,27,1
+missing_required_argument,"The named parameter 'createdAt' is required, but there's no corresponding argument.",lib/features/profile/providers/profile_provider.dart,466,33,1
+undefined_enum_constant,"There's no constant named 'dashed' in 'BorderStyle'.",lib/features/profile/widgets/photo_management_widget.dart,131,31,1
+undefined_enum_constant,"There's no constant named 'dashed' in 'BorderStyle'.",lib/features/profile/widgets/photo_management_widget.dart,301,51,1
+expected_token,"Expected to find ';'.",lib/features/legal/pages/privacy_page.dart,280,6,1
+missing_identifier,"Expected an identifier.",lib/features/legal/pages/privacy_page.dart,280,7,1
+unexpected_token,"Unexpected text ';'.",lib/features/legal/pages/privacy_page.dart,280,7,1
+missing_identifier,"Expected an identifier.",lib/features/legal/pages/privacy_page.dart,281,4,1
+expected_token,"Expected to find ';'.",lib/features/legal/pages/privacy_page.dart,280,7,1
+unexpected_token,"Unexpected text ';'.",lib/features/legal/pages/privacy_page.dart,281,4,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/features/main/pages/home_page.dart,189,33,1
+undefined_getter,"The getter 'borderLight' isn't defined for the type 'AppColors'.",lib/features/reports/pages/user_reports_page.dart,168,29,1
+undefined_getter,"The getter 'borderLight' isn't defined for the type 'AppColors'.",lib/features/reports/pages/user_reports_page.dart,219,62,1
+argument_type_not_assignable,"The argument type 'List<BoxShadow> Function({bool highContrast})' can't be assigned to the parameter type 'List<BoxShadow>?'.",lib/shared/widgets/optimized_image.dart,353,15,1
