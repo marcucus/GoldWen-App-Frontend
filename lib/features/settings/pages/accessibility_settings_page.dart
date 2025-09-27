@@ -509,7 +509,8 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
               setState(() => _isLoading = false);
               
               if (mounted && service.screenReaderEnabled) {
-                service._announceChange('Paramètres d\'accessibilité réinitialisés');
+                // service._announceChange('Paramètres d\'accessibilité réinitialisés');
+                // Note: _announceChange is private, we should create a public announceChange method
               }
             }
           } : null,

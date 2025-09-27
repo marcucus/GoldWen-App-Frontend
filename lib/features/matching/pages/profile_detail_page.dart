@@ -406,10 +406,12 @@ class ProfileDetailPage extends StatelessWidget {
   }
 
   void _showReportDialog(BuildContext context, MatchProfile profile) {
-    ReportDialog.show(
-      context,
-      targetUserId: profile.id,
-      targetUserName: profile.name,
+    showDialog(
+      context: context,
+      builder: (context) => ReportDialog(
+        targetUserId: profile.id,
+        targetUserName: profile.name,
+      ),
     );
   }
 }

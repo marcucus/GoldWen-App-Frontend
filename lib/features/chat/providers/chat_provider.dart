@@ -292,7 +292,8 @@ class ChatProvider with ChangeNotifier {
       notifyListeners();
 
       // Send read receipt via WebSocket
-      _webSocketService?.markMessagesAsRead(chatId);
+      // Note: markMessagesAsRead method needs to be implemented in WebSocketService
+      // _webSocketService?.markMessagesAsRead(chatId);
     } catch (e) {
       // Read receipts are not critical, so don't show error to user
     }

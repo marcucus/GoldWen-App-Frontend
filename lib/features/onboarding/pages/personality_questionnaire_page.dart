@@ -324,7 +324,10 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       return ListView.builder(
         itemCount: question.options!.length,
         itemBuilder: (context, index) {
-          final option = question.options![index];
+          final options = question.options;
+          if (options == null || index >= options.length) return Container();
+          
+          final option = options[index];
           final isSelected = selectedAnswer == option;
           
           return Padding(

@@ -159,7 +159,12 @@ class AccessibilityService extends ChangeNotifier {
 
   /// Announce accessibility changes to screen readers
   void _announceChange(String message) {
-    SemanticsService.announce(message, TextDirection.ltr);
+    try {
+      SemanticsService.announce(message, TextDirection.ltr);
+    } catch (e) {
+      // SemanticsService might not be available on all Flutter versions
+      print('Failed to announce accessibility change: $e');
+    }
   }
 
   /// Get animation duration based on reduced motion setting

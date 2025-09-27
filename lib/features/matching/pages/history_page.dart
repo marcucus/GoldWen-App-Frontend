@@ -259,10 +259,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             }
 
             final historyItem = provider.historyItems[index];
-            return DelayedAnimationWidget(
-              delay: index * 50,
-              child: _buildHistoryDateCard(historyItem),
-            );
+            return _buildHistoryDateCard(historyItem);
           },
         ),
       ),
@@ -270,7 +267,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
   }
 
   Widget _buildHistoryDateCard(HistoryItem historyItem) {
-    return ModernCard(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),

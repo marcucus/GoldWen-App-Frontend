@@ -524,7 +524,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                       isSelected ? Colors.white : Colors.white.withOpacity(0.3),
                   width: isSelected ? 2 : 1,
                 ),
-                boxShadow: isSelected ? AppShadows.medium : null,
+                boxShadow: isSelected ? AppShadows.medium() : null,
               ),
               child: Row(
                 children: [

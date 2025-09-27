@@ -95,7 +95,7 @@ class LocalNotificationService {
       'Découvrez vos nouveaux profils compatibles',
       scheduledTZ,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // Repeat daily at same time
       payload: 'daily_selection',
     );
@@ -377,9 +377,5 @@ class LocalNotificationService {
 
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
-  }
-
-  Future<void> cancelAll() async {
-    await _notifications.cancelAll();
   }
 }

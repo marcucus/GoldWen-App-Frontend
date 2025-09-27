@@ -1175,6 +1175,72 @@ class MatchingServiceApi {
         'X-API-Key': apiKey,
       };
 
+  // Helper method to handle HTTP requests with timeout and error handling
+  static Future<http.Response> _makeRequest(
+    Future<http.Response> request, [
+    Duration? timeout,
+  ]) async {
+    try {
+      return await request.timeout(timeout ?? AppConfig.defaultTimeout);
+    } on TimeoutException catch (_) {
+      throw ApiException(
+        statusCode: 0,
+        message:
+            'Request timeout - Please check your internet connection and try again',
+        code: 'TIMEOUT_ERROR',
+      );
+    } catch (e) {
+      throw ApiException(
+        statusCode: 0,
+        message: 'Network error - Unable to connect to server',
+        code: 'NETWORK_ERROR',
+      );
+    }
+  }
+
+  static dynamic _handleResponse(http.Response response) {
+    try {
+      if (AppConfig.isDevelopment) {
+        print('Matching API Response Status: ${response.statusCode}');
+        print('Matching API Response Body: ${response.body}');
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (AppConfig.isDevelopment) {
+          print('Matching API Response successful, returning data: $decoded');
+        }
+        return decoded;
+      } else {
+        String message;
+        String? code;
+        
+        if (decoded is Map<String, dynamic>) {
+          message = decoded['message'] ?? 'Unknown error';
+          code = decoded['code'];
+        } else {
+          message = response.body;
+        }
+
+        throw ApiException(
+          statusCode: response.statusCode,
+          message: message,
+          code: code,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Invalid response format',
+        code: 'INVALID_RESPONSE',
+      );
+    }
+  }
+
   static Future<Map<String, dynamic>> calculateCompatibility({
     required Map<String, dynamic> user1Profile,
     required Map<String, dynamic> user2Profile,

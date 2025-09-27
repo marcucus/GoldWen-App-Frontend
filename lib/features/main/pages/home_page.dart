@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: AppColors.premiumGradient,
-                      boxShadow: AppShadows.medium,
+                      boxShadow: AppShadows.medium(),
                     ),
                     padding: const EdgeInsets.all(3),
                     child: Container(

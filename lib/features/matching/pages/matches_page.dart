@@ -222,10 +222,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
           itemCount: matches.length,
           itemBuilder: (context, index) {
             final match = matches[index];
-            return DelayedAnimationWidget(
-              delay: index * 100,
-              child: _buildMatchCard(match),
-            );
+            return _buildMatchCard(match);
           },
         ),
       ),
@@ -237,7 +234,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
     final isActive = match.status == 'active';
     final isPending = match.status == 'pending';
 
-    return ModernCard(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
@@ -268,7 +265,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
                 child: profile?.photos.isNotEmpty == true
                     ? ClipOval(
                         child: Image.network(
-                          profile!.photos.first,
+                          profile!.photos.first.url,
                           width: 60,
                           height: 60,
                           fit: BoxFit.cover,
@@ -295,7 +292,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      profile?.name ?? 'Utilisateur',
+                      profile?.firstName ?? 'Utilisateur',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
