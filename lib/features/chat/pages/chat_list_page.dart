@@ -243,7 +243,7 @@ class _ChatListPageState extends State<ChatListPage>
                       AppColors.primaryGold,
                     ],
                   ),
-                  boxShadow: AppShadows.soft,
+                  boxShadow: AppShadows.soft(),
                 ),
                 child: const Icon(
                   Icons.person,

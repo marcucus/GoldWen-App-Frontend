@@ -53,6 +53,10 @@ class AppColors {
   
   // Border Colors
   static const Color borderColor = Color(0xFFE8E8E8);
+  static const Color borderLight = Color(0xFFF0F0F0);
+
+  // Background Colors variations
+  static const Color backgroundDark = Color(0xFF1A1A1A);
 
   // High Contrast Colors (WCAG AAA compliant)
   static const Color highContrastPrimary = Color(0xFF8B6914);
@@ -262,12 +266,6 @@ class AppTheme {
         color: highContrast ? AppColors.highContrastBorder : AppColors.dividerLight,
         thickness: highContrast ? 2 : 1,
         space: 20,
-      ),
-
-      // Focus theme for keyboard navigation
-      focusTheme: FocusThemeData(
-        glowColor: primaryColor.withOpacity(0.3),
-        glowRadius: highContrast ? 6 : 4,
       ),
     );
   }

@@ -129,7 +129,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
           border: Border.all(
             color: AppColors.primaryGold.withOpacity(0.3),
             width: 2,
-            style: BorderStyle.dashed,
+            style: BorderStyle.solid,
           ),
         ),
         child: const Center(
@@ -299,7 +299,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
                       ? AppColors.primaryGold
                       : AppColors.dividerLight,
                   width: isReceiving ? 2 : 1,
-                  style: isReceiving ? BorderStyle.dashed : BorderStyle.solid,
+                  style: BorderStyle.solid,
                 ),
               ),
               child: Column(

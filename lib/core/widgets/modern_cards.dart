@@ -34,7 +34,7 @@ class GlassCard extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: shadows ?? AppShadows.soft,
+        boxShadow: shadows ?? AppShadows.soft(),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -86,7 +86,7 @@ class PremiumCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: gradient ?? AppColors.premiumGradient,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: AppShadows.medium,
+        boxShadow: AppShadows.medium(),
         border: Border.all(
           color: AppColors.primaryGold.withOpacity(0.3),
           width: 1.5,
@@ -204,7 +204,7 @@ class ProfileCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: AppColors.premiumGradient,
-                  boxShadow: AppShadows.soft,
+                  boxShadow: AppShadows.soft(),
                 ),
                 padding: const EdgeInsets.all(2),
                 child: Container(
@@ -322,7 +322,7 @@ class PremiumButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: gradient ?? AppColors.premiumGradient,
           borderRadius: BorderRadius.circular(AppBorderRadius.large),
-          boxShadow: onPressed != null ? AppShadows.medium : null,
+          boxShadow: onPressed != null ? AppShadows.medium() : null,
         ),
         child: Material(
           color: Colors.transparent,

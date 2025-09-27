@@ -450,7 +450,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 // Optimized profile image
                 Positioned.fill(
                   child: OptimizedImage(
-                    imageUrl: profile.photos?.isNotEmpty == true ? profile.photos!.first : null,
+                    imageUrl: profile.photos?.isNotEmpty == true ? profile.photos!.first.url : null,
                     semanticLabel: 'Photo de profil de ${profile.firstName ?? 'cette personne'}',
                     fit: BoxFit.cover,
                     lazyLoad: true,
@@ -1309,109 +1309,5 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         );
       },
     );
-  }
-
-  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
-    // Check if user can select more profiles
-    if (!matchingProvider.canSelectMore) {
-      if (!subscriptionProvider.hasActiveSubscription) {
-        // Show upgrade dialog for free users
-        showDialog(
-          context: context,
-          builder: (context) => SubscriptionLimitReachedDialog(
-            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
-            maxSelections: matchingProvider.maxSelections,
-          ),
-        );
-        return;
-      } else {
-        // Premium user reached their limit
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vous avez atteint votre limite quotidienne de 3 sélections'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-    }
-    
-    final result = await matchingProvider.selectProfile(
-      profile.id, 
-      subscriptionProvider: subscriptionProvider,
-    );
-    
-    if (result != null) {
-      final isMatch = result['isMatch'] ?? false;
-      
-      if (isMatch) {
-        // Show match acceptance dialog
-        final matchId = result['matchId'] as String?;
-        final matchedProfile = result['profile'] as Profile?;
-        
-        if (matchId != null && matchedProfile != null && mounted) {
-          await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => MatchAcceptanceDialog(
-              matchId: matchId,
-              otherUser: matchedProfile,
-              onAccepted: () {
-                // Chat will be created and user navigated to it
-              },
-              onDeclined: () {
-                // Match declined, show appropriate feedback
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Match décliné'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              },
-            ),
-          );
-        }
-      } else {
-        // No match, show regular success message
-        final remaining = matchingProvider.remainingSelections;
-        String message;
-        
-        if (remaining <= 0 || matchingProvider.isSelectionComplete) {
-          message = '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
-        } else {
-          message = '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
-        }
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } else {
-      final errorMessage = matchingProvider.error ?? 'Erreur lors de la sélection';
-      
-      // Check if error suggests upgrade
-      if (!subscriptionProvider.hasActiveSubscription && 
-          errorMessage.contains('limite')) {
-        showDialog(
-          context: context,
-          builder: (context) => SubscriptionLimitReachedDialog(
-            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
-            maxSelections: matchingProvider.maxSelections,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
   }
 }

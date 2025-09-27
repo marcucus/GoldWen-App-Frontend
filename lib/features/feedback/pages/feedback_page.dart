@@ -390,7 +390,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
         ),
-        alignedLabelStyle: false,
       ),
       maxLines: 6,
       maxLength: 1000,

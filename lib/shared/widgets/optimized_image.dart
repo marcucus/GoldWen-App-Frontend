@@ -351,7 +351,7 @@ class ProfileImage extends StatelessWidget {
       heroTag: enableHero ? 'profile_$imageUrl' : null,
       semanticLabel: name != null ? 'Photo de profil de $name' : 'Photo de profil',
       borderRadius: BorderRadius.circular(size / 2),
-      shadows: AppShadows.soft,
+      shadows: AppShadows.soft(),
       onTap: onTap,
       placeholder: Container(
         width: size,
