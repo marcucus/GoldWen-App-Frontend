@@ -92,7 +92,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       BottomNavigationItem(
         icon: Icons.star_outline,
         activeIcon: Icons.star,
-        label: 'Premium',
+        label: 'GoldWen+',
       ),
     ];
   }

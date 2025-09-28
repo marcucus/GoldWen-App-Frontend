@@ -46,15 +46,26 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
   }
 
   void _initializeAnimations() {
+    // Use safe duration fallback in case AccessibilityService isn't available
+    Duration getAnimationDuration(Duration defaultDuration) {
+      try {
+        final accessibilityService = context.read<AccessibilityService>();
+        return accessibilityService.getAnimationDuration(defaultDuration);
+      } catch (e) {
+        // Fallback to default duration if service unavailable
+        return defaultDuration;
+      }
+    }
+    
     // Background glass effect animation
     _backgroundController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: getAnimationDuration(const Duration(milliseconds: 800)),
       vsync: this,
     );
     
     // Selection animation
     _selectionController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
     );
 
@@ -67,8 +78,8 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
     ));
 
     _backgroundOpacityAnimation = Tween<double>(
-      begin: 0.7,
-      end: 0.9,
+      begin: 0.85,
+      end: 0.95,
     ).animate(CurvedAnimation(
       parent: _backgroundController,
       curve: Curves.easeInOut,
@@ -86,7 +97,7 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
     _iconControllers = List.generate(
       widget.items.length,
       (index) => AnimationController(
-        duration: const Duration(milliseconds: 300),
+        duration: getAnimationDuration(const Duration(milliseconds: 300)),
         vsync: this,
       ),
     );
@@ -111,8 +122,8 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
             )))
         .toList();
 
-    // Start entrance animation
-    Future.delayed(const Duration(milliseconds: 200), () {
+    // Start entrance animation immediately to avoid beige square
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _backgroundController.forward();
       }
@@ -132,10 +143,18 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
   void _onItemTap(int index) {
     if (index == widget.currentIndex) return;
 
-    final accessibilityService = context.read<AccessibilityService>();
+    // Get accessibility service safely
+    bool reducedMotion = false;
+    try {
+      final accessibilityService = context.read<AccessibilityService>();
+      reducedMotion = accessibilityService.reducedMotion;
+    } catch (e) {
+      // Use default value if service unavailable
+      reducedMotion = false;
+    }
     
     // Animate selection change
-    if (!accessibilityService.reducedMotion) {
+    if (!reducedMotion) {
       _selectionController.forward().then((_) {
         _selectionController.reverse();
       });
@@ -155,7 +174,16 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accessibilityService = context.watch<AccessibilityService>();
+    
+    // Get accessibility service safely
+    bool reducedMotion = false;
+    try {
+      final accessibilityService = context.watch<AccessibilityService>();
+      reducedMotion = accessibilityService.reducedMotion;
+    } catch (e) {
+      // Use default value if service unavailable
+      reducedMotion = false;
+    }
     
     return Semantics(
       label: 'Barre de navigation principale',
@@ -166,32 +194,38 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
             height: widget.height + MediaQuery.of(context).padding.bottom,
             child: Stack(
               children: [
-                // Glass morphism background
+                // Glass morphism background with solid fallback
                 Positioned.fill(
-                  child: ClipRRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(
-                        sigmaX: _backgroundBlurAnimation.value,
-                        sigmaY: _backgroundBlurAnimation.value,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppColors.backgroundWhite.withOpacity(
-                                _backgroundOpacityAnimation.value * 0.8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // Solid background as fallback
+                      color: AppColors.backgroundWhite,
+                    ),
+                    child: ClipRRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: reducedMotion ? 0 : _backgroundBlurAnimation.value,
+                          sigmaY: reducedMotion ? 0 : _backgroundBlurAnimation.value,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                AppColors.backgroundWhite.withOpacity(
+                                  _backgroundOpacityAnimation.value * 0.85,
+                                ),
+                                AppColors.backgroundWhite.withOpacity(
+                                  _backgroundOpacityAnimation.value * 0.95,
+                                ),
+                              ],
+                            ),
+                            border: Border(
+                              top: BorderSide(
+                                color: AppColors.primaryGold.withOpacity(0.3),
+                                width: 1.5,
                               ),
-                              AppColors.backgroundWhite.withOpacity(
-                                _backgroundOpacityAnimation.value * 0.9,
-                              ),
-                            ],
-                          ),
-                          border: Border(
-                            top: BorderSide(
-                              color: AppColors.primaryGold.withOpacity(0.3),
-                              width: 1.5,
                             ),
                           ),
                         ),
@@ -219,7 +253,7 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
                             index: index,
                             item: item,
                             isSelected: isSelected,
-                            accessibilityService: accessibilityService,
+                            reducedMotion: reducedMotion,
                           ),
                         );
                       }).toList(),
@@ -238,7 +272,7 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
     required int index,
     required BottomNavigationItem item,
     required bool isSelected,
-    required AccessibilityService accessibilityService,
+    required bool reducedMotion,
   }) {
     return Semantics(
       label: '${item.label}, onglet ${index + 1} sur ${widget.items.length}',
@@ -252,13 +286,13 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
         ]),
         builder: (context, child) {
           return Transform.scale(
-            scale: accessibilityService.reducedMotion 
+            scale: reducedMotion 
                 ? 1.0 
                 : isSelected 
                     ? _selectionScaleAnimation.value 
                     : _iconScaleAnimations[index].value,
             child: Transform.rotate(
-              angle: accessibilityService.reducedMotion 
+              angle: reducedMotion 
                   ? 0.0 
                   : _iconRotationAnimations[index].value,
               child: AnimatedPressable(
@@ -350,9 +384,6 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
             ),
           );
         },
-      ),
-    );
-  }
       ),
     );
   }
