@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../../core/services/accessibility_service.dart';
 import '../../core/theme/app_theme.dart';
 import 'animated_pressable.dart';
 
-/// Enhanced bottom navigation bar with smooth transitions and micro-interactions
+/// Modern bottom navigation bar with glass morphism and premium animations
 class EnhancedBottomNavigation extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -28,57 +29,100 @@ class EnhancedBottomNavigation extends StatefulWidget {
 
 class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
     with TickerProviderStateMixin {
-  late AnimationController _indicatorController;
-  late Animation<double> _indicatorAnimation;
+  late AnimationController _backgroundController;
+  late AnimationController _selectionController;
+  late Animation<double> _backgroundBlurAnimation;
+  late Animation<double> _backgroundOpacityAnimation;
+  late Animation<double> _selectionScaleAnimation;
   
   List<AnimationController> _iconControllers = [];
-  List<Animation<double>> _iconAnimations = [];
+  List<Animation<double>> _iconScaleAnimations = [];
+  List<Animation<double>> _iconRotationAnimations = [];
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
+  }
+
+  void _initializeAnimations() {
+    // Background glass effect animation
+    _backgroundController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
     
-    final accessibilityService = context.read<AccessibilityService>();
-    
-    _indicatorController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+    // Selection animation
+    _selectionController = AnimationController(
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
-    _indicatorAnimation = CurvedAnimation(
-      parent: _indicatorController,
+    _backgroundBlurAnimation = Tween<double>(
+      begin: 8.0,
+      end: 15.0,
+    ).animate(CurvedAnimation(
+      parent: _backgroundController,
+      curve: Curves.easeInOut,
+    ));
+
+    _backgroundOpacityAnimation = Tween<double>(
+      begin: 0.7,
+      end: 0.9,
+    ).animate(CurvedAnimation(
+      parent: _backgroundController,
+      curve: Curves.easeInOut,
+    ));
+
+    _selectionScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.1,
+    ).animate(CurvedAnimation(
+      parent: _selectionController,
       curve: Curves.elasticOut,
+    ));
+
+    // Initialize per-item animations
+    _iconControllers = List.generate(
+      widget.items.length,
+      (index) => AnimationController(
+        duration: const Duration(milliseconds: 300),
+        vsync: this,
+      ),
     );
 
-    // Initialize icon controllers
-    for (int i = 0; i < widget.items.length; i++) {
-      final controller = AnimationController(
-        duration: accessibilityService.getAnimationDuration(
-          const Duration(milliseconds: 200)
-        ),
-        vsync: this,
-      );
-      
-      final animation = Tween<double>(
-        begin: 1.0,
-        end: 1.2,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeOut,
-      ));
+    _iconScaleAnimations = _iconControllers
+        .map((controller) => Tween<double>(
+              begin: 1.0,
+              end: 1.2,
+            ).animate(CurvedAnimation(
+              parent: controller,
+              curve: Curves.elasticOut,
+            )))
+        .toList();
 
-      _iconControllers.add(controller);
-      _iconAnimations.add(animation);
-    }
+    _iconRotationAnimations = _iconControllers
+        .map((controller) => Tween<double>(
+              begin: 0.0,
+              end: 0.1,
+            ).animate(CurvedAnimation(
+              parent: controller,
+              curve: Curves.easeInOut,
+            )))
+        .toList();
 
-    _indicatorController.forward();
+    // Start entrance animation
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        _backgroundController.forward();
+      }
+    });
   }
 
   @override
   void dispose() {
-    _indicatorController.dispose();
+    _backgroundController.dispose();
+    _selectionController.dispose();
     for (final controller in _iconControllers) {
       controller.dispose();
     }
@@ -90,15 +134,20 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
 
     final accessibilityService = context.read<AccessibilityService>();
     
-    // Animate icon
+    // Animate selection change
     if (!accessibilityService.reducedMotion) {
+      _selectionController.forward().then((_) {
+        _selectionController.reverse();
+      });
+      
+      // Animate icon
       _iconControllers[index].forward().then((_) {
         _iconControllers[index].reverse();
       });
     }
     
     // Haptic feedback
-    HapticFeedback.selectionClick();
+    HapticFeedback.lightImpact();
     
     widget.onTap(index);
   }
@@ -108,100 +157,202 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
     
-    return Container(
-      height: widget.height,
-      decoration: BoxDecoration(
-        color: widget.backgroundColor ?? AppColors.backgroundWhite,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: widget.items.asMap().entries.map((entry) {
-            final int index = entry.key;
-            final BottomNavigationItem item = entry.value;
-            final bool isSelected = index == widget.currentIndex;
-
-            return Expanded(
-              child: AnimatedBuilder(
-                animation: _iconAnimations[index],
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: accessibilityService.reducedMotion 
-                        ? 1.0 
-                        : _iconAnimations[index].value,
-                    child: AnimatedPressable(
-                      onPressed: () => _onItemTap(index),
-                      enableGlowEffect: isSelected,
-                      glowColor: AppColors.primaryGold,
+    return Semantics(
+      label: 'Barre de navigation principale',
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_backgroundController, _selectionController]),
+        builder: (context, child) {
+          return Container(
+            height: widget.height + MediaQuery.of(context).padding.bottom,
+            child: Stack(
+              children: [
+                // Glass morphism background
+                Positioned.fill(
+                  child: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: _backgroundBlurAnimation.value,
+                        sigmaY: _backgroundBlurAnimation.value,
+                      ),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Icon with indicator
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Background indicator
-                                if (isSelected)
-                                  AnimatedBuilder(
-                                    animation: _indicatorAnimation,
-                                    builder: (context, child) {
-                                      return Container(
-                                        width: 40 * _indicatorAnimation.value,
-                                        height: 40 * _indicatorAnimation.value,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryGold.withOpacity(0.1),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                // Icon
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    isSelected ? item.activeIcon : item.icon,
-                                    color: isSelected 
-                                        ? AppColors.primaryGold 
-                                        : AppColors.textSecondary,
-                                    size: 24,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            // Label
-                            const SizedBox(height: 4),
-                            AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 200),
-                              style: theme.textTheme.labelSmall!.copyWith(
-                                color: isSelected 
-                                    ? AppColors.primaryGold 
-                                    : AppColors.textSecondary,
-                                fontWeight: isSelected 
-                                    ? FontWeight.w600 
-                                    : FontWeight.normal,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.backgroundWhite.withOpacity(
+                                _backgroundOpacityAnimation.value * 0.8,
                               ),
-                              child: Text(item.label),
+                              AppColors.backgroundWhite.withOpacity(
+                                _backgroundOpacityAnimation.value * 0.9,
+                              ),
+                            ],
+                          ),
+                          border: Border(
+                            top: BorderSide(
+                              color: AppColors.primaryGold.withOpacity(0.3),
+                              width: 1.5,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
+
+                // Content
+                SafeArea(
+                  child: Container(
+                    height: widget.height,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: Row(
+                      children: widget.items.asMap().entries.map((entry) {
+                        final int index = entry.key;
+                        final BottomNavigationItem item = entry.value;
+                        final bool isSelected = index == widget.currentIndex;
+
+                        return Expanded(
+                          child: _buildNavItem(
+                            index: index,
+                            item: item,
+                            isSelected: isSelected,
+                            accessibilityService: accessibilityService,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required BottomNavigationItem item,
+    required bool isSelected,
+    required AccessibilityService accessibilityService,
+  }) {
+    return Semantics(
+      label: '${item.label}, onglet ${index + 1} sur ${widget.items.length}',
+      hint: isSelected ? 'Sélectionné' : 'Appuyer pour naviguer vers ${item.label}',
+      button: true,
+      selected: isSelected,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([
+          _iconScaleAnimations[index],
+          _iconRotationAnimations[index],
+        ]),
+        builder: (context, child) {
+          return Transform.scale(
+            scale: accessibilityService.reducedMotion 
+                ? 1.0 
+                : isSelected 
+                    ? _selectionScaleAnimation.value 
+                    : _iconScaleAnimations[index].value,
+            child: Transform.rotate(
+              angle: accessibilityService.reducedMotion 
+                  ? 0.0 
+                  : _iconRotationAnimations[index].value,
+              child: AnimatedPressable(
+                onPressed: () => _onItemTap(index),
+                enableGlowEffect: isSelected,
+                glowColor: AppColors.primaryGold,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon with modern background
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Selection background with glass effect
+                          if (isSelected)
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.primaryGold.withOpacity(0.2),
+                                    AppColors.primaryGold.withOpacity(0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.primaryGold.withOpacity(0.4),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primaryGold.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Icon
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              color: isSelected 
+                                  ? AppColors.primaryGold 
+                                  : AppColors.textSecondary,
+                              size: 24,
+                              semanticLabel: '${item.label} icon',
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: AppSpacing.xs),
+                      
+                      // Label with animation
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                          color: isSelected 
+                              ? AppColors.primaryGold 
+                              : AppColors.textSecondary,
+                          fontWeight: isSelected 
+                              ? FontWeight.w600 
+                              : FontWeight.normal,
+                          fontSize: isSelected ? 11 : 10,
+                        ),
+                        child: Text(
+                          item.label,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        },
+      ),
+    );
+  }
       ),
     );
   }
