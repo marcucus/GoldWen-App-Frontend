@@ -30,6 +30,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Ma localisation'),
         leading: IconButton(

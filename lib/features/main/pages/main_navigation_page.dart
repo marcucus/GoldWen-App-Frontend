@@ -183,13 +183,11 @@ class _MainNavigationPageState extends State<MainNavigationPage>
             position: _slideAnimation,
             child: Transform.scale(
               scale: _scaleAnimation.value,
-              child: Container(
-                margin: const EdgeInsets.all(16.0),
-                child: EnhancedBottomNavigation(
-                  currentIndex: _currentIndex,
-                  onTap: _navigateToTab,
-                  items: _navigationItems,
-                ),
+              child: EnhancedBottomNavigation(
+                currentIndex: _currentIndex,
+                onTap: _navigateToTab,
+                items: _navigationItems,
+                height: 70.0,
               ),
             ),
           );

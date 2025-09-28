@@ -138,6 +138,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Étape ${_currentPage + 1}/5'),
         leading: _currentPage > 0
@@ -160,6 +161,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           Expanded(
             child: PageView(
               controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
               onPageChanged: (page) {
                 setState(() {
                   _currentPage = page;
@@ -180,7 +182,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildBasicInfoPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [

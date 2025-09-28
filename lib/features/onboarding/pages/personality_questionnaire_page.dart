@@ -223,6 +223,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       );
     }
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Question ${_currentPage + 1}/${_questions.length}'),
         leading: _currentPage > 0
@@ -244,6 +245,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           Expanded(
             child: PageView.builder(
               controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
               onPageChanged: (page) {
                 setState(() {
                   _currentPage = page;
@@ -263,7 +265,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   Widget _buildQuestionPage(PersonalityQuestion question) {
     final selectedAnswer = _answers[question.id];
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
@@ -279,9 +281,9 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           const SizedBox(height: AppSpacing.xxl),
           
           // Options - render based on question type
-          Expanded(
-            child: _buildQuestionOptions(question, selectedAnswer),
-          ),
+          _buildQuestionOptions(question, selectedAnswer),
+          
+          const SizedBox(height: AppSpacing.xl),
           
           // Navigation buttons
           Row(
