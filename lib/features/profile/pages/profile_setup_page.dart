@@ -661,29 +661,75 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _nextPage() async {
     if (_currentPage < 4) {
-      // If we're moving to the validation page, load completion status
-      if (_currentPage == 2) { // Moving from prompts to validation
-        final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-        try {
-          // Save current data first
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      
+      // Save basic info when leaving basic info page
+      if (_currentPage == 0) { // Moving from basic info to photos
+        if (_birthDate != null) {
           profileProvider.setBasicInfo(
             _nameController.text.trim(),
             _calculateAge(_birthDate!),
             _bioController.text.trim(),
             birthDate: _birthDate,
           );
+        }
+      }
+      
+      // Save prompt answers when leaving prompts page
+      if (_currentPage == 2) { // Moving from prompts to validation
+        try {
+          // Show loading indicator
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+
+          // Save current data to provider first (if not already saved)
+          if (_birthDate != null) {
+            profileProvider.setBasicInfo(
+              _nameController.text.trim(),
+              _calculateAge(_birthDate!),
+              _bioController.text.trim(),
+              birthDate: _birthDate,
+            );
+          }
           
-          // Set prompt answers
+          // Set prompt answers in provider
           for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
             if (_promptControllers[i].text.isNotEmpty) {
               profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text.trim());
             }
           }
           
-          // Load completion status
+          // Persist profile data to backend
+          await profileProvider.saveProfile();
+          
+          // Persist prompt answers to backend
+          await profileProvider.submitPromptAnswers();
+          
+          // Load updated completion status from backend
           await profileProvider.loadProfileCompletion();
+          
+          // Hide loading indicator
+          if (mounted) Navigator.of(context).pop();
         } catch (e) {
-          print('Error loading profile completion: $e');
+          // Hide loading indicator
+          if (mounted) Navigator.of(context).pop();
+          
+          print('Error saving profile data: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erreur lors de la sauvegarde: $e'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+          return; // Don't proceed to next page if save failed
         }
       }
       
