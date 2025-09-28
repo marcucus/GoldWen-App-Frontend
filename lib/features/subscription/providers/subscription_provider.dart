@@ -14,7 +14,8 @@ class SubscriptionProvider with ChangeNotifier {
   String? _error;
 
   List<SubscriptionPlan> get plans => _plans;
-  List<SubscriptionPlan> get activePlans => _plans.where((plan) => plan.isActive).toList();
+  List<SubscriptionPlan> get activePlans =>
+      _plans.where((plan) => plan.active).toList();
   List<Package> get revenueCatPackages => _revenueCatPackages;
   Subscription? get currentSubscription => _currentSubscription;
   SubscriptionUsage? get usage => _usage;
@@ -22,12 +23,19 @@ class SubscriptionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  bool get hasActiveSubscription => _customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!);
+  bool get hasActiveSubscription =>
+      _customerInfo != null &&
+      RevenueCatService.hasActiveSubscription(_customerInfo!);
   bool get hasExpiredSubscription => _currentSubscription?.isExpired ?? false;
-  bool get willRenew => _customerInfo != null && RevenueCatService.willRenew(_customerInfo!);
+  bool get willRenew =>
+      _customerInfo != null && RevenueCatService.willRenew(_customerInfo!);
 
-  String? get currentPlanName => _customerInfo != null ? RevenueCatService.getProductIdentifier(_customerInfo!) : null;
-  DateTime? get nextRenewalDate => _customerInfo != null ? RevenueCatService.getExpirationDate(_customerInfo!) : null;
+  String? get currentPlanName => _customerInfo != null
+      ? RevenueCatService.getProductIdentifier(_customerInfo!)
+      : null;
+  DateTime? get nextRenewalDate => _customerInfo != null
+      ? RevenueCatService.getExpirationDate(_customerInfo!)
+      : null;
   int? get daysUntilExpiry {
     final expiryDate = nextRenewalDate;
     if (expiryDate == null) return null;
@@ -70,24 +78,25 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       // Initialize RevenueCat if not already initialized
       await RevenueCatService.initialize();
-      
+
       // Load packages from RevenueCat
       _revenueCatPackages = await RevenueCatService.getAvailablePackages();
-      
+
       // Convert packages to subscription plans
       _plans = _revenueCatPackages
-          .map((package) => RevenueCatService.packageToSubscriptionPlan(package))
+          .map(
+              (package) => RevenueCatService.packageToSubscriptionPlan(package))
           .toList();
-      
+
       // Also try to load plans from API as fallback
       try {
         final response = await ApiService.getSubscriptionPlans();
         final plansData = response['data'] ?? response['plans'] ?? [];
-        
+
         final apiPlans = (plansData as List)
             .map((p) => SubscriptionPlan.fromJson(p as Map<String, dynamic>))
             .toList();
-        
+
         // Merge or prioritize RevenueCat plans
         if (_plans.isEmpty && apiPlans.isNotEmpty) {
           _plans = apiPlans;
@@ -95,16 +104,16 @@ class SubscriptionProvider with ChangeNotifier {
       } catch (apiError) {
         print('API plans loading failed, using RevenueCat only: $apiError');
       }
-      
+
       // If both fail, create mock plans for development
       if (_plans.isEmpty) {
         _createMockPlans();
       }
-      
+
       _error = null;
     } catch (e) {
       // If all loading methods fail, provide mock data
-      if (e.toString().contains('NetworkException') || 
+      if (e.toString().contains('NetworkException') ||
           e.toString().contains('ECONNREFUSED') ||
           e.toString().contains('Failed to connect')) {
         _createMockPlans();
@@ -134,7 +143,7 @@ class SubscriptionProvider with ChangeNotifier {
           'Profil prioritaire',
         ],
         metadata: {'popular': false},
-        isActive: true,
+        active: true,
       ),
       SubscriptionPlan(
         id: 'goldwen_quarterly',
@@ -146,13 +155,13 @@ class SubscriptionProvider with ChangeNotifier {
         intervalCount: 3,
         features: [
           '3 sélections par jour',
-          'Chat illimité', 
+          'Chat illimité',
           'Voir qui vous a sélectionné',
           'Profil prioritaire',
           '🔥 Plan le plus populaire',
         ],
         metadata: {'popular': true},
-        isActive: true,
+        active: true,
       ),
       SubscriptionPlan(
         id: 'goldwen_yearly',
@@ -165,12 +174,12 @@ class SubscriptionProvider with ChangeNotifier {
         features: [
           '3 sélections par jour',
           'Chat illimité',
-          'Voir qui vous a sélectionné', 
+          'Voir qui vous a sélectionné',
           'Profil prioritaire',
           'Meilleure valeur',
         ],
         metadata: {'popular': false},
-        isActive: true,
+        active: true,
       ),
     ];
   }
@@ -179,17 +188,17 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       // Load from RevenueCat
       _customerInfo = await RevenueCatService.getCurrentCustomerInfo();
-      
+
       // Load from API
       final response = await ApiService.getCurrentSubscription();
       final subscriptionData = response['data'] ?? response;
-      
+
       if (subscriptionData != null) {
         _currentSubscription = Subscription.fromJson(subscriptionData);
       } else {
         _currentSubscription = null;
       }
-      
+
       _error = null;
       notifyListeners();
     } catch (e) {
@@ -207,7 +216,7 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       final response = await ApiService.getSubscriptionUsage();
       final usageData = response['data'] ?? response;
-      
+
       _usage = SubscriptionUsage.fromJson(usageData);
       _error = null;
       notifyListeners();
@@ -234,40 +243,43 @@ class SubscriptionProvider with ChangeNotifier {
       final package = _revenueCatPackages
           .where((p) => p.storeProduct.identifier == planId)
           .firstOrNull;
-      
+
       if (package != null) {
         // Use RevenueCat for purchase
         _customerInfo = await RevenueCatService.purchasePackage(package);
-        
-        if (_customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!)) {
+
+        if (_customerInfo != null &&
+            RevenueCatService.hasActiveSubscription(_customerInfo!)) {
           // Verify with backend
-          final verified = await RevenueCatService.verifySubscriptionWithBackend(_customerInfo!);
-          
+          final verified =
+              await RevenueCatService.verifySubscriptionWithBackend(
+                  _customerInfo!);
+
           if (verified) {
             // Reload data
             await loadCurrentSubscription();
             await loadSubscriptionUsage();
-            
+
             _error = null;
             _setLoaded();
             return true;
           }
         }
       }
-      
+
       // Fallback to API purchase
       final response = await ApiService.purchaseSubscription(
         plan: planId,
         platform: platform,
         receiptData: receiptData,
       );
-      
+
       final subscriptionData = response['data'] ?? response;
       _currentSubscription = Subscription.fromJson(subscriptionData);
-      
+
       // Reload usage data
       await loadSubscriptionUsage();
-      
+
       _error = null;
       _setLoaded();
       return true;
@@ -286,13 +298,13 @@ class SubscriptionProvider with ChangeNotifier {
         receiptData: receiptData,
         platform: platform,
       );
-      
+
       final subscriptionData = response['data'] ?? response;
       if (subscriptionData != null) {
         _currentSubscription = Subscription.fromJson(subscriptionData);
         await loadSubscriptionUsage();
       }
-      
+
       _error = null;
       notifyListeners();
       return true;
@@ -307,10 +319,10 @@ class SubscriptionProvider with ChangeNotifier {
 
     try {
       await ApiService.cancelSubscription();
-      
+
       // Reload current subscription to get updated status
       await loadCurrentSubscription();
-      
+
       _error = null;
       _setLoaded();
       return true;
@@ -326,11 +338,13 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       // Use RevenueCat to restore purchases
       _customerInfo = await RevenueCatService.restorePurchases();
-      
-      if (_customerInfo != null && RevenueCatService.hasActiveSubscription(_customerInfo!)) {
+
+      if (_customerInfo != null &&
+          RevenueCatService.hasActiveSubscription(_customerInfo!)) {
         // Verify with backend
-        final verified = await RevenueCatService.verifySubscriptionWithBackend(_customerInfo!);
-        
+        final verified = await RevenueCatService.verifySubscriptionWithBackend(
+            _customerInfo!);
+
         if (verified) {
           await loadCurrentSubscription();
           await loadSubscriptionUsage();
@@ -339,16 +353,16 @@ class SubscriptionProvider with ChangeNotifier {
           return true;
         }
       }
-      
+
       // Fallback to API restore
       final response = await ApiService.restoreSubscription();
-      
+
       final subscriptionData = response['data'] ?? response;
       if (subscriptionData != null) {
         _currentSubscription = Subscription.fromJson(subscriptionData);
         await loadSubscriptionUsage();
       }
-      
+
       _error = null;
       _setLoaded();
       return true;
@@ -379,9 +393,9 @@ class SubscriptionProvider with ChangeNotifier {
     }
   }
 
-  List<SubscriptionPlan> get activePlans {
-    return _plans.where((plan) => plan.active).toList();
-  }
+  // List<SubscriptionPlan> get activePlans {
+  //   return _plans.where((plan) => plan.active).toList();
+  // }
 
   Future<void> refreshAll() async {
     await Future.wait([
@@ -405,13 +419,13 @@ class SubscriptionProvider with ChangeNotifier {
 
   void _handleError(dynamic error, String fallbackMessage) {
     _isLoading = false;
-    
+
     if (error is ApiException) {
       _error = error.message;
     } else {
       _error = fallbackMessage;
     }
-    
+
     notifyListeners();
   }
 }
