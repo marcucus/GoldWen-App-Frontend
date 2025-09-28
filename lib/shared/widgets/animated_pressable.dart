@@ -48,25 +48,28 @@ class _AnimatedPressableState extends State<AnimatedPressable>
   void initState() {
     super.initState();
     
-    // Initialize controllers based on accessibility settings
-    final accessibilityService = context.read<AccessibilityService>();
+    // Initialize controllers with safe accessibility fallback
+    Duration getAnimationDuration(Duration defaultDuration) {
+      try {
+        final accessibilityService = context.read<AccessibilityService>();
+        return accessibilityService.getAnimationDuration(defaultDuration);
+      } catch (e) {
+        return defaultDuration;
+      }
+    }
     
     _scaleController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(widget.duration),
+      duration: getAnimationDuration(widget.duration),
       vsync: this,
     );
     
     _glowController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
     
     _rippleController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 400)
-      ),
+      duration: getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
     );
 
@@ -109,13 +112,20 @@ class _AnimatedPressableState extends State<AnimatedPressable>
     
     setState(() => _isPressed = true);
     
-    final accessibilityService = context.read<AccessibilityService>();
+    // Safe accessibility service access
+    bool reducedMotion = false;
+    try {
+      final accessibilityService = context.read<AccessibilityService>();
+      reducedMotion = accessibilityService.reducedMotion;
+    } catch (e) {
+      reducedMotion = false;
+    }
     
-    if (widget.enableScaleAnimation && !accessibilityService.reducedMotion) {
+    if (widget.enableScaleAnimation && !reducedMotion) {
       _scaleController.forward();
     }
     
-    if (widget.enableGlowEffect && !accessibilityService.reducedMotion) {
+    if (widget.enableGlowEffect && !reducedMotion) {
       _glowController.forward();
     }
   }
@@ -131,8 +141,15 @@ class _AnimatedPressableState extends State<AnimatedPressable>
     }
     
     // Trigger ripple effect
-    final accessibilityService = context.read<AccessibilityService>();
-    if (!accessibilityService.reducedMotion) {
+    bool reducedMotion = false;
+    try {
+      final accessibilityService = context.read<AccessibilityService>();
+      reducedMotion = accessibilityService.reducedMotion;
+    } catch (e) {
+      reducedMotion = false;
+    }
+    
+    if (!reducedMotion) {
       _rippleController.reset();
       _rippleController.forward();
     }
@@ -151,7 +168,14 @@ class _AnimatedPressableState extends State<AnimatedPressable>
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityService = context.watch<AccessibilityService>();
+    // Safe accessibility service access
+    bool reducedMotion = false;
+    try {
+      final accessibilityService = context.watch<AccessibilityService>();
+      reducedMotion = accessibilityService.reducedMotion;
+    } catch (e) {
+      reducedMotion = false;
+    }
     
     return GestureDetector(
       onTapDown: _onTapDown,
@@ -168,7 +192,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
           Widget content = widget.child;
           
           // Apply scale animation
-          if (widget.enableScaleAnimation && !accessibilityService.reducedMotion) {
+          if (widget.enableScaleAnimation && !reducedMotion) {
             content = Transform.scale(
               scale: _scaleAnimation.value,
               child: content,
@@ -176,7 +200,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
           }
           
           // Apply glow effect
-          if (widget.enableGlowEffect && !accessibilityService.reducedMotion) {
+          if (widget.enableGlowEffect && !reducedMotion) {
             content = Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -193,7 +217,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
           }
           
           // Apply ripple effect
-          if (_rippleAnimation.value > 0 && !accessibilityService.reducedMotion) {
+          if (_rippleAnimation.value > 0 && !reducedMotion) {
             content = Stack(
               alignment: Alignment.center,
               children: [
