@@ -24,6 +24,7 @@ import 'features/notifications/providers/notification_provider.dart';
 import 'features/admin/providers/admin_auth_provider.dart';
 import 'features/admin/providers/admin_provider.dart';
 import 'features/feedback/providers/feedback_provider.dart';
+import 'core/config/app_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,7 @@ void main() async {
   } catch (e) {
     print('Background message handler not set: $e');
   }
+  AppConfig.debugPrintApiUrl(); // Ajoute cette ligne
 
   runApp(const GoldWenApp());
 }
@@ -54,9 +56,11 @@ class GoldWenApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // Core services
-        ChangeNotifierProvider(create: (_) => AccessibilityService()..initialize()),
-        ChangeNotifierProvider(create: (_) => PerformanceCacheService()..initialize()),
-        
+        ChangeNotifierProvider(
+            create: (_) => AccessibilityService()..initialize()),
+        ChangeNotifierProvider(
+            create: (_) => PerformanceCacheService()..initialize()),
+
         // App providers
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
@@ -101,7 +105,8 @@ class GoldWenApp extends StatelessWidget {
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(accessibilityService.textScaleFactor),
+                  textScaler:
+                      TextScaler.linear(accessibilityService.textScaleFactor),
                 ),
                 child: child!,
               );
