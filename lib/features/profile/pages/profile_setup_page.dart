@@ -29,7 +29,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers =
-      List.generate(10, (index) => TextEditingController()); // Changed from 3 to 10
+      List.generate(3, (index) => TextEditingController()); // Should be 3 prompts as per requirements
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
@@ -89,15 +89,15 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.loadPrompts();
 
-      // Select all 10 prompts automatically
-      if (profileProvider.availablePrompts.length >= 10) {
+      // Select first 3 prompts automatically
+      if (profileProvider.availablePrompts.length >= 3) {
         setState(() {
           _selectedPromptIds = profileProvider.availablePrompts
-              .take(10) // Changed from 3 to 10
+              .take(3) // Should be 3 prompts as per requirements
               .map((prompt) => prompt.id)
               .toList();
           _promptQuestions = profileProvider.availablePrompts
-              .take(10) // Changed from 3 to 10
+              .take(3) // Should be 3 prompts as per requirements
               .map((prompt) => prompt.text)
               .toList();
         });
@@ -360,7 +360,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             child: _promptQuestions.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: 10, // Changed from 3 to 10
+                    itemCount: 3, // Should be 3 prompts as per requirements
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
                       final questionText = index < _promptQuestions.length
@@ -404,16 +404,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _getValidAnswersCount() == 10 ? Icons.check_circle : Icons.pending,
-                  color: _getValidAnswersCount() == 10 ? Colors.green : AppColors.textSecondary,
+                  _getValidAnswersCount() == 3 ? Icons.check_circle : Icons.pending,
+                  color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/10',
+                  'Réponses complétées: ${_getValidAnswersCount()}/3',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: _getValidAnswersCount() == 10 ? Colors.green : AppColors.textSecondary,
-                    fontWeight: _getValidAnswersCount() == 10 ? FontWeight.w600 : FontWeight.normal,
+                    color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
+                    fontWeight: _getValidAnswersCount() == 3 ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ],
@@ -426,7 +426,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: Text(
                 _arePromptsValid() 
                   ? 'Continuer' 
-                  : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
+                  : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
               ),
             ),
           ),
@@ -597,10 +597,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    // Updated to support 10 prompts required
-    if (_promptControllers.length != 10) return false;
+    // Should be 3 prompts as per requirements
+    if (_promptControllers.length != 3) return false;
     
-    // All 10 controllers must have non-empty text within character limit
+    // All 3 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
       if (text.isEmpty || text.length > 300) {
