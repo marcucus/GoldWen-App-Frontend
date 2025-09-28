@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../config/app_config.dart';
 import '../models/models.dart';
 
@@ -155,10 +157,18 @@ class ApiService {
 
   static Future<Map<String, dynamic>> submitPersonalityAnswers(
       List<Map<String, dynamic>> answers) async {
+    
+    if (AppConfig.isDevelopment) {
+      print('Submitting personality answers: $answers');
+      print('Request body: ${jsonEncode({'answers': answers})}');
+    }
+    
     final response = await http.post(
       Uri.parse('$baseUrl/profiles/me/personality-answers'),
       headers: _headers,
-      body: jsonEncode(answers), // Send as direct array, not wrapped
+      body: jsonEncode({
+        'answers': answers
+      }), // Wrap answers in object as expected by DTO
     );
 
     return _handleResponse(response);
@@ -168,11 +178,31 @@ class ApiService {
     final response = await _makeRequest(
       http.get(
         Uri.parse(
-            '$baseUrl/profiles/questions'), // Fixed endpoint to match API docs
+            '$baseUrl/profiles/personality-questions'), // Corrected endpoint - was /profiles/questions
         headers: _headers,
       ),
     );
-    return _handleResponse(response) as List<dynamic>;
+    
+    final result = _handleResponse(response);
+    
+    // Handle both direct array and wrapped response formats
+    if (result is List) {
+      return result;
+    } else if (result is Map<String, dynamic>) {
+      // If response is wrapped (e.g., {"success": true, "data": [...]})
+      if (result.containsKey('data') && result['data'] is List) {
+        return result['data'] as List<dynamic>;
+      } else if (result.containsKey('questions') && result['questions'] is List) {
+        return result['questions'] as List<dynamic>;
+      }
+    }
+    
+    // If we can't find a list, throw an error with debug info
+    throw ApiException(
+      statusCode: 200,
+      message: 'Invalid response format for personality questions. Expected List but got: ${result.runtimeType}',
+      code: 'INVALID_RESPONSE_FORMAT',
+    );
   }
 
   static Future<List<dynamic>> getPrompts() async {
@@ -182,7 +212,44 @@ class ApiService {
         headers: _headers,
       ),
     );
-    return _handleResponse(response) as List<dynamic>;
+    
+    final result = _handleResponse(response);
+    
+    // Debug: Print the response structure
+    print('getPrompts response structure: ${result.runtimeType}');
+    print('getPrompts response data: $result');
+    
+    // Handle the wrapped response format from ResponseInterceptor
+    if (result is Map<String, dynamic>) {
+      // Standard wrapped response: {"success": true, "data": [...], "metadata": {...}}
+      if (result.containsKey('data')) {
+        final data = result['data'];
+        if (data is List) {
+          return data.cast<Map<String, dynamic>>();
+        } else {
+          print('Error: data field is not a List, got: ${data.runtimeType}');
+        }
+      }
+      // Legacy format (direct prompts field)
+      else if (result.containsKey('prompts') && result['prompts'] is List) {
+        return (result['prompts'] as List).cast<Map<String, dynamic>>();
+      }
+      // If it's a Map but no data/prompts field, maybe it's the direct object
+      else {
+        print('Error: No data or prompts field found in response');
+      }
+    } 
+    // Handle direct array response (shouldn't happen with ResponseInterceptor)
+    else if (result is List) {
+      return result.cast<Map<String, dynamic>>();
+    }
+    
+    // If we can't find a list, throw an error with debug info
+    throw ApiException(
+      statusCode: 200,
+      message: 'Invalid response format for prompts. Expected wrapped response with data field containing List, but got: ${result.runtimeType}\nResponse: $result',
+      code: 'INVALID_RESPONSE_FORMAT',
+    );
   }
 
   static Future<Map<String, dynamic>> submitPromptAnswers(
@@ -365,7 +432,39 @@ class ApiService {
     var request =
         http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
     request.headers.addAll(_headers);
-    request.files.add(await http.MultipartFile.fromPath('photos', filePath));
+    
+    String extension = filePath.split('.').last.toLowerCase();
+    
+    // Determine media type based on file extension
+    String subtype;
+    switch (extension) {
+      case 'png':
+        subtype = 'png';
+        break;
+      case 'webp':
+        subtype = 'webp';
+        break;
+      case 'jpg':
+      case 'jpeg':
+      default:
+        subtype = 'jpeg';
+        break;
+    }
+    
+    // Read file as bytes to ensure proper MIME type handling
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final filename = file.uri.pathSegments.last;
+    
+    final multipartFile = http.MultipartFile.fromBytes(
+      'photos',
+      bytes,
+      filename: filename,
+      contentType: MediaType('image', subtype),
+    );
+    
+    request.files.add(multipartFile);
+    
     if (order != null) {
       request.fields['order'] = order.toString();
     }
@@ -381,7 +480,52 @@ class ApiService {
     request.headers.addAll(_headers);
     
     for (int i = 0; i < filePaths.length; i++) {
-      request.files.add(await http.MultipartFile.fromPath('photos', filePaths[i]));
+      String filePath = filePaths[i];
+      String extension = filePath.split('.').last.toLowerCase();
+      
+      // Determine media type based on file extension
+      String subtype;
+      String mimeType;
+      switch (extension) {
+        case 'png':
+          subtype = 'png';
+          mimeType = 'image/png';
+          break;
+        case 'webp':
+          subtype = 'webp';
+          mimeType = 'image/webp';
+          break;
+        case 'jpg':
+        case 'jpeg':
+        default:
+          subtype = 'jpeg';
+          mimeType = 'image/jpeg';
+          break;
+      }
+      
+      // Read file as bytes to ensure proper MIME type handling
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      final filename = file.uri.pathSegments.last;
+      
+      print('Adding file: $filename with MIME type: $mimeType');
+      
+      // Create multipart file with explicit MIME type
+      final multipartFile = http.MultipartFile.fromBytes(
+        'photos',
+        bytes,
+        filename: filename,
+        contentType: MediaType('image', subtype),
+      );
+      
+      request.files.add(multipartFile);
+    }
+    
+    // Debug: Log the request headers and content type
+    print('Request headers: ${request.headers}');
+    print('Files being uploaded: ${request.files.length}');
+    for (var file in request.files) {
+      print('File field: ${file.field}, filename: ${file.filename}, contentType: ${file.contentType}');
     }
 
     final streamedResponse = await request.send();
@@ -1101,6 +1245,10 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (AppConfig.isDevelopment) {
           print('API Response successful, returning data: $decoded');
+          print('Data type: ${decoded.runtimeType}');
+          if (decoded is Map<String, dynamic>) {
+            print('Map keys: ${decoded.keys.toList()}');
+          }
         }
         return decoded; // Peut être Map ou List
       } else {

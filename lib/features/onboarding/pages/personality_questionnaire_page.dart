@@ -6,7 +6,6 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../profile/pages/profile_setup_page.dart';
 
 class PersonalityQuestionnairePage extends StatefulWidget {
   const PersonalityQuestionnairePage({super.key});
@@ -531,11 +530,8 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       await authProvider.refreshUser();
       
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const ProfileSetupPage(),
-          ),
-        );
+        // Use GoRouter for navigation instead of Navigator.pushReplacement
+        context.go('/profile-setup');
       }
     } catch (e) {
       print('Error submitting personality answers: $e');

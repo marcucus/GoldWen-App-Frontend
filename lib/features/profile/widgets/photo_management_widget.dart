@@ -397,8 +397,21 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
             order: _photos.length + 1,
           );
 
-          // Create new Photo object from response
-          final photoData = response['data'] ?? response;
+          // Handle array response from backend
+          final responseData = response['data'];
+          Map<String, dynamic> photoData;
+          
+          if (responseData is List && responseData.isNotEmpty) {
+            // Backend returns array of photos
+            photoData = responseData[0] as Map<String, dynamic>;
+          } else if (responseData is Map<String, dynamic>) {
+            // Single photo object
+            photoData = responseData;
+          } else {
+            // Fallback to full response
+            photoData = response;
+          }
+          
           final newPhoto = Photo.fromJson(photoData);
 
           setState(() {

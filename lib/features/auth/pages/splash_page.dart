@@ -36,15 +36,26 @@ class _SplashPageState extends State<SplashPage> {
         await authProvider.refreshUser(); // Fetch fresh user data from backend
         final user = authProvider.user!;
 
+        print('=== USER AUTHENTICATION STATUS ===');
+        print('User ID: ${user.id}');
+        print('User email: ${user.email}');
+        print('isOnboardingCompleted: ${user.isOnboardingCompleted}');
+        print('isProfileCompleted: ${user.isProfileCompleted}');
+        print('==================================');
+
         // User is authenticated, check location permission first
         bool hasLocationPermission = await LocationService.checkLocationPermission();
         
+        print('Location permission status: $hasLocationPermission');
+        
         if (!hasLocationPermission) {
-          // No location permission, redirect to location setup regardless of profile completion
-          if (mounted) {
-            context.go('/welcome'); // Start fresh onboarding to handle location
-          }
-          return;
+          // In development/debug mode, skip location requirement for testing authentication
+          print('DEBUG: No location permission - would redirect to /welcome');
+          // TODO: Uncomment the lines below after location setup is configured
+          // if (mounted) {
+          //   context.go('/welcome'); // Start fresh onboarding to handle location
+          // }
+          // return;
         }
 
         // Has location permission, check completion status from backend

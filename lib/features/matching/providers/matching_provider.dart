@@ -365,7 +365,7 @@ class MatchingProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      final response = await ApiService.getHistory(
+      final response = await MatchingServiceApi.getHistory(
         page: page,
         limit: limit,
         startDate: startDate,

@@ -405,6 +405,9 @@ class ProfileProvider with ChangeNotifier {
 
   Future<void> submitPromptAnswers() async {
     try {
+      print('DEBUG: Current _promptAnswers state: $_promptAnswers');
+      print('DEBUG: _promptAnswers.entries: ${_promptAnswers.entries.toList()}');
+      
       final promptAnswers = _promptAnswers.entries.map((entry) {
         return {
           'promptId': entry.key, // Use real prompt ID
@@ -414,6 +417,10 @@ class ProfileProvider with ChangeNotifier {
 
       print('Submitting ${promptAnswers.length} prompt answers');
       print('Prompt answers data: $promptAnswers');
+
+      if (promptAnswers.isEmpty) {
+        throw Exception('No prompt answers to submit. Please fill in the prompts first.');
+      }
 
       await ApiService.submitPromptAnswers(promptAnswers);
       print('Prompt answers submitted successfully');
@@ -507,7 +514,24 @@ class ProfileProvider with ChangeNotifier {
       final response = await ApiService.getProfileCompletion();
       final completionData = response['data'] ?? response;
       
-      _profileCompletion = ProfileCompletion.fromJson(completionData);
+      // Debug: Print the backend response for profile completion
+      print('Profile completion raw response: $completionData');
+      print('Requirements section: ${completionData['requirements']}');
+      print('Prompt answers section: ${completionData['requirements']?['promptAnswers']}');
+      
+      // Map backend response to frontend model
+      final mappedData = {
+        'isCompleted': completionData['isComplete'] ?? false,
+        'hasPhotos': completionData['requirements']?['minimumPhotos']?['satisfied'] ?? false,
+        'hasPrompts': completionData['requirements']?['promptAnswers']?['satisfied'] ?? false,
+        'hasPersonalityAnswers': completionData['requirements']?['personalityQuestionnaire'] ?? false,
+        'hasRequiredProfileFields': completionData['requirements']?['basicInfo'] ?? false,
+        'missingSteps': completionData['missingSteps'] ?? [],
+      };
+      
+      print('Mapped completion data: $mappedData');
+      
+      _profileCompletion = ProfileCompletion.fromJson(mappedData);
       _isProfileComplete = _profileCompletion!.isCompleted;
       
       notifyListeners();

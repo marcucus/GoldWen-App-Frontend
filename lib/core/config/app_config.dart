@@ -30,6 +30,9 @@ class AppConfig {
     try {
       if (Platform.isAndroid) {
         return 'http://10.0.2.2:$port/api/v1';
+      } else if (Platform.isIOS) {
+        // Use your Mac's local IP address for iOS physical devices
+        return 'http://192.168.1.171:$port/api/v1';
       }
     } catch (e) {
       // Platform.isAndroid might not be available in some contexts (like tests)
@@ -43,6 +46,9 @@ class AppConfig {
     try {
       if (Platform.isAndroid) {
         return 'ws://10.0.2.2:$port/chat';
+      } else if (Platform.isIOS) {
+        // Use your Mac's local IP address for iOS physical devices
+        return 'ws://192.168.1.171:$port/chat';
       }
     } catch (e) {
       // Platform.isAndroid might not be available in some contexts (like tests)
