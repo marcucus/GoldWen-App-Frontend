@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/services/location_service.dart';
-import '../../../shared/widgets/enhanced_navigation.dart';
-import '../../auth/providers/auth_provider.dart';
 import 'home_page.dart';
 import '../../matching/pages/daily_matches_page.dart';
 import '../../chat/pages/chat_list_page.dart';
@@ -25,7 +22,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   late Animation<Offset> _slideAnimation;
 
   late final List<Widget> _pages;
-  late final List<BottomNavigationItem> _navigationItems;
+  late final List<NavigationItem> _navigationItems;
 
   @override
   void initState() {
@@ -74,25 +71,29 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   void _initializeNavigationItems() {
     _navigationItems = [
-      BottomNavigationItem(
+      NavigationItem(
         icon: Icons.home_outlined,
         activeIcon: Icons.home,
         label: 'Accueil',
+        color: Colors.amber,
       ),
-      BottomNavigationItem(
+      NavigationItem(
         icon: Icons.favorite_outline,
         activeIcon: Icons.favorite,
         label: 'Découvrir',
+        color: Colors.red,
       ),
-      BottomNavigationItem(
+      NavigationItem(
         icon: Icons.chat_bubble_outline,
         activeIcon: Icons.chat_bubble,
         label: 'Messages',
+        color: Colors.blue,
       ),
-      BottomNavigationItem(
+      NavigationItem(
         icon: Icons.star_outline,
         activeIcon: Icons.star,
-        label: 'GoldWen+',
+        label: 'Premium',
+        color: Colors.purple,
       ),
     ];
   }
@@ -137,37 +138,20 @@ class _MainNavigationPageState extends State<MainNavigationPage>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        // Check if profile is completed - if not, redirect to complete it
-        final user = authProvider.user;
-        if (user != null && (user.isProfileCompleted != true)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              context.go('/profile-setup');
-            }
-          });
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        return Scaffold(
-          body: Stack(
-            children: [
-              // Main content
-              TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _pages,
-              ),
-
-              // Floating bottom navigation
-              _buildFloatingNavigation(),
-            ],
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Main content
+          TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: _pages,
           ),
-        );
-      },
+
+          // Floating bottom navigation
+          _buildFloatingNavigation(),
+        ],
+      ),
     );
   }
 
@@ -183,11 +167,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
             position: _slideAnimation,
             child: Transform.scale(
               scale: _scaleAnimation.value,
-              child: EnhancedBottomNavigation(
-                currentIndex: _currentIndex,
-                onTap: _navigateToTab,
-                items: _navigationItems,
-                height: 70.0,
+              child: Container(
+                margin: const EdgeInsets.all(16.0),
+                child: _buildNavigationBar(),
               ),
             ),
           );
@@ -196,4 +178,147 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     );
   }
 
+  Widget _buildNavigationBar() {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.shade700,
+            Colors.amber.shade800,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amber.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withOpacity(0.1),
+                Colors.transparent,
+              ],
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              _navigationItems.length,
+              (index) => _buildNavigationItem(index),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationItem(int index) {
+    final item = _navigationItems[index];
+    final isSelected = _currentIndex == index;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _navigateToTab(index),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon with animation
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withOpacity(0.2)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      isSelected ? item.activeIcon : item.icon,
+                      key: ValueKey('${index}_${isSelected}'),
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                // Label with fade animation
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isSelected ? 1.0 : 0.7,
+                  child: Text(
+                    item.label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 11,
+                        ),
+                  ),
+                ),
+
+                // Selection indicator
+                const SizedBox(height: 4),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: isSelected ? 20 : 0,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NavigationItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final Color color;
+
+  NavigationItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.color,
+  });
 }
