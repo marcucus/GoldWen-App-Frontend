@@ -2,16 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CustomLoggerService } from './common/logger';
 import { HttpExceptionFilter } from './common/filters';
-import { ResponseInterceptor } from './common/interceptors';
+import { ResponseInterceptor, CacheInterceptor } from './common/interceptors';
+import { SentryService } from './common/monitoring';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
   const logger = app.get(CustomLoggerService);
+  const reflector = app.get(Reflector);
+  const sentry = app.get(SentryService);
 
   // Use custom logger
   app.useLogger(logger);
@@ -41,15 +45,18 @@ async function bootstrap() {
   );
 
   // Global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter(logger));
+  app.useGlobalFilters(new HttpExceptionFilter(logger, sentry));
 
-  // Global response interceptor
+  // Global interceptors - order matters for interceptor chain
+  app.useGlobalInterceptors(new CacheInterceptor(reflector));
   app.useGlobalInterceptors(new ResponseInterceptor(logger));
 
   // CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || true,
+    origin: '*', // Accepte toutes les origines temporairement
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
   });
 
   // Swagger documentation
@@ -66,6 +73,7 @@ async function bootstrap() {
       .addTag('Chat', 'Real-time messaging and chat management')
       .addTag('Subscriptions', 'Premium subscriptions and payments')
       .addTag('Notifications', 'Push notifications and alerts')
+      .addTag('Preferences', 'User preferences management')
       .addTag('Admin', 'Administrative operations')
       .build();
 
@@ -73,10 +81,11 @@ async function bootstrap() {
     SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
   }
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   logger.info('🚀 GoldWen API is running successfully', {
-    url: `http://localhost:${port}/${apiPrefix}`,
-    docs: `http://localhost:${port}/${apiPrefix}/docs`,
+    url: `http://192.168.1.183:${port}/${apiPrefix}`,
+    networkUrl: `http://192.168.1.183:${port}/${apiPrefix}`,
+    docs: `http://192.168.1.183:${port}/${apiPrefix}/docs`,
     environment: configService.get('app.environment'),
   });
 }

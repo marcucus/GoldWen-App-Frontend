@@ -23,6 +23,9 @@ export class Prompt {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: true })
+  isRequired: boolean;
+
   @Column({ nullable: true })
   category: string;
 

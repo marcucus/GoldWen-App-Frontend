@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as path from 'path';
+import * as fs from 'fs';
 
 import { Profile } from '../../database/entities/profile.entity';
 import { User } from '../../database/entities/user.entity';
@@ -77,7 +79,9 @@ export class ProfilesService {
       const today = new Date();
       const birthYear = today.getFullYear() - updateProfileDto.age;
       updateProfileDto.birthDate = `${birthYear}-01-01`;
-      // Remove age from the DTO since it's not a database field
+    }
+    // Remove age from the DTO since it's not a database field
+    if ('age' in updateProfileDto) {
       delete updateProfileDto.age;
     }
 
@@ -132,9 +136,10 @@ export class ProfilesService {
     );
 
     if (missingRequired.length > 0) {
-      throw new BadRequestException(
-        `Missing answers for required questions: ${missingRequired.map((q) => q.question).join(', ')}`,
-      );
+      throw new BadRequestException({
+        message: `Missing answers for required questions: ${missingRequired.map((q) => q.question).join(', ')}`,
+        missingQuestions: missingRequired.map((q) => q.id),
+      });
     }
 
     try {
@@ -165,9 +170,10 @@ export class ProfilesService {
         ':',
         error,
       );
-      throw new BadRequestException(
-        'Failed to save personality answers: ' + error.message,
-      );
+      throw new BadRequestException({
+        message: 'Failed to save personality answers: ' + error.message,
+        error: error?.message || error,
+      });
     }
   }
 
@@ -184,13 +190,23 @@ export class ProfilesService {
       throw new NotFoundException('Profile not found');
     }
 
-    // Validate minimum photos requirement
-    const totalPhotos = (profile.photos?.length || 0) + files.length;
-    if (totalPhotos < 3) {
-      throw new BadRequestException('Minimum 3 photos required');
+    // Validate maximum photos requirement (6 max total)
+    const currentPhotosCount = profile.photos?.length || 0;
+    const totalPhotos = currentPhotosCount + files.length;
+    if (totalPhotos > 6) {
+      throw new BadRequestException(
+        `Maximum 6 photos allowed. You currently have ${currentPhotosCount} photos.`,
+      );
     }
 
-    // Create photo entities
+    // Validate at least one file is provided
+    if (files.length === 0) {
+      throw new BadRequestException('At least one photo is required');
+    }
+
+    console.log('Received files for upload:', files);
+
+    // Simplified version without image processing for now
     const photoEntities = files.map((file, index) => {
       return this.photoRepository.create({
         profileId: profile.id,
@@ -198,15 +214,15 @@ export class ProfilesService {
         filename: file.filename,
         mimeType: file.mimetype,
         fileSize: file.size,
-        order: (profile.photos?.length || 0) + index + 1,
-        isPrimary: (profile.photos?.length || 0) === 0 && index === 0,
-        isApproved: true, // Auto-approve for MVP, can be changed later
+        order: currentPhotosCount + index + 1,
+        isPrimary: currentPhotosCount === 0 && index === 0, // First photo is primary if no photos exist
+        isApproved: true, // Auto-approve for MVP
       });
     });
-
+    console.log('Photo entities to be saved:', photoEntities);
     const savedPhotos = await this.photoRepository.save(photoEntities);
 
-    // Check if profile is now complete
+    // Check if profile is now complete after upload
     await this.updateProfileCompletionStatus(userId);
 
     return savedPhotos;
@@ -257,43 +273,44 @@ export class ProfilesService {
       throw new NotFoundException('Photo not found');
     }
 
-    if (newOrder < 1 || newOrder > profile.photos.length) {
+    const totalPhotos = profile.photos?.length || 0;
+    if (newOrder < 1 || newOrder > totalPhotos) {
       throw new BadRequestException(
-        `Invalid order position. Must be between 1 and ${profile.photos.length}`,
+        `Invalid order. Must be between 1 and ${totalPhotos}`,
       );
     }
 
-    const oldOrder = photo.order;
-    
+    const currentOrder = photo.order;
+
     // If the order hasn't changed, return the photo as is
-    if (oldOrder === newOrder) {
+    if (currentOrder === newOrder) {
       return photo;
     }
 
-    // Update order of other photos
-    if (newOrder < oldOrder) {
-      // Moving photo to an earlier position - increment order of photos in between
+    // Update the orders of other photos
+    if (newOrder < currentOrder) {
+      // Moving photo to an earlier position - shift others down
       await this.photoRepository
         .createQueryBuilder()
         .update(Photo)
         .set({ order: () => '"order" + 1' })
         .where('profileId = :profileId', { profileId: profile.id })
         .andWhere('order >= :newOrder', { newOrder })
-        .andWhere('order < :oldOrder', { oldOrder })
+        .andWhere('order < :currentOrder', { currentOrder })
         .execute();
     } else {
-      // Moving photo to a later position - decrement order of photos in between
+      // Moving photo to a later position - shift others up
       await this.photoRepository
         .createQueryBuilder()
         .update(Photo)
         .set({ order: () => '"order" - 1' })
         .where('profileId = :profileId', { profileId: profile.id })
-        .andWhere('order > :oldOrder', { oldOrder })
+        .andWhere('order > :currentOrder', { currentOrder })
         .andWhere('order <= :newOrder', { newOrder })
         .execute();
     }
 
-    // Update the photo's order
+    // Update the target photo's order
     photo.order = newOrder;
     return this.photoRepository.save(photo);
   }
@@ -305,15 +322,67 @@ export class ProfilesService {
     });
   }
 
+  async getUserPromptAnswers(userId: string): Promise<PromptAnswer[]> {
+    const profile = await this.profileRepository.findOne({
+      where: { userId },
+      relations: ['promptAnswers', 'promptAnswers.prompt'],
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile.promptAnswers || [];
+  }
+
   async submitPromptAnswers(
     userId: string,
     promptAnswersDto: SubmitPromptAnswersDto,
   ): Promise<void> {
     const { answers } = promptAnswersDto;
 
-    // Validate that 3 prompts are answered (as required by specifications)
-    if (answers.length !== 3) {
-      throw new BadRequestException('Exactly 3 prompt answers are required');
+    // Get required prompts to validate answers
+    const requiredPrompts = await this.promptRepository.find({
+      where: { isActive: true, isRequired: true },
+    });
+    console.log('[submitPromptAnswers] Required prompts:', requiredPrompts.map(p => ({ id: p.id, text: p.text })));
+
+    console.log('[submitPromptAnswers] Answers received:', answers);
+
+    // Validate that all required prompts are answered
+    const answeredPromptIds = new Set(answers.map((a) => a.promptId));
+    console.log('[submitPromptAnswers] Answered prompt IDs:', Array.from(answeredPromptIds));
+    const missingRequired = requiredPrompts.filter(
+      (p) => !answeredPromptIds.has(p.id),
+    );
+    console.log('[submitPromptAnswers] Missing required prompts:', missingRequired.map(p => ({ id: p.id, text: p.text })));
+
+    if (missingRequired.length > 0) {
+      console.warn('[submitPromptAnswers] ERROR: Missing answers for required prompts:', missingRequired.map((p) => p.text));
+      throw new BadRequestException({
+        message: `Missing answers for required prompts: ${missingRequired.map((p) => p.text).join(', ')}`,
+        missingPrompts: missingRequired.map((p) => p.id),
+      });
+    }
+
+    // Validate that answered prompts exist and are active
+    const allPrompts = await this.promptRepository.find({
+      where: { isActive: true },
+    });
+    const activePromptIds = new Set(allPrompts.map((p) => p.id));
+    console.log('[submitPromptAnswers] All active prompt IDs:', Array.from(activePromptIds));
+
+    const invalidAnswers = answers.filter(
+      (a) => !activePromptIds.has(a.promptId),
+    );
+    console.log('[submitPromptAnswers] Invalid answers:', invalidAnswers);
+
+    if (invalidAnswers.length > 0) {
+      console.warn('[submitPromptAnswers] ERROR: Some prompts are invalid or inactive:', invalidAnswers.map((a) => a.promptId));
+      throw new BadRequestException(
+        'Some prompts are invalid or inactive: ' +
+          invalidAnswers.map((a) => a.promptId).join(', '),
+      );
     }
 
     const profile = await this.profileRepository.findOne({
@@ -321,11 +390,13 @@ export class ProfilesService {
     });
 
     if (!profile) {
+      console.error('[submitPromptAnswers] ERROR: Profile not found for user', userId);
       throw new NotFoundException('Profile not found');
     }
 
     try {
       // Delete existing prompt answers
+      console.log('[submitPromptAnswers] Deleting existing prompt answers for profileId:', profile.id);
       await this.promptAnswerRepository.delete({ profileId: profile.id });
 
       // Create new prompt answers
@@ -338,13 +409,26 @@ export class ProfilesService {
         });
       });
 
-      await this.promptAnswerRepository.save(answerEntities);
+      console.log('[submitPromptAnswers] Saving prompt answers:', {
+        userId,
+        profileId: profile.id,
+        answersCount: answerEntities.length,
+        answers: answerEntities.map(a => ({ promptId: a.promptId, answer: a.answer })),
+      });
+
+      const savedAnswers = await this.promptAnswerRepository.save(answerEntities);
+      
+      console.log('[submitPromptAnswers] Prompt answers saved successfully:', {
+        userId,
+        savedCount: savedAnswers.length,
+        savedIds: savedAnswers.map(a => a.id),
+      });
 
       // Check if profile is now complete
       await this.updateProfileCompletionStatus(userId);
     } catch (error) {
       // Log the error for debugging
-      console.error('Error saving prompt answers for user', userId, ':', error);
+      console.error('[submitPromptAnswers] ERROR saving prompt answers for user', userId, ':', error);
       throw new BadRequestException(
         'Failed to save prompt answers: ' + error.message,
       );
@@ -384,11 +468,26 @@ export class ProfilesService {
 
     // Check completion criteria from specifications:
     // 1. Minimum 3 photos
-    // 2. 3 prompt answers
+    // 2. All required prompt answers
     // 3. All required personality questions answered
     // 4. Required profile fields: birthDate (gender and interestedInGenders are optional for now)
     const hasMinPhotos = (user.profile.photos?.length || 0) >= 3;
-    const hasPromptAnswers = (user.profile.promptAnswers?.length || 0) >= 3;
+
+    // Get required prompts count and validate answers
+    const requiredPrompts = await this.promptRepository.find({
+      where: { isActive: true, isRequired: true },
+    });
+
+    const answeredPromptIds = new Set(
+      (user.profile.promptAnswers || []).map((a) => a.promptId),
+    );
+
+    const missingRequiredPrompts = requiredPrompts.filter(
+      (p) => !answeredPromptIds.has(p.id),
+    );
+
+    const hasPromptAnswers = missingRequiredPrompts.length === 0;
+
     const hasRequiredProfileFields = !!(
       user.profile.birthDate && user.profile.bio
     );
@@ -423,12 +522,25 @@ export class ProfilesService {
   }
 
   async getProfileCompletion(userId: string): Promise<{
-    isCompleted: boolean;
-    hasPhotos: boolean;
-    hasPrompts: boolean;
-    hasPersonalityAnswers: boolean;
-    hasRequiredProfileFields: boolean;
+    isComplete: boolean;
+    completionPercentage: number;
+    requirements: {
+      minimumPhotos: {
+        required: number;
+        current: number;
+        satisfied: boolean;
+      };
+      promptAnswers: {
+        required: number;
+        current: number;
+        satisfied: boolean;
+        missing: Array<{ id: string; text: string }>;
+      };
+      personalityQuestionnaire: boolean;
+      basicInfo: boolean;
+    };
     missingSteps: string[];
+    nextStep: string;
   }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -444,11 +556,59 @@ export class ProfilesService {
       throw new NotFoundException('Profile not found');
     }
 
-    const hasPhotos = (user.profile.photos?.length || 0) >= 3;
-    const hasPrompts = (user.profile.promptAnswers?.length || 0) >= 3;
+    // Debug: Log the user profile data
+    console.log('Profile completion debug - user data:', {
+      userId: user.id,
+      profileId: user.profile.id,
+      promptAnswersRaw: user.profile.promptAnswers,
+      promptAnswersCount: user.profile.promptAnswers?.length || 0,
+    });
+
+    const photosCount = user.profile.photos?.length || 0;
+    const hasPhotos = photosCount >= 3;
     const hasRequiredProfileFields = !!(
       user.profile.birthDate && user.profile.bio
     );
+
+    // Get required prompts and check if user has answered all of them
+    const requiredPrompts = await this.promptRepository.find({
+      where: { isActive: true, isRequired: true },
+    });
+
+    // Debug: Log all prompts for verification
+    const allPrompts = await this.promptRepository.find({
+      where: { isActive: true },
+    });
+    
+    console.log('All active prompts in database:', {
+      totalActive: allPrompts.length,
+      requiredPrompts: allPrompts.filter(p => p.isRequired).map(p => ({ id: p.id, text: p.text, isRequired: p.isRequired, order: p.order })),
+      optionalPrompts: allPrompts.filter(p => !p.isRequired).map(p => ({ id: p.id, text: p.text, isRequired: p.isRequired, order: p.order })),
+      totalRequired: requiredPrompts.length,
+    });
+
+    const answeredPromptIds = new Set(
+      (user.profile.promptAnswers || []).map((a) => a.promptId),
+    );
+
+    const missingRequiredPrompts = requiredPrompts.filter(
+      (p) => !answeredPromptIds.has(p.id),
+    );
+
+    const hasPrompts = missingRequiredPrompts.length === 0;
+    const promptsCount = user.profile.promptAnswers?.length || 0;
+    const requiredPromptsCount = requiredPrompts.length;
+
+    // Debug: Log prompts validation
+    console.log('Prompts validation debug:', {
+      userId: user.id,
+      requiredPromptsCount,
+      promptsCount,
+      answeredPromptIds: Array.from(answeredPromptIds),
+      requiredPromptIds: requiredPrompts.map(p => p.id),
+      missingRequiredPrompts: missingRequiredPrompts.map(p => ({ id: p.id, text: p.text })),
+      hasPrompts,
+    });
 
     const requiredQuestionsCount =
       await this.personalityQuestionRepository.count({
@@ -460,7 +620,17 @@ export class ProfilesService {
 
     const missingSteps: string[] = [];
     if (!hasPhotos) missingSteps.push('Upload at least 3 photos');
-    if (!hasPrompts) missingSteps.push('Answer 3 prompts');
+    if (!hasPrompts) {
+      const missingPromptTexts = missingRequiredPrompts
+        .map((p) => p.text)
+        .slice(0, 3) // Show max 3 for readability
+        .join(', ');
+      const moreCount = missingRequiredPrompts.length - 3;
+      const moreText = moreCount > 0 ? ` and ${moreCount} more` : '';
+      missingSteps.push(
+        `Answer required prompts: ${missingPromptTexts}${moreText}`,
+      );
+    }
     if (!hasPersonalityAnswers)
       missingSteps.push('Complete personality questionnaire');
     if (!hasRequiredProfileFields) {
@@ -472,18 +642,71 @@ export class ProfilesService {
       );
     }
 
+    const isComplete =
+      hasPhotos &&
+      hasPrompts &&
+      hasPersonalityAnswers &&
+      hasRequiredProfileFields;
+
+    // Calculate completion percentage based on the 4 requirements
+    let completed = 0;
+    if (hasPhotos) completed++;
+    if (hasPrompts) completed++;
+    if (hasPersonalityAnswers) completed++;
+    if (hasRequiredProfileFields) completed++;
+    const completionPercentage = Math.round((completed / 4) * 100);
+
+    // Determine next step based on priority
+    let nextStep = '';
+    if (!hasRequiredProfileFields) {
+      const missingFields = [];
+      if (!user.profile.birthDate) missingFields.push('birth date');
+      if (!user.profile.bio) missingFields.push('bio');
+      nextStep = `Complete basic profile information: ${missingFields.join(', ')}`;
+    } else if (!hasPersonalityAnswers) {
+      nextStep = 'Complete personality questionnaire';
+    } else if (!hasPhotos) {
+      nextStep = 'Upload at least 3 photos';
+    } else if (!hasPrompts) {
+      const missingCount = missingRequiredPrompts.length;
+      nextStep = `Answer ${missingCount} required prompt${missingCount > 1 ? 's' : ''}`;
+    } else {
+      nextStep = 'Profile is complete!';
+    }
+
     return {
-      isCompleted:
-        hasPhotos &&
-        hasPrompts &&
-        hasPersonalityAnswers &&
-        hasRequiredProfileFields,
-      hasPhotos,
-      hasPrompts,
-      hasPersonalityAnswers,
-      hasRequiredProfileFields,
+      isComplete,
+      completionPercentage,
+      requirements: {
+        minimumPhotos: {
+          required: 3,
+          current: photosCount,
+          satisfied: hasPhotos,
+        },
+        promptAnswers: {
+          required: requiredPromptsCount,
+          current: promptsCount,
+          satisfied: hasPrompts,
+          missing: missingRequiredPrompts.map((p) => ({
+            id: p.id,
+            text: p.text,
+          })),
+        },
+        personalityQuestionnaire: hasPersonalityAnswers,
+        basicInfo: hasRequiredProfileFields,
+      },
       missingSteps,
+      nextStep,
     };
+  }
+
+  async isProfileVisible(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['isProfileCompleted'],
+    });
+
+    return user?.isProfileCompleted ?? false;
   }
 
   async updateProfileStatus(

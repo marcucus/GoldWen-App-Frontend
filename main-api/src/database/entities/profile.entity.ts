@@ -101,6 +101,9 @@ export class Profile {
   @Column({ default: true })
   showDistance: boolean;
 
+  @Column({ default: true })
+  showMeInDiscovery: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

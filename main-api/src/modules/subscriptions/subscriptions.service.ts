@@ -10,6 +10,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { Subscription } from '../../database/entities/subscription.entity';
 import { User } from '../../database/entities/user.entity';
+import { DailySelection } from '../../database/entities/daily-selection.entity';
 import { SubscriptionStatus, SubscriptionPlan } from '../../common/enums';
 import { CustomLoggerService } from '../../common/logger';
 
@@ -26,6 +27,8 @@ export class SubscriptionsService {
     private subscriptionRepository: Repository<Subscription>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(DailySelection)
+    private dailySelectionRepository: Repository<DailySelection>,
     private configService: ConfigService,
     private logger: CustomLoggerService,
   ) {}
@@ -306,6 +309,9 @@ export class SubscriptionsService {
       userId: webhookData.app_user_id,
       eventType: webhookData.event.type,
     });
+
+    // Additional billing issue handling could be added here
+    return Promise.resolve();
   }
 
   private getSubscriptionPlanFromProductId(
@@ -406,5 +412,198 @@ export class SubscriptionsService {
       expiredSubscriptions,
       revenue,
     };
+  }
+
+  // Get available subscription plans
+  getPlans(): {
+    plans: Array<{
+      id: string;
+      name: string;
+      price: number;
+      currency: string;
+      duration: string;
+      features: string[];
+    }>;
+  } {
+    // Based on specifications.md, we return the GoldWen Plus plans
+    const plans = [
+      {
+        id: 'goldwen_plus_monthly',
+        name: 'GoldWen Plus',
+        price: 19.99,
+        currency: 'EUR',
+        duration: 'monthly',
+        features: [
+          '3 sélections par jour',
+          'Chat illimité',
+          'Voir qui vous a sélectionné',
+          'Profil prioritaire',
+        ],
+      },
+      {
+        id: 'goldwen_plus_quarterly',
+        name: 'GoldWen Plus',
+        price: 49.99,
+        currency: 'EUR',
+        duration: 'quarterly',
+        features: [
+          '3 sélections par jour',
+          'Chat illimité',
+          'Voir qui vous a sélectionné',
+          'Profil prioritaire',
+        ],
+      },
+      {
+        id: 'goldwen_plus_yearly',
+        name: 'GoldWen Plus',
+        price: 179.99,
+        currency: 'EUR',
+        duration: 'yearly',
+        features: [
+          '3 sélections par jour',
+          'Chat illimité',
+          'Voir qui vous a sélectionné',
+          'Profil prioritaire',
+        ],
+      },
+    ];
+
+    return { plans };
+  }
+
+  // Get subscription usage for a user
+  async getUsage(userId: string): Promise<{
+    dailyChoices: {
+      limit: number;
+      used: number;
+      remaining: number;
+      resetTime: string;
+    };
+    subscription: {
+      tier: 'free' | 'premium';
+      isActive: boolean;
+    };
+  }> {
+    const subscription = await this.getActiveSubscription(userId);
+    const isPremium =
+      subscription &&
+      subscription.isActive &&
+      subscription.plan === SubscriptionPlan.GOLDWEN_PLUS;
+
+    // Get today's daily selection to check actual usage
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailySelection = await this.dailySelectionRepository.findOne({
+      where: {
+        userId,
+        selectionDate: today,
+      },
+    });
+
+    const limit = isPremium ? 3 : 1;
+    const used = dailySelection ? dailySelection.choicesUsed : 0;
+    const remaining = Math.max(0, limit - used);
+
+    // Calculate reset time (next day at noon)
+    const resetTime = new Date();
+    resetTime.setDate(resetTime.getDate() + 1);
+    resetTime.setHours(12, 0, 0, 0);
+
+    return {
+      dailyChoices: {
+        limit,
+        used,
+        remaining,
+        resetTime: resetTime.toISOString(),
+      },
+      subscription: {
+        tier: isPremium ? 'premium' : 'free',
+        isActive: subscription ? subscription.isActive : false,
+      },
+    };
+  }
+
+  // Restore subscriptions from app stores
+  async restoreSubscriptions(userId: string): Promise<{
+    restored: boolean;
+    subscriptions: Subscription[];
+  }> {
+    // This would integrate with RevenueCat or direct app store APIs
+    // For now, we'll return the existing active subscriptions
+    const subscriptions = await this.subscriptionRepository.find({
+      where: {
+        userId,
+        status: SubscriptionStatus.ACTIVE,
+      },
+    });
+
+    return {
+      restored: true,
+      subscriptions,
+    };
+  }
+
+  // Cancel user's current subscription (simpler version for user-initiated cancellation)
+  async cancelUserSubscription(
+    userId: string,
+    reason?: string,
+  ): Promise<Subscription> {
+    const activeSubscription = await this.getActiveSubscription(userId);
+
+    if (!activeSubscription) {
+      throw new NotFoundException('No active subscription found');
+    }
+
+    activeSubscription.status = SubscriptionStatus.CANCELLED;
+    activeSubscription.cancelledAt = new Date();
+
+    // Store cancellation reason in metadata
+    if (reason) {
+      activeSubscription.metadata = {
+        ...activeSubscription.metadata,
+        cancellationReason: reason,
+        cancelledBy: 'user',
+      };
+    }
+
+    return this.subscriptionRepository.save(activeSubscription);
+  }
+
+  // Get user subscription tier for use in other services
+  async getUserSubscriptionTier(userId: string): Promise<{
+    tier: SubscriptionPlan;
+    isActive: boolean;
+    features: {
+      maxDailyChoices: number;
+      hasExtendChatFeature: boolean;
+      hasPrioritySupport: boolean;
+      canSeeWhoLiked: boolean;
+    };
+  }> {
+    const subscription = await this.getActiveSubscription(userId);
+    const isActive = subscription?.isActive || false;
+    const tier =
+      isActive && subscription ? subscription.plan : SubscriptionPlan.FREE;
+
+    return {
+      tier,
+      isActive,
+      features: {
+        maxDailyChoices: tier === SubscriptionPlan.GOLDWEN_PLUS ? 3 : 1,
+        hasExtendChatFeature: tier === SubscriptionPlan.GOLDWEN_PLUS,
+        hasPrioritySupport: tier === SubscriptionPlan.GOLDWEN_PLUS,
+        canSeeWhoLiked: tier === SubscriptionPlan.GOLDWEN_PLUS,
+      },
+    };
+  }
+
+  // Helper method to check if user is premium (for use in other services)
+  async isUserPremium(userId: string): Promise<boolean> {
+    const subscription = await this.getActiveSubscription(userId);
+    return Boolean(
+      subscription?.isActive &&
+        subscription.plan === SubscriptionPlan.GOLDWEN_PLUS,
+    );
   }
 }

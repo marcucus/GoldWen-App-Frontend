@@ -20,13 +20,17 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SkipProfileCompletion } from '../auth/decorators/skip-profile-completion.decorator';
 import { ProfilesService } from './profiles.service';
+import { CacheControl } from '../../common/interceptors/cache.interceptor';
+import { CacheStrategy } from '../../common/enums/cache-strategy.enum';
 import {
   UpdateProfileDto,
   SubmitPersonalityAnswersDto,
   UploadPhotosDto,
   SubmitPromptAnswersDto,
   UpdateProfileStatusDto,
+  UpdatePhotoOrderDto,
 } from './dto/profiles.dto';
 
 @ApiTags('profiles')
@@ -37,6 +41,8 @@ export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
   @Get('me')
+  @CacheControl(CacheStrategy.SHORT_CACHE)
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
   async getProfile(@Request() req: any) {
@@ -44,6 +50,7 @@ export class ProfilesController {
   }
 
   @Put('me')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   async updateProfile(
@@ -54,6 +61,7 @@ export class ProfilesController {
   }
 
   @Get('completion')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Get profile completion status' })
   @ApiResponse({ status: 200, description: 'Profile completion status' })
   async getProfileCompletion(@Request() req: any) {
@@ -61,6 +69,8 @@ export class ProfilesController {
   }
 
   @Get('personality-questions')
+  @CacheControl(CacheStrategy.LONG_CACHE)
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Get personality questionnaire questions' })
   @ApiResponse({ status: 200, description: 'Personality questions retrieved' })
   async getPersonalityQuestions() {
@@ -68,6 +78,7 @@ export class ProfilesController {
   }
 
   @Post('me/personality-answers')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Submit personality questionnaire answers' })
   @ApiResponse({
     status: 201,
@@ -77,6 +88,7 @@ export class ProfilesController {
     @Request() req: any,
     @Body() answersDto: SubmitPersonalityAnswersDto,
   ) {
+    console.log('Received personality answers:', answersDto);
     await this.profilesService.submitPersonalityAnswers(
       req.user.id,
       answersDto,
@@ -85,6 +97,7 @@ export class ProfilesController {
   }
 
   @Post('me/photos')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Upload profile photos' })
   @ApiResponse({ status: 201, description: 'Photos uploaded successfully' })
   @ApiConsumes('multipart/form-data')
@@ -97,6 +110,7 @@ export class ProfilesController {
   }
 
   @Delete('me/photos/:photoId')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Delete a profile photo' })
   @ApiResponse({ status: 200, description: 'Photo deleted successfully' })
   async deletePhoto(@Request() req: any, @Param('photoId') photoId: string) {
@@ -105,6 +119,7 @@ export class ProfilesController {
   }
 
   @Put('me/photos/:photoId/primary')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Set photo as primary' })
   @ApiResponse({
     status: 200,
@@ -118,7 +133,8 @@ export class ProfilesController {
   }
 
   @Put('me/photos/:photoId/order')
-  @ApiOperation({ summary: 'Update photo order' })
+  @SkipProfileCompletion()
+  @ApiOperation({ summary: 'Update photo order for drag & drop' })
   @ApiResponse({
     status: 200,
     description: 'Photo order updated successfully',
@@ -126,7 +142,7 @@ export class ProfilesController {
   async updatePhotoOrder(
     @Request() req: any,
     @Param('photoId') photoId: string,
-    @Body() orderDto: { newOrder: number },
+    @Body() orderDto: UpdatePhotoOrderDto,
   ) {
     return this.profilesService.updatePhotoOrder(
       req.user.id,
@@ -136,6 +152,8 @@ export class ProfilesController {
   }
 
   @Get('prompts')
+  @CacheControl(CacheStrategy.LONG_CACHE)
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Get available prompts' })
   @ApiResponse({ status: 200, description: 'Prompts retrieved successfully' })
   async getPrompts() {
@@ -143,6 +161,7 @@ export class ProfilesController {
   }
 
   @Post('me/prompt-answers')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Submit prompt answers' })
   @ApiResponse({
     status: 201,
@@ -159,7 +178,19 @@ export class ProfilesController {
     return { message: 'Prompt answers submitted successfully' };
   }
 
+  @Get('me/prompt-answers')
+  @SkipProfileCompletion()
+  @ApiOperation({ summary: 'Get user prompt answers' })
+  @ApiResponse({
+    status: 200,
+    description: 'User prompt answers retrieved successfully',
+  })
+  async getUserPromptAnswers(@Request() req: any) {
+    return this.profilesService.getUserPromptAnswers(req.user.id);
+  }
+
   @Put('me/status')
+  @SkipProfileCompletion()
   @ApiOperation({ summary: 'Update profile status' })
   @ApiResponse({
     status: 200,

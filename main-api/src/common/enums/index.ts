@@ -55,6 +55,7 @@ export enum NotificationType {
   CHAT_EXPIRING = 'chat_expiring',
   SUBSCRIPTION_EXPIRED = 'subscription_expired',
   SUBSCRIPTION_RENEWED = 'subscription_renewed',
+  SYSTEM = 'system',
 }
 
 export enum QuestionType {
@@ -67,6 +68,12 @@ export enum AdminRole {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   MODERATOR = 'moderator',
+}
+
+export enum UserRole {
+  USER = 'user',
+  MODERATOR = 'moderator',
+  ADMIN = 'admin',
 }
 
 export enum ReportStatus {
@@ -83,3 +90,14 @@ export enum ReportType {
   SPAM = 'spam',
   OTHER = 'other',
 }
+
+export enum FontSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+  XLARGE = 'xlarge',
+}
+
+// Export new enums
+export * from './error-codes.enum';
+export * from './cache-strategy.enum';

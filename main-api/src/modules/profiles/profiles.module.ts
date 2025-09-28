@@ -6,8 +6,10 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 import { ProfilesController } from './profiles.controller';
+import { PersonalityController } from './personality.controller';
 import { ProfilesService } from './profiles.service';
 import { DatabaseSeederService } from './database-seeder.service';
+import { ProfileCompletionGuard } from '../auth/guards/profile-completion.guard';
 
 import { Profile } from '../../database/entities/profile.entity';
 import { User } from '../../database/entities/user.entity';
@@ -31,20 +33,56 @@ import { PromptAnswer } from '../../database/entities/prompt-answer.entity';
     MulterModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         storage: diskStorage({
-          destination: './uploads/photos',
+          destination: (req, file, callback) => {
+            const uploadPath = './uploads/photos';
+            // Ensure directory exists
+            if (!require('fs').existsSync(uploadPath)) {
+              require('fs').mkdirSync(uploadPath, { recursive: true });
+            }
+            callback(null, uploadPath);
+          },
           filename: (req, file, callback) => {
             const uniqueSuffix =
               Date.now() + '-' + Math.round(Math.random() * 1e9);
             const ext = extname(file.originalname);
-            callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+            callback(null, `photo-${uniqueSuffix}${ext}`);
           },
         }),
         fileFilter: (req, file, callback) => {
-          if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-            callback(new Error('Only image files are allowed!'), false);
-          } else {
+          console.log('File upload attempt:', {
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size
+          });
+          
+          // Check for valid image MIME types
+          const validMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+          
+          // Primary check: MIME type
+          if (validMimeTypes.includes(file.mimetype.toLowerCase())) {
+            console.log('Accepted file type:', file.mimetype);
             callback(null, true);
+            return;
           }
+          
+          // Fallback: Check file extension if MIME type is application/octet-stream
+          if (file.mimetype === 'application/octet-stream' && file.originalname) {
+            const extension = file.originalname.split('.').pop()?.toLowerCase();
+            const validExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            
+            if (extension && validExtensions.includes(extension)) {
+              console.log('Accepted file based on extension:', extension);
+              callback(null, true);
+              return;
+            }
+          }
+          
+          // Reject if neither MIME type nor extension is valid
+          console.log('Rejected file type:', file.mimetype);
+          callback(
+            new Error(`Only image files (JPEG, PNG, WebP) are allowed! Received: ${file.mimetype}`),
+            false,
+          );
         },
         limits: {
           fileSize: 10 * 1024 * 1024, // 10MB limit
@@ -54,8 +92,8 @@ import { PromptAnswer } from '../../database/entities/prompt-answer.entity';
       inject: [ConfigService],
     }),
   ],
-  providers: [ProfilesService, DatabaseSeederService],
-  controllers: [ProfilesController],
-  exports: [ProfilesService],
+  providers: [ProfilesService, DatabaseSeederService, ProfileCompletionGuard],
+  controllers: [ProfilesController, PersonalityController],
+  exports: [ProfilesService, ProfileCompletionGuard],
 })
 export class ProfilesModule {}

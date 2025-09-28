@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsNumber,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MessageType } from '../../../common/enums';
@@ -41,4 +42,10 @@ export class ExtendChatDto {
   @IsNumber()
   @Min(1)
   hours?: number = 24;
+}
+
+export class AcceptChatDto {
+  @ApiProperty({ description: 'Whether to accept the chat request' })
+  @IsBoolean()
+  accept: boolean;
 }

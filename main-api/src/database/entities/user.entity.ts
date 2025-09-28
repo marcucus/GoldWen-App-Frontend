@@ -8,7 +8,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
-import { UserStatus } from '../../common/enums';
+import { UserStatus, FontSize, UserRole } from '../../common/enums';
 import { Profile } from './profile.entity';
 import { PersonalityAnswer } from './personality-answer.entity';
 import { DailySelection } from './daily-selection.entity';
@@ -18,6 +18,9 @@ import { Subscription } from './subscription.entity';
 import { Notification } from './notification.entity';
 import { NotificationPreferences } from './notification-preferences.entity';
 import { Report } from './report.entity';
+import { SupportTicket } from './support-ticket.entity';
+import { PushToken } from './push-token.entity';
+import { UserConsent } from './user-consent.entity';
 
 @Entity('users')
 @Index(['email'], { unique: true })
@@ -44,6 +47,13 @@ export class User {
     default: UserStatus.ACTIVE,
   })
   status?: UserStatus;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role?: UserRole;
 
   @Column({ default: false })
   isEmailVerified?: boolean;
@@ -74,6 +84,23 @@ export class User {
 
   @Column({ default: true })
   notificationsEnabled?: boolean;
+
+  // Accessibility Settings
+  @Column({
+    type: 'enum',
+    enum: FontSize,
+    default: FontSize.MEDIUM,
+  })
+  fontSize?: FontSize;
+
+  @Column({ default: false })
+  highContrast?: boolean;
+
+  @Column({ default: false })
+  reducedMotion?: boolean;
+
+  @Column({ default: false })
+  screenReader?: boolean;
 
   @CreateDateColumn()
   createdAt?: Date;
@@ -119,4 +146,13 @@ export class User {
 
   @OneToMany(() => Report, (report) => report.reportedUser)
   reportsReceived?: Report[];
+
+  @OneToMany(() => SupportTicket, (ticket) => ticket.user)
+  supportTickets?: SupportTicket[];
+
+  @OneToMany(() => PushToken, (pushToken) => pushToken.user, { cascade: true })
+  pushTokens?: PushToken[];
+
+  @OneToMany(() => UserConsent, (consent) => consent.user, { cascade: true })
+  consents?: UserConsent[];
 }

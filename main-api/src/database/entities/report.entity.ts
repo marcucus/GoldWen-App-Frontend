@@ -11,6 +11,8 @@ import {
 import { ReportStatus, ReportType } from '../../common/enums';
 import { User } from './user.entity';
 import { Admin } from './admin.entity';
+import { Message } from './message.entity';
+import { Chat } from './chat.entity';
 
 @Entity('reports')
 export class Report {
@@ -45,10 +47,16 @@ export class Report {
   description: string;
 
   @Column({ type: 'text', nullable: true })
-  evidence: string; // URLs or file paths to evidence
+  evidence?: string; // URLs or file paths to evidence
 
   @Column({ nullable: true })
-  reviewedById: string;
+  messageId?: string; // Optional: specific message being reported
+
+  @Column({ nullable: true })
+  chatId?: string; // Optional: chat where incident occurred
+
+  @Column({ nullable: true })
+  reviewedById?: string;
 
   @Column({ nullable: true })
   reviewedAt: Date;
@@ -81,4 +89,12 @@ export class Report {
   @ManyToOne(() => Admin)
   @JoinColumn({ name: 'reviewedById' })
   reviewedBy: Admin;
+
+  @ManyToOne(() => Message, { nullable: true })
+  @JoinColumn({ name: 'messageId' })
+  message?: Message;
+
+  @ManyToOne(() => Chat, { nullable: true })
+  @JoinColumn({ name: 'chatId' })
+  chat?: Chat;
 }

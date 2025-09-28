@@ -28,8 +28,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final _nameController = TextEditingController();
   DateTime? _birthDate;
   final _bioController = TextEditingController();
-  final List<TextEditingController> _promptControllers =
-      List.generate(3, (index) => TextEditingController()); // Should be 3 prompts as per requirements
+  final List<TextEditingController> _promptControllers = List.generate(
+      10,
+      (index) =>
+          TextEditingController()); // Should be 10 prompts as per requirements
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
@@ -46,21 +48,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
     // Load prompts from backend
     _loadPrompts();
-    
+
     // Initialize to the correct page based on profile completion
     _initializeCurrentPage();
   }
 
   void _initializeCurrentPage() async {
     // Load profile completion status and navigate to first missing step
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
     await profileProvider.loadProfileCompletion();
-    
+
     if (mounted) {
       final completion = profileProvider.profileCompletion;
       if (completion != null && !completion.isCompleted) {
         int targetPage = 0;
-        
+
         // Determine which page to show first based on missing steps
         if (!completion.hasRequiredProfileFields) {
           targetPage = 0; // Basic info page
@@ -69,9 +72,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         } else if (!completion.hasPrompts) {
           targetPage = 2; // Prompts page
         } else {
-          targetPage = 3; // Validation page
+          targetPage = 10; // Validation page
         }
-        
+
         // Navigate to the appropriate page without animation
         if (targetPage != _currentPage) {
           setState(() {
@@ -89,22 +92,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.loadPrompts();
 
-      // Select first 3 prompts automatically
-      if (profileProvider.availablePrompts.length >= 3) {
+      // Select first 10 prompts automatically
+      if (profileProvider.availablePrompts.length >= 10) {
         setState(() {
           _selectedPromptIds = profileProvider.availablePrompts
-              .take(3) // Should be 3 prompts as per requirements
+              .take(10) // Should be 10 prompts as per requirements
               .map((prompt) => prompt.id)
               .toList();
           _promptQuestions = profileProvider.availablePrompts
-              .take(3) // Should be 3 prompts as per requirements
+              .take(10) // Should be 10 prompts as per requirements
               .map((prompt) => prompt.text)
               .toList();
         });
       } else {
         // If we don't have enough prompts, show error
         throw Exception(
-            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 3 to 10
+            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 10 to 10
       }
     } catch (e) {
       print('Error loading prompts: $e');
@@ -263,7 +266,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               labelText: 'Bio',
               hintText: 'Décrivez-vous en quelques mots...',
             ),
-            maxLines: 3,
+            maxLines: 10,
             maxLength: 200,
           ),
 
@@ -296,7 +299,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Ajoutez au moins 3 photos pour continuer',
+            'Ajoutez au moins 10 photos pour continuer',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -311,7 +314,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   onPhotosChanged: (photos) {
                     profileProvider.updatePhotos(photos);
                   },
-                  minPhotos: 3,
+                  minPhotos: 10,
                   maxPhotos: 6,
                   showAddButton: true,
                 );
@@ -324,8 +327,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed:
-                      profileProvider.photos.length >= 3 ? _nextPage : null,
-                  child: Text('Continuer (${profileProvider.photos.length}/3)'),
+                      profileProvider.photos.length >= 10 ? _nextPage : null,
+                  child:
+                      Text('Continuer (${profileProvider.photos.length}/10)'),
                 ),
               );
             },
@@ -360,7 +364,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             child: _promptQuestions.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: 3, // Should be 3 prompts as per requirements
+                    itemCount: 10, // Should be 10 prompts as per requirements
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
                       final questionText = index < _promptQuestions.length
@@ -380,10 +384,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             TextFormField(
                               controller: _promptControllers[index],
                               decoration: InputDecoration(
-                                hintText: 'Votre réponse... (max 300 caractères)',
-                                counterText: '${_promptControllers[index].text.length}/300',
+                                hintText:
+                                    'Votre réponse... (max 300 caractères)',
+                                counterText:
+                                    '${_promptControllers[index].text.length}/300',
                               ),
-                              maxLines: 3,
+                              maxLines: 10,
                               maxLength: 300,
                               onChanged: (text) {
                                 setState(() {
@@ -404,17 +410,25 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _getValidAnswersCount() == 3 ? Icons.check_circle : Icons.pending,
-                  color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
+                  _getValidAnswersCount() == 10
+                      ? Icons.check_circle
+                      : Icons.pending,
+                  color: _getValidAnswersCount() == 10
+                      ? Colors.green
+                      : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/3',
+                  'Réponses complétées: ${_getValidAnswersCount()}/10',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: _getValidAnswersCount() == 3 ? Colors.green : AppColors.textSecondary,
-                    fontWeight: _getValidAnswersCount() == 3 ? FontWeight.w600 : FontWeight.normal,
-                  ),
+                        color: _getValidAnswersCount() == 10
+                            ? Colors.green
+                            : AppColors.textSecondary,
+                        fontWeight: _getValidAnswersCount() == 10
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
                 ),
               ],
             ),
@@ -424,9 +438,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             child: ElevatedButton(
               onPressed: _arePromptsValid() ? _nextPage : null,
               child: Text(
-                _arePromptsValid() 
-                  ? 'Continuer' 
-                  : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
+                _arePromptsValid()
+                    ? 'Continuer'
+                    : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
               ),
             ),
           ),
@@ -456,7 +470,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xxl),
-          
           Expanded(
             child: SingleChildScrollView(
               child: Consumer<ProfileProvider>(
@@ -469,17 +482,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ),
             ),
           ),
-          
           const Spacer(),
           SizedBox(
             width: double.infinity,
             child: Consumer<ProfileProvider>(
               builder: (context, profileProvider, child) {
-                final isComplete = profileProvider.profileCompletion?.isCompleted ?? false;
+                final isComplete =
+                    profileProvider.profileCompletion?.isCompleted ?? false;
                 return ElevatedButton(
                   onPressed: isComplete ? _nextPage : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isComplete ? AppColors.primaryGold : AppColors.textTertiary,
+                    backgroundColor: isComplete
+                        ? AppColors.primaryGold
+                        : AppColors.textTertiary,
                   ),
                   child: Text(
                     isComplete ? 'Continuer' : 'Profil incomplet',
@@ -496,9 +511,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _handleMissingStepTap() {
     // Navigate to the appropriate page based on missing steps
-    final completion = Provider.of<ProfileProvider>(context, listen: false).profileCompletion;
+    final completion =
+        Provider.of<ProfileProvider>(context, listen: false).profileCompletion;
     if (completion == null) return;
-    
+
     if (!completion.hasRequiredProfileFields) {
       // Go to basic info page
       _goToPage(0);
@@ -512,7 +528,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       // Show message about personality questionnaire
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vous devez d\'abord compléter le questionnaire de personnalité'),
+          content: Text(
+              'Vous devez d\'abord compléter le questionnaire de personnalité'),
         ),
       );
     }
@@ -569,7 +586,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Chaque jour à 12h00, nous vous proposerons 3-5 profils soigneusement sélectionnés selon vos affinités.',
+                  'Chaque jour à 12h00, nous vous proposerons 10-5 profils soigneusement sélectionnés selon vos affinités.',
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -597,17 +614,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    // Should be 3 prompts as per requirements
-    if (_promptControllers.length != 3) return false;
-    
-    // All 3 controllers must have non-empty text within character limit
+    // Should be 10 prompts as per requirements
+    if (_promptControllers.length != 10) return false;
+
+    // All 10 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
       if (text.isEmpty || text.length > 300) {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -661,10 +678,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _nextPage() async {
     if (_currentPage < 4) {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-      
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+
       // Save basic info when leaving basic info page
-      if (_currentPage == 0) { // Moving from basic info to photos
+      if (_currentPage == 0) {
+        // Moving from basic info to photos
         if (_birthDate != null) {
           profileProvider.setBasicInfo(
             _nameController.text.trim(),
@@ -674,9 +693,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           );
         }
       }
-      
+
       // Save prompt answers when leaving prompts page
-      if (_currentPage == 2) { // Moving from prompts to validation
+      if (_currentPage == 2) {
+        // Moving from prompts to validation
         try {
           // Show loading indicator
           showDialog(
@@ -696,43 +716,46 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               birthDate: _birthDate,
             );
           }
-          
+
           // Set prompt answers in provider
-          for (int i = 0; i < _promptControllers.length && i < _selectedPromptIds.length; i++) {
+          for (int i = 0;
+              i < _promptControllers.length && i < _selectedPromptIds.length;
+              i++) {
             if (_promptControllers[i].text.isNotEmpty) {
-              profileProvider.setPromptAnswer(_selectedPromptIds[i], _promptControllers[i].text.trim());
+              profileProvider.setPromptAnswer(
+                  _selectedPromptIds[i], _promptControllers[i].text.trim());
             }
           }
-          
+
           // Persist profile data to backend
           await profileProvider.saveProfile();
-          
+
           // Persist prompt answers to backend
           await profileProvider.submitPromptAnswers();
-          
+
           // Load updated completion status from backend
           await profileProvider.loadProfileCompletion();
-          
+
           // Hide loading indicator
           if (mounted) Navigator.of(context).pop();
         } catch (e) {
           // Hide loading indicator
           if (mounted) Navigator.of(context).pop();
-          
+
           print('Error saving profile data: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Erreur lors de la sauvegarde: $e'),
                 backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
+                duration: const Duration(seconds: 10),
               ),
             );
           }
           return; // Don't proceed to next page if save failed
         }
       }
-      
+
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -799,17 +822,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       return;
     }
 
-    // Validate prompt answers - must have exactly 3 valid responses
-    if (_promptControllers.length != 3) {
+    // Validate prompt answers - must have exactly 10 valid responses
+    if (_promptControllers.length != 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: 3 prompts requis pour continuer'),
+          content: Text('Erreur: 10 prompts requis pour continuer'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
-    
+
     for (int i = 0; i < _promptControllers.length; i++) {
       final text = _promptControllers[i].text.trim();
       if (text.isEmpty) {
@@ -821,11 +844,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         );
         return;
       }
-      
+
       if (text.length > 300) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('La réponse ${i + 1} dépasse 300 caractères (${text.length}/300)'),
+            content: Text(
+                'La réponse ${i + 1} dépasse 300 caractères (${text.length}/300)'),
             backgroundColor: Colors.red,
           ),
         );
@@ -884,16 +908,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
       // Check if profile is complete and validate for activation
       await profileProvider.loadProfileCompletion();
-      
+
       if (profileProvider.profileCompletion?.isCompleted ?? false) {
         // Profile is complete, can activate
         await profileProvider.validateAndActivateProfile();
         print('Profile validated and activated successfully');
-        
+
         // Refresh user data to get updated completion status from backend
         await authProvider.refreshUser();
         print('User data refreshed successfully');
-        
+
         // Close loading dialog and navigate using GoRouter
         if (mounted) {
           // Close dialog first
@@ -906,7 +930,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         // Profile is not complete, show missing steps
         if (mounted) {
           context.pop(); // Close loading dialog
-          
+
           _showProfileIncompleteDialog(profileProvider.profileCompletion);
         }
       }
@@ -946,19 +970,26 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Votre profil n\'est pas encore complet. Étapes manquantes:'),
+            const Text(
+                'Votre profil n\'est pas encore complet. Étapes manquantes:'),
             const SizedBox(height: 8),
             if (completion?.missingSteps.isNotEmpty ?? false)
-              ...completion!.missingSteps.map((step) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.arrow_right, size: 16, color: AppColors.warningAmber),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(step, style: Theme.of(context).textTheme.bodySmall)),
-                  ],
-                ),
-              )).toList(),
+              ...completion!.missingSteps
+                  .map((step) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.arrow_right,
+                                size: 16, color: AppColors.warningAmber),
+                            const SizedBox(width: 8),
+                            Expanded(
+                                child: Text(step,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall)),
+                          ],
+                        ),
+                      ))
+                  .toList(),
           ],
         ),
         actions: [

@@ -14,6 +14,10 @@ import {
   ReportType,
   NotificationType,
 } from '../../../common/enums';
+import {
+  SupportStatus,
+  SupportPriority,
+} from '../../../database/entities/support-ticket.entity';
 
 export class AdminLoginDto {
   @ApiProperty()
@@ -111,4 +115,24 @@ export class BroadcastNotificationDto {
   @IsOptional()
   @IsString()
   targetAudience?: string; // 'all', 'premium', 'active', etc.
+}
+
+export class SupportReplyDto {
+  @ApiProperty()
+  @IsString()
+  ticketId: string;
+
+  @ApiProperty()
+  @IsString()
+  reply: string;
+
+  @ApiPropertyOptional({ enum: SupportStatus })
+  @IsOptional()
+  @IsEnum(SupportStatus)
+  status?: SupportStatus;
+
+  @ApiPropertyOptional({ enum: SupportPriority })
+  @IsOptional()
+  @IsEnum(SupportPriority)
+  priority?: SupportPriority;
 }

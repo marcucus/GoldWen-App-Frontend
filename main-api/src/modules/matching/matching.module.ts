@@ -6,6 +6,7 @@ import { MatchingService } from './matching.service';
 import { MatchingIntegrationService } from './matching-integration.service';
 import { ChatModule } from '../chat/chat.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 import { User } from '../../database/entities/user.entity';
 import { Profile } from '../../database/entities/profile.entity';
@@ -26,6 +27,7 @@ import { Subscription } from '../../database/entities/subscription.entity';
     ]),
     forwardRef(() => ChatModule),
     forwardRef(() => NotificationsModule),
+    ProfilesModule,
   ],
   providers: [MatchingService, MatchingIntegrationService],
   controllers: [MatchingController],

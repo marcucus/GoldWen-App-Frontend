@@ -2,6 +2,8 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { CustomLoggerService } from './common/logger';
+import { CacheControl } from './common/interceptors/cache.interceptor';
+import { CacheStrategy } from './common/enums/cache-strategy.enum';
 
 @ApiTags('app')
 @Controller()
@@ -20,10 +22,11 @@ export class AppController {
   }
 
   @Get('health')
+  @CacheControl(CacheStrategy.SHORT_CACHE)
   @ApiOperation({ summary: 'Health check endpoint' })
   @ApiResponse({ status: 200, description: 'Service health status' })
-  getHealth() {
-    const healthData = this.appService.getHealth();
+  async getHealth() {
+    const healthData = await this.appService.getHealth();
 
     this.logger.info('Health check requested', {
       status: healthData.status,

@@ -169,24 +169,6 @@ export class CustomLoggerService implements LoggerService {
     });
   }
 
-  // User action logging
-  logUserAction(action: string, userId: string, meta?: any) {
-    this.info(`User action: ${action}`, {
-      action,
-      userId,
-      ...meta,
-    });
-  }
-
-  // Security event logging
-  logSecurityEvent(event: string, details: any) {
-    this.warn(`Security event: ${event}`, {
-      action: 'security_event',
-      event,
-      ...details,
-    });
-  }
-
   // Business logic logging
   logBusinessEvent(event: string, details: any) {
     this.info(`Business event: ${event}`, {
@@ -221,6 +203,79 @@ export class CustomLoggerService implements LoggerService {
       method,
       responseTime: responseTime ? `${responseTime}ms` : undefined,
       statusCode,
+    });
+  }
+
+  // Security event logging
+  logSecurityEvent(
+    event: string,
+    details: any,
+    level: 'info' | 'warn' | 'error' = 'warn',
+  ) {
+    const logData = {
+      action: 'security_event',
+      event,
+      timestamp: new Date().toISOString(),
+      traceId: this.context.traceId,
+      userId: this.context.userId,
+      ipAddress: this.context.ipAddress,
+      userAgent: this.context.userAgent,
+      ...details,
+    };
+
+    switch (level) {
+      case 'error':
+        this.error(`Security event: ${event}`, undefined, 'SecurityLogger');
+        this.info('Security event details', logData);
+        break;
+      case 'warn':
+        this.warn(`Security event: ${event}`, 'SecurityLogger');
+        this.info('Security event details', logData);
+        break;
+      default:
+        this.info(`Security event: ${event}`, logData);
+    }
+  }
+
+  // Audit trail logging for GDPR compliance
+  logAuditTrail(action: string, resource: string, details: any) {
+    this.info(`Audit: ${action} on ${resource}`, {
+      action: 'audit_trail',
+      auditAction: action,
+      resource,
+      timestamp: new Date().toISOString(),
+      userId: this.context.userId,
+      traceId: this.context.traceId,
+      ...details,
+    });
+  }
+
+  // Performance monitoring
+  logPerformanceMetric(
+    metric: string,
+    value: number,
+    unit: string,
+    metadata?: any,
+  ) {
+    this.info(`Performance metric: ${metric}`, {
+      action: 'performance_metric',
+      metric,
+      value,
+      unit,
+      timestamp: new Date().toISOString(),
+      ...metadata,
+    });
+  }
+
+  // User action logging for analytics
+  logUserAction(action: string, details: any) {
+    this.info(`User action: ${action}`, {
+      action: 'user_action',
+      userAction: action,
+      userId: this.context.userId,
+      timestamp: new Date().toISOString(),
+      traceId: this.context.traceId,
+      ...details,
     });
   }
 }

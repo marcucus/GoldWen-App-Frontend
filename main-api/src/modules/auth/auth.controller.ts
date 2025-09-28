@@ -107,7 +107,9 @@ export class AuthController {
 
   private client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  @Post('googleLogin')
+  @ApiOperation({ summary: 'Google social authentication with ID token' })
+  @ApiResponse({ status: 200, description: 'Google authentication successful' })
+  @Post('google')
   async googleLogin(@Body('idToken') idToken: string) {
     const ticket = await this.client.verifyIdToken({
       idToken,
@@ -145,6 +147,34 @@ export class AuthController {
   @UseGuards(AuthGuard('apple'))
   async appleAuth() {
     // This will redirect to Apple
+  }
+
+  @ApiOperation({ summary: 'Apple social authentication with identity token' })
+  @ApiResponse({ status: 200, description: 'Apple authentication successful' })
+  @Post('apple')
+  async appleLogin(
+    @Body() appleTokenDto: { identityToken: string; user?: any },
+  ) {
+    // For now, return placeholder implementation
+    // In a real implementation, you would verify the Apple identity token
+    const { identityToken, user } = appleTokenDto;
+
+    // Apple token verification logic would go here
+    // For development, we'll create a mock response based on the token
+    if (!identityToken) {
+      throw new Error('Identity token is required');
+    }
+
+    // Mock Apple user data for development
+    const appleUserData = {
+      socialId: `apple_${Date.now()}`,
+      provider: 'apple',
+      email: user?.email || 'apple.user@privaterelay.appleid.com',
+      firstName: user?.name?.firstName || 'Apple',
+      lastName: user?.name?.lastName || 'User',
+    };
+
+    return this.authService.socialLogin(appleUserData);
   }
 
   @ApiOperation({ summary: 'Apple OAuth callback' })

@@ -10,6 +10,7 @@ import {
   EmailConfig,
   MatchingServiceConfig,
   RevenueCatConfig,
+  MonitoringConfig,
 } from './config.interface';
 
 export const databaseConfig = registerAs(
@@ -107,5 +108,34 @@ export const revenueCatConfig = registerAs(
   'revenueCat',
   (): RevenueCatConfig => ({
     apiKey: process.env.REVENUECAT_API_KEY || '',
+  }),
+);
+
+export const monitoringConfig = registerAs(
+  'monitoring',
+  (): MonitoringConfig => ({
+    sentry: {
+      dsn: process.env.SENTRY_DSN || '',
+      environment: process.env.NODE_ENV || 'development',
+      tracesSampleRate: parseFloat(
+        process.env.SENTRY_TRACES_SAMPLE_RATE || '0.1',
+      ),
+      profilesSampleRate: parseFloat(
+        process.env.SENTRY_PROFILES_SAMPLE_RATE || '0.01',
+      ),
+    },
+    datadog: process.env.DATADOG_API_KEY && process.env.DATADOG_APP_KEY ? {
+      apiKey: process.env.DATADOG_API_KEY,
+      appKey: process.env.DATADOG_APP_KEY,
+    } : undefined,
+    alerts: {
+      webhookUrl: process.env.ALERTS_WEBHOOK_URL,
+      slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
+      emailRecipients: process.env.ALERT_EMAIL_RECIPIENTS
+        ? process.env.ALERT_EMAIL_RECIPIENTS.split(',').map((email) =>
+            email.trim(),
+          )
+        : [],
+    },
   }),
 );

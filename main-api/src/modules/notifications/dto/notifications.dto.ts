@@ -115,3 +115,29 @@ export class TestNotificationDto {
   @IsEnum(NotificationType)
   type?: NotificationType = NotificationType.DAILY_SELECTION;
 }
+
+export class SendGroupNotificationDto {
+  @ApiProperty({
+    description: 'User IDs to send notification to',
+    type: [String],
+  })
+  @IsString({ each: true })
+  userIds: string[];
+
+  @ApiProperty({ description: 'Notification type', enum: NotificationType })
+  @IsEnum(NotificationType)
+  type: NotificationType;
+
+  @ApiProperty({ description: 'Notification title' })
+  @IsString()
+  title: string;
+
+  @ApiProperty({ description: 'Notification body' })
+  @IsString()
+  body: string;
+
+  @ApiPropertyOptional({ description: 'Additional notification data' })
+  @IsOptional()
+  @IsObject()
+  data?: any;
+}

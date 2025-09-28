@@ -5,8 +5,9 @@ import {
   CallHandler,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { CustomLoggerService } from '../logger';
+import { SuccessResponseDto, ResponseMetadata } from '../dto/response.dto';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
@@ -18,22 +19,69 @@ export class ResponseInterceptor implements NestInterceptor {
     const startTime = Date.now();
 
     return next.handle().pipe(
-      tap((data) => {
+      map((data) => {
         const endTime = Date.now();
-        const duration = endTime - startTime;
+        const processingTime = endTime - startTime;
+
+        // Add performance headers
+        response.setHeader('X-Response-Time', `${processingTime}ms`);
+        response.setHeader('X-Request-ID', this.generateRequestId());
+
+        // Optimize response time warning
+        if (processingTime > 1000) {
+          this.logger.warn(
+            `Slow response detected: ${processingTime}ms`,
+            'ResponseInterceptor',
+          );
+        }
 
         // Log successful responses
         this.logger.info('HTTP Response', {
           method: request.method,
           url: request.url,
           statusCode: response.statusCode,
-          duration: `${duration}ms`,
+          duration: `${processingTime}ms`,
           userAgent: request.headers['user-agent'],
           ip: request.ip,
           userId: request.user?.id,
-          dataSize: JSON.stringify(data).length,
+          dataSize: data ? JSON.stringify(data).length : 0,
         });
+
+        // Enhance response with metadata if it's not already structured
+        if (data && typeof data === 'object') {
+          // If it's already a structured response, enhance metadata
+          if ('success' in data || 'message' in data) {
+            const metadata: ResponseMetadata = {
+              ...data.metadata,
+              requestId: this.generateRequestId(),
+              processingTime,
+              loadingState: 'success',
+            };
+
+            return {
+              ...data,
+              metadata,
+            };
+          } else {
+            // Wrap raw data in success response
+            return new SuccessResponseDto(
+              'Operation completed successfully',
+              data,
+              {
+                requestId: this.generateRequestId(),
+                processingTime,
+                loadingState: 'success',
+              },
+            );
+          }
+        }
+
+        return data;
       }),
     );
+  }
+
+  private generateRequestId(): string {
+    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

@@ -137,41 +137,16 @@ export class SubscriptionsController {
     return { status: 'ok' };
   }
 
-  /* TODO: Implement these methods in the service
-  @Post('purchase')
+  @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Purchase a subscription' })
-  @ApiResponse({
-    status: 201,
-    description: 'Subscription purchased successfully',
-  })
-  async purchaseSubscription(
-    @Request() req: any,
-    @Body() purchaseDto: any, // Will define proper DTO
-  ) {
-    return this.subscriptionsService.purchaseSubscription(
-      req.user.id,
-      purchaseDto,
-    );
-  }
-
-  @Post('verify-receipt')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Verify a purchase receipt' })
+  @ApiOperation({ summary: 'Get current user subscription' })
   @ApiResponse({
     status: 200,
-    description: 'Receipt verified successfully',
+    description: 'Current subscription retrieved successfully',
   })
-  async verifyReceipt(
-    @Request() req: any,
-    @Body() verifyDto: any, // Will define proper DTO
-  ) {
-    return this.subscriptionsService.verifyReceipt(
-      req.user.id,
-      verifyDto,
-    );
+  async getCurrentSubscription(@Request() req: any) {
+    return this.subscriptionsService.getActiveSubscription(req.user.id);
   }
 
   @Put('cancel')
@@ -184,7 +159,7 @@ export class SubscriptionsController {
   })
   async cancelUserSubscription(
     @Request() req: any,
-    @Body() cancelDto?: any,
+    @Body() cancelDto?: { reason?: string },
   ) {
     return this.subscriptionsService.cancelUserSubscription(
       req.user.id,
@@ -225,7 +200,36 @@ export class SubscriptionsController {
   async getPlans() {
     return this.subscriptionsService.getPlans();
   }
-  */
+
+  @Get('tier')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user subscription tier and features' })
+  @ApiResponse({
+    status: 200,
+    description: 'User subscription tier retrieved successfully',
+  })
+  async getUserTier(@Request() req: any) {
+    return this.subscriptionsService.getUserSubscriptionTier(req.user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete/Cancel a subscription by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Subscription cancelled successfully',
+  })
+  async deleteSubscription(
+    @Request() req: any,
+    @Param('id') subscriptionId: string,
+  ) {
+    return this.subscriptionsService.cancelSubscription(
+      subscriptionId,
+      req.user.id,
+    );
+  }
 
   // Admin endpoints
   @Get('admin/stats')

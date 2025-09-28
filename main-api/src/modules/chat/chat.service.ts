@@ -3,15 +3,18 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Or, In, Not, LessThan } from 'typeorm';
+import { Repository, Or, In, Not, LessThan, Between } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { Chat } from '../../database/entities/chat.entity';
 import { Message } from '../../database/entities/message.entity';
 import { Match } from '../../database/entities/match.entity';
 import { User } from '../../database/entities/user.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 import { ChatStatus, MessageType, MatchStatus } from '../../common/enums';
 import { SendMessageDto } from './dto/chat.dto';
@@ -27,6 +30,8 @@ export class ChatService {
     private matchRepository: Repository<Match>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
   // Automatically expire chats every hour
@@ -44,6 +49,55 @@ export class ChatService {
     for (const chat of expiredChats) {
       chat.status = ChatStatus.EXPIRED;
       await this.chatRepository.save(chat);
+    }
+  }
+
+  // Send expiration warnings 2 hours before chat expires
+  @Cron(CronExpression.EVERY_HOUR)
+  async warnAboutExpiringChats() {
+    const now = new Date();
+    const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+    const expiringChats = await this.chatRepository.find({
+      where: {
+        status: ChatStatus.ACTIVE,
+        expiresAt: Between(twoHoursFromNow, threeHoursFromNow),
+      },
+      relations: [
+        'match',
+        'match.user1',
+        'match.user1.profile',
+        'match.user2',
+        'match.user2.profile',
+      ],
+    });
+
+    for (const chat of expiringChats) {
+      const hoursLeft = Math.ceil(
+        (chat.expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60),
+      );
+
+      // Send notification to both users
+      const user1 = chat.match.user1;
+      const user2 = chat.match.user2;
+
+      try {
+        await this.notificationsService.sendChatExpiringNotification(
+          user1.id,
+          user2.profile?.firstName || 'votre match',
+          hoursLeft,
+        );
+
+        await this.notificationsService.sendChatExpiringNotification(
+          user2.id,
+          user1.profile?.firstName || 'votre match',
+          hoursLeft,
+        );
+      } catch (error) {
+        // Log error but don't throw to avoid stopping other notifications
+        console.error('Failed to send chat expiring notifications:', error);
+      }
     }
   }
 
@@ -76,6 +130,94 @@ export class ChatService {
     });
 
     return this.chatRepository.save(chat);
+  }
+
+  async acceptChatRequest(
+    matchId: string,
+    userId: string,
+    accept: boolean,
+  ): Promise<{
+    success: boolean;
+    data: {
+      chatId?: string;
+      match: any;
+      expiresAt?: string;
+    };
+  }> {
+    // Find the match where current user is the target (user2)
+    const match = await this.matchRepository.findOne({
+      where: {
+        id: matchId,
+        user2Id: userId,
+        status: MatchStatus.MATCHED,
+      },
+      relations: ['user1', 'user1.profile', 'user2', 'user2.profile'],
+    });
+
+    if (!match) {
+      throw new NotFoundException(
+        'Match not found or you are not authorized to accept this match',
+      );
+    }
+
+    // Check if chat already exists
+    const existingChat = await this.chatRepository.findOne({
+      where: { matchId },
+    });
+
+    if (existingChat && existingChat.status === ChatStatus.ACTIVE) {
+      throw new BadRequestException('Chat has already been accepted');
+    }
+
+    if (accept) {
+      // Create the chat
+      const chat = await this.createChatForMatch(matchId);
+
+      // Send notifications to both users about chat acceptance
+      try {
+        await this.notificationsService.sendChatAcceptedNotification(
+          match.user1Id, // Original initiator
+          match.user2.profile?.firstName || 'Someone',
+        );
+
+        await this.notificationsService.sendChatAcceptedNotification(
+          match.user2Id, // User who accepted
+          match.user1.profile?.firstName || 'Someone',
+        );
+      } catch (error) {
+        // Log error but don't fail the whole operation
+        console.error('Failed to send chat acceptance notifications:', error);
+      }
+
+      return {
+        success: true,
+        data: {
+          chatId: chat.id,
+          match: {
+            id: match.id,
+            user1: match.user1,
+            user2: match.user2,
+            matchedAt: match.matchedAt,
+          },
+          expiresAt: chat.expiresAt.toISOString(),
+        },
+      };
+    } else {
+      // User declined the chat - update match status or delete it
+      // For now, we'll just mark the match as rejected
+      match.status = MatchStatus.REJECTED;
+      await this.matchRepository.save(match);
+
+      return {
+        success: true,
+        data: {
+          match: {
+            id: match.id,
+            status: 'rejected',
+          },
+        },
+      };
+    }
   }
 
   async getChatByMatchId(matchId: string, userId: string): Promise<Chat> {

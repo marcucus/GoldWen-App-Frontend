@@ -17,12 +17,18 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ProfileCompletionGuard } from '../auth/guards/profile-completion.guard';
 import { ChatService } from './chat.service';
-import { SendMessageDto, GetMessagesDto, ExtendChatDto } from './dto/chat.dto';
+import {
+  SendMessageDto,
+  GetMessagesDto,
+  ExtendChatDto,
+  AcceptChatDto,
+} from './dto/chat.dto';
 
 @ApiTags('chat')
 @Controller('chat')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ProfileCompletionGuard)
 @ApiBearerAuth()
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -115,6 +121,24 @@ export class ChatController {
       chatId,
       req.user.id,
       extendChatDto.hours,
+    );
+  }
+
+  @Post('accept/:matchId')
+  @ApiOperation({ summary: 'Accept or decline a chat request from a match' })
+  @ApiResponse({
+    status: 200,
+    description: 'Chat request processed successfully',
+  })
+  async acceptChatRequest(
+    @Request() req: any,
+    @Param('matchId') matchId: string,
+    @Body() acceptChatDto: AcceptChatDto,
+  ) {
+    return this.chatService.acceptChatRequest(
+      matchId,
+      req.user.id,
+      acceptChatDto.accept,
     );
   }
 }

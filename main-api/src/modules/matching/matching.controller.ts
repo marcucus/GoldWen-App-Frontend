@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Query,
+  Body,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -15,15 +16,26 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ProfileCompletionGuard } from '../auth/guards/profile-completion.guard';
 import { MatchingService } from './matching.service';
 import { GetMatchesDto } from './dto/matching.dto';
 
 @ApiTags('matching')
 @Controller('matching')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ProfileCompletionGuard)
 @ApiBearerAuth()
 export class MatchingController {
   constructor(private readonly matchingService: MatchingService) {}
+
+  @Get('user-choices')
+  @ApiOperation({ summary: 'Get user choices history' })
+  @ApiResponse({
+    status: 200,
+    description: 'User choices retrieved successfully',
+  })
+  async getUserChoices(@Request() req: any, @Query('date') date?: string) {
+    return this.matchingService.getUserChoices(req.user.id, date);
+  }
 
   @Get('daily-selection')
   @ApiOperation({ summary: 'Get daily selection of profiles' })
@@ -31,8 +43,11 @@ export class MatchingController {
     status: 200,
     description: 'Daily selection retrieved successfully',
   })
-  async getDailySelection(@Request() req: any) {
-    return this.matchingService.getDailySelection(req.user.id);
+  async getDailySelection(
+    @Request() req: any,
+    @Query('preload') preload?: boolean,
+  ) {
+    return this.matchingService.getDailySelection(req.user.id, preload);
   }
 
   @Post('daily-selection/generate')
@@ -54,15 +69,43 @@ export class MatchingController {
   async chooseProfile(
     @Request() req: any,
     @Param('targetUserId') targetUserId: string,
+    @Body() body: { choice: 'like' | 'pass' },
   ) {
-    return this.matchingService.chooseProfile(req.user.id, targetUserId);
+    return this.matchingService.chooseProfile(
+      req.user.id,
+      targetUserId,
+      body.choice,
+    );
   }
 
   @Get('matches')
   @ApiOperation({ summary: 'Get user matches' })
   @ApiResponse({ status: 200, description: 'Matches retrieved successfully' })
   async getMatches(@Request() req: any, @Query() query: GetMatchesDto) {
-    return this.matchingService.getUserMatches(req.user.id, query.status);
+    const matches = await this.matchingService.getUserMatches(
+      req.user.id,
+      query.status,
+    );
+    return {
+      success: true,
+      data: matches,
+    };
+  }
+
+  @Get('pending-matches')
+  @ApiOperation({ summary: 'Get pending matches awaiting chat acceptance' })
+  @ApiResponse({
+    status: 200,
+    description: 'Pending matches retrieved successfully',
+  })
+  async getPendingMatches(@Request() req: any) {
+    const pendingMatches = await this.matchingService.getPendingMatches(
+      req.user.id,
+    );
+    return {
+      success: true,
+      data: pendingMatches,
+    };
   }
 
   @Get('matches/:matchId')
