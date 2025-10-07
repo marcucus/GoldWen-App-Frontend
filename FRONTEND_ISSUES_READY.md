@@ -2078,44 +2078,86 @@ class MyApp extends StatelessWidget {
 
 ### Issue Frontend #14: Améliorations UX/UI avancées
 
-**Priorité**: Optionnelle (V2)  
+**Priorité**: Normale 🔧  
 **Estimation**: 4-5 jours  
 **Module**: UX/UI (specifications.md §7)  
 **Fichiers concernés**:
-- Tous les widgets majeurs
-- Animations et transitions
+- `lib/core/theme/animations.dart` (créer)
+- `lib/core/services/haptic_service.dart` (créer)
+- `lib/features/onboarding/widgets/onboarding_tips.dart` (créer)
+- `lib/core/theme/dark_theme.dart` (finaliser)
+- `lib/features/matching/widgets/profile_card_animated.dart` (modifier)
 
 **Contexte (specifications.md §7):**
-> "Design minimaliste, apaisant, typographie claire."
+> "Technologie Calme ('Calm Technology') : Design minimaliste, couleurs douces, animations subtiles."  
+> "L'application doit être agréable visuellement et facile à prendre en main."
 
 **Description:**
-Polish final de l'UX/UI avec animations, micro-interactions et feedback visuel.
+Améliorer l'expérience utilisateur avec des animations fluides, un feedback haptique approprié, un mode sombre complet, des micro-interactions engageantes et un onboarding contextuel avec tips. L'objectif est de rendre l'application non seulement fonctionnelle mais aussi délicieuse à utiliser tout en respectant les principes de "Calm Technology".
 
-**Améliorations:**
+**État actuel du code:**
+- ✅ Thème clair avec couleurs douces implémenté
+- ⚠️ Thème sombre existant mais incomplet
+- ❌ Pas d'animations de transition entre pages
+- ❌ Pas de feedback haptique sur interactions importantes
+- ❌ Pas de micro-interactions (like button animation, etc.)
+- ❌ Pas de tips contextuels pour onboarding
+- ❌ Pas d'animations de chargement custom
 
-1. **Animations**
-   - Transitions pages fluides
-   - Loading skeletons
-   - Feedback micro-interactions
+**Comportement attendu:**
 
-2. **États visuels**
+1. **Animations fluides et subtiles (Calm Technology)**
+   - Transitions de pages : Slide de droite à gauche (250ms, Curves.easeInOut)
+   - Card flip : Animation 3D quand l'utilisateur explore les photos
+   - Like animation : Cœur qui pulse lors du like
+   - Match celebration : Confetti + cœurs lors d'un match
+   - Skeleton loading : Shimmer effect pendant chargement
+   - Pull-to-refresh : Animation custom avec logo GoldWen
+
+2. **Feedback haptique**
+   - Light impact : Swipe
+   - Medium impact : Like/pass
+   - Heavy impact : Match  
+   - Selection : Paramètres
+   - Success/Error patterns
+
+3. **Mode sombre OLED-friendly**
+   - Pure black (#000000) pour backgrounds
+   - Contraste ≥4.5:1
+   - Transition douce
+
+4. **Onboarding contextuel**
+   - First-time tips avec coach marks
+   - Progress tracking
+   - Completion celebration
+   - In-app hints contextuels
+
+5. **Micro-interactions**
+   - Button press : Scale 0.95
+   - Notification badge pulse
    - Empty states personnalisés
-   - Error states avec retry
-   - Success confirmations
+   - Success toasts animés
 
-3. **Polish**
-   - Haptic feedback
-   - Animations swipe
-   - Transitions photos
+**Code Flutter (complet dans backup):**
 
 **Critères d'acceptation:**
-- [ ] Animations fluides 60fps
-- [ ] Loading skeletons
-- [ ] Empty/Error states
-- [ ] Haptic feedback approprié
-- [ ] Polish général cohérent
+- [ ] Transitions fluides 250ms toutes pages
+- [ ] Like button animation pulse
+- [ ] Match celebration confetti + vibration
+- [ ] Skeleton shimmer loading
+- [ ] Pull-to-refresh custom
+- [ ] Haptic feedback toutes actions
+- [ ] Mode sombre OLED contraste ≥4.5:1
+- [ ] Tips première utilisation
+- [ ] Progress bar onboarding
+- [ ] Empty states illustrations
+- [ ] Micro-interactions boutons
+- [ ] Pinch zoom photos
+- [ ] Animations Calm Technology
+- [ ] Tests utilisateurs validés (5+)
 
 ---
+
 
 ### Issue Frontend #15: Tests et validation complète
 
@@ -2125,36 +2167,66 @@ Polish final de l'UX/UI avec animations, micro-interactions et feedback visuel.
 **Fichiers concernés**:
 - `test/` (créer tests unitaires)
 - `integration_test/` (créer tests intégration)
+- `test/mocks/` (créer mocks)
+- `.github/workflows/flutter_ci.yml` (CI/CD)
 
 **Contexte (specifications.md §5):**
-> "Tests unitaires et d'intégration obligatoires."
+> "Tests unitaires et d'intégration obligatoires."  
+> "Coverage minimum 70% avant mise en production."
 
 **Description:**
-Créer une suite de tests complète pour validation avant production.
+Créer une suite de tests complète couvrant unitaires, widgets, intégration et E2E pour garantir la qualité avant production. Tests automatisés dans CI/CD.
 
-**Tests à créer:**
+**État actuel du code:**
+- ❌ Pas de tests unitaires
+- ❌ Pas de tests widgets  
+- ❌ Pas de tests intégration
+- ❌ Pas de CI/CD configuré
+- ❌ Coverage 0%
 
-1. **Tests unitaires**
-   - Providers (matching, auth, subscription)
-   - Services (API, cache, firebase)
-   - Validators et utils
+**Comportement attendu:**
+
+1. **Tests unitaires (Coverage >70%)**
+   - Providers : MatchingProvider, AuthProvider, SubscriptionProvider
+   - Services : ApiService, CacheService, FirebaseService
+   - Validators : EmailValidator, PromptsValidator
+   - Utils : DateUtils, StringUtils
 
 2. **Tests widgets**
-   - Pages critiques
-   - Formulaires
-   - Navigation
+   - Pages critiques : DailySelectionPage, ChatPage, ProfilePage
+   - Formulaires : PromptsForm, ProfileSetupForm
+   - Widgets custom : ProfileCard, PromptWidget
 
 3. **Tests intégration**
-   - Flow onboarding complet
-   - Flow matching quotidien
-   - Flow chat 24h
+   - Flow onboarding complet (signup → questionnaire → prompts → sélection)
+   - Flow matching (sélection → like → match → chat)
+   - Flow chat (envoi message → réception → expiration)
+
+4. **Tests E2E**
+   - User journey complet
+   - Tests platform-specific (iOS/Android)
+
+5. **CI/CD**
+   - GitHub Actions
+   - Tests automatiques sur PR
+   - Build checks
+   - Coverage reports
+
+**Code exemple tests (complet dans backup):**
 
 **Critères d'acceptation:**
-- [ ] Coverage > 70%
-- [ ] Tests providers critiques
-- [ ] Tests intégration flows majeurs
-- [ ] CI/CD avec tests auto
-- [ ] Documentation tests
+- [ ] Coverage globale >70%
+- [ ] Tests providers critiques 100%
+- [ ] Tests widgets pages majeures
+- [ ] Tests intégration 3 flows
+- [ ] Tests E2E user journey
+- [ ] CI/CD configuré GitHub Actions
+- [ ] Tests auto sur chaque PR
+- [ ] Coverage report automatique
+- [ ] Tests passent 100% localement
+- [ ] Documentation tests README
+- [ ] Mocks propres et réutilisables
+- [ ] Tests rapides (<2min total)
 
 ---
 
