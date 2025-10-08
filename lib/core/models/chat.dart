@@ -199,8 +199,10 @@ class TypingStatus {
     return TypingStatus(
       userId: json['userId'] as String,
       conversationId: json['conversationId'] as String,
-      isTyping: json['isTyping'] as bool,
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      isTyping: json['isTyping'] as bool? ?? false,
+      timestamp: json['timestamp'] != null 
+          ? DateTime.parse(json['timestamp'] as String)
+          : DateTime.now(),
     );
   }
 
@@ -216,5 +218,55 @@ class TypingStatus {
   bool get isRecent {
     final now = DateTime.now();
     return now.difference(timestamp).inSeconds < 5;
+  }
+}
+
+class OnlineStatus {
+  final String userId;
+  final bool isOnline;
+  final DateTime? lastSeenAt;
+
+  OnlineStatus({
+    required this.userId,
+    required this.isOnline,
+    this.lastSeenAt,
+  });
+
+  factory OnlineStatus.fromJson(Map<String, dynamic> json) {
+    return OnlineStatus(
+      userId: json['userId'] as String,
+      isOnline: json['isOnline'] as bool? ?? false,
+      lastSeenAt: json['lastSeenAt'] != null
+          ? DateTime.parse(json['lastSeenAt'] as String)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'isOnline': isOnline,
+      'lastSeenAt': lastSeenAt?.toIso8601String(),
+    };
+  }
+
+  String getLastSeenText() {
+    if (isOnline) return 'En ligne';
+    if (lastSeenAt == null) return 'Hors ligne';
+
+    final now = DateTime.now();
+    final difference = now.difference(lastSeenAt!);
+
+    if (difference.inMinutes < 1) {
+      return 'Vu à l\'instant';
+    } else if (difference.inMinutes < 60) {
+      return 'Vu il y a ${difference.inMinutes} min';
+    } else if (difference.inHours < 24) {
+      return 'Vu il y a ${difference.inHours}h';
+    } else if (difference.inDays < 7) {
+      return 'Vu il y a ${difference.inDays}j';
+    } else {
+      return 'Hors ligne';
+    }
   }
 }
