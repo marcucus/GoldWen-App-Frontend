@@ -522,4 +522,56 @@ class MatchingProvider with ChangeNotifier {
     _whoLikedMe.clear();
     notifyListeners();
   }
+
+  // Advanced Recommendations (Matching V2)
+  List<CompatibilityScoreV2>? _advancedRecommendations;
+  bool _isLoadingAdvancedRecommendations = false;
+
+  List<CompatibilityScoreV2>? get advancedRecommendations => _advancedRecommendations;
+  bool get isLoadingAdvancedRecommendations => _isLoadingAdvancedRecommendations;
+
+  Future<void> loadAdvancedRecommendations({
+    required String userId,
+    required List<String> candidateIds,
+    Map<String, dynamic>? personalityAnswers,
+    Map<String, dynamic>? preferences,
+    Map<String, dynamic>? userLocation,
+    bool includeAdvancedScoring = true,
+  }) async {
+    _isLoadingAdvancedRecommendations = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.calculateCompatibilityV2(
+        userId: userId,
+        candidateIds: candidateIds,
+        personalityAnswers: personalityAnswers ?? {},
+        preferences: preferences ?? {},
+        userLocation: userLocation,
+        includeAdvancedScoring: includeAdvancedScoring,
+      );
+
+      final scoresData = response['data']?['compatibilityScores'] ?? response['compatibilityScores'];
+      
+      if (scoresData is List) {
+        _advancedRecommendations = scoresData
+            .map((score) => CompatibilityScoreV2.fromJson(score as Map<String, dynamic>))
+            .toList();
+        _error = null;
+      } else {
+        throw Exception('Invalid response format for advanced recommendations');
+      }
+    } catch (e) {
+      _handleError(e, 'Failed to load advanced recommendations');
+    } finally {
+      _isLoadingAdvancedRecommendations = false;
+      notifyListeners();
+    }
+  }
+
+  void clearAdvancedRecommendations() {
+    _advancedRecommendations = null;
+    notifyListeners();
+  }
 }
