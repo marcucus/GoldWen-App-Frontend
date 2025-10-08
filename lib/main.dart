@@ -21,6 +21,7 @@ import 'features/matching/providers/report_provider.dart';
 import 'features/chat/providers/chat_provider.dart';
 import 'features/subscription/providers/subscription_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
+import 'features/settings/providers/email_notification_provider.dart';
 import 'features/admin/providers/admin_auth_provider.dart';
 import 'features/admin/providers/admin_provider.dart';
 import 'features/feedback/providers/feedback_provider.dart';
@@ -81,6 +82,9 @@ class GoldWenApp extends StatelessWidget {
             ..loadNotificationSettings()
             ..loadNotifications()
                 .catchError((e) => print('Failed to load notifications: $e')),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => EmailNotificationProvider(),
         ),
       ],
       child: Consumer<AccessibilityService>(
