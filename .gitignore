@@ -45,3 +45,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release*.zip
 dart-sdk/
+
+# Firebase configuration files (sensitive)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+web/firebase-config.js
+
+# Keep template files
+!android/app/google-services.json.template
+!android/app/google-services.json.example
+!ios/Runner/GoogleService-Info.plist.template
