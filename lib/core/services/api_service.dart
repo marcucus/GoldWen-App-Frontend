@@ -1447,6 +1447,30 @@ class MatchingServiceApi {
     return _handleMatchingResponse(response);
   }
 
+  static Future<Map<String, dynamic>> calculateCompatibilityV2({
+    required String userId,
+    required List<String> candidateIds,
+    required Map<String, dynamic> personalityAnswers,
+    required Map<String, dynamic> preferences,
+    Map<String, dynamic>? userLocation,
+    bool includeAdvancedScoring = true,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/matching/calculate-compatibility-v2'),
+      headers: _headers,
+      body: jsonEncode({
+        'userId': userId,
+        'candidateIds': candidateIds,
+        'personalityAnswers': personalityAnswers,
+        'preferences': preferences,
+        if (userLocation != null) 'userLocation': userLocation,
+        'includeAdvancedScoring': includeAdvancedScoring,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
   static Future<Map<String, dynamic>> getAlgorithmStats() async {
     final response = await http.get(
       Uri.parse('$baseUrl/matching-service/algorithm/stats'),
