@@ -212,9 +212,9 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider}) async {
-    // Check if user has remaining selections
-    if (!canSelectMore) {
+  Future<Map<String, dynamic>?> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider, String choice = 'like'}) async {
+    // Check if user has remaining selections (only for 'like' choice)
+    if (choice == 'like' && !canSelectMore) {
       if (subscriptionProvider != null && !subscriptionProvider.hasActiveSubscription) {
         _error = 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
       } else {
@@ -231,7 +231,7 @@ class MatchingProvider with ChangeNotifier {
     }
 
     try {
-      final response = await ApiService.chooseProfile(profileId);
+      final response = await ApiService.chooseProfile(profileId, choice: choice);
       
       // Check if it's a match
       final responseData = response['data'] ?? response;
@@ -277,7 +277,7 @@ class MatchingProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
       
-      return {'isMatch': false};
+      return {'isMatch': false, 'choice': choice};
     } catch (e) {
       _handleError(e, 'Failed to select profile');
       return null;

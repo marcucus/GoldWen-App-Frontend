@@ -574,10 +574,16 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> chooseProfile(String profileId) async {
+  static Future<Map<String, dynamic>> chooseProfile(
+    String profileId, {
+    String choice = 'like',
+  }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/matching/choose/$profileId'),
       headers: _headers,
+      body: jsonEncode({
+        'choice': choice,
+      }),
     );
 
     return _handleResponse(response);

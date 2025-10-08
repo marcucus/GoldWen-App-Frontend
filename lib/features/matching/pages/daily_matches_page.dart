@@ -427,26 +427,28 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     return Semantics(
       label: 'Profil de ${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'âge non spécifié'} ans',
-      hint: 'Appuyez pour voir les détails ou choisir ce profil',
+      hint: 'Appuyez pour voir les détails du profil',
       button: true,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            height: 400,
-            child: Stack(
-              children: [
+      child: GestureDetector(
+        onTap: () => _showProfileDetails(profile),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              height: 400,
+              child: Stack(
+                children: [
                 // Optimized profile image
                 Positioned.fill(
                   child: OptimizedImage(
@@ -542,15 +544,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           children: [
                             Expanded(
                               child: Semantics(
-                                label: 'Voir les détails de ${profile.firstName ?? 'ce profil'}',
-                                hint: 'Appuyez pour ouvrir la page de détails',
+                                label: 'Passer ce profil',
+                                hint: 'Appuyez pour passer au profil suivant sans sélectionner',
                                 button: true,
                                 child: OutlinedButton.icon(
                                   onPressed: () {
-                                    _showProfileDetails(profile);
+                                    _passProfile(profile, matchingProvider, subscriptionProvider);
                                   },
-                                  icon: const Icon(Icons.info_outline),
-                                  label: const Text('Détails'),
+                                  icon: const Icon(Icons.close),
+                                  label: const Text('Passer'),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.white,
                                     side: const BorderSide(color: Colors.white),
@@ -814,6 +816,37 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     context.push('/profile-detail/${profile.id}');
   }
 
+  Future<void> _passProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
+    final result = await matchingProvider.selectProfile(
+      profile.id,
+      subscriptionProvider: subscriptionProvider,
+      choice: 'pass',
+    );
+    
+    if (result != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profil passé. Continuez à explorer !'),
+            backgroundColor: Colors.grey[700],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      final errorMessage = matchingProvider.error ?? 'Erreur lors du passage du profil';
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
   void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
     showDialog(
       context: context,
@@ -955,6 +988,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     final result = await matchingProvider.selectProfile(
       profile.id, 
       subscriptionProvider: subscriptionProvider,
+      choice: 'like',
     );
     
     if (result != null) {
