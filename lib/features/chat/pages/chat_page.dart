@@ -405,6 +405,52 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildBlockedMessage(ChatMessage message) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUserId = authProvider.user?.id ?? 'current_user';
+    final isFromCurrentUser = message.senderId == currentUserId;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Row(
+        mainAxisAlignment:
+            isFromCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isFromCurrentUser) ...[
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: AppColors.primaryGold.withOpacity(0.3),
+              child: const Icon(
+                Icons.person,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(
+            child: ModerationBlockedContent(
+              moderationResult: message.moderationResult!,
+              resourceType: 'message',
+            ),
+          ),
+          if (isFromCurrentUser) ...[
+            const SizedBox(width: AppSpacing.sm),
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: AppColors.errorRed,
+              child: const Icon(
+                Icons.block,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildMessageInput(ChatProvider chatProvider) {
     return Column(
       mainAxisSize: MainAxisSize.min,
