@@ -1,0 +1,125 @@
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1629:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1651:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1677:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1706:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1729:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1816:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1827:12 • undefined_method
+  error • The method '_handleResponse' isn't defined for the type 'MatchingServiceApi' • lib/core/services/api_service.dart:1838:12 • undefined_method
+  error • The method 'calculateCompatibilityV2' isn't defined for the type 'ApiService' • lib/features/matching/pages/advanced_recommendations_page.dart:50:41 • undefined_method
+  error • Expected to find ')' • lib/features/matching/pages/daily_matches_page.dart:660:6 • expected_token
+  error • The method 'calculateCompatibilityV2' isn't defined for the type 'ApiService' • lib/features/matching/providers/matching_provider.dart:595:41 • undefined_method
+  error • The method 'getEmailHistory' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:60:41 • undefined_method
+  error • The method 'getEmailDetails' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:104:41 • undefined_method
+  error • The method 'retryEmail' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:128:41 • undefined_method
+  error • Const variables must be initialized with a constant value • test/accessibility_service_test.dart:75:28 • const_initialized_with_non_constant_value
+  error • Undefined name 'Curves' • test/accessibility_service_test.dart:75:28 • undefined_identifier
+  error • Undefined name 'Curves' • test/accessibility_service_test.dart:82:55 • undefined_identifier
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/account_deletion_page_test.dart:32:18 • argument_type_not_assignable
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/account_deletion_page_test.dart:93:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/account_deletion_page_test.dart:111:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/account_deletion_page_test.dart:126:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/account_deletion_page_test.dart:196:19 • assignment_to_final_no_setter
+  error • The method 'getHistory' isn't defined for the type 'ApiService' • test/api_history_validation_test.dart:9:26 • undefined_method
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/daily_matches_page_test.dart:26:16 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/daily_matches_page_test.dart:141:18 • argument_type_not_assignable
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:155:12 • undefined_identifier
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:156:12 • undefined_identifier
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:157:12 • undefined_identifier
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:158:12 • undefined_identifier
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:159:12 • undefined_identifier
+  error • Undefined name 'mockMatchingProvider' • test/daily_matches_page_test.dart:160:12 • undefined_identifier
+  error • Undefined name 'mockSubscriptionProvider' • test/daily_matches_page_test.dart:161:12 • undefined_identifier
+  error • The function 'createTestWidget' isn't defined • test/daily_matches_page_test.dart:164:31 • undefined_function
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/data_export_page_test.dart:23:18 • argument_type_not_assignable
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:70:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:87:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:105:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:121:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:137:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:153:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:202:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/data_export_page_test.dart:218:19 • assignment_to_final_no_setter
+  error • There isn't a setter named 'isLoading' in class 'GdprService' • test/data_export_page_test.dart:233:19 • assignment_to_final_no_setter
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:21:18 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:54:18 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:77:18 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:104:18 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:121:18 • argument_type_not_assignable
+  error • The argument type 'ThemeData Function({bool highContrast, double textScaleFactor})' can't be assigned to the parameter type 'ThemeData?'.  • test/gdpr_integration_test.dart:147:18 • argument_type_not_assignable
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/gdpr_service_test.dart:57:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/gdpr_service_test.dart:67:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/gdpr_service_test.dart:84:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/gdpr_service_test.dart:94:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/gdpr_service_test.dart:107:21 • assignment_to_final_no_setter
+  error • The named parameter 'createdAt' is required, but there's no corresponding argument • test/match_acceptance_test.dart:18:27 • missing_required_argument
+  error • The named parameter 'isComplete' is required, but there's no corresponding argument • test/match_acceptance_test.dart:18:27 • missing_required_argument
+  error • The named parameter 'updatedAt' is required, but there's no corresponding argument • test/match_acceptance_test.dart:18:27 • missing_required_argument
+  error • The named parameter 'firstName' isn't defined • test/match_acceptance_test.dart:21:9 • undefined_named_parameter
+  error • The named parameter 'lastName' isn't defined • test/match_acceptance_test.dart:22:9 • undefined_named_parameter
+  error • The named parameter 'age' isn't defined • test/match_acceptance_test.dart:23:9 • undefined_named_parameter
+  error • The named parameter 'isVerified' isn't defined • test/match_acceptance_test.dart:28:9 • undefined_named_parameter
+  error • The named parameter 'distance' isn't defined • test/match_acceptance_test.dart:29:9 • undefined_named_parameter
+  error • The named parameter 'compatibility' isn't defined • test/match_acceptance_test.dart:30:9 • undefined_named_parameter
+  error • The named parameter 'isActive' isn't defined • test/match_acceptance_test.dart:31:9 • undefined_named_parameter
+  error • The named parameter 'lastSeen' isn't defined • test/match_acceptance_test.dart:32:9 • undefined_named_parameter
+  error • There isn't a setter named 'dailySelection' in class 'MatchingProvider' • test/match_acceptance_test.dart:77:24 • assignment_to_final_no_setter
+  error • There isn't a setter named 'dailySelection' in class 'MatchingProvider' • test/match_acceptance_test.dart:98:24 • assignment_to_final_no_setter
+  error • There isn't a setter named 'dailySelection' in class 'MatchingProvider' • test/match_acceptance_test.dart:114:24 • assignment_to_final_no_setter
+  error • 'MockMatchingProvider.dailyProfiles' ('List<dynamic> Function()') isn't a valid override of 'MatchingProvider.dailyProfiles' ('List<Profile> Function()') • test/mocks.mocks.dart:55:21 • invalid_override
+  error • The method 'getNotifications' isn't defined for the type 'MockApiService' • test/notification_system_test.dart:48:27 • undefined_method
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/notification_system_test.dart:300:16 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'String'.  • test/notification_system_test.dart:301:15 • argument_type_not_assignable
+  error • The argument type 'Null' can't be assigned to the parameter type 'int'.  • test/notification_system_test.dart:303:13 • argument_type_not_assignable
+  error • Target of URI doesn't exist: 'profile_setup_validation_fix_test.mocks.dart' • test/profile_setup_validation_fix_test.dart:9:8 • uri_does_not_exist
+  error • Undefined class 'MockApiService' • test/profile_setup_validation_fix_test.dart:14:10 • undefined_class
+  error • The function 'MockApiService' isn't defined • test/profile_setup_validation_fix_test.dart:18:24 • undefined_function
+  error • Target of URI doesn't exist: 'profile_validation_test.mocks.dart' • test/profile_validation_test.dart:10:8 • uri_does_not_exist
+  error • Undefined class 'MockApiService' • test/profile_validation_test.dart:15:10 • undefined_class
+  error • The function 'MockApiService' isn't defined • test/profile_validation_test.dart:19:24 • undefined_function
+  error • The function 'MockReportProvider' isn't defined • test/report_system_integration_test.dart:17:28 • undefined_function
+  error • The method 'show' isn't defined for the type 'ReportDialog' • test/report_system_integration_test.dart:28:49 • undefined_method
+  error • The method '_reportTypeToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:90:21 • undefined_method
+  error • The method '_reportTypeToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:91:21 • undefined_method
+  error • The method '_reportTypeToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:92:21 • undefined_method
+  error • The method '_reportTypeToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:93:21 • undefined_method
+  error • The method '_reportTypeToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:94:21 • undefined_method
+  error • The method '_reportStatusToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:98:21 • undefined_method
+  error • The method '_reportStatusToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:99:21 • undefined_method
+  error • The method '_reportStatusToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:100:21 • undefined_method
+  error • The method '_reportStatusToString' isn't defined for the type 'Report' • test/report_system_integration_test.dart:101:21 • undefined_method
+  error • Undefined class 'MockReportProvider' • test/report_system_integration_test.dart:107:34 • undefined_class
+  error • The 'super' keyword can't be used in an extension because an extension doesn't have a superclass • test/report_system_integration_test.dart:116:12 • super_in_extension
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:23:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:36:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:43:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:62:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:76:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:83:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:90:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:119:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:187:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:196:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:205:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentConsent' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:214:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentPrivacySettings' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:227:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentPrivacySettings' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:241:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentPrivacySettings' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:248:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:269:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'currentExportRequest' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:276:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:300:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:308:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:319:21 • assignment_to_final_no_setter
+  error • There isn't a setter named 'accountDeletionStatus' in class 'GdprService' • test/rgpd_service_enhanced_test.dart:328:21 • assignment_to_final_no_setter
+  error • Target of URI doesn't exist: 'user_reports_page_test.mocks.dart' • test/user_reports_page_test.dart:12:8 • uri_does_not_exist
+  error • Undefined class 'MockReportProvider' • test/user_reports_page_test.dart:17:10 • undefined_class
+  error • The function 'MockReportProvider' isn't defined • test/user_reports_page_test.dart:20:28 • undefined_function
+  error • The named parameter 'createdAt' is required, but there's no corresponding argument • test/who_liked_me_test.dart:25:23 • missing_required_argument
+  error • The named parameter 'isComplete' is required, but there's no corresponding argument • test/who_liked_me_test.dart:25:23 • missing_required_argument
+  error • The named parameter 'updatedAt' is required, but there's no corresponding argument • test/who_liked_me_test.dart:25:23 • missing_required_argument
+  error • The named parameter 'userId' is required, but there's no corresponding argument • test/who_liked_me_test.dart:25:23 • missing_required_argument
+  error • The named parameter 'firstName' isn't defined • test/who_liked_me_test.dart:27:9 • undefined_named_parameter
+  error • The named parameter 'age' isn't defined • test/who_liked_me_test.dart:28:9 • undefined_named_parameter
+  error • The named parameter 'prompts' isn't defined • test/who_liked_me_test.dart:31:9 • undefined_named_parameter
+  error • The named parameter 'preferences' isn't defined • test/who_liked_me_test.dart:33:9 • undefined_named_parameter
+  error • The function 'PreferenceFilter' isn't defined • test/who_liked_me_test.dart:33:22 • undefined_function
