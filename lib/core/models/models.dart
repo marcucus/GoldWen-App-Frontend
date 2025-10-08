@@ -7,3 +7,4 @@ export 'subscription.dart';
 export 'notification.dart';
 export 'report.dart';
 export 'feedback.dart';
+export 'email_notification.dart';
