@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/gdpr_consent.dart';
 import 'api_service.dart';
+import 'analytics_service.dart';
 
 class GdprService extends ChangeNotifier {
   GdprConsent? _currentConsent;
@@ -75,6 +76,8 @@ class GdprService extends ChangeNotifier {
       }
       if (analytics != null) {
         await prefs.setBool('gdpr_analytics_consent', analytics);
+        // Update analytics service consent
+        await AnalyticsService.updateConsent(analytics);
       }
 
       _currentConsent = GdprConsent(
@@ -174,6 +177,9 @@ class GdprService extends ChangeNotifier {
         functionalCookies: functionalCookies,
         dataRetention: dataRetention,
       );
+
+      // Update analytics service consent
+      await AnalyticsService.updateConsent(analytics);
 
       _currentPrivacySettings = PrivacySettings(
         analytics: analytics,
@@ -346,6 +352,9 @@ class GdprService extends ChangeNotifier {
     await prefs.remove('gdpr_consent_date');
     await prefs.remove('gdpr_marketing_consent');
     await prefs.remove('gdpr_analytics_consent');
+
+    // Reset analytics
+    await AnalyticsService.reset();
 
     _currentConsent = null;
     _currentPrivacySettings = null;

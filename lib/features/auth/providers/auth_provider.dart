@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:convert';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
@@ -60,6 +61,9 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Track signup started
+      await AnalyticsService.trackSignupStarted('email');
+      
       final response = await ApiService.register(
         email: email,
         password: password,
@@ -67,7 +71,7 @@ class AuthProvider with ChangeNotifier {
         lastName: lastName,
       );
 
-      await _handleAuthSuccess(response);
+      await _handleAuthSuccess(response, isSignup: true, signupMethod: 'email');
     } catch (e) {
       _handleAuthError(e);
       rethrow;
@@ -78,6 +82,9 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Track signup started
+      await AnalyticsService.trackSignupStarted('google');
+      
       // Initialize Google Sign In
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
@@ -112,7 +119,7 @@ class AuthProvider with ChangeNotifier {
         lastName: googleUser.displayName?.split(' ').skip(1).join(' '),
       );
 
-      await _handleAuthSuccess(response);
+      await _handleAuthSuccess(response, isSignup: true, signupMethod: 'google');
     } catch (e) {
       print('Google Sign-In Error: $e');
       _handleAuthError(e);
@@ -123,6 +130,9 @@ class AuthProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Track signup started
+      await AnalyticsService.trackSignupStarted('apple');
+      
       // Check if Apple Sign In is available on this device
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
@@ -156,7 +166,7 @@ class AuthProvider with ChangeNotifier {
         lastName: lastName ?? '',
       );
 
-      await _handleAuthSuccess(response);
+      await _handleAuthSuccess(response, isSignup: true, signupMethod: 'apple');
     } catch (e) {
       print('Apple Sign-In Error: $e');
       _handleAuthError(e);
@@ -235,7 +245,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _handleAuthSuccess(Map<String, dynamic> response) async {
+  Future<void> _handleAuthSuccess(Map<String, dynamic> response, {bool isSignup = false, String? signupMethod}) async {
     try {
       // Debug: Print the full response to understand its structure
       print('Auth response received: $response');
@@ -271,6 +281,11 @@ class AuthProvider with ChangeNotifier {
 
       // Store token and user data for session persistence
       await _storeAuthData();
+
+      // Track signup completed if this is a signup
+      if (isSignup && signupMethod != null && _user?.id != null) {
+        await AnalyticsService.trackSignupCompleted(_user!.id, signupMethod);
+      }
 
       print(
           'Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');

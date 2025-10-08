@@ -3,6 +3,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/services/local_notification_service.dart';
 import '../../../core/services/notification_manager.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
 import '../../subscription/providers/subscription_provider.dart';
 
@@ -71,6 +72,9 @@ class MatchingProvider with ChangeNotifier {
       _dailyProfiles = _dailySelection!.profiles;
       _lastUpdateTime = DateTime.now();
       _error = null;
+      
+      // Track daily selection viewed
+      await AnalyticsService.trackDailySelectionViewed(_dailyProfiles.length);
       
       // Load subscription usage to know limits
       await _loadSubscriptionUsage();
@@ -247,7 +251,23 @@ class MatchingProvider with ChangeNotifier {
       final matchId = responseData['matchId'] as String?;
       final choicesRemaining = responseData['choicesRemaining'] as int?;
       
+      // Track profile chosen or passed
+      if (choice == 'like') {
+        final profile = _dailyProfiles.firstWhere((p) => p.id == profileId);
+        await AnalyticsService.trackProfileChosen(
+          profileId,
+          compatibilityScore: profile.compatibilityScore,
+        );
+      } else if (choice == 'pass') {
+        await AnalyticsService.trackProfilePassed(profileId);
+      }
+      
       if (isMatch) {
+        // Track match created
+        if (matchId != null) {
+          await AnalyticsService.trackMatchCreated(matchId, profileId);
+        }
+        
         // Reload matches to include the new one
         await loadMatches();
         

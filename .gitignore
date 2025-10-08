@@ -51,6 +51,11 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 web/firebase-config.js
 
+# Analytics configuration files (sensitive)
+.env.analytics
+analytics-config.json
+mixpanel-config.json
+
 # Keep template files
 !android/app/google-services.json.template
 !android/app/google-services.json.example
