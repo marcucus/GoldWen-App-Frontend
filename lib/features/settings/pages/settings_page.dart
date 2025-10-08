@@ -466,6 +466,13 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         _buildSettingItem(
           context,
+          'Historique des emails',
+          'Consulter vos emails transactionnels',
+          Icons.email,
+          () => context.go('/email-history'),
+        ),
+        _buildSettingItem(
+          context,
           'Localisation',
           'Paramètres de géolocalisation',
           Icons.location_on,
