@@ -1229,10 +1229,77 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Enhanced delete account with GDPR compliance notice
-  static Future<Map<String, dynamic>> deleteAccountWithGdpr() async {
+  // Request data export
+  static Future<Map<String, dynamic>> requestDataExport() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/me/data-export'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Get data export status
+  static Future<Map<String, dynamic>> getDataExportStatus(String requestId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/me/data-export/$requestId'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Download data export
+  static Future<dynamic> downloadDataExport(String requestId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/me/data-export/$requestId/download'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response.bodyBytes; // Return raw bytes for file download
+    } else {
+      throw ApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to download data export',
+        code: 'DOWNLOAD_ERROR',
+      );
+    }
+  }
+
+  // Enhanced delete account with GDPR compliance and grace period
+  static Future<Map<String, dynamic>> deleteAccountWithGdpr({
+    required String password,
+    String? reason,
+    bool immediateDelete = false,
+  }) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/users/me'),
+      headers: _headers,
+      body: jsonEncode({
+        'password': password,
+        if (reason != null) 'reason': reason,
+        'immediateDelete': immediateDelete,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Cancel account deletion
+  static Future<Map<String, dynamic>> cancelAccountDeletion() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/me/cancel-deletion'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  // Get account deletion status
+  static Future<Map<String, dynamic>> getAccountDeletionStatus() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/me/deletion-status'),
       headers: _headers,
     );
 

@@ -9,6 +9,8 @@ class GdprService extends ChangeNotifier {
   GdprConsent? _currentConsent;
   PrivacySettings? _currentPrivacySettings;
   PrivacyPolicy? _currentPrivacyPolicy;
+  DataExportRequest? _currentExportRequest;
+  AccountDeletionStatus? _accountDeletionStatus;
   bool _isLoading = false;
   String? _error;
 
@@ -16,6 +18,8 @@ class GdprService extends ChangeNotifier {
   GdprConsent? get currentConsent => _currentConsent;
   PrivacySettings? get currentPrivacySettings => _currentPrivacySettings;
   PrivacyPolicy? get currentPrivacyPolicy => _currentPrivacyPolicy;
+  DataExportRequest? get currentExportRequest => _currentExportRequest;
+  AccountDeletionStatus? get accountDeletionStatus => _accountDeletionStatus;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -190,15 +194,139 @@ class GdprService extends ChangeNotifier {
   }
 
   // Delete account with GDPR compliance
-  Future<bool> deleteAccountWithGdprCompliance() async {
+  Future<bool> deleteAccountWithGdprCompliance({
+    required String password,
+    String? reason,
+    bool immediateDelete = false,
+  }) async {
     _setLoading(true);
     _error = null;
 
     try {
-      await ApiService.deleteAccountWithGdpr();
+      final response = await ApiService.deleteAccountWithGdpr(
+        password: password,
+        reason: reason,
+        immediateDelete: immediateDelete,
+      );
+
+      // Parse deletion status from response
+      if (response['data'] != null) {
+        _accountDeletionStatus = AccountDeletionStatus.fromJson(response['data']);
+      }
       
-      // Clear all local consent data
-      await clearLocalConsentData();
+      // If immediate deletion, clear all local consent data
+      if (immediateDelete) {
+        await clearLocalConsentData();
+      }
+
+      _setLoading(false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Request data export
+  Future<bool> requestDataExport() async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      final response = await ApiService.requestDataExport();
+
+      if (response['data'] != null) {
+        _currentExportRequest = DataExportRequest.fromJson(response['data']);
+      }
+
+      _setLoading(false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Get export status
+  Future<bool> getExportStatus(String requestId) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      final response = await ApiService.getDataExportStatus(requestId);
+
+      if (response['data'] != null) {
+        _currentExportRequest = DataExportRequest.fromJson(response['data']);
+      }
+
+      _setLoading(false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Download data export
+  Future<Uint8List?> downloadDataExport(String requestId) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      final data = await ApiService.downloadDataExport(requestId);
+      _setLoading(false);
+      notifyListeners();
+      return data as Uint8List?;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      notifyListeners();
+      return null;
+    }
+  }
+
+  // Cancel account deletion
+  Future<bool> cancelAccountDeletion() async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      await ApiService.cancelAccountDeletion();
+      
+      // Reset deletion status to active
+      _accountDeletionStatus = AccountDeletionStatus(status: 'active');
+
+      _setLoading(false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _setLoading(false);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Get account deletion status
+  Future<bool> getAccountDeletionStatus() async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      final response = await ApiService.getAccountDeletionStatus();
+
+      if (response['data'] != null) {
+        _accountDeletionStatus = AccountDeletionStatus.fromJson(response['data']);
+      }
 
       _setLoading(false);
       notifyListeners();

@@ -18,6 +18,8 @@ import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
 import '../../features/legal/pages/privacy_page.dart';
 import '../../features/legal/pages/privacy_settings_page.dart';
+import '../../features/legal/pages/data_export_page.dart';
+import '../../features/legal/pages/account_deletion_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
 import '../../features/notifications/pages/notifications_page.dart';
@@ -145,6 +147,16 @@ class AppRouter {
         path: '/privacy-settings',
         name: 'privacy-settings',
         builder: (context, state) => const PrivacySettingsPage(),
+      ),
+      GoRoute(
+        path: '/data-export',
+        name: 'data-export',
+        builder: (context, state) => const DataExportPage(),
+      ),
+      GoRoute(
+        path: '/account-deletion',
+        name: 'account-deletion',
+        builder: (context, state) => const AccountDeletionPage(),
       ),
 
       // User Profile
