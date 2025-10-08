@@ -9,6 +9,7 @@ class ProfileProvider with ChangeNotifier {
   DateTime? _birthDate;
   String? _bio;
   List<Photo> _photos = [];
+  List<MediaFile> _mediaFiles = [];
   List<String> _prompts = [];
   Map<String, dynamic> _personalityAnswers = {};
   List<PersonalityQuestion> _personalityQuestions = [];
@@ -40,6 +41,7 @@ class ProfileProvider with ChangeNotifier {
   DateTime? get birthDate => _birthDate;
   String? get bio => _bio;
   List<Photo> get photos => _photos;
+  List<MediaFile> get mediaFiles => _mediaFiles;
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
   List<PersonalityQuestion> get personalityQuestions => _personalityQuestions;
@@ -101,6 +103,24 @@ class ProfileProvider with ChangeNotifier {
 
   void updatePhotos(List<Photo> photos) {
     _photos = List.from(photos);
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void updateMediaFiles(List<MediaFile> mediaFiles) {
+    _mediaFiles = List.from(mediaFiles);
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void addMediaFile(MediaFile mediaFile) {
+    _mediaFiles.add(mediaFile);
+    _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void removeMediaFile(String mediaId) {
+    _mediaFiles.removeWhere((m) => m.id == mediaId);
     _checkProfileCompletion();
     notifyListeners();
   }
@@ -487,6 +507,20 @@ class ProfileProvider with ChangeNotifier {
       } else {
         _photos.clear();
       }
+
+      // Load media files from profile data
+      if (profileData['mediaFiles'] != null && profileData['mediaFiles'] is List) {
+        try {
+          _mediaFiles = (profileData['mediaFiles'] as List)
+              .map((mediaData) => MediaFile.fromJson(mediaData))
+              .toList();
+        } catch (e) {
+          debugPrint('Error parsing media files: $e');
+          _mediaFiles.clear();
+        }
+      } else {
+        _mediaFiles.clear();
+      }
       
       _prompts = List<String>.from(profileData['prompts'] ?? []);
       _personalityAnswers =
@@ -503,6 +537,7 @@ class ProfileProvider with ChangeNotifier {
       _bio = null;
       _birthDate = null;
       _photos.clear();
+      _mediaFiles.clear();
       _prompts.clear();
       _personalityAnswers.clear();
       _isProfileComplete = false;

@@ -9,6 +9,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
+import '../widgets/media_management_widget.dart';
 import '../widgets/profile_completion_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
@@ -170,6 +171,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               children: [
                 _buildBasicInfoPage(),
                 _buildPhotosPage(),
+                _buildMediaPage(),
                 _buildPromptsPage(),
                 _buildValidationPage(),
                 _buildReviewPage(),
@@ -335,6 +337,55 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaPage() {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'Médias Audio/Vidéo (Optionnel)',
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Ajoutez des fichiers audio ou vidéo pour enrichir votre profil',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          Expanded(
+            child: Consumer<ProfileProvider>(
+              builder: (context, profileProvider, child) {
+                return MediaManagementWidget(
+                  mediaFiles: profileProvider.mediaFiles,
+                  onMediaFilesChanged: (mediaFiles) {
+                    profileProvider.updateMediaFiles(mediaFiles);
+                  },
+                  maxAudioFiles: 2,
+                  maxVideoFiles: 1,
+                  showAddButton: true,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _nextPage,
+              child: const Text('Continuer'),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
         ],

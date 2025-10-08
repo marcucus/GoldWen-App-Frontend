@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/models/profile.dart';
 import '../models/match_profile.dart';
 import '../providers/matching_provider.dart';
 import '../providers/report_provider.dart';
 import '../widgets/report_dialog.dart';
+import '../../profile/widgets/media_player_widget.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   final String profileId;
@@ -270,6 +272,29 @@ class ProfileDetailPage extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: AppSpacing.xxl),
+                  
+                  // Media files section (Audio/Video)
+                  if (profile.mediaFiles.isNotEmpty) ...[
+                    Text(
+                      'Médias',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    
+                    const SizedBox(height: AppSpacing.lg),
+                    
+                    ...profile.mediaFiles.map((mediaFile) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: MediaPlayerWidget(
+                          mediaFile: mediaFile,
+                          autoPlay: false,
+                          showControls: true,
+                        ),
+                      );
+                    }).toList(),
+                    
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
                   
                   // Action buttons
                   Row(

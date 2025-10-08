@@ -1,9 +1,12 @@
+import '../../../core/models/profile.dart';
+
 class MatchProfile {
   final String id;
   final String name;
   final int age;
   final String bio;
   final List<String> photos;
+  final List<MediaFile> mediaFiles;
   final List<String> prompts;
   final double compatibilityScore;
 
@@ -13,6 +16,7 @@ class MatchProfile {
     required this.age,
     required this.bio,
     required this.photos,
+    this.mediaFiles = const [],
     required this.prompts,
     required this.compatibilityScore,
   });
@@ -24,6 +28,10 @@ class MatchProfile {
       age: json['age'],
       bio: json['bio'],
       photos: List<String>.from(json['photos']),
+      mediaFiles: (json['mediaFiles'] as List<dynamic>?)
+              ?.map((e) => MediaFile.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       prompts: List<String>.from(json['prompts']),
       compatibilityScore: json['compatibilityScore'].toDouble(),
     );
@@ -36,6 +44,7 @@ class MatchProfile {
       'age': age,
       'bio': bio,
       'photos': photos,
+      'mediaFiles': mediaFiles.map((m) => m.toJson()).toList(),
       'prompts': prompts,
       'compatibilityScore': compatibilityScore,
     };

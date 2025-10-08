@@ -22,6 +22,7 @@ class Profile {
   final List<String> languages;
   final int? height;
   final List<Photo> photos;
+  final List<MediaFile> mediaFiles;
   final List<PersonalityAnswer> personalityAnswers;
   final List<PromptAnswer> promptAnswers;
   final bool isComplete;
@@ -50,6 +51,7 @@ class Profile {
     this.languages = const [],
     this.height,
     this.photos = const [],
+    this.mediaFiles = const [],
     this.personalityAnswers = const [],
     this.promptAnswers = const [],
     required this.isComplete,
@@ -113,6 +115,10 @@ class Profile {
               ?.map((e) => Photo.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      mediaFiles: (json['mediaFiles'] as List<dynamic>?)
+              ?.map((e) => MediaFile.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       personalityAnswers: (json['personalityAnswers'] as List<dynamic>?)
               ?.map(
                   (e) => PersonalityAnswer.fromJson(e as Map<String, dynamic>))
@@ -151,6 +157,7 @@ class Profile {
       'languages': languages,
       'height': height,
       'photos': photos.map((p) => p.toJson()).toList(),
+      'mediaFiles': mediaFiles.map((m) => m.toJson()).toList(),
       'personalityAnswers': personalityAnswers.map((a) => a.toJson()).toList(),
       'promptAnswers': promptAnswers.map((a) => a.toJson()).toList(),
       'isComplete': isComplete,
@@ -424,6 +431,50 @@ class ProfileCompletion {
       'hasPersonalityAnswers': hasPersonalityAnswers,
       'hasRequiredProfileFields': hasRequiredProfileFields,
       'missingSteps': missingSteps,
+    };
+  }
+}
+
+class MediaFile {
+  final String id;
+  final String url;
+  final String type; // 'audio' or 'video'
+  final int order;
+  final int? duration; // Duration in seconds
+  final String? thumbnailUrl; // For videos
+  final DateTime createdAt;
+
+  MediaFile({
+    required this.id,
+    required this.url,
+    required this.type,
+    required this.order,
+    this.duration,
+    this.thumbnailUrl,
+    required this.createdAt,
+  });
+
+  factory MediaFile.fromJson(Map<String, dynamic> json) {
+    return MediaFile(
+      id: json['id'] as String,
+      url: json['url'] as String,
+      type: json['type'] as String,
+      order: json['order'] as int,
+      duration: json['duration'] as int?,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'url': url,
+      'type': type,
+      'order': order,
+      'duration': duration,
+      'thumbnailUrl': thumbnailUrl,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }
