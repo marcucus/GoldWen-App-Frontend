@@ -7,6 +7,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_countdown_timer.dart';
+import '../widgets/typing_indicator.dart';
+import '../widgets/online_status_indicator.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -110,6 +112,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               child: Consumer<ChatProvider>(
                 builder: (context, chatProvider, child) {
                   final conversation = chatProvider.getConversation(widget.chatId);
+                  final otherUserId = conversation?.participantIds
+                      .firstWhere((id) => id != chatProvider.conversations.first.participantIds.first,
+                          orElse: () => '');
+                  final onlineStatus = otherUserId != null && otherUserId.isNotEmpty
+                      ? chatProvider.getOnlineStatus(otherUserId)
+                      : null;
                   
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +130,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           fontFamily: 'Lato',
                         ),
                       ),
-                      if (conversation?.expiresAt != null)
+                      if (onlineStatus != null)
+                        OnlineStatusIndicator(
+                          status: onlineStatus,
+                          showText: true,
+                          compact: true,
+                        )
+                      else if (conversation?.expiresAt != null)
                         ChatCountdownTimer(
                           expiresAt: conversation!.expiresAt!,
                           onExpired: () {
@@ -182,6 +196,34 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           return _buildMessageBubble(message);
                         },
                       ),
+              ),
+
+              // Typing indicator
+              Consumer<ChatProvider>(
+                builder: (context, chatProvider, child) {
+                  final conversation = chatProvider.getConversation(widget.chatId);
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  final currentUserId = authProvider.user?.id;
+                  
+                  // Get the other user's ID
+                  final otherUserId = conversation?.participantIds
+                      .firstWhere((id) => id != currentUserId, orElse: () => '');
+                  
+                  if (otherUserId != null && 
+                      otherUserId.isNotEmpty && 
+                      chatProvider.isUserTyping(widget.chatId, otherUserId)) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: TypingIndicator(
+                        userName: conversation?.otherParticipant?.firstName ?? 'L\'utilisateur',
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
 
               // Input area
@@ -248,13 +290,28 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isFromCurrentUser
-                              ? Colors.white70
-                              : AppColors.textSecondary,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isFromCurrentUser
+                                  ? Colors.white70
+                                  : AppColors.textSecondary,
+                            ),
+                      ),
+                      if (isFromCurrentUser) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(
+                          message.isRead ? Icons.done_all : Icons.done,
+                          size: 14,
+                          color: message.isRead 
+                              ? Colors.lightBlue 
+                              : Colors.white70,
                         ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -365,6 +422,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       controller: _messageController,
                       focusNode: _focusNode,
                       enabled: !isExpired,
+                      onChanged: (text) {
+                        // Trigger typing indicator
+                        if (text.isNotEmpty) {
+                          chatProvider.startTyping(widget.chatId);
+                        } else {
+                          chatProvider.stopTyping(widget.chatId);
+                        }
+                      },
                       onTap: () {
                         if (_showEmojiPicker) {
                           setState(() {
@@ -544,6 +609,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     if (message.isNotEmpty) {
       chatProvider.sendMessage(widget.chatId, message);
       _messageController.clear();
+      
+      // Stop typing indicator since message was sent
+      chatProvider.stopTyping(widget.chatId);
 
       // Scroll to bottom
       WidgetsBinding.instance.addPostFrameCallback((_) {

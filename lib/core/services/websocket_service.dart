@@ -21,6 +21,7 @@ class WebSocketService {
   final StreamController<Map<String, dynamic>> _typingController = StreamController.broadcast();
   final StreamController<Map<String, dynamic>> _readReceiptController = StreamController.broadcast();
   final StreamController<Map<String, dynamic>> _chatExpiredController = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _onlineStatusController = StreamController.broadcast();
   final StreamController<bool> _connectionController = StreamController.broadcast();
 
   // Public streams
@@ -28,6 +29,7 @@ class WebSocketService {
   Stream<Map<String, dynamic>> get typingStream => _typingController.stream;
   Stream<Map<String, dynamic>> get readReceiptStream => _readReceiptController.stream;
   Stream<Map<String, dynamic>> get chatExpiredStream => _chatExpiredController.stream;
+  Stream<Map<String, dynamic>> get onlineStatusStream => _onlineStatusController.stream;
   Stream<bool> get connectionStream => _connectionController.stream;
 
   bool get isConnected => _isConnected;
@@ -87,6 +89,10 @@ class WebSocketService {
         case 'user_typing':
         case 'user_stopped_typing':
           _typingController.add(data);
+          break;
+        case 'user_online':
+        case 'user_offline':
+          _onlineStatusController.add(data);
           break;
         case 'chat_expired':
           _chatExpiredController.add(data);
@@ -257,6 +263,7 @@ class WebSocketService {
     _typingController.close();
     _readReceiptController.close();
     _chatExpiredController.close();
+    _onlineStatusController.close();
     _connectionController.close();
   }
 }

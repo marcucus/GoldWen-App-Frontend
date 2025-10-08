@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
@@ -8,15 +9,19 @@ class ChatProvider with ChangeNotifier {
   List<Conversation> _conversations = [];
   Map<String, List<ChatMessage>> _chatMessages = {};
   Map<String, TypingStatus> _typingStatuses = {};
+  Map<String, OnlineStatus> _onlineStatuses = {};
   bool _isLoading = false;
   String? _error;
   WebSocketService? _webSocketService;
   bool _isWebSocketConnected = false;
   String? _currentUserId;
+  Timer? _typingTimer;
+  String? _currentTypingChatId;
 
   List<Conversation> get conversations => _conversations;
   Map<String, List<ChatMessage>> get chatMessages => _chatMessages;
   Map<String, TypingStatus> get typingStatuses => _typingStatuses;
+  Map<String, OnlineStatus> get onlineStatuses => _onlineStatuses;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isWebSocketConnected => _isWebSocketConnected;
@@ -67,9 +72,18 @@ class ChatProvider with ChangeNotifier {
     return null;
   }
 
+  OnlineStatus? getOnlineStatus(String userId) {
+    return _onlineStatuses[userId];
+  }
+
   bool isUserTyping(String chatId, String userId) {
     final status = getTypingStatus(chatId);
-    return status?.userId == userId && status?.isTyping == true;
+    return status?.userId == userId && status?.isTyping == true && status!.isRecent;
+  }
+
+  bool isUserOnline(String userId) {
+    final status = getOnlineStatus(userId);
+    return status?.isOnline ?? false;
   }
 
   Future<void> initializeWebSocket(String token) async {
@@ -82,6 +96,7 @@ class ChatProvider with ChangeNotifier {
       _webSocketService!.typingStream.listen(_handleTypingUpdate);
       _webSocketService!.readReceiptStream.listen(_handleReadReceipt);
       _webSocketService!.chatExpiredStream.listen(_handleChatExpired);
+      _webSocketService!.onlineStatusStream.listen(_handleOnlineStatusUpdate);
       _webSocketService!.connectionStream.listen(_handleConnectionUpdate);
       
       await _webSocketService!.connect();
@@ -332,11 +347,25 @@ class ChatProvider with ChangeNotifier {
   }
 
   void startTyping(String chatId) {
-    _webSocketService?.sendTyping(chatId);
+    // Cancel existing timer if user is typing again
+    _typingTimer?.cancel();
+    
+    // Send typing start event only if this is a new chat or different from current
+    if (_currentTypingChatId != chatId) {
+      _webSocketService?.sendTyping(chatId);
+      _currentTypingChatId = chatId;
+    }
+    
+    // Set timeout to auto-stop typing after 3 seconds
+    _typingTimer = Timer(const Duration(seconds: 3), () {
+      stopTyping(chatId);
+    });
   }
 
   void stopTyping(String chatId) {
+    _typingTimer?.cancel();
     _webSocketService?.sendStoppedTyping(chatId);
+    _currentTypingChatId = null;
   }
 
   void leaveChatRoom(String chatId) {
@@ -373,6 +402,16 @@ class ChatProvider with ChangeNotifier {
     try {
       final typingStatus = TypingStatus.fromJson(data);
       _typingStatuses[typingStatus.conversationId] = typingStatus;
+      notifyListeners();
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  void _handleOnlineStatusUpdate(Map<String, dynamic> data) {
+    try {
+      final onlineStatus = OnlineStatus.fromJson(data);
+      _onlineStatuses[onlineStatus.userId] = onlineStatus;
       notifyListeners();
     } catch (e) {
       // Handle error silently
@@ -499,6 +538,7 @@ class ChatProvider with ChangeNotifier {
 
   @override
   void dispose() {
+    _typingTimer?.cancel();
     _webSocketService?.dispose();
     super.dispose();
   }
