@@ -20,7 +20,7 @@ void main() {
       return ChangeNotifierProvider<GdprService>.value(
         value: gdprService,
         child: MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: const DataExportPage(),
         ),
       );

@@ -29,7 +29,7 @@ void main() {
           ChangeNotifierProvider<AuthProvider>.value(value: mockAuthProvider),
         ],
         child: MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: const AccountDeletionPage(),
         ),
       );

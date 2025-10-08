@@ -297,10 +297,10 @@ void main() {
 
     test('should show instant notification', () async {
       when(mockLocalService.showInstantNotification(
-        title: anyNamed('title'),
-        body: anyNamed('body'),
-        payload: anyNamed('payload'),
-        id: anyNamed('id'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        payload: any(named: 'payload'),
+        id: any(named: 'id'),
       )).thenAnswer((_) async {});
 
       await mockLocalService.showInstantNotification(

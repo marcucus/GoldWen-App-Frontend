@@ -18,7 +18,7 @@ void main() {
     testWidgets('should display consent modal with all required options', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: const Scaffold(
@@ -51,7 +51,7 @@ void main() {
     testWidgets('should enable submit button when required consent is given', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: const Scaffold(
@@ -74,7 +74,7 @@ void main() {
     testWidgets('should handle optional consents independently', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: const Scaffold(
@@ -101,7 +101,7 @@ void main() {
     testWidgets('should show privacy policy link', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: const Scaffold(
@@ -118,7 +118,7 @@ void main() {
     testWidgets('should display warning when required consent not given', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: const Scaffold(
@@ -144,7 +144,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: Scaffold(
