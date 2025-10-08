@@ -205,3 +205,104 @@ class WhoLikedMeItem {
     };
   }
 }
+
+class ScoreBreakdown {
+  final double personalityScore;
+  final double preferencesScore;
+  final double activityBonus;
+  final double responseRateBonus;
+  final double reciprocityBonus;
+
+  ScoreBreakdown({
+    required this.personalityScore,
+    required this.preferencesScore,
+    required this.activityBonus,
+    required this.responseRateBonus,
+    required this.reciprocityBonus,
+  });
+
+  factory ScoreBreakdown.fromJson(Map<String, dynamic> json) {
+    return ScoreBreakdown(
+      personalityScore: (json['personalityScore'] as num).toDouble(),
+      preferencesScore: (json['preferencesScore'] as num).toDouble(),
+      activityBonus: (json['activityBonus'] as num).toDouble(),
+      responseRateBonus: (json['responseRateBonus'] as num).toDouble(),
+      reciprocityBonus: (json['reciprocityBonus'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'personalityScore': personalityScore,
+      'preferencesScore': preferencesScore,
+      'activityBonus': activityBonus,
+      'responseRateBonus': responseRateBonus,
+      'reciprocityBonus': reciprocityBonus,
+    };
+  }
+
+  double get baseScore => personalityScore + preferencesScore;
+  double get totalBonuses => activityBonus + responseRateBonus + reciprocityBonus;
+}
+
+class MatchReason {
+  final String category;
+  final String description;
+  final double impact;
+
+  MatchReason({
+    required this.category,
+    required this.description,
+    required this.impact,
+  });
+
+  factory MatchReason.fromJson(Map<String, dynamic> json) {
+    return MatchReason(
+      category: json['category'] as String,
+      description: json['description'] as String,
+      impact: (json['impact'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'category': category,
+      'description': description,
+      'impact': impact,
+    };
+  }
+}
+
+class CompatibilityScoreV2 {
+  final String userId;
+  final double score;
+  final ScoreBreakdown breakdown;
+  final List<MatchReason> matchReasons;
+
+  CompatibilityScoreV2({
+    required this.userId,
+    required this.score,
+    required this.breakdown,
+    required this.matchReasons,
+  });
+
+  factory CompatibilityScoreV2.fromJson(Map<String, dynamic> json) {
+    return CompatibilityScoreV2(
+      userId: json['userId'] as String,
+      score: (json['score'] as num).toDouble(),
+      breakdown: ScoreBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>),
+      matchReasons: (json['matchReasons'] as List<dynamic>?)
+          ?.map((e) => MatchReason.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'score': score,
+      'breakdown': breakdown.toJson(),
+      'matchReasons': matchReasons.map((r) => r.toJson()).toList(),
+    };
+  }
+}
