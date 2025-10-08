@@ -112,9 +112,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               child: Consumer<ChatProvider>(
                 builder: (context, chatProvider, child) {
                   final conversation = chatProvider.getConversation(widget.chatId);
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  final currentUserId = authProvider.user?.id;
+                  
+                  // Get the other user's ID from the conversation participants
                   final otherUserId = conversation?.participantIds
-                      .firstWhere((id) => id != chatProvider.conversations.first.participantIds.first,
-                          orElse: () => '');
+                      .firstWhere((id) => id != currentUserId, orElse: () => '');
                   final onlineStatus = otherUserId != null && otherUserId.isNotEmpty
                       ? chatProvider.getOnlineStatus(otherUserId)
                       : null;
