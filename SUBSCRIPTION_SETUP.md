@@ -11,6 +11,23 @@ The subscription system supports:
 - RevenueCat integration for payment processing
 - Subscription management (cancel, restore, upgrade)
 
+## Implementation Status
+
+✅ **Completed:**
+- Subscription page UI with responsive design and animations
+- RevenueCat SDK integration for iOS and Android payments
+- Subscription provider with state management
+- Purchase flow with error handling and user cancellation support
+- Subscription status indicators and banners
+- Daily selection limit enforcement
+- Settings integration for subscription management
+- Unit and integration tests
+
+⚠️ **Configuration Required:**
+- RevenueCat API key needs to be set in production
+- Backend API endpoints must be configured
+- App Store Connect and Google Play Console products setup
+
 ## Configuration Required
 
 ### 1. RevenueCat Setup
@@ -47,6 +64,27 @@ The User model now includes subscription fields:
 - `subscriptionExpiresAt: DateTime?`
 
 Ensure your backend returns these fields in the `/users/me` endpoint.
+
+## Purchase Flow
+
+The subscription purchase flow is fully integrated with RevenueCat:
+
+1. **Plan Selection**: User selects a subscription plan on `/subscription` page
+2. **RevenueCat Purchase**: The app initiates native payment via RevenueCat SDK
+   - iOS: App Store payment sheet
+   - Android: Google Play payment sheet
+3. **User Cancellation**: If user cancels, the flow exits gracefully without showing errors
+4. **Verification**: Successful purchases are verified with the backend
+5. **Status Update**: Subscription status is updated and user is notified
+6. **Success Dialog**: User sees confirmation and can start using premium features
+
+### Error Handling
+
+The purchase flow handles various scenarios:
+- **User Cancellation**: Silent exit, no error shown
+- **Network Errors**: User-friendly error message with retry option
+- **Verification Failures**: Specific error about backend verification
+- **Invalid Plans**: Error message about plan availability
 
 ## Features Implemented
 

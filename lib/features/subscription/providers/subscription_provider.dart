@@ -248,8 +248,14 @@ class SubscriptionProvider with ChangeNotifier {
         // Use RevenueCat for purchase
         _customerInfo = await RevenueCatService.purchasePackage(package);
 
-        if (_customerInfo != null &&
-            RevenueCatService.hasActiveSubscription(_customerInfo!)) {
+        if (_customerInfo == null) {
+          // User cancelled the purchase
+          _error = null;
+          _setLoaded();
+          return false;
+        }
+
+        if (RevenueCatService.hasActiveSubscription(_customerInfo!)) {
           // Verify with backend
           final verified =
               await RevenueCatService.verifySubscriptionWithBackend(
@@ -263,11 +269,19 @@ class SubscriptionProvider with ChangeNotifier {
             _error = null;
             _setLoaded();
             return true;
+          } else {
+            _error = 'Failed to verify subscription with backend';
+            _setLoaded();
+            return false;
           }
+        } else {
+          _error = 'Purchase completed but no active subscription found';
+          _setLoaded();
+          return false;
         }
       }
 
-      // Fallback to API purchase
+      // Fallback to API purchase if no RevenueCat package found
       final response = await ApiService.purchaseSubscription(
         plan: planId,
         platform: platform,

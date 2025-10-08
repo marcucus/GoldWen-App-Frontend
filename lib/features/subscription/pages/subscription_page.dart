@@ -758,15 +758,11 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     });
 
     try {
-      // TODO: Integrate RevenueCat for actual payment processing
-      // For now, simulate subscription process
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Simulate successful purchase
+      // Use the SubscriptionProvider's purchase method which integrates with RevenueCat
       final success = await subscriptionProvider.purchaseSubscription(
         planId: selectedPlan.id,
         platform: Theme.of(context).platform == TargetPlatform.iOS ? 'ios' : 'android',
-        receiptData: 'simulated_receipt_data', // This would come from RevenueCat
+        receiptData: '', // RevenueCat handles receipt data internally
       );
 
       if (mounted) {
@@ -777,7 +773,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         if (success) {
           _showSuccessDialog();
         } else {
-          _showErrorDialog(subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'abonnement');
+          final errorMessage = subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'abonnement';
+          _showErrorDialog(errorMessage);
         }
       }
     } catch (e) {
@@ -785,7 +782,12 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         setState(() {
           _isLoading = false;
         });
-        _showErrorDialog('Une erreur est survenue lors de l\'abonnement: $e');
+        
+        // Don't show error for user cancellations
+        final errorMessage = e.toString();
+        if (!errorMessage.contains('cancelled') && !errorMessage.contains('canceled')) {
+          _showErrorDialog('Une erreur est survenue lors de l\'abonnement: $e');
+        }
       }
     }
   }

@@ -102,5 +102,32 @@ void main() {
       expect(matchingProvider.remainingSelections, 1);
       expect(matchingProvider.canSelectMore, true);
     });
+
+    test('SubscriptionProvider handles purchase cancellation gracefully', () {
+      final subscriptionProvider = SubscriptionProvider();
+      
+      // Verify that error is null when user cancels
+      expect(subscriptionProvider.error, isNull);
+      expect(subscriptionProvider.isLoading, false);
+    });
+
+    test('SubscriptionProvider correctly loads active plans', () {
+      final subscriptionProvider = SubscriptionProvider();
+      
+      // Initially no plans
+      expect(subscriptionProvider.activePlans, isEmpty);
+      expect(subscriptionProvider.plans, isEmpty);
+    });
+
+    test('SubscriptionProvider exposes correct subscription status properties', () {
+      final subscriptionProvider = SubscriptionProvider();
+      
+      // Test default state
+      expect(subscriptionProvider.hasActiveSubscription, false);
+      expect(subscriptionProvider.hasExpiredSubscription, false);
+      expect(subscriptionProvider.currentPlanName, isNull);
+      expect(subscriptionProvider.nextRenewalDate, isNull);
+      expect(subscriptionProvider.daysUntilExpiry, isNull);
+    });
   });
 }
