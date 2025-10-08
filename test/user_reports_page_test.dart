@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 
 import '../lib/features/reports/pages/user_reports_page.dart';
 import '../lib/features/matching/providers/report_provider.dart';
 import '../lib/core/models/models.dart';
 
-// Import the generated mock
-import 'user_reports_page_test.mocks.dart';
+// Use the centralized mocks file
+import 'mocks.mocks.dart';
 
-@GenerateMocks([ReportProvider])
 void main() {
   group('UserReportsPage Tests', () {
     late MockReportProvider mockReportProvider;

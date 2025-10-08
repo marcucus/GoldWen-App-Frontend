@@ -1,13 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:goldwen_app/core/models/profile.dart';
 import 'package:goldwen_app/core/services/api_service.dart';
 import 'package:goldwen_app/features/profile/providers/profile_provider.dart';
 
-// Generate mock classes
-@GenerateMocks([ApiService])
-import 'profile_validation_test.mocks.dart';
+// Use the centralized mocks file
+import 'mocks.mocks.dart';
 
 void main() {
   group('Profile Validation Tests', () {

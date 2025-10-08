@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 
 import '../lib/core/models/models.dart';
 import '../lib/features/matching/providers/report_provider.dart';
 import '../lib/features/matching/widgets/report_dialog.dart';
 
+// Use the centralized mocks file
+import 'mocks.mocks.dart';
+
 // Integration test for the complete report system
-@GenerateMocks([ReportProvider])
 void main() {
   group('Report System Integration Tests', () {
     testWidgets('Report dialog should submit report successfully', (WidgetTester tester) async {
