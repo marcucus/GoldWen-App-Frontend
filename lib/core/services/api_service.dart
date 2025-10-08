@@ -1329,21 +1329,44 @@ class ApiService {
         String message;
         String? code;
         Map<String, dynamic>? errors;
+        RateLimitInfo? rateLimitInfo;
+        
         if (decoded is Map<String, dynamic>) {
           message = decoded['message'] ??
               _getDefaultErrorMessage(response.statusCode);
           code = decoded['code'];
           errors = decoded['errors'];
+          
+          // Extract retry information from response body if available
+          if (response.statusCode == 429 && decoded['retryAfter'] != null) {
+            rateLimitInfo = RateLimitInfo(
+              retryAfterSeconds: decoded['retryAfter'] as int?,
+            );
+          }
         } else {
           message = _getDefaultErrorMessage(response.statusCode);
           code = null;
           errors = null;
         }
+        
+        // Extract rate limit info from headers
+        if (rateLimitInfo == null) {
+          final headerMap = <String, String>{};
+          response.headers.forEach((key, value) {
+            headerMap[key.toLowerCase()] = value;
+          });
+          final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
+          if (rateLimitFromHeaders.hasData) {
+            rateLimitInfo = rateLimitFromHeaders;
+          }
+        }
+        
         throw ApiException(
           statusCode: response.statusCode,
           message: message,
           code: code,
           errors: errors,
+          rateLimitInfo: rateLimitInfo,
         );
       }
     } catch (e) {
@@ -1436,18 +1459,39 @@ class MatchingServiceApi {
       } else {
         String message;
         String? code;
+        RateLimitInfo? rateLimitInfo;
         
         if (decoded is Map<String, dynamic>) {
           message = decoded['message'] ?? 'Unknown error';
           code = decoded['code'];
+          
+          // Extract retry information from response body if available
+          if (response.statusCode == 429 && decoded['retryAfter'] != null) {
+            rateLimitInfo = RateLimitInfo(
+              retryAfterSeconds: decoded['retryAfter'] as int?,
+            );
+          }
         } else {
           message = response.body;
+        }
+        
+        // Extract rate limit info from headers
+        if (rateLimitInfo == null) {
+          final headerMap = <String, String>{};
+          response.headers.forEach((key, value) {
+            headerMap[key.toLowerCase()] = value;
+          });
+          final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
+          if (rateLimitFromHeaders.hasData) {
+            rateLimitInfo = rateLimitFromHeaders;
+          }
         }
 
         throw ApiException(
           statusCode: response.statusCode,
           message: message,
           code: code,
+          rateLimitInfo: rateLimitInfo,
         );
       }
     } catch (e) {
@@ -1673,10 +1717,32 @@ class MatchingServiceApi {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
     } else {
+      RateLimitInfo? rateLimitInfo;
+      
+      // Extract retry information from response body if available
+      if (response.statusCode == 429 && data['retryAfter'] != null) {
+        rateLimitInfo = RateLimitInfo(
+          retryAfterSeconds: data['retryAfter'] as int?,
+        );
+      }
+      
+      // Extract rate limit info from headers
+      if (rateLimitInfo == null) {
+        final headerMap = <String, String>{};
+        response.headers.forEach((key, value) {
+          headerMap[key.toLowerCase()] = value;
+        });
+        final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
+        if (rateLimitFromHeaders.hasData) {
+          rateLimitInfo = rateLimitFromHeaders;
+        }
+      }
+      
       throw ApiException(
         statusCode: response.statusCode,
         message: data['message'] ?? 'Matching service error occurred',
         code: data['code'],
+        rateLimitInfo: rateLimitInfo,
       );
     }
   }
@@ -1731,12 +1797,14 @@ class ApiException implements Exception {
   final String message;
   final String? code;
   final Map<String, dynamic>? errors;
+  final RateLimitInfo? rateLimitInfo;
 
   ApiException({
     required this.statusCode,
     required this.message,
     this.code,
     this.errors,
+    this.rateLimitInfo,
   });
 
   @override
@@ -1747,4 +1815,87 @@ class ApiException implements Exception {
   bool get isNotFound => statusCode == 404;
   bool get isServerError => statusCode >= 500;
   bool get isNetworkError => statusCode == 0;
+  bool get isRateLimitError => statusCode == 429;
+}
+
+/// Contains rate limiting information from API response headers
+class RateLimitInfo {
+  final int? limit;
+  final int? remaining;
+  final DateTime? resetTime;
+  final int? retryAfterSeconds;
+
+  RateLimitInfo({
+    this.limit,
+    this.remaining,
+    this.resetTime,
+    this.retryAfterSeconds,
+  });
+
+  factory RateLimitInfo.fromHeaders(Map<String, String> headers) {
+    // Parse X-RateLimit-Limit header
+    final limit = headers['x-ratelimit-limit'] != null
+        ? int.tryParse(headers['x-ratelimit-limit']!)
+        : null;
+
+    // Parse X-RateLimit-Remaining header
+    final remaining = headers['x-ratelimit-remaining'] != null
+        ? int.tryParse(headers['x-ratelimit-remaining']!)
+        : null;
+
+    // Parse X-RateLimit-Reset header (Unix timestamp in seconds)
+    DateTime? resetTime;
+    final resetHeader = headers['x-ratelimit-reset'];
+    if (resetHeader != null) {
+      final resetTimestamp = int.tryParse(resetHeader);
+      if (resetTimestamp != null) {
+        resetTime = DateTime.fromMillisecondsSinceEpoch(
+          resetTimestamp * 1000,
+        );
+      }
+    }
+
+    // Parse Retry-After header (seconds)
+    final retryAfterSeconds = headers['retry-after'] != null
+        ? int.tryParse(headers['retry-after']!)
+        : null;
+
+    return RateLimitInfo(
+      limit: limit,
+      remaining: remaining,
+      resetTime: resetTime,
+      retryAfterSeconds: retryAfterSeconds,
+    );
+  }
+
+  bool get hasData => limit != null || remaining != null || resetTime != null || retryAfterSeconds != null;
+
+  bool get isNearLimit => remaining != null && limit != null && remaining! < (limit! * 0.2);
+
+  String getRetryMessage() {
+    if (retryAfterSeconds != null) {
+      final minutes = retryAfterSeconds! ~/ 60;
+      final seconds = retryAfterSeconds! % 60;
+      if (minutes > 0) {
+        return 'Réessayez dans $minutes minute${minutes > 1 ? 's' : ''} ${seconds > 0 ? 'et $seconds seconde${seconds > 1 ? 's' : ''}' : ''}';
+      }
+      return 'Réessayez dans $seconds seconde${seconds > 1 ? 's' : ''}';
+    }
+    
+    if (resetTime != null) {
+      final now = DateTime.now();
+      final diff = resetTime!.difference(now);
+      if (diff.isNegative) {
+        return 'Vous pouvez réessayer maintenant';
+      }
+      final minutes = diff.inMinutes;
+      final seconds = diff.inSeconds % 60;
+      if (minutes > 0) {
+        return 'Réessayez dans $minutes minute${minutes > 1 ? 's' : ''} ${seconds > 0 ? 'et $seconds seconde${seconds > 1 ? 's' : ''}' : ''}';
+      }
+      return 'Réessayez dans $seconds seconde${seconds > 1 ? 's' : ''}';
+    }
+    
+    return 'Veuillez réessayer plus tard';
+  }
 }

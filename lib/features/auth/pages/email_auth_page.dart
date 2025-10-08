@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/widgets/rate_limit_dialog.dart';
 import '../../onboarding/pages/gender_selection_page.dart';
 
 class EmailAuthPage extends StatefulWidget {
@@ -304,6 +305,19 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
     } catch (e) {
       setState(() {
         if (e is ApiException) {
+          // Handle rate limit errors specially
+          if (e.isRateLimitError) {
+            // Show rate limit dialog instead of inline error
+            if (mounted) {
+              RateLimitDialog.show(
+                context,
+                e,
+                onRetry: _submitForm,
+              );
+            }
+            return;
+          }
+          
           _errorMessage = e.message;
           // Show more specific error messages for common issues
           if (e.statusCode == 0 || e.message.contains('connection')) {
