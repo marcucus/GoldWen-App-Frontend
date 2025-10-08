@@ -194,18 +194,18 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
 
                             _buildActionCard(
                               title: 'Exporter mes données',
-                              description: 'Télécharger une copie complète de vos données',
+                              description: 'Télécharger une copie complète de vos données (RGPD Art. 20)',
                               icon: Icons.download,
-                              onTap: _showDataExportDialog,
+                              onTap: () => context.push('/data-export'),
                             ),
 
                             const SizedBox(height: AppSpacing.md),
 
                             _buildActionCard(
                               title: 'Supprimer mon compte',
-                              description: 'Supprimer définitivement votre compte et toutes vos données',
+                              description: 'Suppression avec délai de grâce de 30 jours (RGPD Art. 17)',
                               icon: Icons.delete_forever,
-                              onTap: _showAccountDeletionDialog,
+                              onTap: () => context.push('/account-deletion'),
                               isDestructive: true,
                             ),
 
@@ -475,189 +475,5 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
         );
       }
     }
-  }
-
-  void _showDataExportDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.download, color: AppColors.primaryGold),
-              const SizedBox(width: AppSpacing.sm),
-              const Text('Exporter mes données'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Choisissez le format pour l\'export de vos données :',
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _exportUserData('json');
-                      },
-                      icon: const Icon(Icons.code),
-                      label: const Text('JSON'),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _exportUserData('pdf');
-                      },
-                      icon: const Icon(Icons.picture_as_pdf),
-                      label: const Text('PDF'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _exportUserData(String format) async {
-    final gdprService = Provider.of<GdprService>(context, listen: false);
-
-    try {
-      // Show loading
-      _showLoadingDialog('Export en cours...');
-      
-      final data = await gdprService.exportUserData(format: format);
-      
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Données exportées avec succès au format $format'),
-            backgroundColor: AppColors.successGreen,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        
-        // Here you would typically save the file or open a share dialog
-        // For now, we'll just show the success message
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'export: $e'),
-            backgroundColor: AppColors.errorRed,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  void _showAccountDeletionDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.delete_forever, color: AppColors.errorRed),
-              const SizedBox(width: AppSpacing.sm),
-              const Text('Supprimer mon compte'),
-            ],
-          ),
-          content: const Text(
-            'ATTENTION : Cette action est irréversible.\n\n'
-            'Toutes vos données seront définitivement supprimées :\n'
-            '• Votre profil et photos\n'
-            '• Vos conversations\n'
-            '• Vos matches\n'
-            '• Votre historique\n\n'
-            'Êtes-vous sûr de vouloir continuer ?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteAccount();
-              },
-              child: Text(
-                'Supprimer définitivement',
-                style: TextStyle(color: AppColors.errorRed),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteAccount() async {
-    final gdprService = Provider.of<GdprService>(context, listen: false);
-
-    _showLoadingDialog('Suppression en cours...');
-
-    final success = await gdprService.deleteAccountWithGdprCompliance();
-
-    if (mounted) {
-      Navigator.of(context).pop(); // Close loading dialog
-      
-      if (success) {
-        // Navigate to welcome screen
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/welcome',
-          (route) => false,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(gdprService.error ?? 'Erreur lors de la suppression'),
-            backgroundColor: AppColors.errorRed,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  void _showLoadingDialog(String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(child: Text(message)),
-            ],
-          ),
-        );
-      },
-    );
   }
 }

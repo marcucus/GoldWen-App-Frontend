@@ -127,3 +127,95 @@ class PrivacyPolicy {
     };
   }
 }
+
+class DataExportRequest {
+  final String requestId;
+  final String status; // 'processing', 'ready', 'expired', 'failed'
+  final DateTime requestedAt;
+  final DateTime? expiresAt;
+  final String? downloadUrl;
+  final String? estimatedTime;
+
+  DataExportRequest({
+    required this.requestId,
+    required this.status,
+    required this.requestedAt,
+    this.expiresAt,
+    this.downloadUrl,
+    this.estimatedTime,
+  });
+
+  factory DataExportRequest.fromJson(Map<String, dynamic> json) {
+    return DataExportRequest(
+      requestId: json['requestId'] as String? ?? '',
+      status: json['status'] as String? ?? 'processing',
+      requestedAt: json['requestedAt'] != null
+          ? DateTime.parse(json['requestedAt'] as String)
+          : DateTime.now(),
+      expiresAt: json['expiresAt'] != null
+          ? DateTime.parse(json['expiresAt'] as String)
+          : null,
+      downloadUrl: json['downloadUrl'] as String?,
+      estimatedTime: json['estimatedTime'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'requestId': requestId,
+      'status': status,
+      'requestedAt': requestedAt.toIso8601String(),
+      if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
+      if (downloadUrl != null) 'downloadUrl': downloadUrl,
+      if (estimatedTime != null) 'estimatedTime': estimatedTime,
+    };
+  }
+
+  bool get isReady => status == 'ready';
+  bool get isProcessing => status == 'processing';
+  bool get isFailed => status == 'failed';
+  bool get isExpired => status == 'expired' || (expiresAt != null && DateTime.now().isAfter(expiresAt!));
+}
+
+class AccountDeletionStatus {
+  final String status; // 'active', 'scheduled_deletion', 'deleted'
+  final DateTime? deletionDate;
+  final String? message;
+  final bool canCancel;
+
+  AccountDeletionStatus({
+    required this.status,
+    this.deletionDate,
+    this.message,
+    this.canCancel = false,
+  });
+
+  factory AccountDeletionStatus.fromJson(Map<String, dynamic> json) {
+    return AccountDeletionStatus(
+      status: json['status'] as String? ?? 'active',
+      deletionDate: json['deletionDate'] != null
+          ? DateTime.parse(json['deletionDate'] as String)
+          : null,
+      message: json['message'] as String?,
+      canCancel: json['canCancel'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status,
+      if (deletionDate != null) 'deletionDate': deletionDate!.toIso8601String(),
+      if (message != null) 'message': message,
+      'canCancel': canCancel,
+    };
+  }
+
+  bool get isScheduledForDeletion => status == 'scheduled_deletion';
+  bool get isActive => status == 'active';
+  bool get isDeleted => status == 'deleted';
+  
+  int? get daysUntilDeletion {
+    if (deletionDate == null) return null;
+    return deletionDate!.difference(DateTime.now()).inDays;
+  }
+}
