@@ -215,10 +215,17 @@ class MatchingProvider with ChangeNotifier {
   Future<Map<String, dynamic>?> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider, String choice = 'like'}) async {
     // Check if user has remaining selections (only for 'like' choice)
     if (choice == 'like' && !canSelectMore) {
+      final refreshTime = _dailySelection?.refreshTime;
+      final resetTimeInfo = refreshTime != null ? _formatResetTime(refreshTime) : null;
+      
       if (subscriptionProvider != null && !subscriptionProvider.hasActiveSubscription) {
-        _error = 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
+        _error = resetTimeInfo != null
+          ? 'Vous avez atteint votre limite quotidienne. Nouvelle sélection dans $resetTimeInfo ou passez à GoldWen Plus pour 3 choix/jour !'
+          : 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
       } else {
-        _error = 'Limite quotidienne de sélections atteinte';
+        _error = resetTimeInfo != null
+          ? 'Limite quotidienne de sélections atteinte. Nouvelle sélection dans $resetTimeInfo.'
+          : 'Limite quotidienne de sélections atteinte';
       }
       notifyListeners();
       return null;
@@ -282,6 +289,28 @@ class MatchingProvider with ChangeNotifier {
       _handleError(e, 'Failed to select profile');
       return null;
     }
+  }
+
+  String? _formatResetTime(DateTime resetTime) {
+    final now = DateTime.now();
+    final difference = resetTime.difference(now);
+    
+    if (difference.isNegative) return null;
+    
+    if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+      if (hours > 0) {
+        return '${hours}h${minutes > 0 ? minutes.toString().padLeft(2, '0') : ''}';
+      } else {
+        return '${minutes}min';
+      }
+    }
+    
+    // Format as "demain à HH:MM"
+    final hour = resetTime.hour;
+    final minute = resetTime.minute;
+    return 'demain à ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
   void _updateDailySelectionAfterChoice(int? choicesRemaining) {

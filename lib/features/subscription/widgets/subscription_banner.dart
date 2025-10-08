@@ -113,15 +113,41 @@ class SubscriptionPromoBanner extends StatelessWidget {
 class SubscriptionLimitReachedDialog extends StatelessWidget {
   final int currentSelections;
   final int maxSelections;
+  final DateTime? resetTime;
   
   const SubscriptionLimitReachedDialog({
     super.key,
     required this.currentSelections,
     required this.maxSelections,
+    this.resetTime,
   });
+
+  String _formatResetTime(DateTime resetTime) {
+    final now = DateTime.now();
+    final difference = resetTime.difference(now);
+    
+    if (difference.isNegative) return 'bientôt';
+    
+    if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+      if (hours > 0) {
+        return 'dans ${hours}h${minutes > 0 ? minutes.toString().padLeft(2, '0') : ''}';
+      } else {
+        return 'dans ${minutes}min';
+      }
+    }
+    
+    // Format as "demain à HH:MM"
+    final hour = resetTime.hour;
+    final minute = resetTime.minute;
+    return 'demain à ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final resetTimeText = resetTime != null ? _formatResetTime(resetTime!) : null;
+    
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
@@ -151,6 +177,25 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
             'Vous avez utilisé $currentSelections/$maxSelections sélections aujourd\'hui.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
+          if (resetTimeText != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  'Nouvelle sélection $resetTimeText',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
