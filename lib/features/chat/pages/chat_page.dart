@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
+import '../../../core/widgets/moderation_widgets.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_countdown_timer.dart';
 import '../widgets/typing_indicator.dart';
@@ -245,6 +246,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       return _buildSystemMessage(message);
     }
 
+    // Check if message is blocked by moderation
+    if (message.moderationResult != null && message.moderationResult!.isBlocked) {
+      return _buildBlockedMessage(message);
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentUserId = authProvider.user?.id ??
         'current_user'; // Fallback to 'current_user' if no user
@@ -270,54 +276,70 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             const SizedBox(width: AppSpacing.sm),
           ],
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: isFromCurrentUser
-                    ? AppColors.primaryGold
-                    : AppColors.accentCream,
-                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.content,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isFromCurrentUser
-                              ? Colors.white
-                              : AppColors.textDark,
-                        ),
+            child: Column(
+              crossAxisAlignment: isFromCurrentUser 
+                  ? CrossAxisAlignment.end 
+                  : CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  decoration: BoxDecoration(
+                    color: isFromCurrentUser
+                        ? AppColors.primaryGold
+                        : AppColors.accentCream,
+                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        message.content,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: isFromCurrentUser
-                                  ? Colors.white70
-                                  : AppColors.textSecondary,
+                                  ? Colors.white
+                                  : AppColors.textDark,
                             ),
                       ),
-                      if (isFromCurrentUser) ...[
-                        const SizedBox(width: AppSpacing.xs),
-                        Icon(
-                          message.isRead ? Icons.done_all : Icons.done,
-                          size: 14,
-                          color: message.isRead 
-                              ? Colors.lightBlue 
-                              : Colors.white70,
-                        ),
-                      ],
+                      const SizedBox(height: AppSpacing.xs),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: isFromCurrentUser
+                                      ? Colors.white70
+                                      : AppColors.textSecondary,
+                                ),
+                          ),
+                          if (isFromCurrentUser) ...[
+                            const SizedBox(width: AppSpacing.xs),
+                            Icon(
+                              message.isRead ? Icons.done_all : Icons.done,
+                              size: 14,
+                              color: message.isRead 
+                                  ? Colors.lightBlue 
+                                  : Colors.white70,
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
+                ),
+                // Show moderation badge if pending
+                if (message.moderationResult != null && 
+                    message.moderationResult!.isPending) ...[
+                  const SizedBox(height: 4),
+                  ModerationStatusBadge(
+                    moderationResult: message.moderationResult!,
+                    compact: true,
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
           if (isFromCurrentUser) ...[

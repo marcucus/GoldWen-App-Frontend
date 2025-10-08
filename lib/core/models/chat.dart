@@ -1,5 +1,6 @@
 import 'user.dart';
 import 'profile.dart';
+import 'moderation.dart';
 
 class Conversation {
   final String id;
@@ -108,6 +109,7 @@ class ChatMessage {
   final DateTime createdAt;
   final DateTime? readAt;
   final User? sender;
+  final ModerationResult? moderationResult;
 
   ChatMessage({
     required this.id,
@@ -119,6 +121,7 @@ class ChatMessage {
     required this.createdAt,
     this.readAt,
     this.sender,
+    this.moderationResult,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
@@ -136,6 +139,9 @@ class ChatMessage {
       sender: json['sender'] != null
           ? User.fromJson(json['sender'] as Map<String, dynamic>)
           : null,
+      moderationResult: json['moderationResult'] != null
+          ? ModerationResult.fromJson(json['moderationResult'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -150,6 +156,7 @@ class ChatMessage {
       'createdAt': createdAt.toIso8601String(),
       'readAt': readAt?.toIso8601String(),
       'sender': sender?.toJson(),
+      'moderationResult': moderationResult?.toJson(),
     };
   }
 
@@ -167,6 +174,7 @@ class ChatMessage {
     DateTime? createdAt,
     DateTime? readAt,
     User? sender,
+    ModerationResult? moderationResult,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -178,6 +186,7 @@ class ChatMessage {
       createdAt: createdAt ?? this.createdAt,
       readAt: readAt ?? this.readAt,
       sender: sender ?? this.sender,
+      moderationResult: moderationResult ?? this.moderationResult,
     );
   }
 }
