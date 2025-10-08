@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/revenue_cat_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
 
 class SubscriptionProvider with ChangeNotifier {
@@ -76,6 +77,9 @@ class SubscriptionProvider with ChangeNotifier {
     _setLoading();
 
     try {
+      // Track subscription page viewed
+      await AnalyticsService.trackSubscriptionPageViewed();
+      
       // Initialize RevenueCat if not already initialized
       await RevenueCatService.initialize();
 
@@ -262,6 +266,16 @@ class SubscriptionProvider with ChangeNotifier {
                   _customerInfo!);
 
           if (verified) {
+            // Track subscription started
+            final productId = RevenueCatService.getProductIdentifier(_customerInfo!);
+            if (productId != null) {
+              // Extract tier and period from product ID (e.g., "goldwen_plus_monthly")
+              final parts = productId.split('_');
+              final tier = parts.length > 1 ? parts[1] : 'unknown';
+              final period = parts.length > 2 ? parts[2] : 'unknown';
+              await AnalyticsService.trackSubscriptionStarted(tier, period);
+            }
+            
             // Reload data
             await loadCurrentSubscription();
             await loadSubscriptionUsage();
@@ -290,6 +304,14 @@ class SubscriptionProvider with ChangeNotifier {
 
       final subscriptionData = response['data'] ?? response;
       _currentSubscription = Subscription.fromJson(subscriptionData);
+      
+      // Track subscription started
+      if (_currentSubscription != null) {
+        await AnalyticsService.trackSubscriptionStarted(
+          _currentSubscription!.tier,
+          _currentSubscription!.period ?? 'unknown',
+        );
+      }
 
       // Reload usage data
       await loadSubscriptionUsage();
@@ -334,6 +356,11 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       await ApiService.cancelSubscription();
 
+      // Track subscription cancelled
+      if (_currentSubscription != null) {
+        await AnalyticsService.trackSubscriptionCancelled(_currentSubscription!.tier);
+      }
+
       // Reload current subscription to get updated status
       await loadCurrentSubscription();
 
@@ -360,6 +387,14 @@ class SubscriptionProvider with ChangeNotifier {
             _customerInfo!);
 
         if (verified) {
+          // Track subscription restored
+          final productId = RevenueCatService.getProductIdentifier(_customerInfo!);
+          if (productId != null) {
+            final parts = productId.split('_');
+            final tier = parts.length > 1 ? parts[1] : 'unknown';
+            await AnalyticsService.trackSubscriptionRestored(tier);
+          }
+          
           await loadCurrentSubscription();
           await loadSubscriptionUsage();
           _error = null;
@@ -374,6 +409,12 @@ class SubscriptionProvider with ChangeNotifier {
       final subscriptionData = response['data'] ?? response;
       if (subscriptionData != null) {
         _currentSubscription = Subscription.fromJson(subscriptionData);
+        
+        // Track subscription restored
+        if (_currentSubscription != null) {
+          await AnalyticsService.trackSubscriptionRestored(_currentSubscription!.tier);
+        }
+        
         await loadSubscriptionUsage();
       }
 

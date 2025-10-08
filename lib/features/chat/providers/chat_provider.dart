@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
 import '../../../core/config/app_config.dart';
 
@@ -234,6 +235,9 @@ class ChatProvider with ChangeNotifier {
     }
 
     try {
+      // Check if this is the first message in the conversation
+      final isFirstMessage = (_chatMessages[chatId]?.isEmpty ?? true);
+      
       // Optimistically add message to UI
       final tempMessage = ChatMessage(
         id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
@@ -257,6 +261,12 @@ class ChatProvider with ChangeNotifier {
       final response = await ApiService.sendMessage(chatId, type: type, content: message);
       final sentMessageData = response['data'] ?? response;
       final sentMessage = ChatMessage.fromJson(sentMessageData);
+
+      // Track analytics
+      if (isFirstMessage) {
+        await AnalyticsService.trackFirstMessageSent(chatId);
+      }
+      await AnalyticsService.trackMessageSent(chatId, messageLength: message.length);
 
       // Replace temp message with real message
       final messages = _chatMessages[chatId] ?? [];
@@ -441,6 +451,10 @@ class ChatProvider with ChangeNotifier {
   void _handleChatExpired(Map<String, dynamic> data) {
     try {
       final chatId = data['chatId'] as String;
+      
+      // Track chat expiration
+      final messageCount = _chatMessages[chatId]?.length ?? 0;
+      AnalyticsService.trackChatExpired(chatId, messageCount);
       
       // Add system message before marking as expired
       _addSystemMessage(chatId, 'Cette conversation a expiré');

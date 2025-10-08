@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/models/profile.dart';
 
 class ProfileProvider with ChangeNotifier {
@@ -341,6 +342,9 @@ class ProfileProvider with ChangeNotifier {
       _error = null;
       print('ProfileProvider: Personality answers submitted successfully');
       
+      // Track personality quiz completion
+      await AnalyticsService.trackPersonalityQuizCompleted();
+      
       // Refresh profile data after successful submission
       await loadProfile();
     } catch (e) {
@@ -550,6 +554,10 @@ class ProfileProvider with ChangeNotifier {
         // Profile is complete, update status to mark as validated
         await ApiService.updateProfileStatus(completed: true);
         await loadProfileCompletion(); // Reload to get updated status
+        
+        // Track profile completion
+        // Note: We need userId from auth - this assumes it's available via API
+        await AnalyticsService.trackProfileCompleted('current_user');
       } else {
         throw Exception('Profile is not complete. Missing steps: ${_profileCompletion?.missingSteps.join(', ') ?? 'Unknown'}');
       }

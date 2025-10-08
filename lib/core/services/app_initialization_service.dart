@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_messaging_service.dart';
 import 'local_notification_service.dart';
+import 'analytics_service.dart';
 
 class AppInitializationService {
   static bool _initialized = false;
@@ -41,6 +42,24 @@ class AppInitializationService {
         }
       } else {
         debugPrint('Skipping Firebase messaging - Firebase not available');
+      }
+      
+      // Initialize analytics service (Mixpanel)
+      // Use environment variable or placeholder token
+      const mixpanelToken = String.fromEnvironment(
+        'MIXPANEL_TOKEN',
+        defaultValue: 'YOUR_MIXPANEL_TOKEN_HERE',
+      );
+      
+      if (mixpanelToken != 'YOUR_MIXPANEL_TOKEN_HERE') {
+        try {
+          await AnalyticsService.initialize(token: mixpanelToken);
+          debugPrint('Analytics service initialized successfully');
+        } catch (e) {
+          debugPrint('Analytics initialization failed: $e');
+        }
+      } else {
+        debugPrint('Skipping analytics - no token configured');
       }
       
       _initialized = true;
