@@ -25,6 +25,8 @@ void main() {
     });
 
     testWidgets('SubscriptionLimitReachedDialog displays upgrade options', (WidgetTester tester) async {
+      final resetTime = DateTime.now().add(Duration(hours: 4));
+      
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -35,6 +37,7 @@ void main() {
                   builder: (context) => SubscriptionLimitReachedDialog(
                     currentSelections: 1,
                     maxSelections: 1,
+                    resetTime: resetTime,
                   ),
                 ),
                 child: Text('Show Dialog'),

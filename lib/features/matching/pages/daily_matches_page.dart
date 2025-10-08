@@ -23,18 +23,30 @@ class DailyMatchesPage extends StatefulWidget {
 }
 
 class _DailyMatchesPageState extends State<DailyMatchesPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _backgroundController;
   late AnimationController _cardController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeAnimations();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDailyMatches();
       _preloadProfileImages();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // When app resumes, check if we need to refresh the daily selection
+    if (state == AppLifecycleState.resumed) {
+      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      matchingProvider.refreshSelectionIfNeeded();
+    }
   }
 
   void _initializeAnimations() {
@@ -69,6 +81,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _backgroundController.dispose();
     _cardController.dispose();
     super.dispose();
@@ -313,6 +326,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     final remainingSelections = matchingProvider.remainingSelections;
     final maxSelections = matchingProvider.maxSelections;
     final hasSubscription = subscriptionProvider.hasActiveSubscription;
+    final refreshTime = matchingProvider.dailySelection?.refreshTime;
     
     final content = Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -326,66 +340,90 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
       ),
       child: Semantics(
         label: 'Choix restants: $remainingSelections sur $maxSelections${hasSubscription ? ' avec abonnement GoldWen Plus' : ''}',
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Choix restants',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Choix restants',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (!hasSubscription)
+                      Text(
+                        'GoldWen Plus: 3 choix/jour',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
                 ),
-                if (!hasSubscription)
+                Row(
+                  children: [
+                    if (hasSubscription)
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'PLUS',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                          semanticsLabel: 'Abonné GoldWen Plus',
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: remainingSelections > 0 
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey[400],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$remainingSelections/$maxSelections',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (refreshTime != null && remainingSelections == 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 14,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 4),
                   Text(
-                    'GoldWen Plus: 3 choix/jour',
+                    'Reset: ${_formatResetTime(refreshTime) ?? 'demain'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
-                      fontStyle: FontStyle.italic,
                     ),
                   ),
-              ],
-            ),
-            Row(
-              children: [
-                if (hasSubscription)
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.amber,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'PLUS',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                      semanticsLabel: 'Abonné GoldWen Plus',
-                    ),
-                  ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: remainingSelections > 0 
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey[400],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '$remainingSelections/$maxSelections',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -763,6 +801,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   }
 
   Widget _buildSelectionCompleteState(MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+    final refreshTime = matchingProvider.dailySelection?.refreshTime;
+    final resetTimeText = _formatResetTime(refreshTime);
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -804,6 +845,34 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
+              if (resetTimeText != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Prochaine sélection : $resetTimeText',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               if (!matchingProvider.hasSubscription)
                 Semantics(
@@ -830,6 +899,30 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ),
       ),
     );
+  }
+
+  String? _formatResetTime(DateTime? resetTime) {
+    if (resetTime == null) return null;
+    
+    final now = DateTime.now();
+    final difference = resetTime.difference(now);
+    
+    if (difference.isNegative) return null;
+    
+    if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+      if (hours > 0) {
+        return '${hours}h${minutes > 0 ? minutes.toString().padLeft(2, '0') : ''}';
+      } else {
+        return '${minutes}min';
+      }
+    }
+    
+    // Format as "demain à 12h00" or specific time
+    final hour = resetTime.hour;
+    final minute = resetTime.minute;
+    return 'demain à ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
   void _showProfileDetails(Profile profile) {
@@ -984,6 +1077,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
     // Check if user can select more profiles
     if (!matchingProvider.canSelectMore) {
+      final refreshTime = matchingProvider.dailySelection?.refreshTime;
+      final resetTimeText = _formatResetTime(refreshTime);
+      
       if (!subscriptionProvider.hasActiveSubscription) {
         // Show upgrade dialog for free users
         showDialog(
@@ -991,15 +1087,21 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           builder: (context) => SubscriptionLimitReachedDialog(
             currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
             maxSelections: matchingProvider.maxSelections,
+            resetTime: matchingProvider.dailySelection?.refreshTime,
           ),
         );
         return;
       } else {
         // Premium user reached their limit
+        final message = resetTimeText != null 
+          ? 'Vous avez atteint votre limite quotidienne de 3 sélections. Nouvelle sélection dans $resetTimeText.'
+          : 'Vous avez atteint votre limite quotidienne de 3 sélections.';
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vous avez atteint votre limite quotidienne de 3 sélections'),
+          SnackBar(
+            content: Text(message),
             backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
           ),
         );
         return;
@@ -1072,6 +1174,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           builder: (context) => SubscriptionLimitReachedDialog(
             currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
             maxSelections: matchingProvider.maxSelections,
+            resetTime: matchingProvider.dailySelection?.refreshTime,
           ),
         );
       } else {
