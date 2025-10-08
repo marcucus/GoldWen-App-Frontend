@@ -6,6 +6,7 @@
 import 'dart:async' as _i5;
 
 import 'package:flutter/material.dart' as _i6;
+import 'package:goldwen_app/core/models/models.dart' as _i7;
 import 'package:goldwen_app/features/matching/providers/matching_provider.dart' as _i4;
 import 'package:goldwen_app/features/subscription/providers/subscription_provider.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
@@ -52,10 +53,10 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
   String? get error => (super.noSuchMethod(Invocation.getter(#error)) as String?);
 
   @override
-  List<dynamic> get dailyProfiles => (super.noSuchMethod(
+  List<_i7.Profile> get dailyProfiles => (super.noSuchMethod(
         Invocation.getter(#dailyProfiles),
-        returnValue: <dynamic>[],
-      ) as List<dynamic>);
+        returnValue: <_i7.Profile>[],
+      ) as List<_i7.Profile>);
 
   @override
   List<String> get selectedProfileIds => (super.noSuchMethod(
