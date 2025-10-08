@@ -52,6 +52,11 @@ dependencies:
   # File Handling
   path_provider: ^2.1.1
   share_plus: ^10.1.4
+  file_picker: ^8.1.6
+  
+  # Media Playback
+  video_player: ^2.9.2
+  audioplayers: ^6.1.0
   
   # Location Services
   geolocator: ^14.0.2

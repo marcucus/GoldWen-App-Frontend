@@ -562,6 +562,117 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // Media file endpoints (audio/video)
+  static Future<Map<String, dynamic>> uploadMediaFile(
+    String filePath, {
+    required String type,
+    int? order,
+  }) async {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/profiles/me/media'),
+    );
+    request.headers.addAll(_headers);
+
+    String extension = filePath.split('.').last.toLowerCase();
+
+    // Determine media type based on file extension
+    String mainType;
+    String subtype;
+
+    if (type == 'audio') {
+      mainType = 'audio';
+      switch (extension) {
+        case 'mp3':
+          subtype = 'mpeg';
+          break;
+        case 'wav':
+          subtype = 'wav';
+          break;
+        case 'm4a':
+          subtype = 'mp4';
+          break;
+        case 'aac':
+          subtype = 'aac';
+          break;
+        case 'ogg':
+          subtype = 'ogg';
+          break;
+        default:
+          subtype = 'mpeg';
+          break;
+      }
+    } else {
+      // video
+      mainType = 'video';
+      switch (extension) {
+        case 'mp4':
+          subtype = 'mp4';
+          break;
+        case 'mov':
+          subtype = 'quicktime';
+          break;
+        case 'avi':
+          subtype = 'x-msvideo';
+          break;
+        case 'mkv':
+          subtype = 'x-matroska';
+          break;
+        case 'webm':
+          subtype = 'webm';
+          break;
+        default:
+          subtype = 'mp4';
+          break;
+      }
+    }
+
+    // Read file as bytes
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final filename = file.uri.pathSegments.last;
+
+    final multipartFile = http.MultipartFile.fromBytes(
+      'mediaFile',
+      bytes,
+      filename: filename,
+      contentType: MediaType(mainType, subtype),
+    );
+
+    request.files.add(multipartFile);
+    request.fields['type'] = type;
+
+    if (order != null) {
+      request.fields['order'] = order.toString();
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> deleteMediaFile(String mediaId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/profiles/me/media/$mediaId'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> updateMediaFileOrder(
+    String mediaId,
+    int newOrder,
+  ) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/profiles/me/media/$mediaId/order'),
+      headers: _headers,
+      body: jsonEncode({'newOrder': newOrder}),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Matching endpoints
   static Future<Map<String, dynamic>> getDailySelection() async {
     final response = await _makeRequest(
