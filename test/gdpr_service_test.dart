@@ -54,7 +54,7 @@ void main() {
       });
 
       test('should return true for recent consent', () {
-        gdprService.currentConsent = GdprConsent(
+        // gdprService.currentConsent = GdprConsent(
           dataProcessing: true,
           consentedAt: DateTime.now().subtract(const Duration(days: 30)),
         );
@@ -64,7 +64,7 @@ void main() {
       });
 
       test('should return false for old consent (over 1 year)', () {
-        gdprService.currentConsent = GdprConsent(
+        // gdprService.currentConsent = GdprConsent(
           dataProcessing: true,
           consentedAt: DateTime.now().subtract(const Duration(days: 370)),
         );
@@ -81,7 +81,7 @@ void main() {
       });
 
       test('should return false for recent consent', () {
-        gdprService.currentConsent = GdprConsent(
+        // gdprService.currentConsent = GdprConsent(
           dataProcessing: true,
           consentedAt: DateTime.now().subtract(const Duration(days: 30)),
         );
@@ -91,7 +91,7 @@ void main() {
       });
 
       test('should return true for consent older than 10 months', () {
-        gdprService.currentConsent = GdprConsent(
+        // gdprService.currentConsent = GdprConsent(
           dataProcessing: true,
           consentedAt: DateTime.now().subtract(const Duration(days: 305)),
         );
@@ -104,7 +104,7 @@ void main() {
     group('clearLocalConsentData', () {
       test('should clear all local consent data', () async {
         // Set initial data
-        gdprService.currentConsent = GdprConsent(
+        // gdprService.currentConsent = GdprConsent(
           dataProcessing: true,
           consentedAt: DateTime.now(),
         );

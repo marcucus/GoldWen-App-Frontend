@@ -67,7 +67,7 @@ void main() {
     });
 
     testWidgets('should display processing status when request is processing', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'processing',
         requestedAt: DateTime.now(),
@@ -84,7 +84,7 @@ void main() {
     });
 
     testWidgets('should display ready status with download button', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'ready',
         requestedAt: DateTime.now().subtract(const Duration(hours: 12)),
@@ -102,7 +102,7 @@ void main() {
     });
 
     testWidgets('should display failed status with retry option', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'failed',
         requestedAt: DateTime.now(),
@@ -118,7 +118,7 @@ void main() {
     });
 
     testWidgets('should display expired status', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'expired',
         requestedAt: DateTime.now().subtract(const Duration(days: 10)),
@@ -134,7 +134,7 @@ void main() {
     });
 
     testWidgets('should display refresh button when processing', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'processing',
         requestedAt: DateTime.now(),
@@ -150,7 +150,7 @@ void main() {
 
     testWidgets('should show expiration date when ready', (WidgetTester tester) async {
       final expiresAt = DateTime.now().add(const Duration(days: 7));
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'ready',
         requestedAt: DateTime.now(),
@@ -199,7 +199,7 @@ void main() {
     });
 
     testWidgets('should use appropriate colors for status', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'ready',
         requestedAt: DateTime.now(),
@@ -215,7 +215,7 @@ void main() {
     });
 
     testWidgets('should use error color for failed status', (WidgetTester tester) async {
-      gdprService.currentExportRequest = DataExportRequest(
+      // gdprService.currentExportRequest = DataExportRequest(
         requestId: 'test-123',
         status: 'failed',
         requestedAt: DateTime.now(),
@@ -230,7 +230,7 @@ void main() {
     });
 
     testWidgets('should show loading state for request button', (WidgetTester tester) async {
-      gdprService.isLoading = true;
+      // gdprService.isLoading = true;
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();

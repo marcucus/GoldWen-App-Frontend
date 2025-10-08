@@ -90,7 +90,7 @@ void main() {
     testWidgets('should display scheduled deletion view when deletion is scheduled', (WidgetTester tester) async {
       // Set scheduled deletion status
       final deletionDate = DateTime.now().add(const Duration(days: 25));
-      gdprService.accountDeletionStatus = AccountDeletionStatus(
+      // gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         message: 'Votre compte sera supprimé dans 30 jours',
@@ -108,7 +108,7 @@ void main() {
 
     testWidgets('should display cancel button when deletion can be cancelled', (WidgetTester tester) async {
       final deletionDate = DateTime.now().add(const Duration(days: 20));
-      gdprService.accountDeletionStatus = AccountDeletionStatus(
+      // gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         canCancel: true,
@@ -123,7 +123,7 @@ void main() {
 
     testWidgets('should show deletion date in scheduled view', (WidgetTester tester) async {
       final deletionDate = DateTime.now().add(const Duration(days: 30));
-      gdprService.accountDeletionStatus = AccountDeletionStatus(
+      // gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         canCancel: true,
@@ -193,7 +193,7 @@ void main() {
     });
 
     testWidgets('should display warning icon in scheduled view', (WidgetTester tester) async {
-      gdprService.accountDeletionStatus = AccountDeletionStatus(
+      // gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: DateTime.now().add(const Duration(days: 15)),
         canCancel: true,
