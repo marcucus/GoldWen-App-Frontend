@@ -4,6 +4,23 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
 
+/// A widget for playing audio and video media files.
+///
+/// This widget provides:
+/// - Video playback with standard controls (play/pause, seek, duration)
+/// - Audio playback with custom UI and controls
+/// - Progress bar with seek functionality
+/// - Automatic resource cleanup
+/// - Error handling and loading states
+///
+/// Example usage:
+/// ```dart
+/// MediaPlayerWidget(
+///   mediaFile: mediaFile,
+///   autoPlay: false,
+///   showControls: true,
+/// )
+/// ```
 class MediaPlayerWidget extends StatefulWidget {
   final MediaFile mediaFile;
   final bool autoPlay;

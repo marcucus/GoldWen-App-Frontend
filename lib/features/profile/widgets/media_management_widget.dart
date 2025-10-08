@@ -5,6 +5,24 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/services/api_service.dart';
 
+/// A widget for managing audio and video media files in user profiles.
+///
+/// This widget allows users to:
+/// - Upload audio files (mp3, wav, m4a, aac, ogg) up to 50MB
+/// - Upload video files (mp4, mov, avi, mkv, webm) up to 50MB
+/// - Preview uploaded media files
+/// - Delete media files with confirmation
+/// - Enforce maximum limits (2 audio files, 1 video file by default)
+///
+/// Example usage:
+/// ```dart
+/// MediaManagementWidget(
+///   mediaFiles: profileProvider.mediaFiles,
+///   onMediaFilesChanged: (files) => profileProvider.updateMediaFiles(files),
+///   maxAudioFiles: 2,
+///   maxVideoFiles: 1,
+/// )
+/// ```
 class MediaManagementWidget extends StatefulWidget {
   final List<MediaFile> mediaFiles;
   final Function(List<MediaFile>) onMediaFilesChanged;
