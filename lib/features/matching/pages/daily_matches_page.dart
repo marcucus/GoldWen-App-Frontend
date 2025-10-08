@@ -23,18 +23,30 @@ class DailyMatchesPage extends StatefulWidget {
 }
 
 class _DailyMatchesPageState extends State<DailyMatchesPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _backgroundController;
   late AnimationController _cardController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeAnimations();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDailyMatches();
       _preloadProfileImages();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // When app resumes, check if we need to refresh the daily selection
+    if (state == AppLifecycleState.resumed) {
+      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      matchingProvider.refreshSelectionIfNeeded();
+    }
   }
 
   void _initializeAnimations() {
@@ -69,6 +81,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _backgroundController.dispose();
     _cardController.dispose();
     super.dispose();
