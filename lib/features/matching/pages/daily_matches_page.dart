@@ -520,6 +520,27 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                     semanticsLabel: 'Nom: ${profile.firstName ?? ''} ${profile.lastName ?? ''}, Âge: ${profile.age ?? 'non spécifié'} ans',
                                   ),
                                   const SizedBox(height: 4),
+                                  if (profile.location?.isNotEmpty == true)
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          color: Colors.white.withOpacity(0.9),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          profile.location!,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Colors.white.withOpacity(0.9),
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 4),
                                   if (profile.bio?.isNotEmpty == true)
                                     Text(
                                       profile.bio!,
