@@ -1,3 +1,5 @@
+import 'moderation.dart';
+
 class Profile {
   final String id;
   final String userId;
@@ -6,6 +8,7 @@ class Profile {
   final String? gender;
   final List<String> interestedInGenders;
   final String? bio;
+  final ModerationResult? bioModerationResult;
   final String? jobTitle;
   final String? company;
   final String? education;
@@ -33,6 +36,7 @@ class Profile {
     this.gender,
     this.interestedInGenders = const [],
     this.bio,
+    this.bioModerationResult,
     this.jobTitle,
     this.company,
     this.education,
@@ -84,6 +88,9 @@ class Profile {
               .toList() ??
           [],
       bio: json['bio'] as String?,
+      bioModerationResult: json['bioModerationResult'] != null
+          ? ModerationResult.fromJson(json['bioModerationResult'] as Map<String, dynamic>)
+          : null,
       jobTitle: json['jobTitle'] as String?,
       company: json['company'] as String?,
       education: json['education'] as String?,
@@ -130,6 +137,7 @@ class Profile {
       'gender': gender,
       'interestedInGenders': interestedInGenders,
       'bio': bio,
+      'bioModerationResult': bioModerationResult?.toJson(),
       'jobTitle': jobTitle,
       'company': company,
       'education': education,
@@ -158,6 +166,7 @@ class Photo {
   final int order;
   final bool isPrimary;
   final DateTime createdAt;
+  final ModerationResult? moderationResult;
 
   Photo({
     required this.id,
@@ -165,6 +174,7 @@ class Photo {
     required this.order,
     required this.isPrimary,
     required this.createdAt,
+    this.moderationResult,
   });
 
   factory Photo.fromJson(Map<String, dynamic> json) {
@@ -174,6 +184,9 @@ class Photo {
       order: json['order'] as int,
       isPrimary: json['isPrimary'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      moderationResult: json['moderationResult'] != null
+          ? ModerationResult.fromJson(json['moderationResult'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -184,6 +197,7 @@ class Photo {
       'order': order,
       'isPrimary': isPrimary,
       'createdAt': createdAt.toIso8601String(),
+      'moderationResult': moderationResult?.toJson(),
     };
   }
 }
