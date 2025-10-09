@@ -1,0 +1,8 @@
+  error • This expression has a type of 'void' so its value can't be used • lib/core/services/analytics_service.dart:102:20 • use_of_void_result
+  error • The argument type 'Map<String, dynamic>' can't be assigned to the parameter type 'String'.  • lib/core/services/analytics_service.dart:102:24 • argument_type_not_assignable
+  error • 2 positional arguments expected by 'set', but 1 found • lib/core/services/analytics_service.dart:102:34 • not_enough_positional_arguments
+  error • A value of type 'String' can't be returned from the method 'getExpirationDate' because it has a return type of 'DateTime?' • lib/core/services/revenue_cat_service.dart:152:16 • return_of_invalid_type
+  error • Expected to find ')' • lib/features/matching/pages/daily_matches_page.dart:662:6 • expected_token
+  error • The method 'getEmailHistory' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:60:41 • undefined_method
+  error • The method 'getEmailDetails' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:104:41 • undefined_method
+  error • The method 'retryEmail' isn't defined for the type 'ApiService' • lib/features/settings/providers/email_notification_provider.dart:128:41 • undefined_method

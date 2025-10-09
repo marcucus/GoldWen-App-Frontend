@@ -1,5 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - test/**
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+
 linter:
   rules:
     # Styling
