@@ -417,25 +417,31 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         },
       );
     } else if (question.type == 'scale') {
-      // Handle scale questions (e.g., 1-5 rating)
+      // Handle scale questions - use minValue and maxValue from question
+      final minValue = question.minValue ?? 1;
+      final maxValue = question.maxValue ?? 5;
+      final scaleRange = maxValue - minValue + 1;
+      
       return Column(
         children: [
           Text(
-            'Évaluez de 1 à 5',
+            'Évaluez de $minValue à $maxValue',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(5, (index) {
-              final value = index + 1;
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: List.generate(scaleRange, (index) {
+              final value = minValue + index;
               final isSelected = selectedAnswer == value;
               
               return GestureDetector(
                 onTap: () => _selectAnswer(question.id, value),
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: scaleRange <= 5 ? 50 : 40,
+                  height: scaleRange <= 5 ? 50 : 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isSelected ? AppColors.primaryGold : Colors.transparent,
@@ -450,7 +456,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                       style: TextStyle(
                         color: isSelected ? Colors.white : AppColors.textDark,
                         fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                        fontSize: scaleRange <= 5 ? 18 : 14,
                       ),
                     ),
                   ),
