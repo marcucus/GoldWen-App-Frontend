@@ -149,13 +149,20 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       // Use dynamic questions from API
       final backendQuestions = profileProvider.personalityQuestions;
       if (backendQuestions.isEmpty) {
-        throw Exception('Aucune question de personnalité trouvée sur le serveur');
+        print('WARNING: No personality questions found on server');
+        setState(() {
+          _error = 'Aucune question de personnalité trouvée sur le serveur. Veuillez contacter le support.';
+          _isLoading = false;
+        });
+        return;
       }
 
       // Sort questions by order
       final sortedQuestions = List<PersonalityQuestion>.from(backendQuestions)
         ..sort((a, b) => a.order.compareTo(b.order));
 
+      print('Loaded ${sortedQuestions.length} personality questions successfully');
+      
       setState(() {
         _questions = sortedQuestions;
         _isLoading = false;
@@ -222,6 +229,53 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         ),
       );
     }
+
+    // Add check for empty questions list
+    if (_questions.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Questionnaire de personnalité'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.quiz_outlined,
+                size: 64,
+                color: Colors.orange[400],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Aucune question disponible',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Les questions du questionnaire n\'ont pas pu être chargées.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                    _error = null;
+                  });
+                  _loadPersonalityQuestions();
+                },
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -323,6 +377,8 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   Widget _buildQuestionOptions(PersonalityQuestion question, dynamic selectedAnswer) {
     if (question.type == 'multiple_choice' && question.options?.isNotEmpty == true) {
       return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: question.options!.length,
         itemBuilder: (context, index) {
           final options = question.options;
@@ -361,25 +417,31 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         },
       );
     } else if (question.type == 'scale') {
-      // Handle scale questions (e.g., 1-5 rating)
+      // Handle scale questions - use minValue and maxValue from question
+      final minValue = question.minValue ?? 1;
+      final maxValue = question.maxValue ?? 5;
+      final scaleRange = maxValue - minValue + 1;
+      
       return Column(
         children: [
           Text(
-            'Évaluez de 1 à 5',
+            'Évaluez de $minValue à $maxValue',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(5, (index) {
-              final value = index + 1;
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: List.generate(scaleRange, (index) {
+              final value = minValue + index;
               final isSelected = selectedAnswer == value;
               
               return GestureDetector(
                 onTap: () => _selectAnswer(question.id, value),
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: scaleRange <= 5 ? 50 : 40,
+                  height: scaleRange <= 5 ? 50 : 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isSelected ? AppColors.primaryGold : Colors.transparent,
@@ -394,7 +456,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                       style: TextStyle(
                         color: isSelected ? Colors.white : AppColors.textDark,
                         fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                        fontSize: scaleRange <= 5 ? 18 : 14,
                       ),
                     ),
                   ),
