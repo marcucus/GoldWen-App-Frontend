@@ -1516,6 +1516,57 @@ class ApiService {
         return 'Unknown error occurred';
     }
   }
+
+  // Wrapper methods for MatchingServiceApi
+  static Future<Map<String, dynamic>> calculateCompatibilityV2({
+    required String userId,
+    required List<String> candidateIds,
+    required Map<String, dynamic> personalityAnswers,
+    required Map<String, dynamic> preferences,
+    Map<String, dynamic>? userLocation,
+    bool includeAdvancedScoring = true,
+  }) {
+    return MatchingServiceApi.calculateCompatibilityV2(
+      userId: userId,
+      candidateIds: candidateIds,
+      personalityAnswers: personalityAnswers,
+      preferences: preferences,
+      userLocation: userLocation,
+      includeAdvancedScoring: includeAdvancedScoring,
+    );
+  }
+
+  static Future<Map<String, dynamic>> getHistory({
+    int page = 1,
+    int limit = 20,
+    String? startDate,
+    String? endDate,
+  }) {
+    return MatchingServiceApi.getHistory(
+      page: page,
+      limit: limit,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  static Future<Map<String, dynamic>> getEmailHistory({
+    int page = 1,
+    int limit = 20,
+  }) {
+    return MatchingServiceApi.getEmailHistory(
+      page: page,
+      limit: limit,
+    );
+  }
+
+  static Future<Map<String, dynamic>> getEmailDetails(String emailId) {
+    return MatchingServiceApi.getEmailDetails(emailId);
+  }
+
+  static Future<Map<String, dynamic>> retryEmail(String emailId) {
+    return MatchingServiceApi.retryEmail(emailId);
+  }
 }
 
 // External Matching Service API

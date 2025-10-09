@@ -24,17 +24,16 @@ void main() {
     test('WhoLikedMeItem model serialization works correctly', () {
       final profile = Profile(
         id: 'profile-1',
-        firstName: 'Jane',
-        age: 25,
+        userId: 'user-1',
+        pseudo: 'Jane',
+        birthDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
         photos: [],
         bio: 'Test bio',
-        prompts: [],
         personalityAnswers: [],
-        preferences: PreferenceFilter(
-          minAge: 18,
-          maxAge: 35,
-          maxDistance: 50,
-        ),
+        promptAnswers: [],
+        isComplete: true,
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+        updatedAt: DateTime.now(),
       );
 
       final whoLikedMeItem = WhoLikedMeItem(
@@ -57,17 +56,17 @@ void main() {
         'userId': 'user-123',
         'user': {
           'id': 'profile-123',
-          'firstName': 'John',
-          'age': 30,
+          'userId': 'user-123',
+          'pseudo': 'John',
+          'birthDate': DateTime.now().subtract(const Duration(days: 365 * 30)).toIso8601String(),
           'photos': [],
           'bio': 'Test user bio',
-          'prompts': [],
+          'promptAnswers': [],
           'personalityAnswers': [],
-          'preferences': {
-            'minAge': 20,
-            'maxAge': 40,
-            'maxDistance': 25,
-          },
+          'interests': [],
+          'isComplete': true,
+          'createdAt': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
         },
         'likedAt': '2024-01-15T10:30:00.000Z',
       };

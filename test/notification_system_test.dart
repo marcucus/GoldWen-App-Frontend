@@ -6,8 +6,10 @@ import 'package:goldwen_app/core/services/api_service.dart';
 import 'package:goldwen_app/core/services/firebase_messaging_service.dart';
 import 'package:goldwen_app/core/services/local_notification_service.dart';
 
-// Mock classes
-class MockApiService extends Mock implements ApiService {}
+// Use generated mocks for ApiService
+import 'mocks.mocks.dart';
+
+// Mock classes for services without generated mocks
 class MockFirebaseMessagingService extends Mock implements FirebaseMessagingService {}
 class MockLocalNotificationService extends Mock implements LocalNotificationService {}
 
@@ -297,10 +299,10 @@ void main() {
 
     test('should show instant notification', () async {
       when(mockLocalService.showInstantNotification(
-        title: anyNamed('title'),
-        body: anyNamed('body'),
-        payload: anyNamed('payload'),
-        id: anyNamed('id'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        payload: any(named: 'payload'),
+        id: any(named: 'id'),
       )).thenAnswer((_) async {});
 
       await mockLocalService.showInstantNotification(

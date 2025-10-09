@@ -23,7 +23,7 @@ void main() {
 
     Widget createTestWidget() {
       return MaterialApp(
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme(),
         home: MultiProvider(
           providers: [
             ChangeNotifierProvider<MatchingProvider>.value(
@@ -138,7 +138,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(),
           home: ChangeNotifierProvider<MatchingProvider>.value(
             value: mockProvider,
             child: const DailyMatchesPage(),
