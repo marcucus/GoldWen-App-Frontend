@@ -30,7 +30,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(
-      3,
+      10,
       (index) =>
           TextEditingController()); // Should be 3 prompts as per API requirements
 
@@ -94,21 +94,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       await profileProvider.loadPrompts();
 
       // Select first 3 prompts automatically
-      if (profileProvider.availablePrompts.length >= 3) {
+      if (profileProvider.availablePrompts.length >= 10) {
         setState(() {
           _selectedPromptIds = profileProvider.availablePrompts
-              .take(3) // Should be 3 prompts as per API requirements
+              .take(10) // Should be 3 prompts as per API requirements
               .map((prompt) => prompt.id)
               .toList();
           _promptQuestions = profileProvider.availablePrompts
-              .take(3) // Should be 3 prompts as per API requirements
+              .take(10) // Should be 3 prompts as per API requirements
               .map((prompt) => prompt.text)
               .toList();
         });
       } else {
         // If we don't have enough prompts, show error
         throw Exception(
-            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)'); // Changed from 10 to 3
+            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 10 to 3
       }
     } catch (e) {
       print('Error loading prompts: $e');
@@ -431,7 +431,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: 3, // Should be 3 prompts as per API requirements
+                    itemCount: 10, // Should be 3 prompts as per API requirements
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
                       final questionText = index < _promptQuestions.length
@@ -477,22 +477,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _getValidAnswersCount() == 3
+                  _getValidAnswersCount() == 10
                       ? Icons.check_circle
                       : Icons.pending,
-                  color: _getValidAnswersCount() == 3
+                  color: _getValidAnswersCount() == 10
                       ? Colors.green
                       : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/3',
+                  'Réponses complétées: ${_getValidAnswersCount()}/10',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getValidAnswersCount() == 3
+                        color: _getValidAnswersCount() == 10
                             ? Colors.green
                             : AppColors.textSecondary,
-                        fontWeight: _getValidAnswersCount() == 3
+                        fontWeight: _getValidAnswersCount() == 10
                             ? FontWeight.w600
                             : FontWeight.normal,
                       ),
@@ -507,7 +507,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: Text(
                 _arePromptsValid()
                     ? 'Continuer'
-                    : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
+                    : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
               ),
             ),
           ),
@@ -682,7 +682,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   bool _arePromptsValid() {
     // Should be 3 prompts as per API requirements
-    if (_promptControllers.length != 3) return false;
+    if (_promptControllers.length != 10) return false;
 
     // All 3 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
@@ -890,10 +890,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
 
     // Validate prompt answers - must have exactly 3 valid responses
-    if (_promptControllers.length != 3) {
+    if (_promptControllers.length != 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: 3 prompts requis pour continuer'),
+          content: Text('Erreur: 10 prompts requis pour continuer'),
           backgroundColor: Colors.red,
         ),
       );
