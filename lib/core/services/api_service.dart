@@ -1549,6 +1549,50 @@ class ApiService {
       endDate: endDate,
     );
   }
+
+  // Email notification endpoints
+  static Future<Map<String, dynamic>> getEmailHistory({
+    int? page,
+    int? limit,
+    String? type,
+    String? status,
+  }) async {
+    final queryParams = <String, String>{};
+    if (page != null) queryParams['page'] = page.toString();
+    if (limit != null) queryParams['limit'] = limit.toString();
+    if (type != null) queryParams['type'] = type;
+    if (status != null) queryParams['status'] = status;
+
+    final uri = Uri.parse('$baseUrl/users/me/email-history')
+        .replace(queryParameters: queryParams);
+    final response = await _makeRequest(
+      http.get(uri, headers: _headers),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getEmailDetails(String emailId) async {
+    final response = await _makeRequest(
+      http.get(
+        Uri.parse('$baseUrl/users/me/email-history/$emailId'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> retryEmail(String emailId) async {
+    final response = await _makeRequest(
+      http.post(
+        Uri.parse('$baseUrl/users/me/email-history/$emailId/retry'),
+        headers: _headers,
+      ),
+    );
+
+    return _handleResponse(response);
+  }
 }
 
 // External Matching Service API
@@ -1889,50 +1933,6 @@ class MatchingServiceApi {
         rateLimitInfo: rateLimitInfo,
       );
     }
-  }
-
-  // Email notification endpoints
-  static Future<Map<String, dynamic>> getEmailHistory({
-    int? page,
-    int? limit,
-    String? type,
-    String? status,
-  }) async {
-    final queryParams = <String, String>{};
-    if (page != null) queryParams['page'] = page.toString();
-    if (limit != null) queryParams['limit'] = limit.toString();
-    if (type != null) queryParams['type'] = type;
-    if (status != null) queryParams['status'] = status;
-
-    final uri = Uri.parse('$baseUrl/users/me/email-history')
-        .replace(queryParameters: queryParams);
-    final response = await _makeRequest(
-      http.get(uri, headers: _headers),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getEmailDetails(String emailId) async {
-    final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/users/me/email-history/$emailId'),
-        headers: _headers,
-      ),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> retryEmail(String emailId) async {
-    final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/users/me/email-history/$emailId/retry'),
-        headers: _headers,
-      ),
-    );
-
-    return _handleResponse(response);
   }
 }
 

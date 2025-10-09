@@ -100,7 +100,7 @@ class AnalyticsService {
     try {
       final people = _mixpanel!.getPeople();
       for (final entry in properties.entries) {
-        await people.set(entry.key, entry.value);
+        people.set(entry.key, entry.value);
       }
     } catch (e) {
       debugPrint('Error setting user properties: $e');
