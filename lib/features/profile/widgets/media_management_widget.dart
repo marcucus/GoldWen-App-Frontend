@@ -178,7 +178,8 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           border: Border.all(
             color: AppColors.primaryGold.withOpacity(0.3),
-            style: BorderStyle.dashed,
+            style: BorderStyle.solid,
+            width: 2,
           ),
         ),
         child: Center(
