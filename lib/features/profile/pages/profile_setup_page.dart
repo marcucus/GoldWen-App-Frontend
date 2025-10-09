@@ -274,7 +274,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             maxLength: 200,
           ),
 
-          const Spacer(),
+          const SizedBox(height: AppSpacing.xxl),
 
           SizedBox(
             width: double.infinity,
@@ -415,7 +415,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           const SizedBox(height: AppSpacing.xxl),
           Expanded(
             child: _promptQuestions.isEmpty
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: AppSpacing.md),
+                        const Text('Chargement des questions...'),
+                        const SizedBox(height: AppSpacing.lg),
+                        TextButton(
+                          onPressed: _loadPrompts,
+                          child: const Text('Réessayer'),
+                        ),
+                      ],
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: 3, // Should be 3 prompts as per API requirements
                     itemBuilder: (context, index) {
@@ -535,7 +549,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
             child: Consumer<ProfileProvider>(
@@ -646,7 +660,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ],
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
