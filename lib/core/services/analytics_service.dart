@@ -63,7 +63,7 @@ class AnalyticsService {
     if (_mixpanel == null) return;
     
     try {
-      await _mixpanel!.optOutTracking();
+      _mixpanel!.optOutTracking();
       debugPrint('Analytics tracking opted out');
     } catch (e) {
       debugPrint('Error opting out of analytics: $e');
@@ -75,7 +75,7 @@ class AnalyticsService {
     if (_mixpanel == null) return;
     
     try {
-      await _mixpanel!.optInTracking();
+      _mixpanel!.optInTracking();
       debugPrint('Analytics tracking opted in');
     } catch (e) {
       debugPrint('Error opting in to analytics: $e');
@@ -98,7 +98,8 @@ class AnalyticsService {
     if (!_isInitialized || !_analyticsEnabled || _mixpanel == null) return;
 
     try {
-      await _mixpanel!.getPeople().set(properties);
+      final people = _mixpanel!.getPeople();
+      await people.set(properties);
     } catch (e) {
       debugPrint('Error setting user properties: $e');
     }
