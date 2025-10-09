@@ -1,0 +1,2018 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 67.0.0 (89.0.0 available)
+  _flutterfire_internals 1.3.61 (1.3.62 available)
+  analyzer 6.4.1 (8.2.0 available)
+  build 2.4.1 (4.0.1 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_resolvers 2.4.2 (3.0.4 available)
+  build_runner 2.4.13 (2.9.0 available)
+  build_runner_core 7.3.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  dart_style 2.3.6 (3.1.2 available)
+  file_picker 8.3.7 (10.3.3 available)
+  firebase_auth 6.0.2 (6.1.0 available)
+  firebase_auth_platform_interface 8.1.1 (8.1.2 available)
+  firebase_auth_web 6.0.2 (6.0.3 available)
+  firebase_core 4.1.0 (4.1.1 available)
+  firebase_core_platform_interface 6.0.0 (6.0.1 available)
+  firebase_core_web 3.1.0 (3.1.1 available)
+  firebase_messaging 16.0.1 (16.0.2 available)
+  firebase_messaging_platform_interface 4.7.1 (4.7.2 available)
+  firebase_messaging_web 4.0.1 (4.0.2 available)
+  flutter_plugin_android_lifecycle 2.0.30 (2.0.31 available)
+  go_router 16.2.1 (16.2.4 available)
+  google_fonts 6.3.1 (6.3.2 available)
+  google_sign_in 6.1.5 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.0 available)
+  google_sign_in_ios 5.9.0 (6.2.1 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  image_cropper 10.0.0+1 (11.0.0 available)
+  image_cropper_for_web 6.1.0 (7.0.0 available)
+  image_cropper_platform_interface 7.2.0 (8.0.0 available)
+  in_app_purchase_storekit 0.4.4+1 (0.4.6 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  mockito 5.4.4 (5.5.1 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  path_provider_android 2.2.18 (2.2.19 available)
+  purchases_flutter 9.6.2 (9.7.0 available)
+  share_plus 10.1.4 (12.0.0 available)
+  share_plus_platform_interface 5.0.2 (6.1.0 available)
+  shared_preferences_android 2.4.12 (2.4.15 available)
+  shelf_web_socket 2.0.1 (3.0.0 available)
+  source_gen 1.5.0 (4.0.1 available)
+  source_helper 1.3.5 (1.3.8 available)
+  test_api 0.7.6 (0.7.7 available)
+  watcher 1.1.3 (1.1.4 available)
+  win32 5.14.0 (5.15.0 available)
+Got dependencies!
+47 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Building com.goldwenApp for device (ios)...
+Automatically signing iOS for device deployment using specified development team in Xcode project: 3L39MWQ44C
+Running pod install...                                           2 631ms
+Running Xcode build...                                          
+Xcode build done.                                           26,4s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/_9/lh4bpq8j48n06k6hvsw7y30w0000gn/T/flutter_tools.hWX4k1/flutter_ios_build_temp_dirlfs4tO/temporary_xcresult_bundle
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:14:40: warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+    12 | 
+    13 | // Converts an instance of SKProduct into a dictionary.
+    14 | + (NSDictionary *)getMapFromSKProduct:(SKProduct *)product;
+       |                                        `- warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+    15 | 
+    16 | // Converts an instance of SKProductSubscriptionPeriod into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProduct.h:41:12: note: 'SKProduct' has been explicitly marked deprecated here
+    39 | API_DEPRECATED("Use Product", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    40 | NS_SWIFT_SENDABLE
+    41 | @interface SKProduct : NSObject {
+       |            `- note: 'SKProduct' has been explicitly marked deprecated here
+    42 | @private
+    43 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:17:58: warning: 'SKProductSubscriptionPeriod' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionPeriod
+    15 | 
+    16 | // Converts an instance of SKProductSubscriptionPeriod into a dictionary.
+    17 | + (NSDictionary *)getMapFromSKProductSubscriptionPeriod:(SKProductSubscriptionPeriod *)period
+       |                                                          `- warning: 'SKProductSubscriptionPeriod' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionPeriod
+    18 |     API_AVAILABLE(ios(11.2));
+    19 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProduct.h:27:12: note: 'SKProductSubscriptionPeriod' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use Product.SubscriptionPeriod", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKProductSubscriptionPeriod : NSObject {
+       |            `- note: 'SKProductSubscriptionPeriod' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:21:48: warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    19 | 
+    20 | // Converts an instance of SKProductDiscount into a dictionary.
+    21 | + (NSDictionary *)getMapFromSKProductDiscount:(SKProductDiscount *)discount
+       |                                                `- warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    22 |     API_AVAILABLE(ios(11.2));
+    23 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductDiscount.h:33:12: note: 'SKProductDiscount' has been explicitly marked deprecated here
+    31 | API_DEPRECATED("Use Product.SubscriptionOffer", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    32 | NS_SWIFT_SENDABLE
+    33 | @interface SKProductDiscount : NSObject {
+       |            `- note: 'SKProductDiscount' has been explicitly marked deprecated here
+    34 | @private
+    35 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:26:22: warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    24 | // Converts an array of SKProductDiscount instances into an array of dictionaries.
+    25 | + (nonnull NSArray *)getMapArrayFromSKProductDiscounts:
+    26 |     (nonnull NSArray<SKProductDiscount *> *)productDiscounts API_AVAILABLE(ios(12.2));
+       |                      `- warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    27 | 
+    28 | // Converts an instance of SKProductsResponse into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductDiscount.h:33:12: note: 'SKProductDiscount' has been explicitly marked deprecated here
+    31 | API_DEPRECATED("Use Product.SubscriptionOffer", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    32 | NS_SWIFT_SENDABLE
+    33 | @interface SKProductDiscount : NSObject {
+       |            `- note: 'SKProductDiscount' has been explicitly marked deprecated here
+    34 | @private
+    35 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:29:49: warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+    27 | 
+    28 | // Converts an instance of SKProductsResponse into a dictionary.
+    29 | + (NSDictionary *)getMapFromSKProductsResponse:(SKProductsResponse *)productResponse;
+       |                                                 `- warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+    30 | 
+    31 | // Converts an instance of SKPayment into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductsRequest.h:44:12: note: 'SKProductsResponse' has been explicitly marked deprecated here
+    42 | API_DEPRECATED("Get products using Product.products(for:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    43 | NS_SWIFT_SENDABLE
+    44 | @interface SKProductsResponse : NSObject {
+       |            `- note: 'SKProductsResponse' has been explicitly marked deprecated here
+    45 | @private
+    46 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:32:40: warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    30 | 
+    31 | // Converts an instance of SKPayment into a dictionary.
+    32 | + (NSDictionary *)getMapFromSKPayment:(SKPayment *)payment;
+       |                                        `- warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    33 | 
+    34 | // Converts an instance of NSLocale into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:19:12: note: 'SKPayment' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKPayment : NSObject <NSCopying, NSMutableCopying> {
+       |            `- note: 'SKPayment' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:38:4: warning: 'SKMutablePayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    36 | 
+    37 | // Creates an instance of the SKMutablePayment class based on the supplied dictionary.
+    38 | + (SKMutablePayment *)getSKMutablePaymentFromMap:(NSDictionary *)map;
+       |    `- warning: 'SKMutablePayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    39 | 
+    40 | // Converts an instance of SKPaymentTransaction into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:52:12: note: 'SKMutablePayment' has been explicitly marked deprecated here
+    50 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    51 | NS_SWIFT_NONSENDABLE
+    52 | @interface SKMutablePayment : SKPayment
+       |            `- note: 'SKMutablePayment' has been explicitly marked deprecated here
+    53 | 
+    54 | @property(nonatomic, copy, readwrite, nullable) NSString *applicationUsername API_DEPRECATED("Create a Product.PurchaseOption.appAccountToken to use in Product.purchase(confirmIn:options:)", ios(7.0, 18.0), macos(10.9, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0));
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:41:51: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    39 | 
+    40 | // Converts an instance of SKPaymentTransaction into a dictionary.
+    41 | + (NSDictionary *)getMapFromSKPaymentTransaction:(SKPaymentTransaction *)transaction;
+       |                                                   `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    42 | 
+    43 | // Converts an instance of NSError into a dictionary.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:47:43: warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    45 | 
+    46 | // Converts an instance of SKStorefront into a dictionary.
+    47 | + (NSDictionary *)getMapFromSKStorefront:(SKStorefront *)storefront
+       |                                           `- warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    48 |     API_AVAILABLE(ios(13), macos(10.15), watchos(6.2));
+    49 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKStorefront.h:16:12: note: 'SKStorefront' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Use Storefront", ios(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKStorefront : NSObject
+       |            `- note: 'SKStorefront' has been explicitly marked deprecated here
+    17 | 
+    18 | /* The three letter country code for the current storefront */
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:51:43: warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    49 | 
+    50 | // Converts the supplied instances of SKStorefront and SKPaymentTransaction into a dictionary.
+    51 | + (NSDictionary *)getMapFromSKStorefront:(SKStorefront *)storefront
+       |                                           `- warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    52 |                  andSKPaymentTransaction:(SKPaymentTransaction *)transaction
+    53 |     API_AVAILABLE(ios(13), macos(10.15), watchos(6.2));
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKStorefront.h:16:12: note: 'SKStorefront' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Use Storefront", ios(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKStorefront : NSObject
+       |            `- note: 'SKStorefront' has been explicitly marked deprecated here
+    17 | 
+    18 | /* The three letter country code for the current storefront */
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:52:43: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    50 | // Converts the supplied instances of SKStorefront and SKPaymentTransaction into a dictionary.
+    51 | + (NSDictionary *)getMapFromSKStorefront:(SKStorefront *)storefront
+    52 |                  andSKPaymentTransaction:(SKPaymentTransaction *)transaction
+       |                                           `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    53 |     API_AVAILABLE(ios(13), macos(10.15), watchos(6.2));
+    54 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:56:13: warning: 'SKPaymentDiscount' is deprecated: first deprecated in iOS 18.0 - Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)
+    54 | 
+    55 | // Creates an instance of the SKPaymentDiscount class based on the supplied dictionary.
+    56 | + (nullable SKPaymentDiscount *)getSKPaymentDiscountFromMap:(NSDictionary *)map
+       |             `- warning: 'SKPaymentDiscount' is deprecated: first deprecated in iOS 18.0 - Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)
+    57 |                                                   withError:(NSString *_Nullable *_Nullable)error
+    58 |     API_AVAILABLE(ios(12.2));
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentDiscount.h:16:12: note: 'SKPaymentDiscount' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)", ios(12.2, 18.0), tvos(12.2, 18.0), macos(10.14.4, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKPaymentDiscount : NSObject {
+       |            `- note: 'SKPaymentDiscount' has been explicitly marked deprecated here
+    17 | @private
+    18 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:61:15: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    59 | 
+    60 | + (nullable FIASKPaymentTransactionMessage *)convertTransactionToPigeon:
+    61 |     (nullable SKPaymentTransaction *)transaction;
+       |               `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    62 | 
+    63 | + (nullable FIASKStorefrontMessage *)convertStorefrontToPigeon:(nullable SKStorefront *)storefront
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:63:74: warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    61 |     (nullable SKPaymentTransaction *)transaction;
+    62 | 
+    63 | + (nullable FIASKStorefrontMessage *)convertStorefrontToPigeon:(nullable SKStorefront *)storefront
+       |                                                                          `- warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    64 |     API_AVAILABLE(ios(13.0));
+    65 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKStorefront.h:16:12: note: 'SKStorefront' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Use Storefront", ios(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKStorefront : NSObject
+       |            `- note: 'SKStorefront' has been explicitly marked deprecated here
+    17 | 
+    18 | /* The three letter country code for the current storefront */
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:67:15: warning: 'SKPaymentDiscount' is deprecated: first deprecated in iOS 18.0 - Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)
+    65 | 
+    66 | + (nullable FIASKPaymentDiscountMessage *)convertPaymentDiscountToPigeon:
+    67 |     (nullable SKPaymentDiscount *)discount API_AVAILABLE(ios(12.2));
+       |               `- warning: 'SKPaymentDiscount' is deprecated: first deprecated in iOS 18.0 - Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)
+    68 | 
+    69 | + (nullable FIASKPaymentMessage *)convertPaymentToPigeon:(nullable SKPayment *)payment
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentDiscount.h:16:12: note: 'SKPaymentDiscount' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Create a Product.PurchaseOption.promotionalOffer to use in Product.purchase(confirmIn:options:)", ios(12.2, 18.0), tvos(12.2, 18.0), macos(10.14.4, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKPaymentDiscount : NSObject {
+       |            `- note: 'SKPaymentDiscount' has been explicitly marked deprecated here
+    17 | @private
+    18 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:69:68: warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    67 |     (nullable SKPaymentDiscount *)discount API_AVAILABLE(ios(12.2));
+    68 | 
+    69 | + (nullable FIASKPaymentMessage *)convertPaymentToPigeon:(nullable SKPayment *)payment
+       |                                                                    `- warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    70 |     API_AVAILABLE(ios(12.2));
+    71 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:19:12: note: 'SKPayment' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKPayment : NSObject <NSCopying, NSMutableCopying> {
+       |            `- note: 'SKPayment' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:75:15: warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+    73 | 
+    74 | + (nullable FIASKProductsResponseMessage *)convertProductsResponseToPigeon:
+    75 |     (nullable SKProductsResponse *)payment;
+       |               `- warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+    76 | 
+    77 | + (nullable FIASKProductMessage *)convertProductToPigeon:(nullable SKProduct *)product
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductsRequest.h:44:12: note: 'SKProductsResponse' has been explicitly marked deprecated here
+    42 | API_DEPRECATED("Get products using Product.products(for:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    43 | NS_SWIFT_SENDABLE
+    44 | @interface SKProductsResponse : NSObject {
+       |            `- note: 'SKProductsResponse' has been explicitly marked deprecated here
+    45 | @private
+    46 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:77:68: warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+    75 |     (nullable SKProductsResponse *)payment;
+    76 | 
+    77 | + (nullable FIASKProductMessage *)convertProductToPigeon:(nullable SKProduct *)product
+       |                                                                    `- warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+    78 |     API_AVAILABLE(ios(12.2));
+    79 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProduct.h:41:12: note: 'SKProduct' has been explicitly marked deprecated here
+    39 | API_DEPRECATED("Use Product", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    40 | NS_SWIFT_SENDABLE
+    41 | @interface SKProduct : NSObject {
+       |            `- note: 'SKProduct' has been explicitly marked deprecated here
+    42 | @private
+    43 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:81:15: warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    79 | 
+    80 | + (nullable FIASKProductDiscountMessage *)convertProductDiscountToPigeon:
+    81 |     (nullable SKProductDiscount *)productDiscount API_AVAILABLE(ios(12.2));
+       |               `- warning: 'SKProductDiscount' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionOffer
+    82 | 
+    83 | + (nullable FIASKPriceLocaleMessage *)convertNSLocaleToPigeon:(nullable NSLocale *)locale
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductDiscount.h:33:12: note: 'SKProductDiscount' has been explicitly marked deprecated here
+    31 | API_DEPRECATED("Use Product.SubscriptionOffer", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    32 | NS_SWIFT_SENDABLE
+    33 | @interface SKProductDiscount : NSObject {
+       |            `- note: 'SKProductDiscount' has been explicitly marked deprecated here
+    34 | @private
+    35 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    11 | #endif
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:13:
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAObjectTranslator.h:87:15: warning: 'SKProductSubscriptionPeriod' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionPeriod
+    85 | 
+    86 | + (nullable FIASKProductSubscriptionPeriodMessage *)convertSKProductSubscriptionPeriodToPigeon:
+    87 |     (nullable SKProductSubscriptionPeriod *)period API_AVAILABLE(ios(12.2));
+       |               `- warning: 'SKProductSubscriptionPeriod' is deprecated: first deprecated in iOS 18.0 - Use Product.SubscriptionPeriod
+    88 | @end
+    89 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProduct.h:27:12: note: 'SKProductSubscriptionPeriod' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use Product.SubscriptionPeriod", ios(11.2, 18.0), macos(10.13.2, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKProductSubscriptionPeriod : NSObject {
+       |            `- note: 'SKProductSubscriptionPeriod' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:13:30: warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    11 | 
+    12 | /// An object containing the location and unique identifier of an Apple App Store storefront.
+    13 | @property(nonatomic, strong) SKStorefront *storefront API_AVAILABLE(ios(13.0));
+       |                              `- warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+    14 | 
+    15 | /// A list of SKPaymentTransactions, which each represents a single transaction
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKStorefront.h:16:12: note: 'SKStorefront' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Use Storefront", ios(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKStorefront : NSObject
+       |            `- note: 'SKStorefront' has been explicitly marked deprecated here
+    17 | 
+    18 | /* The three letter country code for the current storefront */
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:16:38: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    14 | 
+    15 | /// A list of SKPaymentTransactions, which each represents a single transaction
+    16 | @property(nonatomic, strong) NSArray<SKPaymentTransaction *> *transactions API_AVAILABLE(
+       |                                      `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    17 |     ios(3.0), macos(10.7), watchos(6.2));
+    18 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:20:41: warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    18 | 
+    19 | /// An object that provides information needed to complete transactions.
+    20 | @property(nonatomic, weak, nullable) id<SKPaymentQueueDelegate> delegate API_AVAILABLE(
+       |                                         `- warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    21 |     ios(13.0), macos(10.15), watchos(6.2));
+    22 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:78:11: note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     76 | 
+     77 | API_DEPRECATED("No longer supported", ios(13.0, 18.0), tvos(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     78 | @protocol SKPaymentQueueDelegate <NSObject>
+        |           `- note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     79 | @optional
+     80 | // Sent when the storefront changes while a payment is processing.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:25:36: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    23 | /// Remove a finished (i.e. failed or completed) transaction from the queue.  Attempting to finish a
+    24 | /// purchasing transaction will throw an exception.
+    25 | - (void)finishTransaction:(nonnull SKPaymentTransaction *)transaction;
+       |                                    `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+    26 | 
+    27 | /// Observers are not retained.  The transactions array will only be synchronized with the server
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:29:36: warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+    27 | /// Observers are not retained.  The transactions array will only be synchronized with the server
+    28 | /// while the queue has observers.  This may require that the user authenticate.
+    29 | - (void)addTransactionObserver:(id<SKPaymentTransactionObserver>)observer;
+       |                                    `- warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+    30 | 
+    31 | /// Add a payment to the server queue.  The payment is copied to add an SKPaymentTransaction to the
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:91:11: note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     89 | 
+     90 | API_DEPRECATED("Use StoreKit 2 Transaction APIs", ios(3.0, 18.0), tvos(9.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     91 | @protocol SKPaymentTransactionObserver <NSObject>
+        |           `- note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     92 | @required
+     93 | // Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:34:21: warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    32 | /// transactions array.  The same payment can be added multiple times to create multiple
+    33 | /// transactions.
+    34 | - (void)addPayment:(SKPayment *_Nonnull)payment;
+       |                     `- warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+    35 | 
+    36 | /// Will add completed transactions for the current user back to the queue to be re-completed.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:19:12: note: 'SKPayment' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKPayment : NSObject <NSCopying, NSMutableCopying> {
+       |            `- note: 'SKPayment' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      5 | #import <StoreKit/StoreKit.h>
+      6 | #import "FIATransactionCache.h"
+      7 | #import "FLTPaymentQueueProtocol.h"
+        |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:7:
+      8 | #import "FLTTransactionCacheProtocol.h"
+      9 | 
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueProtocol.h:61:32: warning: 'SKPaymentQueue' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    59 | 
+    60 | /// Initialize this wrapper with an SKPaymentQueue
+    61 | - (instancetype)initWithQueue:(SKPaymentQueue *)queue NS_DESIGNATED_INITIALIZER;
+       |                                `- warning: 'SKPaymentQueue' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    62 | 
+    63 | /// The default initializer is unavailable, as it this must be initlai
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:25:12: note: 'SKPaymentQueue' has been explicitly marked deprecated here
+     23 | API_DEPRECATED("No longer supported", ios(3.0, 18.0), tvos(9.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     24 | NS_SWIFT_SENDABLE
+     25 | @interface SKPaymentQueue : NSObject {
+        |            `- note: 'SKPaymentQueue' has been explicitly marked deprecated here
+     26 | @private
+     27 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:11:45: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+      9 | 
+     10 | NS_ASSUME_NONNULL_BEGIN
+     11 | typedef void (^TransactionsUpdated)(NSArray<SKPaymentTransaction *> *transactions);
+        |                                             `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     12 | typedef void (^TransactionsRemoved)(NSArray<SKPaymentTransaction *> *transactions);
+     13 | typedef void (^RestoreTransactionFailed)(NSError *error);
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:12:45: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     10 | NS_ASSUME_NONNULL_BEGIN
+     11 | typedef void (^TransactionsUpdated)(NSArray<SKPaymentTransaction *> *transactions);
+     12 | typedef void (^TransactionsRemoved)(NSArray<SKPaymentTransaction *> *transactions);
+        |                                             `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     13 | typedef void (^RestoreTransactionFailed)(NSError *error);
+     14 | typedef void (^RestoreCompletedTransactionsFinished)(void);
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:15:39: warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+     13 | typedef void (^RestoreTransactionFailed)(NSError *error);
+     14 | typedef void (^RestoreCompletedTransactionsFinished)(void);
+     15 | typedef BOOL (^ShouldAddStorePayment)(SKPayment *payment, SKProduct *product);
+        |                                       `- warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+     16 | typedef void (^UpdatedDownloads)(NSArray<SKDownload *> *downloads);
+     17 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:19:12: note: 'SKPayment' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKPayment : NSObject <NSCopying, NSMutableCopying> {
+       |            `- note: 'SKPayment' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:15:59: warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+     13 | typedef void (^RestoreTransactionFailed)(NSError *error);
+     14 | typedef void (^RestoreCompletedTransactionsFinished)(void);
+     15 | typedef BOOL (^ShouldAddStorePayment)(SKPayment *payment, SKProduct *product);
+        |                                                           `- warning: 'SKProduct' is deprecated: first deprecated in iOS 18.0 - Use Product
+     16 | typedef void (^UpdatedDownloads)(NSArray<SKDownload *> *downloads);
+     17 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProduct.h:41:12: note: 'SKProduct' has been explicitly marked deprecated here
+    39 | API_DEPRECATED("Use Product", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    40 | NS_SWIFT_SENDABLE
+    41 | @interface SKProduct : NSObject {
+       |            `- note: 'SKProduct' has been explicitly marked deprecated here
+    42 | @private
+    43 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:16:42: warning: 'SKDownload' is deprecated: first deprecated in iOS 16.0 - Hosted content is no longer supported
+     14 | typedef void (^RestoreCompletedTransactionsFinished)(void);
+     15 | typedef BOOL (^ShouldAddStorePayment)(SKPayment *payment, SKProduct *product);
+     16 | typedef void (^UpdatedDownloads)(NSArray<SKDownload *> *downloads);
+        |                                          `- warning: 'SKDownload' is deprecated: first deprecated in iOS 16.0 - Hosted content is no longer supported
+     17 | 
+     18 | /// A protocol that conforms to SKPaymentTransactionObserver and handles SKPaymentQueue methods
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKDownload.h:26:181: note: 'SKDownload' has been explicitly marked deprecated here
+    24 | SK_EXTERN NSTimeInterval SKDownloadTimeRemainingUnknown API_DEPRECATED("Hosted content is no longer supported", ios(6.0, 16.0), macos(10.14, 13.0), tvos(9.0, 16.0), watchos(6.2, 9.0)) API_UNAVAILABLE(visionos);
+    25 | 
+    26 | SK_EXTERN_CLASS API_DEPRECATED("Hosted content is no longer supported", ios(6.0, 16.0), macos(10.8, 13.0), tvos(9.0, 16.0), watchos(6.2, 9.0)) API_UNAVAILABLE(visionos) @interface SKDownload : NSObject {
+       |                                                                                                                                                                                     `- note: 'SKDownload' has been explicitly marked deprecated here
+    27 | @private
+    28 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:19:53: warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+     17 | 
+     18 | /// A protocol that conforms to SKPaymentTransactionObserver and handles SKPaymentQueue methods
+     19 | @protocol FLTPaymentQueueHandlerProtocol <NSObject, SKPaymentTransactionObserver>
+        |                                                     `- warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+     20 | /// An object that provides information needed to complete transactions.
+     21 | @property(nonatomic, weak, nullable) id<SKPaymentQueueDelegate> delegate API_AVAILABLE(
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:91:11: note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     89 | 
+     90 | API_DEPRECATED("Use StoreKit 2 Transaction APIs", ios(3.0, 18.0), tvos(9.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     91 | @protocol SKPaymentTransactionObserver <NSObject>
+        |           `- note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     92 | @required
+     93 | // Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:21:41: warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+     19 | @protocol FLTPaymentQueueHandlerProtocol <NSObject, SKPaymentTransactionObserver>
+     20 | /// An object that provides information needed to complete transactions.
+     21 | @property(nonatomic, weak, nullable) id<SKPaymentQueueDelegate> delegate API_AVAILABLE(
+        |                                         `- warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+     22 |     ios(13.0), macos(10.15), watchos(6.2));
+     23 | /// An object containing the location and unique identifier of an Apple App Store storefront.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:78:11: note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     76 | 
+     77 | API_DEPRECATED("No longer supported", ios(13.0, 18.0), tvos(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     78 | @protocol SKPaymentQueueDelegate <NSObject>
+        |           `- note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     79 | @optional
+     80 | // Sent when the storefront changes while a payment is processing.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:25:5: warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+     23 | /// An object containing the location and unique identifier of an Apple App Store storefront.
+     24 | @property(nonatomic, readonly, nullable)
+     25 |     SKStorefront *storefront API_AVAILABLE(ios(13.0), macos(10.15), watchos(6.2));
+        |     `- warning: 'SKStorefront' is deprecated: first deprecated in iOS 18.0 - Use Storefront
+     26 | 
+     27 | /// Creates a new FIAPaymentQueueHandler.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKStorefront.h:16:12: note: 'SKStorefront' has been explicitly marked deprecated here
+    14 | API_DEPRECATED("Use Storefront", ios(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    15 | NS_SWIFT_SENDABLE
+    16 | @interface SKStorefront : NSObject
+       |            `- note: 'SKStorefront' has been explicitly marked deprecated here
+    17 | 
+    18 | /* The three letter country code for the current storefront */
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:74:36: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     72 | 
+     73 | /// Can throw exceptions if the transaction type is purchasing, should always used in a @try block.
+     74 | - (void)finishTransaction:(nonnull SKPaymentTransaction *)transaction;
+        |                                    `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     75 | 
+     76 | /// Attempt to restore transactions. Require app store receipt url.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:83:12: warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     81 | 
+     82 | /// Return all transactions that are not marked as complete.
+     83 | - (NSArray<SKPaymentTransaction *> *)getUnfinishedTransactions;
+        |            `- warning: 'SKPaymentTransaction' is deprecated: first deprecated in iOS 18.0 - Use PurchaseResult from Product.purchase(confirmIn:options:)
+     84 | 
+     85 | /// This method needs to be called before any other methods.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentTransaction.h:27:12: note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    25 | API_DEPRECATED("Use PurchaseResult from Product.purchase(confirmIn:options:)",ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    26 | NS_SWIFT_SENDABLE
+    27 | @interface SKPaymentTransaction : NSObject {
+       |            `- note: 'SKPaymentTransaction' has been explicitly marked deprecated here
+    28 | @private
+    29 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FIATransactionCache.h"
+     8 | #import "FLTPaymentQueueHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:8:
+     9 | #import "FLTPaymentQueueProtocol.h"
+    10 | #import "FLTTransactionCacheProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTPaymentQueueHandlerProtocol.h:95:21: warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+     93 | /// @param payment Payment object to be added to the payment queue.
+     94 | /// @return whether "addPayment" was successful.
+     95 | - (BOOL)addPayment:(SKPayment *)payment;
+        |                     `- warning: 'SKPayment' is deprecated: first deprecated in iOS 18.0 - Use Product.purchase(confirmIn:options:)
+     96 | 
+     97 | /// Displays the price consent sheet.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPayment.h:19:12: note: 'SKPayment' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("Use Product.purchase(confirmIn:options:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKPayment : NSObject <NSCopying, NSMutableCopying> {
+       |            `- note: 'SKPayment' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    12 | 
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:14:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPaymentQueueHandler.h:17:17: warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+    15 | 
+    16 | @interface FIAPaymentQueueHandler
+    17 |     : NSObject <SKPaymentTransactionObserver, FLTPaymentQueueHandlerProtocol>
+       |                 `- warning: 'SKPaymentTransactionObserver' is deprecated: first deprecated in iOS 18.0 - Use StoreKit 2 Transaction APIs
+    18 | @end
+    19 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:91:11: note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     89 | 
+     90 | API_DEPRECATED("Use StoreKit 2 Transaction APIs", ios(3.0, 18.0), tvos(9.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     91 | @protocol SKPaymentTransactionObserver <NSObject>
+        |           `- note: 'SKPaymentTransactionObserver' has been explicitly marked deprecated here
+     92 | @required
+     93 | // Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:15:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:15:
+    13 | #import "FIAObjectTranslator.h"
+    14 | #import "FIAPaymentQueueHandler.h"
+    15 | #import "FIAPPaymentQueueDelegate.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:15:
+    16 | #import "FIAPReceiptManager.h"
+    17 | #import "FIAPRequestHandler.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPPaymentQueueDelegate.h:19:49: warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    17 | API_AVAILABLE(ios(13), macos(10.15))
+    18 | API_UNAVAILABLE(tvos, watchos)
+    19 | @interface FIAPPaymentQueueDelegate : NSObject <SKPaymentQueueDelegate>
+       |                                                 `- warning: 'SKPaymentQueueDelegate' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    20 | - (id)initWithMethodChannel:(id<FLTMethodChannelProtocol>)methodChannel;
+    21 | @end
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKPaymentQueue.h:78:11: note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     76 | 
+     77 | API_DEPRECATED("No longer supported", ios(13.0, 18.0), tvos(13.0, 18.0), macos(10.15, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+     78 | @protocol SKPaymentQueueDelegate <NSObject>
+        |           `- note: 'SKPaymentQueueDelegate' has been explicitly marked deprecated here
+     79 | @optional
+     80 | // Sent when the storefront changes while a payment is processing.
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+    17 | #import "FIAPRequestHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:
+    18 | #import "FIATransactionCache.h"
+    19 | #import "FLTMethodChannelProtocol.h"
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPRequestHandler.h:7:9: note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPRequestHandler.h:7:
+     5 | #import <Foundation/Foundation.h>
+     6 | #import <StoreKit/StoreKit.h>
+     7 | #import "FLTRequestHandlerProtocol.h"
+       |         `- note: in file included from /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPRequestHandler.h:7:
+     8 | 
+     9 | NS_ASSUME_NONNULL_BEGIN
+
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FLTRequestHandlerProtocol.h:8:42: warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+     6 | 
+     7 | NS_ASSUME_NONNULL_BEGIN
+     8 | typedef void (^ProductRequestCompletion)(SKProductsResponse *_Nullable response,
+       |                                          `- warning: 'SKProductsResponse' is deprecated: first deprecated in iOS 18.0 - Get products using Product.products(for:)
+     9 |                                          NSError *_Nullable errror);
+    10 | /// A protocol that wraps SKRequest.
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKProductsRequest.h:44:12: note: 'SKProductsResponse' has been explicitly marked deprecated here
+    42 | API_DEPRECATED("Get products using Product.products(for:)", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    43 | NS_SWIFT_SENDABLE
+    44 | @interface SKProductsResponse : NSObject {
+       |            `- note: 'SKProductsResponse' has been explicitly marked deprecated here
+    45 | @private
+    46 |     id _internal;
+
+    <module-includes>:1:9: note: in file included from <module-includes>:1:
+    1 | #import "Headers/in_app_purchase_storekit-umbrella.h"
+      |         `- note: in file included from <module-includes>:1:
+    2 | 
+
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:9: note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:
+    15 | #import "FIAPPaymentQueueDelegate.h"
+    16 | #import "FIAPReceiptManager.h"
+    17 | #import "FIAPRequestHandler.h"
+       |         `- note: in file included from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/in_app_purchase_storekit/in_app_purchase_storekit-umbrella.h:17:
+    18 | #import "FIATransactionCache.h"
+    19 | #import "FLTMethodChannelProtocol.h"
+
+    42 warnings generated.
+    /Users/amarques/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.4.4+1/darwin/in_app_purchase_storekit/Sources/in_app_purchase_storekit_objc/include/in_app_purchase_storekit_objc/FIAPRequestHandler.h:13:34: warning: 'SKRequest' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    11 | @interface FIAPRequestHandler : NSObject <FLTRequestHandlerProtocol>
+    12 | 
+    13 | - (instancetype)initWithRequest:(SKRequest *)request;
+       |                                  `- warning: 'SKRequest' is deprecated: first deprecated in iOS 18.0 - No longer supported
+    14 | - (void)startProductRequestWithCompletionHandler:(ProductRequestCompletion)completion;
+    15 | 
+
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/StoreKit.framework/Headers/SKRequest.h:19:12: note: 'SKRequest' has been explicitly marked deprecated here
+    17 | API_DEPRECATED("No longer supported", ios(3.0, 18.0), macos(10.7, 15.0), watchos(6.2, 11.0), visionos(1.0, 2.0))
+    18 | NS_SWIFT_NONSENDABLE
+    19 | @interface SKRequest : NSObject {
+       |            `- note: 'SKRequest' has been explicitly marked deprecated here
+    20 | @private
+    21 |     id _requestInternal;
+    /Users/amarques/.pub-cache/hosted/pub.dev/sign_in_with_apple-7.0.1/ios/Classes/SignInWithAppleError.swift:99:13: warning: switch must be exhaustive
+                switch code {
+                ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/sign_in_with_apple-7.0.1/ios/Classes/SignInWithAppleError.swift:99:13: note: add missing case: '.preferSignInWithApple'
+                switch code {
+                ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/sign_in_with_apple-7.0.1/ios/Classes/SignInWithAppleError.swift:99:13: note: add missing case: '.deviceNotConfiguredForPasskeyCreation'
+                switch code {
+                ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/sign_in_with_apple-7.0.1/ios/Classes/SignInWithAppleError.swift:99:13: note: add missing cases
+                switch code {
+                ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/audioplayers_darwin-6.3.0/darwin/audioplayers_darwin/Sources/audioplayers_darwin/AudioContext.swift:88:17: warning: 'allowBluetooth' was deprecated in iOS 8.0: renamed to 'AVAudioSession.CategoryOptions.allowBluetoothHFP'
+            return .allowBluetooth
+                    ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/audioplayers_darwin-6.3.0/darwin/audioplayers_darwin/Sources/audioplayers_darwin/AudioContext.swift:88:17: note: use 'AVAudioSession.CategoryOptions.allowBluetoothHFP' instead
+            return .allowBluetooth
+                    ^~~~~~~~~~~~~~
+                    AVAudioSession.CategoryOptions.allowBluetoothHFP
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    /Users/amarques/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/ios/Classes/strategies/PhonePermissionStrategy.m:49:35: warning: 'subscriberCellularProvider' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+       49 |     CTCarrier *carrier = [netInfo subscriberCellularProvider];
+          |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+          |                                   serviceSubscriberCellularProviders
+    In module 'CoreTelephony' imported from /Users/amarques/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/ios/Classes/strategies/PhonePermissionStrategy.m:8:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: property 'subscriberCellularProvider' is declared deprecated here
+      114 | @property(readonly, retain, nullable) CTCarrier *subscriberCellularProvider API_DEPRECATED_WITH_REPLACEMENT("serviceSubscriberCellularProviders", ios(4.0, 12.0)) API_UNAVAILABLE(macos);
+          |                                                  ^
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Headers/CTTelephonyNetworkInfo.h:114:50: note: 'subscriberCellularProvider' has been explicitly marked deprecated here
+    1 warning generated.
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Mixpanel-swift/Sources/MixpanelInstance.swift:1248:23: warning: result of call to 'write(closure:)' is unused
+            readWriteLock.write {
+                          ^     ~
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Mixpanel-swift/Sources/MixpanelLogger.swift:73:23: warning: result of call to 'write(closure:)' is unused
+            readWriteLock.write {
+                          ^     ~
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Mixpanel-swift/Sources/MixpanelLogger.swift:80:23: warning: result of call to 'write(closure:)' is unused
+            readWriteLock.write {
+                          ^     ~
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/PurchasesError.swift:136:13: warning: switch must be exhaustive
+                switch storeKitError {
+                ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/PurchasesError.swift:136:13: note: add missing case: '.unsupported'
+                switch storeKitError {
+                ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/StoreKitError+Extensions.swift:21:9: warning: switch must be exhaustive
+            switch self {
+            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/StoreKitError+Extensions.swift:21:9: note: add missing case: '.unsupported'
+            switch self {
+            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/StoreKitError+Extensions.swift:51:9: warning: switch must be exhaustive
+            switch self {
+            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/RevenueCat/Sources/Error Handling/StoreKitError+Extensions.swift:51:9: note: add missing case: '.unsupported'
+            switch self {
+            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+    internal protocol DKPhotoGalleryContentDataSource: class {
+                                                       ^~~~~
+                                                       AnyObject
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+    internal protocol DKPhotoGalleryContentDelegate: class {
+                                                     ^~~~~
+                                                     AnyObject
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:39:52: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+    internal protocol DKPhotoGalleryContentDataSource: class {
+                                                       ^~~~~
+                                                       AnyObject
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:55:50: warning: using 'class' keyword to define a class-constrained protocol is deprecated; use 'AnyObject' instead
+    internal protocol DKPhotoGalleryContentDelegate: class {
+                                                     ^~~~~
+                                                     AnyObject
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoGalleryContentVC.swift:107:14: warning: 'automaticallyAdjustsScrollViewInsets' was deprecated in iOS 11.0: Use UIScrollView's contentInsetAdjustmentBehavior instead
+            self.automaticallyAdjustsScrollViewInsets = false
+                 ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:161:124: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+            scrollView.addObserver(self, forKeyPath: DKPhotoIncrementalIndicator.contentSizeKeyPath, options: [.new], context: &DKPhotoIncrementalIndicator.context)
+                                                                                          ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:162:126: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+            scrollView.addObserver(self, forKeyPath: DKPhotoIncrementalIndicator.contentOffsetKeyPath, options: [.new], context: &DKPhotoIncrementalIndicator.context)
+                                                                                          ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKPhotoGallery/DKPhotoGallery/DKPhotoIncrementalIndicator.swift:171:23: warning: forming 'UnsafeMutableRawPointer' to an inout variable of type String exposes the internal representation rather than the string contents.
+            if context == &DKPhotoIncrementalIndicator.context {
+                          ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:288:43: warning: 'configureWithAPIKey:appUserID:purchasesAreCompletedBy:userDefaultsSuiteName:platformFlavor:platformFlavorVersion:storeKitVersion:dangerousSettings:shouldShowInAppMessagesAutomatically:verificationMode:diagnosticsEnabled:automaticDeviceIdentifierCollectionEnabled:' is deprecated: Use the full configure method instead [-Wdeprecated-declarations]
+      288 |     RCPurchases *purchases = [RCPurchases configureWithAPIKey:apiKey
+          |                                           ^
+    In module 'PurchasesHybridCommon' imported from /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:5:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/PurchasesHybridCommon/PurchasesHybridCommon.framework/Headers/PurchasesHybridCommon-Swift.h:504:790: note: 'configureWithAPIKey:appUserID:purchasesAreCompletedBy:userDefaultsSuiteName:platformFlavor:platformFlavorVersion:storeKitVersion:dangerousSettings:shouldShowInAppMessagesAutomatically:verificationMode:diagnosticsEnabled:automaticDeviceIdentifierCollectionEnabled:' has been explicitly marked deprecated here
+      504 | + (RCPurchases * _Nonnull)configureWithAPIKey:(NSString * _Nonnull)apiKey appUserID:(NSString * _Nullable)appUserID purchasesAreCompletedBy:(NSString * _Nullable)purchasesAreCompletedBy userDefaultsSuiteName:(NSString * _Nullable)userDefaultsSuiteName platformFlavor:(NSString * _Nullable)platformFlavor platformFlavorVersion:(NSString * _Nullable)platformFlavorVersion storeKitVersion:(NSString * _Nonnull)storeKitVersion dangerousSettings:(RCDangerousSettings * _Nullable)dangerousSettings shouldShowInAppMessagesAutomatically:(BOOL)shouldShowInAppMessagesAutomatically verificationMode:(NSString * _Nullable)verificationMode diagnosticsEnabled:(BOOL)diagnosticsEnabled automaticDeviceIdentifierCollectionEnabled:(BOOL)automaticDeviceIdentifierCollectionEnabled SWIFT_WARN_UNUSED_RESULT SWIFT_DEPRECATED_MSG("Use the full configure method instead");
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ^
+    In module 'RevenueCat' imported from /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:6:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/RevenueCat/RevenueCat.framework/Headers/RevenueCat-Swift.h:221:51: note: expanded from macro 'SWIFT_DEPRECATED_MSG'
+      221 | # define SWIFT_DEPRECATED_MSG(...) __attribute__((deprecated(__VA_ARGS__)))
+          |                                                   ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:400:28: warning: 'setDebugLogsEnabled:' is deprecated: Use setLogLevel instead [-Wdeprecated-declarations]
+      400 |     [RCCommonFunctionality setDebugLogsEnabled:enabled];
+          |                            ^
+    In module 'PurchasesHybridCommon' imported from /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:5:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/PurchasesHybridCommon/PurchasesHybridCommon.framework/Headers/PurchasesHybridCommon-Swift.h:330:43: note: 'setDebugLogsEnabled:' has been explicitly marked deprecated here
+      330 | + (void)setDebugLogsEnabled:(BOOL)enabled SWIFT_DEPRECATED_MSG("Use setLogLevel instead");
+          |                                           ^
+    In module 'RevenueCat' imported from /Users/amarques/.pub-cache/hosted/pub.dev/purchases_flutter-9.6.2/ios/purchases_flutter/Sources/purchases_flutter/PurchasesFlutterPlugin.m:6:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/RevenueCat/RevenueCat.framework/Headers/RevenueCat-Swift.h:221:51: note: expanded from macro 'SWIFT_DEPRECATED_MSG'
+      221 | # define SWIFT_DEPRECATED_MSG(...) __attribute__((deprecated(__VA_ARGS__)))
+          |                                                   ^
+    2 warnings generated.
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOSCustomBrowser.m:151:44: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      151 |         [[UIApplication sharedApplication] openURL:_appStoreURL];
+          |                                            ^~~~~~~
+          |                                            openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOSCustomBrowser.m:165:63: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      165 |     BOOL openedInBrowser = [[UIApplication sharedApplication] openURL:requestURL];
+          |                                                               ^~~~~~~
+          |                                                               openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    2 warnings generated.
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:53:3: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+       53 |   SFAuthenticationSession *_authenticationVC;
+          |   ^~~~~~~~~~~~~~~~~~~~~~~
+          |   ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:143:7: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      143 |       SFAuthenticationSession *authenticationVC =
+          |       ^~~~~~~~~~~~~~~~~~~~~~~
+          |       ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:144:37: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      144 |           [[SFAuthenticationSession alloc] initWithURL:requestURL
+          |                                     ^~~~~
+          |                                     ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:180:58: warning: 'openURL:' is deprecated: first deprecated in iOS 10.0 [-Wdeprecated-declarations]
+      180 |     openedUserAgent = [[UIApplication sharedApplication] openURL:requestURL];
+          |                                                          ^~~~~~~
+          |                                                          openURL:options:completionHandler:
+    In module 'UIKit' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/AppAuth/AppAuth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:97:1: note: 'openURL:' has been explicitly marked deprecated here
+       97 | - (BOOL)openURL:(NSURL*)url API_DEPRECATED_WITH_REPLACEMENT("openURL:options:completionHandler:", ios(2.0, 10.0)) API_UNAVAILABLE(visionos, watchos);
+          | ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:203:3: warning: 'SFAuthenticationSession' is deprecated: first deprecated in iOS 12.0 [-Wdeprecated-declarations]
+      203 |   SFAuthenticationSession *authenticationVC = _authenticationVC;
+          |   ^~~~~~~~~~~~~~~~~~~~~~~
+          |   ASWebAuthenticationSession
+    In module 'SafariServices' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/AppAuth/Sources/AppAuth/iOS/OIDExternalUserAgentIOS.m:25:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/SafariServices.framework/Headers/SFAuthenticationSession.h:63:12: note: 'SFAuthenticationSession' has been explicitly marked deprecated here
+       63 | @interface SFAuthenticationSession : NSObject
+          |            ^
+    5 warnings generated.
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/View/DKAssetGroupDetailVC.swift:344:14: warning: 'frameInterval' was deprecated in iOS 10.0: preferredFramesPerSecond
+            link.frameInterval = 1
+                 ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift:557:38: warning: capture of 'fileManager' with non-Sendable type 'FileManager' in an isolated local function; this is an error in the Swift 6 language mode
+                                    try? fileManager.removeItem(at: auxiliaryDirectory)
+                                         ^
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSFileManager.h:96:12: note: class 'FileManager' does not conform to the 'Sendable' protocol
+    @interface NSFileManager : NSObject
+               ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/View/DKAssetGroupDetailVC.swift:344:14: warning: 'frameInterval' was deprecated in iOS 10.0: preferredFramesPerSecond
+            link.frameInterval = 1
+                 ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_messaging-16.0.1/ios/firebase_messaging/Sources/firebase_messaging/FLTFirebaseMessagingPlugin.m:348:32: warning: 'UNNotificationPresentationOptionAlert' is deprecated: first deprecated in iOS 14.0 [-Wdeprecated-declarations]
+      348 |         presentationOptions |= UNNotificationPresentationOptionAlert;
+          |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          |                                UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner
+    In module 'UserNotifications' imported from /Users/amarques/.pub-cache/hosted/pub.dev/firebase_messaging-16.0.1/ios/firebase_messaging/Sources/firebase_messaging/include/FLTFirebaseMessagingPlugin.h:15:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UserNotifications.framework/Headers/UNUserNotificationCenter.h:84:5: note: 'UNNotificationPresentationOptionAlert' has been explicitly marked deprecated here
+       84 |     UNNotificationPresentationOptionAlert API_DEPRECATED_WITH_REPLACEMENT("UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner", macos(10.14, 11.0), ios(10.0, 14.0), watchos(3.0, 7.0), tvos(10.0, 14.0)) = (1 << 2),
+          |     ^
+    1 warning generated.
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_core-4.1.0/ios/firebase_core/Sources/firebase_core/FLTFirebaseCorePlugin.m:92:35: warning: incompatible pointer types assigning to 'NSString * _Nullable' from 'NSNull * _Nonnull' [-Wincompatible-pointer-types]
+       92 |   pigeonOptions.deepLinkURLScheme = [NSNull null];
+          |                                   ^ ~~~~~~~~~~~~~
+    1 warning generated.
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:130:72: warning: sending 'FLTFirebaseAuthPlugin *__strong' to parameter of incompatible type 'id<FLTFirebasePlugin> _Nonnull'
+      130 |     [[FLTFirebasePluginRegistry sharedInstance] registerFirebasePlugin:self];
+          |                                                                        ^~~~
+    In module 'firebase_core' imported from /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:9:
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_core-4.1.0/ios/firebase_core/Sources/firebase_core/include/firebase_core/FLTFirebasePluginRegistry.h:23:64: note: passing argument to parameter 'firebasePlugin' here
+       23 | - (void)registerFirebasePlugin:(id<FLTFirebasePlugin> _Nonnull)firebasePlugin;
+          |                                                                ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:417:14: warning: unused variable 'capturedCompletion' [-Wunused-variable]
+      417 |       void (^capturedCompletion)(PigeonUserCredential *_Nullable, FlutterError *_Nullable) =
+          |              ^~~~~~~~~~~~~~~~~~
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:428:14: warning: unused variable 'capturedCompletion' [-Wunused-variable]
+      428 |       void (^capturedCompletion)(PigeonUserCredential *_Nullable, FlutterError *_Nullable) =
+          |              ^~~~~~~~~~~~~~~~~~
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:439:14: warning: unused variable 'capturedCompletion' [-Wunused-variable]
+      439 |       void (^capturedCompletion)(PigeonUserCredential *_Nullable, FlutterError *_Nullable) =
+          |              ^~~~~~~~~~~~~~~~~~
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:851:45: warning: 'keyWindow' is deprecated: first deprecated in iOS 13.0 - Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes [-Wdeprecated-declarations]
+      851 |   return [[UIApplication sharedApplication] keyWindow];
+          |                                             ^
+    In module 'UIKit' imported from /Users/amarques/Documents/Dev/GoldWen-App-Frontend/ios/Pods/Target Support Files/firebase_auth/firebase_auth-prefix.pch:2:
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:108:51: note: property 'keyWindow' is declared deprecated here
+      108 | @property(nullable, nonatomic,readonly) UIWindow *keyWindow API_DEPRECATED("Should not be used for applications that support multiple scenes as it returns a key window across all connected scenes", ios(2.0, 13.0)) API_UNAVAILABLE(visionos, watchos);
+          |                                                   ^
+    /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIApplication.h:108:51: note: 'keyWindow' has been explicitly marked deprecated here
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:1178:9: warning: 'fetchSignInMethodsForEmail:completion:' is deprecated: `fetchSignInMethods` is deprecated and will be removed in a future release. This method returns an empty list when Email Enumeration Protection is enabled. [-Wdeprecated-declarations]
+     1178 |   [auth fetchSignInMethodsForEmail:email
+          |         ^
+    In module 'FirebaseAuth' imported from /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:5:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/FirebaseAuth/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h:501:159: note: 'fetchSignInMethodsForEmail:completion:' has been explicitly marked deprecated here
+      501 | - (void)fetchSignInMethodsForEmail:(NSString * _Nonnull)email completion:(void (^ _Nullable)(NSArray<NSString *> * _Nullable, NSError * _Nullable))completion SWIFT_DEPRECATED_MSG("`fetchSignInMethods` is deprecated and will be removed in a future release. This method returns an empty list when Email Enumeration Protection is enabled.");
+          |                                                                                                                                                               ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/FirebaseAuth/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h:221:51: note: expanded from macro 'SWIFT_DEPRECATED_MSG'
+      221 | # define SWIFT_DEPRECATED_MSG(...) __attribute__((deprecated(__VA_ARGS__)))
+          |                                                   ^
+    /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:1985:16: warning: 'updateEmail:completion:' is deprecated: `updateEmail` is deprecated and will be removed in a future release. Use sendEmailVerification(beforeUpdatingEmail:) instead. [-Wdeprecated-declarations]
+     1985 |   [currentUser updateEmail:newEmail
+          |                ^
+    In module 'FirebaseAuth' imported from /Users/amarques/.pub-cache/hosted/pub.dev/firebase_auth-6.0.2/ios/firebase_auth/Sources/firebase_auth/FLTFirebaseAuthPlugin.m:5:
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/FirebaseAuth/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h:2075:111: note: 'updateEmail:completion:' has been explicitly marked deprecated here
+     2075 | - (void)updateEmail:(NSString * _Nonnull)email completion:(void (^ _Nullable)(NSError * _Nullable))completion SWIFT_DEPRECATED_MSG("`updateEmail` is deprecated and will be removed in a future release. Use sendEmailVerification(beforeUpdatingEmail:) instead.");
+          |                                                                                                               ^
+    /Users/amarques/Documents/Dev/GoldWen-App-Frontend/build/ios/Debug-iphoneos/FirebaseAuth/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h:221:51: note: expanded from macro 'SWIFT_DEPRECATED_MSG'
+      221 | # define SWIFT_DEPRECATED_MSG(...) __attribute__((deprecated(__VA_ARGS__)))
+          |                                                   ^
+    7 warnings generated.
+    /Users/amarques/.pub-cache/hosted/pub.dev/file_picker-8.3.7/ios/file_picker/Sources/file_picker/FilePickerPlugin.m:409:17: warning: incompatible pointer types assigning to 'NSMutableArray<NSURL *> *' from 'NSArray<NSURL *> *' [-Wincompatible-pointer-types]
+      409 |         newUrls = urls;
+          |                 ^ ~~~~
+    1 warning generated.
+    ld: warning: building for iOS-12.0, but linking with dylib '@rpath/Flutter.framework/Flutter' which was built for newer version 13.0
+    Failed to parse TARGET_DEVICE_OS_VERSION: 
+    lib/features/matching/pages/daily_matches_page.dart:466:21: Error: Can't find ')' to match '('.
+        return Semantics(
+                        ^
+    lib/core/widgets/moderation_widgets.dart:2:8: Error: Error when reading 'lib/models/moderation.dart': No such file or directory
+    import '../../models/moderation.dart';
+           ^
+    lib/core/widgets/moderation_widgets.dart:3:8: Error: Error when reading 'lib/theme/app_theme.dart': No such file or directory
+    import '../../theme/app_theme.dart';
+           ^
+    lib/core/widgets/moderation_widgets.dart:7:9: Error: Type 'ModerationResult' not found.
+      final ModerationResult moderationResult;
+            ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:112:14: Error: Type 'ModerationFlag' not found.
+      final List<ModerationFlag> flags;
+                 ^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:134:25: Error: Type 'ModerationFlag' not found.
+      Widget _buildFlagChip(ModerationFlag flag, BuildContext context) {
+                            ^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:193:9: Error: Type 'ModerationResult' not found.
+      final ModerationResult moderationResult;
+            ^^^^^^^^^^^^^^^^
+    lib/features/matching/providers/matching_provider.dart:259:39: Error: The getter 'compatibilityScore' isn't defined for the type 'Profile'.
+     - 'Profile' is from 'package:goldwen_app/core/models/profile.dart' ('lib/core/models/profile.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'compatibilityScore'.
+              compatibilityScore: profile.compatibilityScore,
+                                          ^^^^^^^^^^^^^^^^^^
+    lib/features/subscription/providers/subscription_provider.dart:311:33: Error: The getter 'tier' isn't defined for the type 'Subscription'.
+     - 'Subscription' is from 'package:goldwen_app/core/models/subscription.dart' ('lib/core/models/subscription.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'tier'.
+              _currentSubscription!.tier,
+                                    ^^^^
+    lib/features/subscription/providers/subscription_provider.dart:312:33: Error: The getter 'period' isn't defined for the type 'Subscription'.
+     - 'Subscription' is from 'package:goldwen_app/core/models/subscription.dart' ('lib/core/models/subscription.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'period'.
+              _currentSubscription!.period ?? 'unknown',
+                                    ^^^^^^
+    lib/features/subscription/providers/subscription_provider.dart:361:81: Error: The getter 'tier' isn't defined for the type 'Subscription'.
+     - 'Subscription' is from 'package:goldwen_app/core/models/subscription.dart' ('lib/core/models/subscription.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'tier'.
+            await AnalyticsService.trackSubscriptionCancelled(_currentSubscription!.tier);
+                                                                                    ^^^^
+    lib/features/subscription/providers/subscription_provider.dart:415:82: Error: The getter 'tier' isn't defined for the type 'Subscription'.
+     - 'Subscription' is from 'package:goldwen_app/core/models/subscription.dart' ('lib/core/models/subscription.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'tier'.
+              await AnalyticsService.trackSubscriptionRestored(_currentSubscription!.tier);
+                                                                                     ^^^^
+    lib/features/settings/providers/email_notification_provider.dart:63:9: Error: No named parameter with the name 'type'.
+            type: type,
+            ^^^^
+    lib/core/services/api_service.dart:1553:39: Context: Found this candidate, but the arguments don't match.
+      static Future<Map<String, dynamic>> getEmailHistory({
+                                          ^^^^^^^^^^^^^^^
+    lib/features/legal/pages/privacy_settings_page.dart:199:52: Error: The method 'push' isn't defined for the type 'BuildContext'.
+     - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/framework.dart').
+    Try correcting the name to the name of an existing method, or defining a method named 'push'.
+                                  onTap: () => context.push('/data-export'),
+                                                       ^^^^
+    lib/features/legal/pages/privacy_settings_page.dart:208:52: Error: The method 'push' isn't defined for the type 'BuildContext'.
+     - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/framework.dart').
+    Try correcting the name to the name of an existing method, or defining a method named 'push'.
+                                  onTap: () => context.push('/account-deletion'),
+                                                       ^^^^
+    lib/features/legal/pages/account_deletion_page.dart:579:28: Error: The method 'logout' isn't defined for the type 'AuthProvider'.
+     - 'AuthProvider' is from 'package:goldwen_app/features/auth/providers/auth_provider.dart' ('lib/features/auth/providers/auth_provider.dart').
+    Try correcting the name to the name of an existing method, or defining a method named 'logout'.
+            await authProvider.logout();
+                               ^^^^^^
+    lib/features/settings/pages/email_history_page.dart:102:33: Error: Member not found: 'primary'.
+              labelColor: AppColors.primary,
+                                    ^^^^^^^
+    lib/features/settings/pages/email_history_page.dart:104:37: Error: Member not found: 'primary'.
+              indicatorColor: AppColors.primary,
+                                        ^^^^^^^
+    lib/features/settings/pages/email_history_page.dart:187:66: Error: Not a constant expression.
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+                                                                     ^^^^^^^^^
+    lib/features/settings/pages/email_history_page.dart:220:65: Error: The getter 'AppRadius' isn't defined for the type '_EmailDetailsSheet'.
+     - '_EmailDetailsSheet' is from 'package:goldwen_app/features/settings/pages/email_history_page.dart' ('lib/features/settings/pages/email_history_page.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+                                borderRadius: BorderRadius.circular(AppRadius.md),
+                                                                    ^^^^^^^^^
+    lib/features/settings/pages/email_history_page.dart:285:63: Error: The getter 'AppRadius' isn't defined for the type '_EmailDetailsSheet'.
+     - '_EmailDetailsSheet' is from 'package:goldwen_app/features/settings/pages/email_history_page.dart' ('lib/features/settings/pages/email_history_page.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                                                                  ^^^^^^^^^
+    lib/features/settings/pages/email_history_page.dart:313:45: Error: The getter 'AppRadius' isn't defined for the type '_EmailDetailsSheet'.
+     - '_EmailDetailsSheet' is from 'package:goldwen_app/features/settings/pages/email_history_page.dart' ('lib/features/settings/pages/email_history_page.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+                                                ^^^^^^^^^
+    lib/core/services/analytics_service.dart:66:24: Error: This expression has type 'void' and can't be used.
+          await _mixpanel!.optOutTracking();
+                           ^
+    lib/core/services/analytics_service.dart:78:24: Error: This expression has type 'void' and can't be used.
+          await _mixpanel!.optInTracking();
+                           ^
+    lib/core/services/analytics_service.dart:101:39: Error: Too few positional arguments: 2 required, 1 given.
+          await _mixpanel!.getPeople().set(properties);
+                                          ^
+    lib/features/profile/widgets/media_management_widget.dart:181:32: Error: Member not found: 'dashed'.
+                style: BorderStyle.dashed,
+                                   ^^^^^^
+    lib/core/widgets/moderation_widgets.dart:7:9: Error: 'ModerationResult' isn't a type.
+      final ModerationResult moderationResult;
+            ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:78:12: Error: Not a constant expression.
+          case ModerationStatus.approved:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:80:12: Error: Not a constant expression.
+          case ModerationStatus.pending:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:82:12: Error: Not a constant expression.
+          case ModerationStatus.blocked:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:79:16: Error: The getter 'AppColors' isn't defined for the type 'ModerationStatusBadge'.
+     - 'ModerationStatusBadge' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            return AppColors.successGreen;
+                   ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:81:16: Error: The getter 'AppColors' isn't defined for the type 'ModerationStatusBadge'.
+     - 'ModerationStatusBadge' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            return AppColors.warningAmber;
+                   ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:83:16: Error: The getter 'AppColors' isn't defined for the type 'ModerationStatusBadge'.
+     - 'ModerationStatusBadge' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            return AppColors.errorRed;
+                   ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:76:9: Error: A non-null value must be returned since the return type 'Color' doesn't allow null.
+     - 'Color' is from 'dart:ui'.
+      Color _getStatusColor() {
+            ^
+    lib/core/widgets/moderation_widgets.dart:89:12: Error: Not a constant expression.
+          case ModerationStatus.approved:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:91:12: Error: Not a constant expression.
+          case ModerationStatus.pending:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:93:12: Error: Not a constant expression.
+          case ModerationStatus.blocked:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:87:12: Error: A non-null value must be returned since the return type 'IconData' doesn't allow null.
+     - 'IconData' is from 'package:flutter/src/widgets/icon_data.dart' ('/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/icon_data.dart').
+      IconData _getStatusIcon() {
+               ^
+    lib/core/widgets/moderation_widgets.dart:100:12: Error: Not a constant expression.
+          case ModerationStatus.approved:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:102:12: Error: Not a constant expression.
+          case ModerationStatus.pending:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:104:12: Error: Not a constant expression.
+          case ModerationStatus.blocked:
+               ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:98:10: Error: A non-null value must be returned since the return type 'String' doesn't allow null.
+      String _getStatusLabel() {
+             ^
+    lib/core/widgets/moderation_widgets.dart:112:14: Error: 'ModerationFlag' isn't a type.
+      final List<ModerationFlag> flags;
+                 ^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:130:68: Error: The argument type 'List<dynamic>' can't be assigned to the parameter type 'List<Widget>'.
+     - 'List' is from 'dart:core'.
+     - 'Widget' is from 'package:flutter/src/widgets/framework.dart' ('/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/framework.dart').
+          children: flags.map((flag) => _buildFlagChip(flag, context)).toList(),
+                                                                       ^
+    lib/core/widgets/moderation_widgets.dart:134:25: Error: 'ModerationFlag' isn't a type.
+      Widget _buildFlagChip(ModerationFlag flag, BuildContext context) {
+                            ^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:138:16: Error: The getter 'AppColors' isn't defined for the type 'ModerationFlagsWidget'.
+     - 'ModerationFlagsWidget' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            color: AppColors.errorRed.withOpacity(0.1),
+                   ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:140:35: Error: The getter 'AppColors' isn't defined for the type 'ModerationFlagsWidget'.
+     - 'ModerationFlagsWidget' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            border: Border.all(color: AppColors.errorRed.withOpacity(0.3)),
+                                      ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:148:20: Error: The getter 'AppColors' isn't defined for the type 'ModerationFlagsWidget'.
+     - 'ModerationFlagsWidget' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                color: AppColors.errorRed,
+                       ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:154:22: Error: The getter 'AppColors' isn't defined for the type 'ModerationFlagsWidget'.
+     - 'ModerationFlagsWidget' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                  color: AppColors.errorRed,
+                         ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:164:24: Error: The getter 'AppColors' isn't defined for the type 'ModerationFlagsWidget'.
+     - 'ModerationFlagsWidget' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                    color: AppColors.errorRed.withOpacity(0.7),
+                           ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:193:9: Error: 'ModerationResult' isn't a type.
+      final ModerationResult moderationResult;
+            ^^^^^^^^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:260:49: Error: Not a constant expression.
+                      side: const BorderSide(color: AppColors.primaryGold),
+                                                    ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:209:16: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            color: AppColors.errorRed.withOpacity(0.05),
+                   ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:211:35: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+            border: Border.all(color: AppColors.errorRed.withOpacity(0.2)),
+                                      ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:221:24: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                    color: AppColors.errorRed,
+                           ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:229:28: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                        color: AppColors.errorRed,
+                               ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:242:24: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                    color: AppColors.textSecondary,
+                           ^^^^^^^^^
+    lib/core/widgets/moderation_widgets.dart:259:36: Error: The getter 'AppColors' isn't defined for the type 'ModerationBlockedContent'.
+     - 'ModerationBlockedContent' is from 'package:goldwen_app/core/widgets/moderation_widgets.dart' ('lib/core/widgets/moderation_widgets.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppColors'.
+                      foregroundColor: AppColors.primaryGold,
+                                       ^^^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:158:50: Error: Member not found: 'primary'.
+                          foregroundColor: AppColors.primary,
+                                                     ^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:159:57: Error: Member not found: 'primary'.
+                          side: BorderSide(color: AppColors.primary),
+                                                            ^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:24:45: Error: The getter 'AppRadius' isn't defined for the type 'EmailNotificationCard'.
+     - 'EmailNotificationCard' is from 'package:goldwen_app/features/settings/widgets/email_notification_card.dart' ('lib/features/settings/widgets/email_notification_card.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+                                                ^^^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:34:45: Error: The getter 'AppRadius' isn't defined for the type 'EmailNotificationCard'.
+     - 'EmailNotificationCard' is from 'package:goldwen_app/features/settings/widgets/email_notification_card.dart' ('lib/features/settings/widgets/email_notification_card.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+                                                ^^^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:48:59: Error: The getter 'AppRadius' isn't defined for the type 'EmailNotificationCard'.
+     - 'EmailNotificationCard' is from 'package:goldwen_app/features/settings/widgets/email_notification_card.dart' ('lib/features/settings/widgets/email_notification_card.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                                                              ^^^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:123:57: Error: The getter 'AppRadius' isn't defined for the type 'EmailNotificationCard'.
+     - 'EmailNotificationCard' is from 'package:goldwen_app/features/settings/widgets/email_notification_card.dart' ('lib/features/settings/widgets/email_notification_card.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                                                            ^^^^^^^^^
+    lib/features/settings/widgets/email_notification_card.dart:179:45: Error: The getter 'AppRadius' isn't defined for the type 'EmailNotificationCard'.
+     - 'EmailNotificationCard' is from 'package:goldwen_app/features/settings/widgets/email_notification_card.dart' ('lib/features/settings/widgets/email_notification_card.dart').
+    Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRadius'.
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+                                                ^^^^^^^^^
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /Users/amarques/Documents/Dev/GoldWen-App-Frontend.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Encountered error while building for device.
