@@ -150,6 +150,10 @@ class Subscription {
   bool get isExpired => DateTime.now().isAfter(currentPeriodEnd);
   bool get willRenew => isActive && autoRenew && !isCanceled;
 
+  // Computed properties for analytics
+  String get tier => plan?.name ?? planId;
+  String? get period => plan?.interval;
+
   int get daysUntilExpiry {
     final now = DateTime.now();
     if (now.isAfter(currentPeriodEnd)) return 0;

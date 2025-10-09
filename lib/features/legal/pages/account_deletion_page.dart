@@ -576,7 +576,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
     if (success) {
       if (_immediateDelete) {
         // Logout and redirect to welcome
-        await authProvider.logout();
+        await authProvider.signOut();
         if (mounted) {
           context.go('/welcome');
         }

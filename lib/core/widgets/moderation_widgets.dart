@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/moderation.dart';
-import '../../theme/app_theme.dart';
+import '../models/moderation.dart';
+import '../theme/app_theme.dart';
 
 /// A badge widget to display moderation status
 class ModerationStatusBadge extends StatelessWidget {

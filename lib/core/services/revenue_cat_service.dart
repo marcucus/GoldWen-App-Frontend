@@ -145,13 +145,18 @@ class RevenueCatService {
 
   static DateTime? getExpirationDate(CustomerInfo customerInfo) {
     final entitlement = getActiveEntitlement(customerInfo);
-    final expirationDateString = entitlement?.expirationDate;
-    if (expirationDateString != null) {
-      try {
-        return DateTime.parse(expirationDateString);
-      } catch (e) {
-        print('Error parsing expiration date: $expirationDateString');
-        return null;
+    final expirationDate = entitlement?.expirationDate;
+    if (expirationDate != null) {
+      // Handle both DateTime and String types
+      if (expirationDate is DateTime) {
+        return expirationDate;
+      } else if (expirationDate is String) {
+        try {
+          return DateTime.parse(expirationDate);
+        } catch (e) {
+          print('Error parsing expiration date: $expirationDate');
+          return null;
+        }
       }
     }
     return null;

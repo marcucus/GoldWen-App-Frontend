@@ -28,6 +28,7 @@ class Profile {
   final bool isComplete;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final double? compatibilityScore; // Optional - only present in matching context
 
   Profile({
     required this.id,
@@ -57,6 +58,7 @@ class Profile {
     required this.isComplete,
     required this.createdAt,
     required this.updatedAt,
+    this.compatibilityScore,
   });
 
   // Add missing getters that are expected by components
@@ -131,6 +133,7 @@ class Profile {
       isComplete: json['isComplete'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      compatibilityScore: (json['compatibilityScore'] as num?)?.toDouble(),
     );
   }
 
@@ -163,6 +166,7 @@ class Profile {
       'isComplete': isComplete,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      if (compatibilityScore != null) 'compatibilityScore': compatibilityScore,
     };
   }
 }

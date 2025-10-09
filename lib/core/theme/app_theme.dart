@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppColors {
   // Primary Palette - Sophisticated Gold Theme
   static const Color primaryGold = Color(0xFFD4AF37);
+  static const Color primary = primaryGold; // Alias for primaryGold
   static const Color primaryGoldDark = Color(0xFFB8941F);
   static const Color primaryGoldLight = Color(0xFFE8C547);
   
@@ -345,6 +346,15 @@ class AppBorderRadius {
   static const double medium = 12.0;
   static const double large = 16.0;
   static const double xLarge = 24.0;
+}
+
+// Alias for AppBorderRadius with shorter property names
+class AppRadius {
+  static const double xs = 4.0;
+  static const double sm = AppBorderRadius.small;
+  static const double md = AppBorderRadius.medium;
+  static const double lg = AppBorderRadius.large;
+  static const double xl = AppBorderRadius.xLarge;
 }
 
 class AppAnimations {

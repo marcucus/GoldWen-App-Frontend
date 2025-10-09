@@ -1549,24 +1549,6 @@ class ApiService {
       endDate: endDate,
     );
   }
-
-  static Future<Map<String, dynamic>> getEmailHistory({
-    int page = 1,
-    int limit = 20,
-  }) {
-    return MatchingServiceApi.getEmailHistory(
-      page: page,
-      limit: limit,
-    );
-  }
-
-  static Future<Map<String, dynamic>> getEmailDetails(String emailId) {
-    return MatchingServiceApi.getEmailDetails(emailId);
-  }
-
-  static Future<Map<String, dynamic>> retryEmail(String emailId) {
-    return MatchingServiceApi.retryEmail(emailId);
-  }
 }
 
 // External Matching Service API
