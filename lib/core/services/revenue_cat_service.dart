@@ -149,10 +149,10 @@ class RevenueCatService {
     if (expirationDate != null) {
       // Handle both DateTime and String types
       if (expirationDate is DateTime) {
-        return expirationDate;
+        return expirationDate as DateTime;
       } else if (expirationDate is String) {
         try {
-          return DateTime.parse(expirationDate);
+          return DateTime.parse(expirationDate as String);
         } catch (e) {
           print('Error parsing expiration date: $expirationDate');
           return null;

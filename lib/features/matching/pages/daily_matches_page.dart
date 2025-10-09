@@ -659,6 +659,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           ),
         ),
       ),
+    ),
     );
   }
 
