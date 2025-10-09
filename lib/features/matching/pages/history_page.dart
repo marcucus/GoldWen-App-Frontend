@@ -329,7 +329,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
     if (targetUser is Map<String, dynamic>) {
       userName = targetUser['name'] as String? ?? 'Utilisateur';
       final photos = targetUser['photos'] as List<dynamic>?;
-      userPhoto = photos?.isNotEmpty == true ? photos!.first as String : null;
+      userPhoto = (photos != null && photos.isNotEmpty) ? photos.first as String : null;
     }
 
     return Padding(
