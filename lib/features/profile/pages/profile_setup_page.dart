@@ -30,9 +30,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(
-      10,
+      3,
       (index) =>
-          TextEditingController()); // Should be 10 prompts as per requirements
+          TextEditingController()); // Should be 3 prompts as per API requirements
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
@@ -71,9 +71,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         } else if (!completion.hasPhotos) {
           targetPage = 1; // Photos page
         } else if (!completion.hasPrompts) {
-          targetPage = 2; // Prompts page
+          targetPage = 3; // Prompts page (skip media page which is optional)
         } else {
-          targetPage = 10; // Validation page
+          targetPage = 4; // Validation page
         }
 
         // Navigate to the appropriate page without animation
@@ -93,22 +93,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.loadPrompts();
 
-      // Select first 10 prompts automatically
-      if (profileProvider.availablePrompts.length >= 10) {
+      // Select first 3 prompts automatically
+      if (profileProvider.availablePrompts.length >= 3) {
         setState(() {
           _selectedPromptIds = profileProvider.availablePrompts
-              .take(10) // Should be 10 prompts as per requirements
+              .take(3) // Should be 3 prompts as per API requirements
               .map((prompt) => prompt.id)
               .toList();
           _promptQuestions = profileProvider.availablePrompts
-              .take(10) // Should be 10 prompts as per requirements
+              .take(3) // Should be 3 prompts as per API requirements
               .map((prompt) => prompt.text)
               .toList();
         });
       } else {
         // If we don't have enough prompts, show error
         throw Exception(
-            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 10 to 10
+            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)'); // Changed from 10 to 3
       }
     } catch (e) {
       print('Error loading prompts: $e');
@@ -141,7 +141,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Étape ${_currentPage + 1}/5'),
+        title: Text('Étape ${_currentPage + 1}/6'),
         leading: _currentPage > 0
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -153,7 +153,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         children: [
           // Progress indicator
           LinearProgressIndicator(
-            value: (_currentPage + 1) / 5,
+            value: (_currentPage + 1) / 6,
             backgroundColor: AppColors.dividerLight,
             valueColor:
                 const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
@@ -303,7 +303,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Ajoutez au moins 10 photos pour continuer',
+            'Ajoutez au moins 3 photos pour continuer',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -318,7 +318,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   onPhotosChanged: (photos) {
                     profileProvider.updatePhotos(photos);
                   },
-                  minPhotos: 10,
+                  minPhotos: 3,
                   maxPhotos: 6,
                   showAddButton: true,
                 );
@@ -331,9 +331,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed:
-                      profileProvider.photos.length >= 10 ? _nextPage : null,
+                      profileProvider.photos.length >= 3 ? _nextPage : null,
                   child:
-                      Text('Continuer (${profileProvider.photos.length}/10)'),
+                      Text('Continuer (${profileProvider.photos.length}/6)'),
                 ),
               );
             },
@@ -417,7 +417,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             child: _promptQuestions.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: 10, // Should be 10 prompts as per requirements
+                    itemCount: 3, // Should be 3 prompts as per API requirements
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
                       final questionText = index < _promptQuestions.length
@@ -442,7 +442,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                 counterText:
                                     '${_promptControllers[index].text.length}/300',
                               ),
-                              maxLines: 10,
+                              maxLines: 3,
                               maxLength: 300,
                               onChanged: (text) {
                                 setState(() {
@@ -463,22 +463,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _getValidAnswersCount() == 10
+                  _getValidAnswersCount() == 3
                       ? Icons.check_circle
                       : Icons.pending,
-                  color: _getValidAnswersCount() == 10
+                  color: _getValidAnswersCount() == 3
                       ? Colors.green
                       : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/10',
+                  'Réponses complétées: ${_getValidAnswersCount()}/3',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getValidAnswersCount() == 10
+                        color: _getValidAnswersCount() == 3
                             ? Colors.green
                             : AppColors.textSecondary,
-                        fontWeight: _getValidAnswersCount() == 10
+                        fontWeight: _getValidAnswersCount() == 3
                             ? FontWeight.w600
                             : FontWeight.normal,
                       ),
@@ -493,7 +493,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: Text(
                 _arePromptsValid()
                     ? 'Continuer'
-                    : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
+                    : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
               ),
             ),
           ),
@@ -667,10 +667,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    // Should be 10 prompts as per requirements
-    if (_promptControllers.length != 10) return false;
+    // Should be 3 prompts as per API requirements
+    if (_promptControllers.length != 3) return false;
 
-    // All 10 controllers must have non-empty text within character limit
+    // All 3 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
       if (text.isEmpty || text.length > 300) {

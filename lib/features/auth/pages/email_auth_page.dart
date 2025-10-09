@@ -5,7 +5,6 @@ import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/rate_limit_dialog.dart';
-import '../../onboarding/pages/gender_selection_page.dart';
 
 class EmailAuthPage extends StatefulWidget {
   const EmailAuthPage({super.key});
@@ -286,21 +285,6 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           print('Authentication successful, navigating to splash for proper routing...');
           context.go('/splash');
         }
-      }
-          if (mounted) {
-            print('Widget now mounted, navigating...');
-            try {
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const GenderSelectionPage(),
-                ),
-              );
-              print('Delayed navigation completed successfully');
-            } catch (e) {
-              print('Delayed navigation failed: $e');
-            }
-          } else {
-            print('Widget still not mounted after delay');
       }
     } catch (e) {
       setState(() {
