@@ -283,9 +283,16 @@ class ProfileProvider with ChangeNotifier {
 
     try {
       final questionsData = await ApiService.getPersonalityQuestions();
-      _personalityQuestions = questionsData
-          .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
-          .toList();
+      
+      if (questionsData.isEmpty) {
+        _error = 'Aucune question de personnalité disponible';
+        print('WARNING: API returned empty personality questions list');
+      } else {
+        _personalityQuestions = questionsData
+            .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
+            .toList();
+        print('Successfully loaded ${_personalityQuestions.length} personality questions');
+      }
 
       _error = null;
     } catch (e) {
