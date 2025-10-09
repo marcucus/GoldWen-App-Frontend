@@ -375,14 +375,20 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   }
 
   Widget _buildQuestionOptions(PersonalityQuestion question, dynamic selectedAnswer) {
-    if (question.type == 'multiple_choice' && question.options?.isNotEmpty == true) {
+    if (question.type == 'multiple_choice') {
+      final options = question.options;
+      if (options == null || options.isEmpty) {
+        return const Center(
+          child: Text('Aucune option disponible pour cette question'),
+        );
+      }
+      
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: question.options!.length,
+        itemCount: options.length,
         itemBuilder: (context, index) {
-          final options = question.options;
-          if (options == null || index >= options.length) return Container();
+          if (index >= options.length) return Container();
           
           final option = options[index];
           final isSelected = selectedAnswer == option;
