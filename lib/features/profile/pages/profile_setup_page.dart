@@ -575,8 +575,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       // Go to photos page
       _goToPage(1);
     } else if (!completion.hasPrompts) {
-      // Go to prompts page
-      _goToPage(2);
+      // Go to prompts page (page 3, not 2 which is media)
+      _goToPage(3);
     } else if (!completion.hasPersonalityAnswers) {
       // Show message about personality questionnaire
       ScaffoldMessenger.of(context).showSnackBar(
@@ -730,7 +730,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _nextPage() async {
-    if (_currentPage < 4) {
+    if (_currentPage < 5) { // Changed from 4 to 5 since we have 6 pages (0-5)
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
 
@@ -748,7 +748,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       }
 
       // Save prompt answers when leaving prompts page
-      if (_currentPage == 2) {
+      if (_currentPage == 3) { // Changed from 2 to 3 (prompts is now page 3)
         // Moving from prompts to validation
         try {
           // Show loading indicator
@@ -875,11 +875,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       return;
     }
 
-    // Validate prompt answers - must have exactly 10 valid responses
-    if (_promptControllers.length != 10) {
+    // Validate prompt answers - must have exactly 3 valid responses
+    if (_promptControllers.length != 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: 10 prompts requis pour continuer'),
+          content: Text('Erreur: 3 prompts requis pour continuer'),
           backgroundColor: Colors.red,
         ),
       );
