@@ -200,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: AppSpacing.sm),
           
           // Bio
-          if (profileProvider.bio?.isNotEmpty == true)
+          if (profileProvider.bio != null && profileProvider.bio!.isNotEmpty)
             Text(
               profileProvider.bio!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(

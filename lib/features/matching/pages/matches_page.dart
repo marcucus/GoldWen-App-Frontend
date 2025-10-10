@@ -262,10 +262,10 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
                     ],
                   ),
                 ),
-                child: profile?.photos.isNotEmpty == true
+                child: (profile?.photos != null && profile!.photos.isNotEmpty)
                     ? ClipOval(
                         child: Image.network(
-                          profile!.photos.first.url,
+                          profile.photos.first.url,
                           width: 60,
                           height: 60,
                           fit: BoxFit.cover,

@@ -143,7 +143,8 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
     }
 
     // Check for success (valid input after error)
-    if (hadError && !_hasError && widget.controller?.text.isNotEmpty == true) {
+    final controllerText = widget.controller?.text;
+    if (hadError && !_hasError && controllerText != null && controllerText.isNotEmpty) {
       _showSuccess();
     }
   }
