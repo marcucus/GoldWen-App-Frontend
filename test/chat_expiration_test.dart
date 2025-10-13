@@ -9,6 +9,10 @@ void main() {
     setUp(() {
       chatProvider = ChatProvider();
     });
+    
+    tearDown(() {
+      chatProvider.dispose();
+    });
 
     test('isChatExpired returns true for expired chats', () {
       // Create a mock expired conversation
@@ -114,6 +118,68 @@ void main() {
       expect(messages.first.type, equals('system'));
       expect(messages.first.content, equals('Cette conversation a expiré'));
       expect(messages.first.senderId, equals('system'));
+    });
+    
+    test('activeConversations filters out expired chats', () {
+      // Create expired and active conversations
+      final expiredConversation = Conversation(
+        id: 'expired-chat',
+        matchId: 'test-match-id',
+        participantIds: ['user1', 'user2'],
+        unreadCount: 0,
+        status: 'active',
+        expiresAt: DateTime.now().subtract(const Duration(hours: 1)),
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      );
+      
+      final activeConversation = Conversation(
+        id: 'active-chat',
+        matchId: 'test-match-id-2',
+        participantIds: ['user1', 'user3'],
+        unreadCount: 0,
+        status: 'active',
+        expiresAt: DateTime.now().add(const Duration(hours: 12)),
+        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        updatedAt: DateTime.now(),
+      );
+
+      chatProvider.conversations.addAll([expiredConversation, activeConversation]);
+
+      final activeChats = chatProvider.activeConversations;
+      expect(activeChats.length, equals(1));
+      expect(activeChats.first.id, equals('active-chat'));
+    });
+    
+    test('archivedConversations returns only expired chats', () {
+      // Create expired and active conversations
+      final expiredConversation = Conversation(
+        id: 'expired-chat',
+        matchId: 'test-match-id',
+        participantIds: ['user1', 'user2'],
+        unreadCount: 0,
+        status: 'active',
+        expiresAt: DateTime.now().subtract(const Duration(hours: 1)),
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      );
+      
+      final activeConversation = Conversation(
+        id: 'active-chat',
+        matchId: 'test-match-id-2',
+        participantIds: ['user1', 'user3'],
+        unreadCount: 0,
+        status: 'active',
+        expiresAt: DateTime.now().add(const Duration(hours: 12)),
+        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+        updatedAt: DateTime.now(),
+      );
+
+      chatProvider.conversations.addAll([expiredConversation, activeConversation]);
+
+      final archivedChats = chatProvider.archivedConversations;
+      expect(archivedChats.length, equals(1));
+      expect(archivedChats.first.id, equals('expired-chat'));
     });
   });
 }

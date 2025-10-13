@@ -15,6 +15,7 @@ import '../../features/matching/pages/history_page.dart';
 import '../../features/matching/pages/who_liked_me_page.dart';
 import '../../features/matching/pages/advanced_recommendations_page.dart';
 import '../../features/chat/pages/chat_page.dart';
+import '../../features/chat/pages/archived_chats_page.dart';
 import '../../features/subscription/pages/subscription_page.dart';
 import '../../features/legal/pages/terms_page.dart';
 import '../../features/legal/pages/privacy_page.dart';
@@ -93,8 +94,17 @@ class AppRouter {
         name: 'chat',
         builder: (context, state) {
           final chatId = state.pathParameters['chatId']!;
-          return ChatPage(chatId: chatId);
+          final isArchived = state.uri.queryParameters['archived'] == 'true';
+          return ChatPage(
+            chatId: chatId,
+            isArchived: isArchived,
+          );
         },
+      ),
+      GoRoute(
+        path: '/archived-chats',
+        name: 'archived-chats',
+        builder: (context, state) => const ArchivedChatsPage(),
       ),
 
       // Matching Features

@@ -128,7 +128,7 @@ class _ChatListPageState extends State<ChatListPage>
                     const SizedBox(height: 4),
                     Consumer<ChatProvider>(
                       builder: (context, chatProvider, child) {
-                        final unreadCount = chatProvider.conversations
+                        final unreadCount = chatProvider.activeConversations
                             .where((chat) => chat.unreadCount > 0)
                             .length;
                         return Text(
@@ -145,6 +145,60 @@ class _ChatListPageState extends State<ChatListPage>
                   ],
                 ),
               ),
+              // Archived chats button
+              Consumer<ChatProvider>(
+                builder: (context, chatProvider, child) {
+                  final archivedCount = chatProvider.archivedConversations.length;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          context.push('/archived-chats');
+                        },
+                        icon: Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundGrey,
+                            borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                          ),
+                          child: const Icon(
+                            Icons.archive_outlined,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      if (archivedCount > 0)
+                        Positioned(
+                          top: -4,
+                          right: -4,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: AppColors.errorRed,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
+                            child: Text(
+                              archivedCount > 9 ? '9+' : '$archivedCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(width: AppSpacing.xs),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
@@ -187,7 +241,7 @@ class _ChatListPageState extends State<ChatListPage>
           return _buildLoadingState();
         }
 
-        final conversations = chatProvider.conversations;
+        final conversations = chatProvider.activeConversations;
 
         if (conversations.isEmpty) {
           return _buildEmptyState();
