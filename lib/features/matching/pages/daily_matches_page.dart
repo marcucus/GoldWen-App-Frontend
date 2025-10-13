@@ -490,7 +490,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 // Optimized profile image
                 Positioned.fill(
                   child: OptimizedImage(
-                    imageUrl: profile.photos?.isNotEmpty == true ? profile.photos!.first.url : null,
+                    imageUrl: profile.photos != null && profile.photos!.isNotEmpty ? profile.photos!.first.url : null,
                     semanticLabel: 'Photo de profil de ${profile.firstName ?? 'cette personne'}',
                     fit: BoxFit.cover,
                     lazyLoad: true,
@@ -560,7 +560,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                     semanticsLabel: 'Nom: ${profile.firstName ?? ''} ${profile.lastName ?? ''}, Âge: ${profile.age ?? 'non spécifié'} ans',
                                   ),
                                   const SizedBox(height: 4),
-                                  if (profile.location?.isNotEmpty == true)
+                                  if (profile.location != null && profile.location!.isNotEmpty)
                                     Row(
                                       children: [
                                         Icon(
@@ -581,7 +581,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                       ],
                                     ),
                                   const SizedBox(height: 4),
-                                  if (profile.bio?.isNotEmpty == true)
+                                  if (profile.bio != null && profile.bio!.isNotEmpty)
                                     Text(
                                       profile.bio!,
                                       style: Theme.of(context)
