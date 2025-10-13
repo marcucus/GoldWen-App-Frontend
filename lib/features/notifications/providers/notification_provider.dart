@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/local_notification_service.dart';
 import '../../../core/models/models.dart';
 
 class NotificationProvider with ChangeNotifier {
@@ -69,8 +70,39 @@ class NotificationProvider with ChangeNotifier {
 
   Future<void> loadNotificationSettings() async {
     try {
-      // Note: This endpoint might be part of user settings
-      // For now, we'll assume default settings
+      final response = await ApiService.getNotificationSettings();
+      
+      // The response should have a 'settings' key based on backend API
+      final settingsData = response['settings'] as Map<String, dynamic>?;
+      
+      if (settingsData != null) {
+        _settings = NotificationSettings.fromJson(settingsData);
+      } else {
+        // Fallback to default settings if no settings found
+        _settings = NotificationSettings(
+          dailySelection: true,
+          newMatches: true,
+          newMessages: true,
+          chatExpiring: true,
+          promotions: false,
+          systemUpdates: true,
+          emailFrequency: 'weekly',
+          pushEnabled: true,
+          emailEnabled: true,
+          soundEnabled: true,
+          vibrationEnabled: true,
+          quietHoursStart: '22:00',
+          quietHoursEnd: '08:00',
+        );
+      }
+
+      // Sync local notifications with loaded settings
+      await _syncLocalNotifications();
+
+      notifyListeners();
+    } catch (e) {
+      // If API fails, use default settings
+      print('Failed to load notification settings from API: $e');
       _settings = NotificationSettings(
         dailySelection: true,
         newMatches: true,
@@ -86,10 +118,11 @@ class NotificationProvider with ChangeNotifier {
         quietHoursStart: '22:00',
         quietHoursEnd: '08:00',
       );
-
+      
+      // Still sync local notifications even with default settings
+      await _syncLocalNotifications();
+      
       notifyListeners();
-    } catch (e) {
-      _handleError(e, 'Failed to load notification settings');
     }
   }
 
@@ -177,6 +210,10 @@ class NotificationProvider with ChangeNotifier {
       });
 
       _settings = newSettings;
+      
+      // Sync local notification scheduling with settings
+      await _syncLocalNotifications();
+      
       _error = null;
       _setLoaded();
       return true;
@@ -352,6 +389,21 @@ class NotificationProvider with ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  // Sync local notification scheduling based on settings
+  Future<void> _syncLocalNotifications() async {
+    final localNotificationService = LocalNotificationService();
+    
+    if (_settings != null && _settings!.pushEnabled && _settings!.dailySelection) {
+      // Schedule daily selection notification at noon
+      await localNotificationService.scheduleDailySelectionNotification();
+      print('Daily selection notification scheduled');
+    } else {
+      // Cancel daily selection notification if disabled
+      await localNotificationService.cancelDailySelectionNotification();
+      print('Daily selection notification cancelled');
+    }
   }
 }
 

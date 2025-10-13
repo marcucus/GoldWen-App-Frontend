@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../../feedback/pages/feedback_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -656,18 +657,98 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showNotificationSettings(BuildContext context) {
+    final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Notifications'),
-          content: const Text('Paramètres de notification en cours de développement.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
+        return Consumer<NotificationProvider>(
+          builder: (context, provider, child) {
+            final settings = provider.settings;
+            
+            if (settings == null) {
+              return AlertDialog(
+                title: const Text('Notifications'),
+                content: const Text('Chargement des paramètres...'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Fermer'),
+                  ),
+                ],
+              );
+            }
+            
+            return AlertDialog(
+              title: const Text('Paramètres de Notifications'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SwitchListTile(
+                      title: const Text('Notifications Push'),
+                      subtitle: const Text('Activer toutes les notifications push'),
+                      value: settings.pushEnabled,
+                      onChanged: (value) {
+                        provider.togglePushNotifications();
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('Sélection Quotidienne'),
+                      subtitle: const Text('Votre sélection du jour à midi'),
+                      value: settings.dailySelection,
+                      onChanged: settings.pushEnabled ? (value) {
+                        provider.toggleDailySelectionNotifications();
+                      } : null,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Nouveaux Matches'),
+                      subtitle: const Text('Alertes pour nouveaux matches'),
+                      value: settings.newMatches,
+                      onChanged: settings.pushEnabled ? (value) {
+                        provider.toggleNewMatchNotifications();
+                      } : null,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Nouveaux Messages'),
+                      subtitle: const Text('Alertes pour nouveaux messages'),
+                      value: settings.newMessages,
+                      onChanged: settings.pushEnabled ? (value) {
+                        provider.toggleNewMessageNotifications();
+                      } : null,
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('Son'),
+                      subtitle: const Text('Jouer un son lors des notifications'),
+                      value: settings.soundEnabled,
+                      onChanged: settings.pushEnabled ? (value) {
+                        final newSettings = settings.copyWith(soundEnabled: value);
+                        provider.updateNotificationSettings(newSettings);
+                      } : null,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Vibration'),
+                      subtitle: const Text('Vibrer lors des notifications'),
+                      value: settings.vibrationEnabled,
+                      onChanged: settings.pushEnabled ? (value) {
+                        final newSettings = settings.copyWith(vibrationEnabled: value);
+                        provider.updateNotificationSettings(newSettings);
+                      } : null,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Fermer'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
