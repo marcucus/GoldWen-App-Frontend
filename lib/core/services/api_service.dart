@@ -999,6 +999,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static Future<Map<String, dynamic>> getNotificationSettings() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/notifications/settings'),
+      headers: _headers,
+    );
+
+    return _handleResponse(response);
+  }
+
   static Future<Map<String, dynamic>> updateNotificationSettings(
       Map<String, dynamic> settings) async {
     final response = await http.put(

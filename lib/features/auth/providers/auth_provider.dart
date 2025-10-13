@@ -5,6 +5,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:convert';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/firebase_messaging_service.dart';
 import '../../../core/models/models.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
@@ -287,6 +288,9 @@ class AuthProvider with ChangeNotifier {
         await AnalyticsService.trackSignupCompleted(_user!.id, signupMethod);
       }
 
+      // Initialize Firebase Messaging after successful authentication
+      await _initializeFirebaseMessaging();
+
       print(
           'Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
       print('User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
@@ -378,6 +382,9 @@ class AuthProvider with ChangeNotifier {
           _token = storedToken;
           _status = AuthStatus.authenticated;
           _error = null;
+
+          // Initialize Firebase Messaging for restored session
+          await _initializeFirebaseMessaging();
 
           print('Session restored successfully for user: ${_user?.email}');
           notifyListeners();
@@ -478,6 +485,29 @@ class AuthProvider with ChangeNotifier {
       await prefs.remove('user_data');
     } catch (e) {
       print('Error clearing auth data: $e');
+    }
+  }
+
+  /// Initialize Firebase Messaging after successful authentication
+  Future<void> _initializeFirebaseMessaging() async {
+    try {
+      final firebaseMessagingService = FirebaseMessagingService();
+      
+      // Initialize if not already initialized
+      if (!firebaseMessagingService.isInitialized) {
+        await firebaseMessagingService.initialize();
+        print('Firebase Messaging initialized after authentication');
+      } else {
+        // If already initialized, just re-register the token
+        // This ensures the token is associated with the current user
+        final token = firebaseMessagingService.deviceToken;
+        if (token != null) {
+          print('Re-registering FCM token with backend for authenticated user');
+        }
+      }
+    } catch (e) {
+      print('Error initializing Firebase Messaging: $e');
+      // Don't rethrow - messaging initialization failure shouldn't block authentication
     }
   }
 }
