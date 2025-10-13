@@ -210,6 +210,36 @@ class ProfileCompletionWidget extends StatelessWidget {
             ],
           ),
         )).toList(),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.warningAmber.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.warningAmber.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 20,
+                color: AppColors.warningAmber,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Votre profil ne sera pas visible tant que toutes les étapes ne sont pas complétées.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

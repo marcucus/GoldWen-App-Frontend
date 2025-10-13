@@ -68,14 +68,26 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         int targetPage = 0;
 
         // Determine which page to show first based on missing steps
-        if (!completion.hasRequiredProfileFields) {
-          targetPage = 0; // Basic info page
-        } else if (!completion.hasPhotos) {
-          targetPage = 1; // Photos page
-        } else if (!completion.hasPrompts) {
-          targetPage = 3; // Prompts page (skip media page which is optional)
-        } else {
-          targetPage = 4; // Validation page
+        // Use the helper method from ProfileProvider for consistency
+        final nextStep = profileProvider.getNextIncompleteStep();
+        
+        switch (nextStep) {
+          case 'basic_info':
+            targetPage = 0; // Basic info page
+            break;
+          case 'photos':
+            targetPage = 1; // Photos page
+            break;
+          case 'prompts':
+            targetPage = 3; // Prompts page (skip media page which is optional)
+            break;
+          case 'personality':
+            // Personality questionnaire should be completed before profile setup
+            // Show a message if user somehow ended up here
+            targetPage = 4; // Validation page to show status
+            break;
+          default:
+            targetPage = 4; // Validation page
         }
 
         // Navigate to the appropriate page without animation
@@ -725,7 +737,53 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.md),
+          // Profile visibility warning
+          Consumer<ProfileProvider>(
+            builder: (context, profileProvider, child) {
+              final isComplete =
+                  profileProvider.profileCompletion?.isCompleted ?? false;
+              return Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: isComplete 
+                      ? AppColors.successGreen.withOpacity(0.1)
+                      : AppColors.warningAmber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                  border: Border.all(
+                    color: isComplete
+                        ? AppColors.successGreen.withOpacity(0.3)
+                        : AppColors.warningAmber.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isComplete ? Icons.check_circle : Icons.visibility_off,
+                      color: isComplete 
+                          ? AppColors.successGreen 
+                          : AppColors.warningAmber,
+                      size: 24,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        isComplete
+                            ? 'Votre profil sera visible par les autres utilisateurs'
+                            : 'Votre profil n\'est pas encore visible. Complétez toutes les étapes pour le rendre visible.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textDark,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Expanded(
             child: SingleChildScrollView(
               child: Consumer<ProfileProvider>(
@@ -767,27 +825,38 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _handleMissingStepTap() {
     // Navigate to the appropriate page based on missing steps
-    final completion =
-        Provider.of<ProfileProvider>(context, listen: false).profileCompletion;
+    final profileProvider = 
+        Provider.of<ProfileProvider>(context, listen: false);
+    final completion = profileProvider.profileCompletion;
     if (completion == null) return;
 
-    if (!completion.hasRequiredProfileFields) {
-      // Go to basic info page
-      _goToPage(0);
-    } else if (!completion.hasPhotos) {
-      // Go to photos page
-      _goToPage(1);
-    } else if (!completion.hasPrompts) {
-      // Go to prompts page (page 3, not 2 which is media)
-      _goToPage(3);
-    } else if (!completion.hasPersonalityAnswers) {
-      // Show message about personality questionnaire
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Vous devez d\'abord compléter le questionnaire de personnalité'),
-        ),
-      );
+    // Use helper method for consistency
+    final nextStep = profileProvider.getNextIncompleteStep();
+    
+    switch (nextStep) {
+      case 'basic_info':
+        _goToPage(0); // Basic info page
+        break;
+      case 'photos':
+        _goToPage(1); // Photos page
+        break;
+      case 'prompts':
+        _goToPage(3); // Prompts page
+        break;
+      case 'personality':
+        // Personality questionnaire must be completed before profile setup
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Le questionnaire de personnalité doit être complété en premier. Veuillez contacter le support si vous pensez que c\'est une erreur.'),
+            backgroundColor: AppColors.warningAmber,
+            duration: Duration(seconds: 5),
+          ),
+        );
+        break;
+      default:
+        // Profile is complete or unknown state
+        break;
     }
   }
 

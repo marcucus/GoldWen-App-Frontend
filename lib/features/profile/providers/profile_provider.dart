@@ -390,6 +390,8 @@ class ProfileProvider with ChangeNotifier {
   }
 
   void _checkProfileCompletion() {
+    // Local validation - but backend completion status is authoritative
+    // This is used for UI guidance only, not for actual validation
     _isProfileComplete = _name != null &&
         _age != null &&
         _bio != null &&
@@ -401,6 +403,9 @@ class ProfileProvider with ChangeNotifier {
         _location != null &&
         _minAge != null &&
         _maxAge != null;
+    
+    // Note: Backend completion status (_profileCompletion) is the authoritative source
+    // and should always be used for actual validation checks
   }
 
   Future<void> saveProfile() async {
@@ -594,7 +599,7 @@ class ProfileProvider with ChangeNotifier {
 
   Future<void> validateAndActivateProfile() async {
     try {
-      // First check if profile is complete
+      // First check if profile is complete using backend validation
       await loadProfileCompletion();
       
       if (_profileCompletion?.isCompleted ?? false) {
@@ -612,5 +617,32 @@ class ProfileProvider with ChangeNotifier {
       print('Error validating profile: $e');
       rethrow;
     }
+  }
+
+  /// Get the next incomplete step that the user should complete
+  /// Returns null if profile is complete
+  String? getNextIncompleteStep() {
+    final completion = _profileCompletion;
+    if (completion == null) return null;
+    if (completion.isCompleted) return null;
+    
+    // Check in order: basic info, photos, prompts, personality
+    if (!completion.hasRequiredProfileFields) {
+      return 'basic_info';
+    } else if (!completion.hasPhotos) {
+      return 'photos';
+    } else if (!completion.hasPrompts) {
+      return 'prompts';
+    } else if (!completion.hasPersonalityAnswers) {
+      return 'personality';
+    }
+    
+    return null;
+  }
+
+  /// Check if the profile is truly complete based on backend validation
+  /// This is the authoritative method for checking completion
+  bool get isProfileTrulyComplete {
+    return _profileCompletion?.isCompleted ?? false;
   }
 }
