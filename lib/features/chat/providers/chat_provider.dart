@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/websocket_service.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/local_notification_service.dart';
 import '../../../core/models/models.dart';
 import '../../../core/config/app_config.dart';
 
@@ -18,6 +19,8 @@ class ChatProvider with ChangeNotifier {
   String? _currentUserId;
   Timer? _typingTimer;
   String? _currentTypingChatId;
+  final Map<String, Timer?> _expirationCheckTimers = {};
+  final LocalNotificationService _notificationService = LocalNotificationService();
 
   List<Conversation> get conversations => _conversations;
   Map<String, List<ChatMessage>> get chatMessages => _chatMessages;
@@ -26,6 +29,16 @@ class ChatProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isWebSocketConnected => _isWebSocketConnected;
+  
+  /// Get only active (non-expired) conversations
+  List<Conversation> get activeConversations {
+    return _conversations.where((conv) => !conv.isExpired).toList();
+  }
+  
+  /// Get only archived (expired) conversations
+  List<Conversation> get archivedConversations {
+    return _conversations.where((conv) => conv.isExpired).toList();
+  }
 
   ChatProvider() {
     _initializeWebSocket();
@@ -153,6 +166,9 @@ class ChatProvider with ChangeNotifier {
         print('ChatProvider: Successfully parsed ${_conversations.length} conversations');
       }
       
+      // Schedule expiration notifications for all active conversations
+      scheduleAllExpirationNotifications();
+      
       _error = null;
     } catch (e) {
       _handleError(e, 'Failed to load conversations');
@@ -217,6 +233,9 @@ class ChatProvider with ChangeNotifier {
       
       // Join the chat room for real-time updates
       _webSocketService?.joinChat(chatId);
+      
+      // Schedule expiration notification for this chat
+      _scheduleExpirationNotification(chatId);
       
       _error = null;
       notifyListeners();
@@ -508,10 +527,57 @@ class ChatProvider with ChangeNotifier {
       
       // Remove typing status but keep messages for reference
       _typingStatuses.remove(conversation.id);
+      
+      // Cancel any pending expiration notifications
+      _cancelExpirationNotification(conversation.id);
     }
     
     if (expiredConversations.isNotEmpty) {
       notifyListeners();
+    }
+  }
+
+  /// Schedule a notification 2 hours before chat expiration
+  void _scheduleExpirationNotification(String chatId) {
+    final conversation = getConversation(chatId);
+    if (conversation?.expiresAt == null) return;
+    
+    final now = DateTime.now();
+    final expiresAt = conversation!.expiresAt!;
+    final notificationTime = expiresAt.subtract(const Duration(hours: 2));
+    
+    // Don't schedule if notification time has already passed
+    if (notificationTime.isBefore(now)) return;
+    
+    // Don't schedule if less than 2 hours remain
+    if (expiresAt.difference(now).inHours < 2) return;
+    
+    // Cancel any existing timer for this chat
+    _cancelExpirationNotification(chatId);
+    
+    // Schedule the notification
+    final delay = notificationTime.difference(now);
+    _expirationCheckTimers[chatId] = Timer(delay, () {
+      final partnerName = conversation.otherParticipant?.firstName ?? 'votre contact';
+      _notificationService.showChatExpiringNotification(
+        partnerName: partnerName,
+        hoursLeft: 2,
+      );
+    });
+  }
+
+  /// Cancel expiration notification for a specific chat
+  void _cancelExpirationNotification(String chatId) {
+    _expirationCheckTimers[chatId]?.cancel();
+    _expirationCheckTimers.remove(chatId);
+  }
+
+  /// Check and schedule expiration notifications for all active conversations
+  void scheduleAllExpirationNotifications() {
+    for (final conversation in _conversations) {
+      if (!conversation.isExpired && conversation.expiresAt != null) {
+        _scheduleExpirationNotification(conversation.id);
+      }
     }
   }
 
@@ -554,6 +620,11 @@ class ChatProvider with ChangeNotifier {
   void dispose() {
     _typingTimer?.cancel();
     _webSocketService?.dispose();
+    // Cancel all expiration notification timers
+    for (final timer in _expirationCheckTimers.values) {
+      timer?.cancel();
+    }
+    _expirationCheckTimers.clear();
     super.dispose();
   }
 }

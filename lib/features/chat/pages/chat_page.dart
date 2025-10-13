@@ -14,10 +14,12 @@ import '../../auth/providers/auth_provider.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
+  final bool isArchived;
 
   const ChatPage({
     super.key,
     required this.chatId,
+    this.isArchived = false,
   });
 
   @override
@@ -166,26 +168,65 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         builder: (context, chatProvider, child) {
           final messages = chatProvider.getChatMessages(widget.chatId);
           final isExpired = chatProvider.isChatExpired(widget.chatId);
+          final isReadOnly = widget.isArchived || isExpired;
 
           return Column(
             children: [
-              // Timer indicator
-              Container(
-                width: double.infinity,
-                height: 4,
-                child: AnimatedBuilder(
-                  animation: _timerAnimationController,
-                  builder: (context, child) {
-                    return LinearProgressIndicator(
-                      value: _timerAnimationController.value,
-                      backgroundColor: AppColors.dividerLight,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isExpired ? AppColors.errorRed : AppColors.primaryGold,
-                      ),
-                    );
-                  },
+              // Timer indicator (only show for non-archived)
+              if (!widget.isArchived)
+                Container(
+                  width: double.infinity,
+                  height: 4,
+                  child: AnimatedBuilder(
+                    animation: _timerAnimationController,
+                    builder: (context, child) {
+                      return LinearProgressIndicator(
+                        value: _timerAnimationController.value,
+                        backgroundColor: AppColors.dividerLight,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isExpired ? AppColors.errorRed : AppColors.primaryGold,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
+              
+              // Archive banner
+              if (widget.isArchived)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorRed.withOpacity(0.1),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppColors.errorRed.withOpacity(0.3),
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.archive,
+                        size: 16,
+                        color: AppColors.errorRed,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          'Cette conversation est archivée - Lecture seule',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.errorRed,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Messages
               Expanded(
@@ -202,37 +243,38 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       ),
               ),
 
-              // Typing indicator
-              Consumer<ChatProvider>(
-                builder: (context, chatProvider, child) {
-                  final conversation = chatProvider.getConversation(widget.chatId);
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  final currentUserId = authProvider.user?.id;
-                  
-                  // Get the other user's ID
-                  final otherUserId = conversation?.participantIds
-                      .firstWhere((id) => id != currentUserId, orElse: () => '');
-                  
-                  if (otherUserId != null && 
-                      otherUserId.isNotEmpty && 
-                      chatProvider.isUserTyping(widget.chatId, otherUserId)) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      child: TypingIndicator(
-                        userName: conversation?.otherParticipant?.firstName ?? 'L\'utilisateur',
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+              // Typing indicator (only show for non-archived)
+              if (!widget.isArchived)
+                Consumer<ChatProvider>(
+                  builder: (context, chatProvider, child) {
+                    final conversation = chatProvider.getConversation(widget.chatId);
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    final currentUserId = authProvider.user?.id;
+                    
+                    // Get the other user's ID
+                    final otherUserId = conversation?.participantIds
+                        .firstWhere((id) => id != currentUserId, orElse: () => '');
+                    
+                    if (otherUserId != null && 
+                        otherUserId.isNotEmpty && 
+                        chatProvider.isUserTyping(widget.chatId, otherUserId)) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        child: TypingIndicator(
+                          userName: conversation?.otherParticipant?.firstName ?? 'L\'utilisateur',
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
 
-              // Input area
-              if (!isExpired) _buildMessageInput(chatProvider),
-              if (isExpired) _buildExpiredMessage(),
+              // Input area or expired message
+              if (!isReadOnly) _buildMessageInput(chatProvider),
+              if (isReadOnly) _buildExpiredMessage(),
             ],
           );
         },
