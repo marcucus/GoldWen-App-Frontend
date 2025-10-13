@@ -11,6 +11,7 @@ import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
 import '../widgets/media_management_widget.dart';
 import '../widgets/profile_completion_widget.dart';
+import '../widgets/prompt_selection_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
 
@@ -30,12 +31,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(
-      10,
+      3,
       (index) =>
-          TextEditingController()); // Should be 3 prompts as per API requirements
+          TextEditingController());
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
+  bool _isInPromptSelectionMode = true; // Track if user is selecting or answering prompts
 
   @override
   void initState() {
@@ -93,26 +95,41 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     try {
       await profileProvider.loadPrompts();
 
-      // Select first 3 prompts automatically
-      if (profileProvider.availablePrompts.length >= 10) {
+      // Don't auto-select prompts anymore - let user choose
+      if (mounted) {
         setState(() {
-          _selectedPromptIds = profileProvider.availablePrompts
-              .take(10) // Should be 3 prompts as per API requirements
-              .map((prompt) => prompt.id)
-              .toList();
-          _promptQuestions = profileProvider.availablePrompts
-              .take(10) // Should be 3 prompts as per API requirements
-              .map((prompt) => prompt.text)
-              .toList();
+          // If there are existing prompt answers, load them
+          if (profileProvider.promptAnswers.isNotEmpty) {
+            _selectedPromptIds = profileProvider.promptAnswers.keys.toList();
+            _isInPromptSelectionMode = false;
+            
+            // Initialize controllers with existing answers
+            for (int i = 0; i < _selectedPromptIds.length && i < 3; i++) {
+              final promptId = _selectedPromptIds[i];
+              final answer = profileProvider.promptAnswers[promptId];
+              if (answer != null && i < _promptControllers.length) {
+                _promptControllers[i].text = answer;
+              }
+            }
+            
+            // Load prompt questions
+            _promptQuestions = _selectedPromptIds.map((id) {
+              final prompt = profileProvider.availablePrompts.firstWhere(
+                (p) => p.id == id,
+                orElse: () => Prompt(
+                  id: id,
+                  text: 'Question...',
+                  category: 'general',
+                  active: true,
+                ),
+              );
+              return prompt.text;
+            }).toList();
+          }
         });
-      } else {
-        // If we don't have enough prompts, show error
-        throw Exception(
-            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 10 to 3
       }
     } catch (e) {
       print('Error loading prompts: $e');
-      // Show error instead of fallback - we need real prompt IDs from backend
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -394,126 +411,237 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildPromptsPage() {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          const SizedBox(height: AppSpacing.xl),
-          Text(
-            'Complétez ces phrases',
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Cela aide les autres à mieux vous connaître',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          Expanded(
-            child: _promptQuestions.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: AppSpacing.md),
-                        const Text('Chargement des questions...'),
-                        const SizedBox(height: AppSpacing.lg),
-                        TextButton(
-                          onPressed: _loadPrompts,
-                          child: const Text('Réessayer'),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: 10, // Should be 3 prompts as per API requirements
-                    itemBuilder: (context, index) {
-                      // Make sure we don't go out of bounds
-                      final questionText = index < _promptQuestions.length
-                          ? _promptQuestions[index]
-                          : 'Question ${index + 1}...';
+    return Consumer<ProfileProvider>(
+      builder: (context, profileProvider, child) {
+        if (profileProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              questionText,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            TextFormField(
-                              controller: _promptControllers[index],
-                              decoration: InputDecoration(
-                                hintText:
-                                    'Votre réponse... (max 300 caractères)',
-                                counterText:
-                                    '${_promptControllers[index].text.length}/300',
-                              ),
-                              maxLines: 3,
-                              maxLength: 300,
-                              onChanged: (text) {
-                                setState(() {
-                                  // This will trigger a rebuild to update validation and counter
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          // Progress indicator for prompts validation
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Row(
+        if (profileProvider.availablePrompts.isEmpty) {
+          return Center(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  _getValidAnswersCount() == 10
-                      ? Icons.check_circle
-                      : Icons.pending,
-                  color: _getValidAnswersCount() == 10
-                      ? Colors.green
-                      : AppColors.textSecondary,
-                  size: 20,
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppColors.errorRed,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/10',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getValidAnswersCount() == 10
-                            ? Colors.green
-                            : AppColors.textSecondary,
-                        fontWeight: _getValidAnswersCount() == 10
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
+                const SizedBox(height: AppSpacing.md),
+                const Text('Erreur lors du chargement des prompts'),
+                const SizedBox(height: AppSpacing.lg),
+                ElevatedButton(
+                  onPressed: _loadPrompts,
+                  child: const Text('Réessayer'),
                 ),
               ],
             ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _arePromptsValid() ? _nextPage : null,
-              child: Text(
-                _arePromptsValid()
-                    ? 'Continuer'
-                    : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
+          );
+        }
+
+        // Selection mode: let user choose 3 prompts
+        if (_isInPromptSelectionMode) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Choisissez vos prompts',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Sélectionnez 3 questions qui vous représentent',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              Expanded(
+                child: PromptSelectionWidget(
+                  availablePrompts: profileProvider.availablePrompts,
+                  selectedPromptIds: _selectedPromptIds,
+                  onSelectionChanged: (newSelection) {
+                    setState(() {
+                      _selectedPromptIds = newSelection;
+                      
+                      // Update prompt questions for display
+                      _promptQuestions = newSelection.map((id) {
+                        final prompt = profileProvider.availablePrompts
+                            .firstWhere((p) => p.id == id);
+                        return prompt.text;
+                      }).toList();
+                    });
+                  },
+                  maxSelection: 3,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadowMedium,
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _selectedPromptIds.length == 3
+                          ? () {
+                              setState(() {
+                                _isInPromptSelectionMode = false;
+                              });
+                            }
+                          : null,
+                      child: Text(
+                        _selectedPromptIds.length == 3
+                            ? 'Continuer'
+                            : 'Sélectionnez 3 prompts (${_selectedPromptIds.length}/3)',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Answer mode: let user answer the selected prompts
+        return Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            children: [
+              const SizedBox(height: AppSpacing.xl),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      setState(() {
+                        _isInPromptSelectionMode = true;
+                      });
+                    },
+                    tooltip: 'Retour à la sélection',
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          'Répondez aux prompts',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          'Cela aide les autres à mieux vous connaître',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 3,
+                  itemBuilder: (context, index) {
+                    final questionText = index < _promptQuestions.length
+                        ? _promptQuestions[index]
+                        : 'Question ${index + 1}...';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            questionText,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          TextFormField(
+                            controller: _promptControllers[index],
+                            decoration: InputDecoration(
+                              hintText: 'Votre réponse... (max 150 caractères)',
+                              counterText:
+                                  '${_promptControllers[index].text.length}/150',
+                            ),
+                            maxLines: 3,
+                            maxLength: 150,
+                            onChanged: (text) {
+                              setState(() {
+                                // This will trigger a rebuild to update validation and counter
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              // Progress indicator for prompts validation
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _getValidAnswersCount() == 3
+                          ? Icons.check_circle
+                          : Icons.pending,
+                      color: _getValidAnswersCount() == 3
+                          ? Colors.green
+                          : AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Réponses complétées: ${_getValidAnswersCount()}/3',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: _getValidAnswersCount() == 3
+                                ? Colors.green
+                                : AppColors.textSecondary,
+                            fontWeight: _getValidAnswersCount() == 3
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _arePromptsValid() ? _nextPage : null,
+                  child: Text(
+                    _arePromptsValid()
+                        ? 'Continuer'
+                        : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -681,13 +809,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    // Should be 3 prompts as per API requirements
-    if (_promptControllers.length != 10) return false;
+    if (_promptControllers.length != 3) return false;
 
     // All 3 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
-      if (text.isEmpty || text.length > 300) {
+      if (text.isEmpty || text.length > 150) {
         return false;
       }
     }
@@ -699,7 +826,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     int count = 0;
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
-      if (text.isNotEmpty && text.length <= 300) {
+      if (text.isNotEmpty && text.length <= 150) {
         count++;
       }
     }
@@ -890,10 +1017,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
 
     // Validate prompt answers - must have exactly 3 valid responses
-    if (_promptControllers.length != 10) {
+    if (_promptControllers.length != 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: 10 prompts requis pour continuer'),
+          content: Text('Erreur: 3 prompts requis pour continuer'),
           backgroundColor: Colors.red,
         ),
       );
@@ -912,11 +1039,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         return;
       }
 
-      if (text.length > 300) {
+      if (text.length > 150) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'La réponse ${i + 1} dépasse 300 caractères (${text.length}/300)'),
+                'La réponse ${i + 1} dépasse 150 caractères (${text.length}/150)'),
             backgroundColor: Colors.red,
           ),
         );

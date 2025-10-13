@@ -272,9 +272,9 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         _buildSettingItem(
           context,
-          'Mes réponses',
-          profileProvider.prompts.isEmpty ? 'Non complété' : '${profileProvider.prompts.length} réponse(s)',
-          Icons.quiz,
+          'Mes prompts',
+          profileProvider.promptAnswers.isEmpty ? 'Non complété' : '${profileProvider.promptAnswers.length} prompt(s)',
+          Icons.chat_bubble_outline,
           () => _navigateToPromptsEditing(context),
         ),
         _buildSettingItem(
@@ -620,7 +620,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
   
   void _navigateToPromptsEditing(BuildContext context) {
-    context.go('/questionnaire');
+    context.go('/prompts-management');
   }
   
   void _navigateToPreferences(BuildContext context) {
