@@ -6,6 +6,7 @@ import '../../features/auth/pages/auth_page.dart';
 import '../../features/auth/pages/email_auth_page.dart';
 import '../../features/auth/pages/splash_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
+import '../../features/profile/pages/prompts_management_page.dart';
 import '../../features/main/pages/main_navigation_page.dart';
 import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
@@ -170,6 +171,13 @@ class AppRouter {
         path: '/user-profile',
         name: 'user-profile',
         builder: (context, state) => const UserProfilePage(),
+      ),
+      
+      // Prompts Management
+      GoRoute(
+        path: '/prompts-management',
+        name: 'prompts-management',
+        builder: (context, state) => const PromptsManagementPage(),
       ),
 
       // Settings
