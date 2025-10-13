@@ -85,9 +85,10 @@ class _PhotoManagementPageState extends State<PhotoManagementPage> {
                           const Text(
                               '• Ajoutez au moins 3 photos pour optimiser votre profil\n'
                               '• La première photo sera votre photo principale\n'
+                              '• Les photos sont automatiquement compressées (max 1MB)\n'
                               '• Utilisez des photos récentes et de bonne qualité\n'
                               '• Glissez-déposez pour réorganiser l\'ordre\n'
-                              '• Formats acceptés: JPG, PNG, HEIC (max 10MB)'),
+                              '• Formats acceptés: JPG, PNG, HEIC (max 10MB avant compression)'),
                         ],
                       ),
                     ),
