@@ -7,6 +7,9 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
+import '../widgets/match_card_widget.dart';
+
+enum MatchFilter { active, expiringSoon, archived }
 
 class MatchesPage extends StatefulWidget {
   const MatchesPage({super.key});
@@ -18,6 +21,7 @@ class MatchesPage extends StatefulWidget {
 class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  MatchFilter _selectedFilter = MatchFilter.active;
 
   @override
   void initState() {
@@ -71,6 +75,10 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
           icon: Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => context.pop(),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: _buildFilterTabs(),
+        ),
       ),
       body: Consumer<MatchingProvider>(
         builder: (context, matchingProvider, child) {
@@ -82,14 +90,114 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
             return _buildErrorState(matchingProvider.error!, matchingProvider);
           }
 
-          if (matchingProvider.matches.isEmpty) {
+          final filteredMatches = _filterMatches(matchingProvider.matches);
+
+          if (filteredMatches.isEmpty) {
             return _buildEmptyState();
           }
 
-          return _buildMatchesList(matchingProvider.matches);
+          return _buildMatchesList(filteredMatches);
         },
       ),
     );
+  }
+
+  Widget _buildFilterTabs() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          _buildFilterChip(
+            label: 'Actifs',
+            filter: MatchFilter.active,
+            icon: Icons.favorite,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'Expire bientôt',
+            filter: MatchFilter.expiringSoon,
+            icon: Icons.timer,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'Archivés',
+            filter: MatchFilter.archived,
+            icon: Icons.archive,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required MatchFilter filter,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedFilter == filter;
+    
+    return Expanded(
+      child: FilterChip(
+        selected: isSelected,
+        label: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : AppColors.primaryGold,
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : AppColors.primaryGold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        onSelected: (selected) {
+          setState(() {
+            _selectedFilter = filter;
+          });
+        },
+        selectedColor: AppColors.primaryGold,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isSelected ? AppColors.primaryGold : AppColors.primaryGold.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      ),
+    );
+  }
+
+  List<Match> _filterMatches(List<Match> matches) {
+    switch (_selectedFilter) {
+      case MatchFilter.active:
+        return matches.where((match) {
+          return match.status == 'active' && !match.isExpired;
+        }).toList();
+      case MatchFilter.expiringSoon:
+        return matches.where((match) {
+          if (match.expiresAt == null || match.isExpired) return false;
+          final hoursRemaining = match.expiresAt!.difference(DateTime.now()).inHours;
+          return hoursRemaining <= 3 && match.status == 'active';
+        }).toList();
+      case MatchFilter.archived:
+        return matches.where((match) {
+          return match.status == 'archived' || match.isExpired;
+        }).toList();
+    }
   }
 
   Widget _buildLoadingState() {
@@ -159,6 +267,28 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
   }
 
   Widget _buildEmptyState() {
+    String title;
+    String message;
+    IconData icon;
+    
+    switch (_selectedFilter) {
+      case MatchFilter.active:
+        title = 'Aucun match actif';
+        message = 'Continuez à faire des sélections quotidiennes pour trouver vos matches !';
+        icon = Icons.favorite_outline;
+        break;
+      case MatchFilter.expiringSoon:
+        title = 'Aucun match expirant bientôt';
+        message = 'Tous vos matches ont encore beaucoup de temps !';
+        icon = Icons.timer;
+        break;
+      case MatchFilter.archived:
+        title = 'Aucun match archivé';
+        message = 'Vos matches archivés apparaîtront ici.';
+        icon = Icons.archive_outlined;
+        break;
+    }
+    
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Center(
@@ -168,13 +298,13 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.favorite_outline,
+                icon,
                 size: 100,
                 color: AppColors.primaryGold.withOpacity(0.5),
               ),
               const SizedBox(height: 24),
               Text(
-                'Aucun match pour le moment',
+                title,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -183,25 +313,27 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
               ),
               const SizedBox(height: 16),
               Text(
-                'Continuez à faire des sélections quotidiennes pour trouver vos matches !',
+                message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => context.go('/home'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryGold,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
+              if (_selectedFilter == MatchFilter.active) ...[
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () => context.go('/home'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                   ),
+                  child: const Text('Découvrir des profils'),
                 ),
-                child: const Text('Découvrir des profils'),
-              ),
+              ],
             ],
           ),
         ),
@@ -222,176 +354,22 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
           itemCount: matches.length,
           itemBuilder: (context, index) {
             final match = matches[index];
-            return _buildMatchCard(match);
+            return MatchCardWidget(
+              match: match,
+              onArchive: () {
+                final provider = Provider.of<MatchingProvider>(context, listen: false);
+                provider.deleteMatch(match.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Match archivé'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            );
           },
         ),
       ),
     );
-  }
-
-  Widget _buildMatchCard(Match match) {
-    final profile = match.otherProfile;
-    final isActive = match.status == 'active';
-    final isPending = match.status == 'pending';
-
-    return GlassCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: () {
-          if (match.chatId != null && isActive) {
-            context.push('/chat/${match.chatId}');
-          } else if (profile != null) {
-            context.push('/profile/${profile.id}');
-          }
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Profile Photo
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryGold.withOpacity(0.3),
-                      AppColors.primaryGold.withOpacity(0.7),
-                    ],
-                  ),
-                ),
-                child: (profile?.photos != null && profile!.photos.isNotEmpty)
-                    ? ClipOval(
-                        child: Image.network(
-                          profile.photos.first.url,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.person,
-                              color: Colors.white,
-                              size: 30,
-                            );
-                          },
-                        ),
-                      )
-                    : const Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-              ),
-              const SizedBox(width: 16),
-
-              // Profile Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile?.firstName ?? 'Utilisateur',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Compatibilité: ${(match.compatibilityScore * 100).round()}%',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatMatchDate(match.createdAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Status and Action
-              Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(match.status),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _getStatusText(match.status),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (isActive && match.chatId != null)
-                    Icon(
-                      Icons.chat_bubble,
-                      color: AppColors.primaryGold,
-                      size: 20,
-                    )
-                  else if (isPending)
-                    Icon(
-                      Icons.hourglass_empty,
-                      color: Colors.orange,
-                      size: 20,
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatMatchDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 0) {
-      return 'Il y a ${difference.inDays} jour${difference.inDays > 1 ? 's' : ''}';
-    } else if (difference.inHours > 0) {
-      return 'Il y a ${difference.inHours} heure${difference.inHours > 1 ? 's' : ''}';
-    } else {
-      return 'Il y a ${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''}';
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'expired':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusText(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'Actif';
-      case 'pending':
-        return 'En attente';
-      case 'expired':
-        return 'Expiré';
-      default:
-        return 'Inconnu';
-    }
   }
 }
