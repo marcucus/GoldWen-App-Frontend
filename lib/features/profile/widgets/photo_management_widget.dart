@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/services/api_service.dart';
@@ -388,12 +390,30 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       if (image != null && mounted) {
         // Validate image
         final bool isValid = await _validateImage(image);
-        if (!isValid) return;
+        if (!isValid) {
+          setState(() => _isLoading = false);
+          return;
+        }
 
         try {
-          // Upload the image to backend
+          // Compress image before upload
+          final compressedPath = await _compressImage(image.path);
+          if (compressedPath == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Erreur lors de la compression de l\'image'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+            setState(() => _isLoading = false);
+            return;
+          }
+
+          // Upload the compressed image to backend
           final response = await ApiService.uploadPhoto(
-            image.path,
+            compressedPath,
             order: _photos.length + 1,
           );
 
@@ -416,9 +436,28 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
           setState(() {
             _photos.add(newPhoto);
+            // Set as primary if it's the first photo
+            if (_photos.length == 1) {
+              _photos[0] = Photo(
+                id: _photos[0].id,
+                url: _photos[0].url,
+                order: _photos[0].order,
+                isPrimary: true,
+                createdAt: _photos[0].createdAt,
+              );
+            }
           });
 
           widget.onPhotosChanged(_photos);
+
+          // Set as primary on backend if it's the first photo
+          if (_photos.length == 1) {
+            try {
+              await ApiService.setPrimaryPhoto(newPhoto.id);
+            } catch (e) {
+              debugPrint('Error setting primary photo: $e');
+            }
+          }
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -455,17 +494,71 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
     }
   }
 
+  Future<String?> _compressImage(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      final fileSizeInBytes = await file.length();
+      const maxSizeInBytes = 1 * 1024 * 1024; // 1MB target
+
+      // If already under 1MB, no need to compress
+      if (fileSizeInBytes <= maxSizeInBytes) {
+        return imagePath;
+      }
+
+      // Get temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final targetPath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.jpg';
+
+      // Start with quality 85 and reduce if needed
+      int quality = 85;
+      XFile? compressedFile;
+
+      // Try compression with decreasing quality until file is under 1MB
+      while (quality >= 50) {
+        compressedFile = await FlutterImageCompress.compressAndGetFile(
+          imagePath,
+          targetPath,
+          quality: quality,
+          minWidth: 1200,
+          minHeight: 1200,
+          format: CompressFormat.jpeg,
+        );
+
+        if (compressedFile != null) {
+          final compressedSize = await File(compressedFile.path).length();
+          if (compressedSize <= maxSizeInBytes) {
+            debugPrint('Image compressed: ${fileSizeInBytes / 1024 / 1024}MB -> ${compressedSize / 1024 / 1024}MB (quality: $quality)');
+            return compressedFile.path;
+          }
+        }
+
+        quality -= 10;
+      }
+
+      // If we still can't get it under 1MB, return the last compressed version
+      if (compressedFile != null) {
+        debugPrint('Image compressed to minimum quality: ${quality + 10}');
+        return compressedFile.path;
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Error compressing image: $e');
+      return null;
+    }
+  }
+
   Future<bool> _validateImage(XFile image) async {
     try {
       final file = File(image.path);
       final fileSizeInBytes = await file.length();
-      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB before compression
 
       if (fileSizeInBytes > maxSizeInBytes) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('La photo est trop volumineuse (max 10MB)'),
+              content: Text('La photo est trop volumineuse (max 10MB). Veuillez choisir une photo plus petite.'),
               backgroundColor: Colors.orange,
             ),
           );
@@ -559,17 +652,22 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       
       setState(() {
         _photos.removeWhere((p) => p.id == photo.id);
-        // Reorder remaining photos
+        // Reorder remaining photos and set first as primary
         for (int i = 0; i < _photos.length; i++) {
           _photos[i] = Photo(
             id: _photos[i].id,
             url: _photos[i].url,
             order: i + 1,
-            isPrimary: _photos[i].isPrimary,
+            isPrimary: i == 0, // First photo is always primary
             createdAt: _photos[i].createdAt,
           );
         }
       });
+
+      // Update primary photo on backend if we have photos left
+      if (_photos.isNotEmpty) {
+        _setPrimaryPhotoOnBackend(_photos[0].id);
+      }
 
       widget.onPhotosChanged(_photos);
 
@@ -603,16 +701,41 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
     try {
       await ApiService.setPrimaryPhoto(photo.id);
       
-      setState(() {
-        // Remove primary status from all photos and set it for the selected one
-        _photos = _photos.map((p) => Photo(
-          id: p.id,
-          url: p.url,
-          order: p.order,
-          isPrimary: p.id == photo.id,
-          createdAt: p.createdAt,
-        )).toList();
-      });
+      // Move the selected photo to the first position
+      final photoIndex = _photos.indexWhere((p) => p.id == photo.id);
+      if (photoIndex != -1 && photoIndex != 0) {
+        setState(() {
+          final selectedPhoto = _photos.removeAt(photoIndex);
+          _photos.insert(0, selectedPhoto);
+          
+          // Update order for all photos and set first as primary
+          for (int i = 0; i < _photos.length; i++) {
+            _photos[i] = Photo(
+              id: _photos[i].id,
+              url: _photos[i].url,
+              order: i + 1,
+              isPrimary: i == 0, // First photo is always primary
+              createdAt: _photos[i].createdAt,
+            );
+          }
+        });
+
+        // Update order on backend for all affected photos
+        for (int i = 0; i < _photos.length; i++) {
+          _updatePhotoOrder(_photos[i], i + 1);
+        }
+      } else {
+        // Just update the isPrimary flag if already first
+        setState(() {
+          _photos = _photos.map((p) => Photo(
+            id: p.id,
+            url: p.url,
+            order: p.order,
+            isPrimary: p.id == photo.id,
+            createdAt: p.createdAt,
+          )).toList();
+        });
+      }
 
       widget.onPhotosChanged(_photos);
 
@@ -656,20 +779,29 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       final Photo item = _photos.removeAt(oldIndex);
       _photos.insert(newIndex, item);
 
-      // Update order for all photos
+      // Update order for all photos and set first as primary
       for (int i = 0; i < _photos.length; i++) {
         _photos[i] = Photo(
           id: _photos[i].id,
           url: _photos[i].url,
           order: i + 1,
-          isPrimary: _photos[i].isPrimary,
+          isPrimary: i == 0, // First photo is always primary
           createdAt: _photos[i].createdAt,
         );
       }
     });
 
-    // Update backend
+    // Update backend for the moved photo
     _updatePhotoOrder(_photos[newIndex], newIndex + 1);
+    
+    // Set first photo as primary on backend
+    if (newIndex == 0) {
+      _setPrimaryPhotoOnBackend(_photos[0].id);
+    } else if (oldIndex == 0) {
+      // If we moved the primary photo away, set the new first photo as primary
+      _setPrimaryPhotoOnBackend(_photos[0].id);
+    }
+    
     widget.onPhotosChanged(_photos);
   }
 
@@ -679,6 +811,15 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
     } catch (e) {
       debugPrint('Error updating photo order: $e');
       // Note: We don't show error to user as this is background operation
+    }
+  }
+
+  Future<void> _setPrimaryPhotoOnBackend(String photoId) async {
+    try {
+      await ApiService.setPrimaryPhoto(photoId);
+      debugPrint('Set photo $photoId as primary on backend');
+    } catch (e) {
+      debugPrint('Error setting primary photo on backend: $e');
     }
   }
 }
