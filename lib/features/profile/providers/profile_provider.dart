@@ -645,4 +645,13 @@ class ProfileProvider with ChangeNotifier {
   bool get isProfileTrulyComplete {
     return _profileCompletion?.isCompleted ?? false;
   }
+
+  // Test helper method - only used in tests
+  void setTestCompletion(ProfileCompletion? completion) {
+    _profileCompletion = completion;
+    if (completion != null) {
+      _isProfileComplete = completion.isCompleted;
+    }
+    notifyListeners();
+  }
 }

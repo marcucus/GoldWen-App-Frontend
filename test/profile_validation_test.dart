@@ -253,4 +253,159 @@ void main() {
       expect(profileProvider.photos.length, 6);
     });
   });
+
+  group('Strict Profile Validation - Backend Enforcement', () {
+    late ProfileProvider profileProvider;
+
+    setUp(() {
+      profileProvider = ProfileProvider();
+    });
+
+    test('isProfileTrulyComplete should use backend completion status', () {
+      // Initially no backend completion data
+      expect(profileProvider.isProfileTrulyComplete, false);
+      
+      // Simulate setting backend completion data
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: true,
+        hasPhotos: true,
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: [],
+      ));
+      
+      expect(profileProvider.isProfileTrulyComplete, true);
+    });
+
+    test('isProfileTrulyComplete should return false for incomplete profile', () {
+      // Simulate incomplete backend completion data
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: false,
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: ['Upload at least 3 photos'],
+      ));
+      
+      expect(profileProvider.isProfileTrulyComplete, false);
+    });
+
+    test('getNextIncompleteStep should return basic_info when profile fields missing', () {
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: true,
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: false,
+        missingSteps: ['Complete basic profile information'],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), 'basic_info');
+    });
+
+    test('getNextIncompleteStep should return photos when photos missing', () {
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: false,
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: ['Upload at least 3 photos'],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), 'photos');
+    });
+
+    test('getNextIncompleteStep should return prompts when prompts missing', () {
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: true,
+        hasPrompts: false,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: ['Answer 3 prompts'],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), 'prompts');
+    });
+
+    test('getNextIncompleteStep should return personality when personality missing', () {
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: true,
+        hasPrompts: true,
+        hasPersonalityAnswers: false,
+        hasRequiredProfileFields: true,
+        missingSteps: ['Complete personality questionnaire'],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), 'personality');
+    });
+
+    test('getNextIncompleteStep should return null when profile is complete', () {
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: true,
+        hasPhotos: true,
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: [],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), null);
+    });
+
+    test('getNextIncompleteStep should prioritize basic_info over other steps', () {
+      // All steps missing - should return basic_info first
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: false,
+        hasPrompts: false,
+        hasPersonalityAnswers: false,
+        hasRequiredProfileFields: false,
+        missingSteps: [
+          'Complete basic profile information',
+          'Upload at least 3 photos',
+          'Answer 3 prompts',
+          'Complete personality questionnaire'
+        ],
+      ));
+      
+      expect(profileProvider.getNextIncompleteStep(), 'basic_info');
+    });
+
+    test('local validation should not override backend completion status', () {
+      // Set local data that would make profile complete
+      profileProvider.setBasicInfo('Test User', 25, 'Test bio');
+      for (int i = 0; i < 3; i++) {
+        profileProvider.addPhotoFromUrl('https://example.com/photo$i.jpg');
+      }
+      profileProvider.setPromptAnswer('prompt1', 'Answer 1');
+      profileProvider.setPromptAnswer('prompt2', 'Answer 2');
+      profileProvider.setPromptAnswer('prompt3', 'Answer 3');
+      profileProvider.setPersonalityAnswer('question1', 'answer1');
+      profileProvider.setGender('male');
+      profileProvider.setGenderPreferences(['female']);
+      profileProvider.setLocation(location: 'Paris', latitude: 48.8566, longitude: 2.3522);
+      profileProvider.setAgePreferences(minAge: 22, maxAge: 30);
+
+      // Local validation says complete
+      expect(profileProvider.isProfileComplete, true);
+
+      // But if backend says incomplete, isProfileTrulyComplete should be false
+      profileProvider.setTestCompletion(ProfileCompletion(
+        isCompleted: false,
+        hasPhotos: false,  // Backend says photos not validated yet
+        hasPrompts: true,
+        hasPersonalityAnswers: true,
+        hasRequiredProfileFields: true,
+        missingSteps: ['Photos not validated by backend'],
+      ));
+
+      // Backend status is authoritative
+      expect(profileProvider.isProfileTrulyComplete, false);
+    });
+  });
 }
