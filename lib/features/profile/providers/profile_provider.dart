@@ -217,6 +217,11 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearPromptAnswers() {
+    _promptAnswers.clear();
+    notifyListeners();
+  }
+
   // New setter methods
   void setGender(String gender) {
     _gender = gender;

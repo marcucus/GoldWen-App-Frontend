@@ -30,9 +30,9 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   DateTime? _birthDate;
   final _bioController = TextEditingController();
   final List<TextEditingController> _promptControllers = List.generate(
-      10,
+      3,
       (index) =>
-          TextEditingController()); // Should be 3 prompts as per API requirements
+          TextEditingController());
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
@@ -94,21 +94,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       await profileProvider.loadPrompts();
 
       // Select first 3 prompts automatically
-      if (profileProvider.availablePrompts.length >= 10) {
+      if (profileProvider.availablePrompts.length >= 3) {
         setState(() {
           _selectedPromptIds = profileProvider.availablePrompts
-              .take(10) // Should be 3 prompts as per API requirements
+              .take(3)
               .map((prompt) => prompt.id)
               .toList();
           _promptQuestions = profileProvider.availablePrompts
-              .take(10) // Should be 3 prompts as per API requirements
+              .take(3)
               .map((prompt) => prompt.text)
               .toList();
         });
       } else {
         // If we don't have enough prompts, show error
         throw Exception(
-            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/10)'); // Changed from 10 to 3
+            'Pas assez de prompts disponibles (${profileProvider.availablePrompts.length}/3)');
       }
     } catch (e) {
       print('Error loading prompts: $e');
@@ -431,7 +431,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: 10, // Should be 3 prompts as per API requirements
+                    itemCount: 3,
                     itemBuilder: (context, index) {
                       // Make sure we don't go out of bounds
                       final questionText = index < _promptQuestions.length
@@ -452,12 +452,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                               controller: _promptControllers[index],
                               decoration: InputDecoration(
                                 hintText:
-                                    'Votre réponse... (max 300 caractères)',
+                                    'Votre réponse... (max 150 caractères)',
                                 counterText:
-                                    '${_promptControllers[index].text.length}/300',
+                                    '${_promptControllers[index].text.length}/150',
                               ),
                               maxLines: 3,
-                              maxLength: 300,
+                              maxLength: 150,
                               onChanged: (text) {
                                 setState(() {
                                   // This will trigger a rebuild to update validation and counter
@@ -477,22 +477,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _getValidAnswersCount() == 10
+                  _getValidAnswersCount() == 3
                       ? Icons.check_circle
                       : Icons.pending,
-                  color: _getValidAnswersCount() == 10
+                  color: _getValidAnswersCount() == 3
                       ? Colors.green
                       : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Réponses complétées: ${_getValidAnswersCount()}/10',
+                  'Réponses complétées: ${_getValidAnswersCount()}/3',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getValidAnswersCount() == 10
+                        color: _getValidAnswersCount() == 3
                             ? Colors.green
                             : AppColors.textSecondary,
-                        fontWeight: _getValidAnswersCount() == 10
+                        fontWeight: _getValidAnswersCount() == 3
                             ? FontWeight.w600
                             : FontWeight.normal,
                       ),
@@ -507,7 +507,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               child: Text(
                 _arePromptsValid()
                     ? 'Continuer'
-                    : 'Complétez les 10 réponses (${_getValidAnswersCount()}/10)',
+                    : 'Complétez les 3 réponses (${_getValidAnswersCount()}/3)',
               ),
             ),
           ),
@@ -681,13 +681,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   bool _arePromptsValid() {
-    // Should be 3 prompts as per API requirements
-    if (_promptControllers.length != 10) return false;
+    if (_promptControllers.length != 3) return false;
 
     // All 3 controllers must have non-empty text within character limit
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
-      if (text.isEmpty || text.length > 300) {
+      if (text.isEmpty || text.length > 150) {
         return false;
       }
     }
@@ -699,7 +698,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     int count = 0;
     for (final controller in _promptControllers) {
       final text = controller.text.trim();
-      if (text.isNotEmpty && text.length <= 300) {
+      if (text.isNotEmpty && text.length <= 150) {
         count++;
       }
     }
@@ -890,10 +889,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
 
     // Validate prompt answers - must have exactly 3 valid responses
-    if (_promptControllers.length != 10) {
+    if (_promptControllers.length != 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur: 10 prompts requis pour continuer'),
+          content: Text('Erreur: 3 prompts requis pour continuer'),
           backgroundColor: Colors.red,
         ),
       );
@@ -912,11 +911,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         return;
       }
 
-      if (text.length > 300) {
+      if (text.length > 150) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'La réponse ${i + 1} dépasse 300 caractères (${text.length}/300)'),
+                'La réponse ${i + 1} dépasse 150 caractères (${text.length}/150)'),
             backgroundColor: Colors.red,
           ),
         );
