@@ -207,4 +207,50 @@ void main() {
       expect(completion.missingSteps, isEmpty);
     });
   });
+
+  group('Photo Validation UI Tests', () {
+    late ProfileProvider profileProvider;
+
+    setUp(() {
+      profileProvider = ProfileProvider();
+    });
+
+    test('should identify when less than 3 photos are added', () {
+      // Add only 2 photos
+      profileProvider.addPhotoFromUrl('https://example.com/photo1.jpg');
+      profileProvider.addPhotoFromUrl('https://example.com/photo2.jpg');
+
+      expect(profileProvider.photos.length, 2);
+      expect(profileProvider.photos.length < 3, true);
+    });
+
+    test('should identify when exactly 3 photos are added', () {
+      // Add exactly 3 photos
+      profileProvider.addPhotoFromUrl('https://example.com/photo1.jpg');
+      profileProvider.addPhotoFromUrl('https://example.com/photo2.jpg');
+      profileProvider.addPhotoFromUrl('https://example.com/photo3.jpg');
+
+      expect(profileProvider.photos.length, 3);
+      expect(profileProvider.photos.length >= 3, true);
+    });
+
+    test('should allow more than 3 photos up to maximum', () {
+      // Add 5 photos
+      for (int i = 0; i < 5; i++) {
+        profileProvider.addPhotoFromUrl('https://example.com/photo$i.jpg');
+      }
+
+      expect(profileProvider.photos.length, 5);
+      expect(profileProvider.photos.length >= 3, true);
+    });
+
+    test('should respect maximum of 6 photos', () {
+      // Try to add 7 photos, but should only add 6
+      for (int i = 0; i < 7; i++) {
+        profileProvider.addPhotoFromUrl('https://example.com/photo$i.jpg');
+      }
+
+      expect(profileProvider.photos.length, 6);
+    });
+  });
 }

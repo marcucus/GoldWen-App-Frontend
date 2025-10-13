@@ -136,6 +136,33 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     });
   }
 
+  void _showMinPhotosAlert() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber),
+              SizedBox(width: AppSpacing.sm),
+              Text('Photos manquantes'),
+            ],
+          ),
+          content: const Text(
+            'Vous devez ajouter au moins 3 photos pour continuer.\n\n'
+            'Les photos permettent aux autres utilisateurs de mieux vous connaître et augmentent vos chances de match.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('J\'ai compris'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,14 +354,48 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           ),
           Consumer<ProfileProvider>(
             builder: (context, profileProvider, child) {
-              return SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed:
-                      profileProvider.photos.length >= 3 ? _nextPage : null,
-                  child:
-                      Text('Continuer (${profileProvider.photos.length}/6)'),
-                ),
+              final hasMinPhotos = profileProvider.photos.length >= 3;
+              return Column(
+                children: [
+                  // Visual indicator showing X/3 photos minimum
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          hasMinPhotos ? Icons.check_circle : Icons.info_outline,
+                          color: hasMinPhotos ? AppColors.success : AppColors.warningAmber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          '${profileProvider.photos.length}/3 photos minimum ajoutées',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: hasMinPhotos ? AppColors.success : AppColors.warningAmber,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: hasMinPhotos ? _nextPage : _showMinPhotosAlert,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: hasMinPhotos
+                            ? AppColors.primaryGold
+                            : AppColors.textTertiary,
+                      ),
+                      child: Text(
+                        hasMinPhotos
+                            ? 'Continuer (${profileProvider.photos.length}/6)'
+                            : 'Continuer (${profileProvider.photos.length}/3 minimum)',
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
