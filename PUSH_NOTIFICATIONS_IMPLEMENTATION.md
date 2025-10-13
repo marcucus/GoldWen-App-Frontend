@@ -232,4 +232,75 @@ The implementation follows the backend API specifications documented in `API_ROU
 
 This implementation provides a complete, user-friendly, and maintainable push notification system that meets all requirements specified in the issue. It supports both daily quotidian notifications and event-driven notifications while giving users full control over their notification experience.
 
+## Recent Updates (Implementation Phase 2)
+
+### Backend Settings Integration ✅
+
+The notification system now fully integrates with backend API for settings management:
+
+1. **Settings Loading:**
+   - NotificationProvider loads settings from `GET /api/v1/notifications/settings` on startup
+   - Falls back to default settings if API fails (graceful degradation)
+   - Settings include: dailySelection, newMatches, newMessages, chatExpiring, sound, vibration
+
+2. **Settings Synchronization:**
+   - Changes to settings are immediately saved to backend via `PUT /api/v1/notifications/settings`
+   - Local notification scheduling automatically syncs with settings changes
+   - Daily selection notification is scheduled/cancelled based on settings
+
+3. **Authentication Integration:**
+   - Firebase Messaging initializes automatically after user authentication
+   - FCM token registration happens seamlessly on login/signup
+   - Token re-registration on session restore
+   - Non-blocking initialization (app works even if notifications fail)
+
+### Navigation Improvements ✅
+
+Enhanced deep linking with go_router integration:
+
+```dart
+// Updated NavigationService for better routing
+static void navigateToDiscoverTab() {
+  context?.go('/home');
+}
+
+static void navigateToChat(String conversationId) {
+  context?.push('/chat/$conversationId');
+}
+```
+
+### Settings UI ✅
+
+Comprehensive notification settings dialog in SettingsPage:
+
+- Master toggle for all push notifications
+- Individual toggles for each notification type
+- Sound and vibration preferences
+- Real-time updates to backend
+- Visual feedback for disabled states
+
+### Badge Management ✅
+
+Added badge count management methods:
+
+```dart
+await FirebaseMessagingService().updateBadgeCount(count);
+await FirebaseMessagingService().clearBadge();
+```
+
+iOS badges managed via FCM payload, Android via notification channels.
+
+### Testing Status
+
+All acceptance criteria are implemented and ready for testing:
+
+- ✅ Permission requests at appropriate time
+- ✅ Daily notification at noon (local time)
+- ✅ Instant match notifications
+- ✅ Badge visibility on app icon
+- ✅ Deep linking navigation
+- ✅ Settings to enable/disable each notification type
+
+Refer to the Testing Guide section above for detailed test procedures.
+
 The modular architecture allows for easy extension and maintenance, while the comprehensive testing ensures reliability. The integration with existing GoldWen app features (matching, chat, settings) provides a seamless user experience that encourages meaningful connections through timely, relevant notifications.
