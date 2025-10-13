@@ -432,6 +432,74 @@ class MatchingProvider with ChangeNotifier {
     return _dailySelection!.isExpired;
   }
 
+  /// Check if there's a new selection available (different from current one)
+  /// This is used to show the "Nouvelle sélection disponible !" badge
+  bool hasNewSelectionAvailable() {
+    if (_dailySelection == null) return true;
+    
+    // Check if the selection has expired
+    if (_dailySelection!.isExpired) return true;
+    
+    // Check if it's past noon (12:00) local time and we haven't refreshed today
+    final now = DateTime.now();
+    final lastUpdate = _lastUpdateTime ?? _dailySelection!.generatedAt;
+    
+    // If last update was before today at noon, there might be a new selection
+    final todayNoon = DateTime(now.year, now.month, now.day, 12, 0, 0);
+    
+    // If we're past noon today and last update was before today's noon
+    if (now.isAfter(todayNoon) && lastUpdate.isBefore(todayNoon)) {
+      return true;
+    }
+    
+    // If refresh time is set and we're past it
+    if (_dailySelection!.refreshTime != null && 
+        now.isAfter(_dailySelection!.refreshTime!)) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /// Get time remaining until next selection refresh
+  Duration? getTimeUntilNextRefresh() {
+    final now = DateTime.now();
+    
+    // If we have a refresh time from the selection, use it
+    if (_dailySelection?.refreshTime != null) {
+      final difference = _dailySelection!.refreshTime!.difference(now);
+      return difference.isNegative ? null : difference;
+    }
+    
+    // Otherwise, calculate next noon (12:00)
+    final todayNoon = DateTime(now.year, now.month, now.day, 12, 0, 0);
+    
+    if (now.isBefore(todayNoon)) {
+      // Next refresh is today at noon
+      return todayNoon.difference(now);
+    } else {
+      // Next refresh is tomorrow at noon
+      final tomorrowNoon = todayNoon.add(const Duration(days: 1));
+      return tomorrowNoon.difference(now);
+    }
+  }
+
+  /// Format the time until next refresh as a countdown string
+  String getNextRefreshCountdown() {
+    final timeUntil = getTimeUntilNextRefresh();
+    if (timeUntil == null) return 'Bientôt disponible';
+    
+    if (timeUntil.inDays > 0) {
+      return '${timeUntil.inDays}j ${timeUntil.inHours % 24}h';
+    } else if (timeUntil.inHours > 0) {
+      return '${timeUntil.inHours}h ${timeUntil.inMinutes % 60}min';
+    } else if (timeUntil.inMinutes > 0) {
+      return '${timeUntil.inMinutes}min';
+    } else {
+      return '${timeUntil.inSeconds}s';
+    }
+  }
+
   bool get isSelectionComplete {
     return _dailySelection?.isSelectionComplete ?? false;
   }

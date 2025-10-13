@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _backgroundController;
   late AnimationController _cardController;
+  Timer? _refreshCheckTimer;
+  Timer? _countdownTimer;
 
   @override
   void initState() {
@@ -35,6 +38,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDailyMatches();
       _preloadProfileImages();
+      _startRefreshCheck();
+      _startCountdownTimer();
     });
   }
 
@@ -46,6 +51,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     if (state == AppLifecycleState.resumed) {
       final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
       matchingProvider.refreshSelectionIfNeeded();
+      // Also restart timers
+      _startRefreshCheck();
+      _startCountdownTimer();
+    } else if (state == AppLifecycleState.paused) {
+      // Stop timers when app goes to background to save resources
+      _refreshCheckTimer?.cancel();
+      _countdownTimer?.cancel();
     }
   }
 
@@ -84,7 +96,45 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     WidgetsBinding.instance.removeObserver(this);
     _backgroundController.dispose();
     _cardController.dispose();
+    _refreshCheckTimer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startRefreshCheck() {
+    // Cancel existing timer if any
+    _refreshCheckTimer?.cancel();
+    
+    // Check every minute if we need to refresh the selection
+    _refreshCheckTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      
+      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      
+      // If new selection is available, refresh automatically
+      if (matchingProvider.hasNewSelectionAvailable()) {
+        matchingProvider.loadDailySelection();
+      }
+    });
+  }
+
+  void _startCountdownTimer() {
+    // Cancel existing timer if any
+    _countdownTimer?.cancel();
+    
+    // Update countdown every second
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      
+      // Just trigger a rebuild to update the countdown display
+      setState(() {});
+    });
   }
 
   void _loadDailyMatches() {
@@ -150,69 +200,154 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   }
 
   Widget _buildAnimatedHeader(AccessibilityService accessibilityService) {
-    Widget header = Container(
-      margin: const EdgeInsets.all(16),
-      child: GlassCard(
-        borderRadius: 24,
-        padding: const EdgeInsets.all(16),
-        child: Semantics(
-          label: 'En-tête de sélection quotidienne',
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sélection du jour',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return Consumer<MatchingProvider>(
+      builder: (context, matchingProvider, child) {
+        final hasNewSelection = matchingProvider.hasNewSelectionAvailable();
+        final countdown = matchingProvider.getNextRefreshCountdown();
+        
+        Widget header = Container(
+          margin: const EdgeInsets.all(16),
+          child: GlassCard(
+            borderRadius: 24,
+            padding: const EdgeInsets.all(16),
+            child: Semantics(
+              label: 'En-tête de sélection quotidienne',
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sélection du jour',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              semanticsLabel: 'Titre: Sélection du jour',
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Découvrez vos matchs parfaits',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                              semanticsLabel: 'Description: Découvrez vos matchs parfaits',
+                            ),
+                          ],
+                        ),
                       ),
-                      semanticsLabel: 'Titre: Sélection du jour',
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Découvrez vos matchs parfaits',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: accessibilityService.highContrast ? null : LinearGradient(
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withOpacity(0.8),
+                            ],
+                          ),
+                          color: accessibilityService.highContrast ? Theme.of(context).primaryColor : null,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 24,
+                          semanticLabel: 'Icône cœur',
+                        ),
                       ),
-                      semanticsLabel: 'Description: Découvrez vos matchs parfaits',
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: accessibilityService.highContrast ? null : LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.8),
                     ],
                   ),
-                  color: accessibilityService.highContrast ? Theme.of(context).primaryColor : null,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.favorite,
-                  color: Colors.white,
-                  size: 24,
-                  semanticLabel: 'Icône cœur',
-                ),
+                  
+                  // New Selection Badge
+                  if (hasNewSelection)
+                    Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.green[400]!,
+                            Colors.green[600]!,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.fiber_new,
+                            color: Colors.white,
+                            size: 20,
+                            semanticLabel: 'Nouveau',
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Nouvelle sélection disponible !',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            semanticsLabel: 'Nouvelle sélection disponible',
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                  // Countdown Timer
+                  if (!hasNewSelection)
+                    Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            color: Colors.grey[700],
+                            size: 18,
+                            semanticLabel: 'Timer',
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Prochaine sélection dans $countdown',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                            semanticsLabel: 'Prochaine sélection dans $countdown',
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        );
 
-    if (accessibilityService.reducedMotion) {
-      return header;
-    }
+        if (accessibilityService.reducedMotion) {
+          return header;
+        }
 
-    return FadeInAnimation(
-      delay: const Duration(milliseconds: 200),
-      child: header,
+        return FadeInAnimation(
+          delay: const Duration(milliseconds: 200),
+          child: header,
+        );
+      },
     );
   }
 
