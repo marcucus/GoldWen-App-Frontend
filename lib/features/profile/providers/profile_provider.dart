@@ -573,15 +573,15 @@ class ProfileProvider with ChangeNotifier {
       // Debug: Print the backend response for profile completion
       print('Profile completion raw response: $completionData');
       print('Requirements section: ${completionData['requirements']}');
-      print('Prompt answers section: ${completionData['requirements']?['promptAnswers']}');
+      print('Minimum prompts section: ${completionData['requirements']?['minimumPrompts']}');
       
       // Map backend response to frontend model
       final mappedData = {
         'isCompleted': completionData['isComplete'] ?? false,
         'hasPhotos': completionData['requirements']?['minimumPhotos']?['satisfied'] ?? false,
-        'hasPrompts': completionData['requirements']?['promptAnswers']?['satisfied'] ?? false,
-        'hasPersonalityAnswers': completionData['requirements']?['personalityQuestionnaire'] ?? false,
-        'hasRequiredProfileFields': completionData['requirements']?['basicInfo'] ?? false,
+        'hasPrompts': completionData['requirements']?['minimumPrompts']?['satisfied'] ?? false,
+        'hasPersonalityAnswers': completionData['requirements']?['personalityQuestionnaire']?['satisfied'] ?? false,
+        'hasRequiredProfileFields': completionData['requirements']?['basicInfo']?['satisfied'] ?? false,
         'missingSteps': completionData['missingSteps'] ?? [],
       };
       
