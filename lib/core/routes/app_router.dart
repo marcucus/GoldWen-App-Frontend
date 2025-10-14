@@ -22,6 +22,7 @@ import '../../features/legal/pages/privacy_page.dart';
 import '../../features/legal/pages/privacy_settings_page.dart';
 import '../../features/legal/pages/data_export_page.dart';
 import '../../features/legal/pages/account_deletion_page.dart';
+import '../../features/legal/pages/consent_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
 import '../../features/settings/pages/email_history_page.dart';
@@ -169,6 +170,11 @@ class AppRouter {
         path: '/account-deletion',
         name: 'account-deletion',
         builder: (context, state) => const AccountDeletionPage(),
+      ),
+      GoRoute(
+        path: '/consent',
+        name: 'consent',
+        builder: (context, state) => const ConsentPage(),
       ),
 
       // User Profile
