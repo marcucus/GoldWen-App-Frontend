@@ -523,6 +523,13 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         _buildSettingItem(
           context,
+          'Télécharger mes données',
+          'Exporter toutes vos données personnelles (RGPD)',
+          Icons.file_download,
+          () => context.go('/data-export'),
+        ),
+        _buildSettingItem(
+          context,
           'Confidentialité',
           'Politique de confidentialité',
           Icons.privacy_tip,
