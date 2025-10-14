@@ -10,6 +10,7 @@ class Match {
   final DateTime createdAt;
   final DateTime? expiresAt;
   final Profile? otherProfile;
+  final bool hasUnreadMessages;
 
   Match({
     required this.id,
@@ -21,6 +22,7 @@ class Match {
     required this.createdAt,
     this.expiresAt,
     this.otherProfile,
+    this.hasUnreadMessages = false,
   });
 
   factory Match.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class Match {
       otherProfile: json['otherProfile'] != null
           ? Profile.fromJson(json['otherProfile'] as Map<String, dynamic>)
           : null,
+      hasUnreadMessages: json['hasUnreadMessages'] as bool? ?? false,
     );
   }
 
@@ -52,6 +55,7 @@ class Match {
       'createdAt': createdAt.toIso8601String(),
       'expiresAt': expiresAt?.toIso8601String(),
       'otherProfile': otherProfile?.toJson(),
+      'hasUnreadMessages': hasUnreadMessages,
     };
   }
 
