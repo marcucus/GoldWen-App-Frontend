@@ -535,6 +535,14 @@ class _SettingsPageState extends State<SettingsPage> {
           Icons.description,
           () => context.go('/terms'),
         ),
+        _buildSettingItem(
+          context,
+          'Supprimer mon compte',
+          'Suppression définitive de votre compte',
+          Icons.delete_forever,
+          () => context.go('/account-deletion'),
+          isDestructive: true,
+        ),
       ],
     );
   }
