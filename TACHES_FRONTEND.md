@@ -781,21 +781,21 @@ Response: {
 ### Tâche #9.2 : Créer la page de suppression de compte
 **Estimation**: 1-2 jours  
 **Priorité**: ⚡ Importante (Droit à l'oubli)  
-**État actuel**: 🚨 À implémenter
+**État actuel**: ✅ Implémenté
 
 **Fichiers à créer**:
-- `lib/features/settings/pages/delete_account_page.dart`
+- `lib/features/settings/pages/delete_account_page.dart` *(Feature accessible via existing legal/account_deletion_page.dart)*
 
 **Fichiers à modifier**:
-- `lib/features/settings/pages/settings_page.dart`
+- `lib/features/settings/pages/settings_page.dart` ✅
 
 **Fonctionnalités à implémenter**:
-- [ ] Bouton "Supprimer mon compte" dans les paramètres
-- [ ] Page d'avertissement avec conséquences de la suppression
-- [ ] Confirmation par mot de passe ou biométrie
-- [ ] Double confirmation ("Êtes-vous sûr ?")
-- [ ] Appel backend pour suppression complète
-- [ ] Déconnexion et redirection vers page d'accueil
+- [x] Bouton "Supprimer mon compte" dans les paramètres
+- [x] Page d'avertissement avec conséquences de la suppression
+- [x] Confirmation par mot de passe ou biométrie
+- [x] Double confirmation ("Êtes-vous sûr ?")
+- [x] Appel backend pour suppression complète
+- [x] Déconnexion et redirection vers page d'accueil
 
 **Routes backend attendues**:
 
