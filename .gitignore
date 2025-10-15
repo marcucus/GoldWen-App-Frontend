@@ -34,6 +34,11 @@
 # Web related
 lib/generated_plugin_registrant.dart
 
+# Generated localization files
+.dart_tool/flutter_gen/
+**/.dart_tool/flutter_gen/
+**/gen_l10n/
+
 # Symbolication related
 app.*.symbols
 
