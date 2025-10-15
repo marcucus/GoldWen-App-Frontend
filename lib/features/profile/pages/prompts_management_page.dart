@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
+import '../../../core/utils/text_validator.dart';
+import '../../../shared/widgets/enhanced_input.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/prompt_selection_widget.dart';
 
@@ -316,17 +318,15 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                                                   ),
                                             ),
                                             const SizedBox(height: AppSpacing.sm),
-                                            TextField(
+                                            EnhancedTextField(
                                               controller: controller,
-                                              decoration: InputDecoration(
-                                                hintText: 'Votre réponse...',
-                                                counterText: '${controller.text.length}/150',
-                                                border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                              ),
+                                              hintText: 'Votre réponse...',
                                               maxLines: 3,
                                               maxLength: 150,
+                                              enableCounter: true,
+                                              validateForbiddenWords: true,
+                                              validateContactInfo: true,
+                                              validateSpamPatterns: true,
                                               onChanged: (_) {
                                                 setState(() {});
                                               },
