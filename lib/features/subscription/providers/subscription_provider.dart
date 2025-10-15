@@ -4,6 +4,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/services/revenue_cat_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
+import '../../../core/config/app_config.dart';
 
 class SubscriptionProvider with ChangeNotifier {
   List<SubscriptionPlan> _plans = [];
@@ -121,19 +122,28 @@ class SubscriptionProvider with ChangeNotifier {
         }
       } catch (apiError) {
         print('API plans loading failed, using RevenueCat only: $apiError');
+        
+        // Only create mock plans in development when API fails
+        if (AppConfig.isDevelopment && 
+            (apiError.toString().contains('NetworkException') ||
+             apiError.toString().contains('ECONNREFUSED') ||
+             apiError.toString().contains('Failed to connect'))) {
+          if (_plans.isEmpty) {
+            _createMockPlans();
+          }
+        }
       }
 
-      // If both fail, create mock plans for development
-      if (_plans.isEmpty) {
-        _createMockPlans();
-      }
+      // Note: We don't create mock plans here anymore - allow empty state to be shown
+      // if both RevenueCat and API return no plans
 
       _error = null;
     } catch (e) {
-      // If all loading methods fail, provide mock data
-      if (e.toString().contains('NetworkException') ||
-          e.toString().contains('ECONNREFUSED') ||
-          e.toString().contains('Failed to connect')) {
+      // If all loading methods fail, provide mock data in development only
+      if (AppConfig.isDevelopment &&
+          (e.toString().contains('NetworkException') ||
+           e.toString().contains('ECONNREFUSED') ||
+           e.toString().contains('Failed to connect'))) {
         _createMockPlans();
         _error = null;
       } else {

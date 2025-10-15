@@ -5,6 +5,7 @@ import '../../../core/services/local_notification_service.dart';
 import '../../../core/services/notification_manager.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
+import '../../../core/config/app_config.dart';
 import '../../subscription/providers/subscription_provider.dart';
 
 class MatchingProvider with ChangeNotifier {
@@ -106,10 +107,11 @@ class MatchingProvider with ChangeNotifier {
       // Schedule next day's notification
       await _scheduleDailyNotifications();
     } catch (e) {
-      // If API is not available, provide mock data for development
-      if (e.toString().contains('NetworkException') || 
-          e.toString().contains('ECONNREFUSED') ||
-          e.toString().contains('Failed to connect')) {
+      // If API is not available, provide mock data for development only
+      if (AppConfig.isDevelopment &&
+          (e.toString().contains('NetworkException') || 
+           e.toString().contains('ECONNREFUSED') ||
+           e.toString().contains('Failed to connect'))) {
         _createMockDailySelection();
         _error = null;
       } else {
