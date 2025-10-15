@@ -287,53 +287,20 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
     return _detectedCity != null && _latitude != null && _longitude != null;
   }
 
-  Future<void> _detectLocation() async {
-    setState(() {
-      _isLoadingLocation = true;
-      _errorMessage = null;
-      _permissionPermanentlyDenied = false;
-    });
+Future<void> _detectLocation() async {
+  setState(() {
+    _isLoadingLocation = true;
+    _errorMessage = null;
+    _permissionPermanentlyDenied = false;
+  });
 
-    try {
-      // Request location access using LocationService
-      bool hasAccess = await LocationService.requestLocationAccess();
-      
-      if (!hasAccess) {
-        // Check if permission was permanently denied
-        PermissionStatus permission = await Permission.location.status;
-        
-        if (permission == PermissionStatus.permanentlyDenied) {
-          setState(() {
-            _permissionPermanentlyDenied = true;
-            _errorMessage = 'L\'autorisation de localisation a été définitivement refusée. Vous devez l\'activer dans les paramètres pour continuer.';
-            _isLoadingLocation = false;
-          });
-        } else if (permission == PermissionStatus.denied) {
-          setState(() {
-            _errorMessage = 'L\'autorisation de localisation est nécessaire pour utiliser GoldWen. Veuillez accepter l\'autorisation pour continuer.';
-            _isLoadingLocation = false;
-          });
-        } else {
-          // Location services might be disabled
-          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-          if (!serviceEnabled) {
-            setState(() {
-              _errorMessage = 'Les services de localisation sont désactivés. Veuillez les activer dans les paramètres de votre téléphone.';
-              _isLoadingLocation = false;
-            });
-          } else {
-            setState(() {
-              _errorMessage = 'Impossible d\'accéder à votre position. Veuillez réessayer.';
-              _isLoadingLocation = false;
-            });
-          }
-        }
-        return;
-      }
+  try {
+    // Demande explicite de la permission
+    final status = await Permission.location.request();
 
+    if (status.isGranted) {
       // Get current position
       Position? position = await LocationService.getCurrentPosition();
-      
       if (position == null) {
         setState(() {
           _errorMessage = 'Impossible de détecter votre position. Veuillez réessayer.';
@@ -341,28 +308,32 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
         });
         return;
       }
-
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
         _detectedCity = 'Position détectée (${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)})';
         _isLoadingLocation = false;
       });
-
-      // Initialize the location service for background updates
       LocationService().initialize();
-
-      // In a real app, you would reverse geocode to get the city name
-      // For now, we'll use a placeholder
-      // TODO: Implement reverse geocoding to get actual city name
-      
-    } catch (e) {
+    } else if (status.isPermanentlyDenied) {
       setState(() {
-        _errorMessage = 'Erreur lors de la détection de votre position. Veuillez réessayer.';
+        _permissionPermanentlyDenied = true;
+        _errorMessage = 'L\'autorisation de localisation a été définitivement refusée. Vous devez l\'activer dans les paramètres pour continuer.';
+        _isLoadingLocation = false;
+      });
+    } else if (status.isDenied) {
+      setState(() {
+        _errorMessage = 'L\'autorisation de localisation est nécessaire pour utiliser GoldWen. Veuillez accepter l\'autorisation pour continuer.';
         _isLoadingLocation = false;
       });
     }
+  } catch (e) {
+    setState(() {
+      _errorMessage = 'Erreur lors de la détection de votre position. Veuillez réessayer.';
+      _isLoadingLocation = false;
+    });
   }
+}
 
   void _continue() {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);

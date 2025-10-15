@@ -52,10 +52,10 @@ class _SplashPageState extends State<SplashPage> {
           // In development/debug mode, skip location requirement for testing authentication
           print('DEBUG: No location permission - would redirect to /welcome');
           // TODO: Uncomment the lines below after location setup is configured
-          // if (mounted) {
-          //   context.go('/welcome'); // Start fresh onboarding to handle location
-          // }
-          // return;
+          if (mounted) {
+            context.go('/gender-selection'); // Start fresh onboarding to handle location
+          }
+          return;
         }
 
         // Has location permission, check completion status from backend

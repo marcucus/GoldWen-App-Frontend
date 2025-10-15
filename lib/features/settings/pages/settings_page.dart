@@ -862,7 +862,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 await subscriptionProvider.logout();
                 await authProvider.signOut();
                 if (context.mounted) {
-                  context.go('/welcome');
+                  context.go('/');
                 }
               },
               style: ElevatedButton.styleFrom(

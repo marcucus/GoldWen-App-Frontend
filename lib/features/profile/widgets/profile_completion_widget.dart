@@ -19,7 +19,6 @@ class ProfileCompletionWidget extends StatelessWidget {
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         final completion = profileProvider.profileCompletion;
-        
         if (completion == null) {
           return const SizedBox.shrink();
         }

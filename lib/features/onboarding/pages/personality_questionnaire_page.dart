@@ -616,11 +616,12 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       
       if (mounted) {
         // Navigate to gender selection to start the full onboarding flow
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const GenderSelectionPage(),
-          ),
-        );
+        // Navigator.of(context).pushReplacement(
+        //   MaterialPageRoute(
+        //     builder: (context) => const GenderSelectionPage(),
+        //   ),
+        // );
+        context.go('/gender-selection');
       }
     } catch (e) {
       print('Error submitting personality answers: $e');

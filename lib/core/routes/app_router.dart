@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/onboarding/pages/gender_selection_page.dart';
 import '../../features/onboarding/pages/welcome_page.dart';
 import '../../features/onboarding/pages/personality_questionnaire_page.dart';
 import '../../features/auth/pages/auth_page.dart';
@@ -74,6 +75,11 @@ class AppRouter {
         path: '/profile-setup',
         name: 'profile-setup',
         builder: (context, state) => const ProfileSetupPage(),
+      ),
+      GoRoute(
+        path: '/gender-selection',
+        name: 'gender-selection',
+        builder: (context, state) => const GenderSelectionPage(),
       ),
 
       // Main App
