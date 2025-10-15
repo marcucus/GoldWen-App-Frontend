@@ -12,6 +12,7 @@ import '../../../shared/widgets/enhanced_input.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
 import '../widgets/media_management_widget.dart';
+import '../widgets/favorite_song_widget.dart';
 import '../widgets/profile_completion_widget.dart';
 import '../widgets/prompt_selection_widget.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -472,14 +473,27 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           const SizedBox(height: AppSpacing.xxl),
           Consumer<ProfileProvider>(
             builder: (context, profileProvider, child) {
-              return MediaManagementWidget(
-                mediaFiles: profileProvider.mediaFiles,
-                onMediaFilesChanged: (mediaFiles) {
-                  profileProvider.updateMediaFiles(mediaFiles);
-                },
-                maxAudioFiles: 2,
-                maxVideoFiles: 1,
-                showAddButton: true,
+              return Column(
+                children: [
+                  // Favorite Song Widget
+                  FavoriteSongWidget(
+                    favoriteSong: profileProvider.favoriteSong,
+                    onChanged: (song) {
+                      profileProvider.updateFavoriteSong(song);
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  // Media Files Widget
+                  MediaManagementWidget(
+                    mediaFiles: profileProvider.mediaFiles,
+                    onMediaFilesChanged: (mediaFiles) {
+                      profileProvider.updateMediaFiles(mediaFiles);
+                    },
+                    maxAudioFiles: 2,
+                    maxVideoFiles: 1,
+                    showAddButton: true,
+                  ),
+                ],
               );
             },
           ),

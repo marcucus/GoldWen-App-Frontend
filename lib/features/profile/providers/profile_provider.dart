@@ -34,6 +34,7 @@ class ProfileProvider with ChangeNotifier {
   int? _height;
   List<String> _interests = [];
   List<String> _languages = [];
+  String? _favoriteSong;
   ProfileCompletion? _profileCompletion;
 
   String? get name => _name;
@@ -42,6 +43,7 @@ class ProfileProvider with ChangeNotifier {
   String? get bio => _bio;
   List<Photo> get photos => _photos;
   List<MediaFile> get mediaFiles => _mediaFiles;
+  String? get favoriteSong => _favoriteSong;
   List<String> get prompts => _prompts;
   Map<String, dynamic> get personalityAnswers => _personalityAnswers;
   List<PersonalityQuestion> get personalityQuestions => _personalityQuestions;
@@ -110,6 +112,11 @@ class ProfileProvider with ChangeNotifier {
   void updateMediaFiles(List<MediaFile> mediaFiles) {
     _mediaFiles = List.from(mediaFiles);
     _checkProfileCompletion();
+    notifyListeners();
+  }
+
+  void updateFavoriteSong(String? favoriteSong) {
+    _favoriteSong = favoriteSong;
     notifyListeners();
   }
 
@@ -429,6 +436,7 @@ class ProfileProvider with ChangeNotifier {
         if (_height != null) 'height': _height,
         if (_interests.isNotEmpty) 'interests': _interests,
         if (_languages.isNotEmpty) 'languages': _languages,
+        if (_favoriteSong != null) 'favoriteSong': _favoriteSong,
       };
 
       print('Saving profile data: $profileData');
@@ -538,6 +546,9 @@ class ProfileProvider with ChangeNotifier {
       } else {
         _mediaFiles.clear();
       }
+      
+      // Load favorite song
+      _favoriteSong = profileData['favoriteSong'];
       
       _prompts = List<String>.from(profileData['prompts'] ?? []);
       _personalityAnswers =
