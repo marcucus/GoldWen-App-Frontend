@@ -1655,11 +1655,13 @@ class MatchingServiceApi {
       } else {
         String message;
         String? code;
+        dynamic errors; // Can be List or Map
         RateLimitInfo? rateLimitInfo;
         
         if (decoded is Map<String, dynamic>) {
           message = decoded['message'] ?? 'Unknown error';
           code = decoded['code'];
+          errors = decoded['errors'];
           
           // Extract retry information from response body if available
           if (response.statusCode == 429 && decoded['retryAfter'] != null) {
@@ -1669,6 +1671,8 @@ class MatchingServiceApi {
           }
         } else {
           message = response.body;
+          code = null;
+          errors = null;
         }
         
         // Extract rate limit info from headers
@@ -1687,6 +1691,7 @@ class MatchingServiceApi {
           statusCode: response.statusCode,
           message: message,
           code: code,
+          errors: errors,
           rateLimitInfo: rateLimitInfo,
         );
       }
@@ -1938,6 +1943,7 @@ class MatchingServiceApi {
         statusCode: response.statusCode,
         message: data['message'] ?? 'Matching service error occurred',
         code: data['code'],
+        errors: data['errors'],
         rateLimitInfo: rateLimitInfo,
       );
     }
