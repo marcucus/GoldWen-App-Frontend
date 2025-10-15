@@ -14,6 +14,7 @@ import '../widgets/profile_completion_widget.dart';
 import '../widgets/prompt_selection_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../main/pages/main_navigation_page.dart';
+import '../../../shared/widgets/keyboard_dismissible.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   const ProfileSetupPage({super.key});
@@ -240,108 +241,110 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildBasicInfoPage() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          const SizedBox(height: AppSpacing.xl),
+    return KeyboardDismissible(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          children: [
+            const SizedBox(height: AppSpacing.xl),
 
-          Text(
-            'Parlez-nous de vous',
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
+            Text(
+              'Parlez-nous de vous',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
 
-          Text(
-            'Ces informations aideront les autres à mieux vous connaître',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
+            Text(
+              'Ces informations aideront les autres à mieux vous connaître',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: AppSpacing.xxl),
+
+            // Name field
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Pseudo',
+                hintText: 'Votre pseudo',
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // Birth date field
+            GestureDetector(
+              onTap: _selectBirthDate,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
                 ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: AppSpacing.xxl),
-
-          // Name field
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Pseudo',
-              hintText: 'Votre pseudo',
-            ),
-            textCapitalization: TextCapitalization.words,
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Birth date field
-          GestureDetector(
-            onTap: _selectBirthDate,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.dividerLight),
-                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _birthDate != null
-                          ? DateFormat('dd/MM/yyyy').format(_birthDate!)
-                          : 'Date de naissance',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: _birthDate != null
-                                ? AppColors.textDark
-                                : AppColors.textSecondary,
-                          ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.dividerLight),
+                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: AppColors.textSecondary,
+                      size: 20,
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _birthDate != null
+                            ? DateFormat('dd/MM/yyyy').format(_birthDate!)
+                            : 'Date de naissance',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: _birthDate != null
+                                  ? AppColors.textDark
+                                  : AppColors.textSecondary,
+                            ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
 
-          // Bio field
-          TextFormField(
-            controller: _bioController,
-            decoration: const InputDecoration(
-              labelText: 'Bio',
-              hintText: 'Décrivez-vous en quelques mots...',
+            // Bio field
+            TextFormField(
+              controller: _bioController,
+              decoration: const InputDecoration(
+                labelText: 'Bio',
+                hintText: 'Décrivez-vous en quelques mots...',
+              ),
+              maxLines: 10,
+              maxLength: 200,
             ),
-            maxLines: 10,
-            maxLength: 200,
-          ),
 
-          const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xxl),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isBasicInfoValid() ? _nextPage : null,
-              child: const Text('Continuer'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isBasicInfoValid() ? _nextPage : null,
+                child: const Text('Continuer'),
+              ),
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.lg),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
       ),
     );
   }
