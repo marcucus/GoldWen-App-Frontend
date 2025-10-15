@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart';
+import '../../../core/utils/text_validator.dart';
 
 class ReportFormWidget extends StatefulWidget {
   final String targetUserId;
@@ -122,6 +123,18 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                 filled: true,
                 fillColor: AppColors.backgroundLight,
               ),
+              validator: (value) {
+                if (value != null && value.trim().isNotEmpty) {
+                  // Validate for forbidden words if description is provided
+                  return TextValidator.validateText(
+                    value,
+                    checkForbiddenWords: true,
+                    checkContactInfo: false,
+                    checkSpamPatterns: false,
+                  );
+                }
+                return null; // Optional field
+              },
             ),
 
             const SizedBox(height: AppSpacing.lg),
