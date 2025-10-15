@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_validator.dart';
+import '../../../core/utils/translations_helper.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../profile/pages/profile_setup_page.dart';
 
@@ -21,59 +23,9 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
   final List<String> _selectedInterests = [];
   final List<String> _selectedLanguages = [];
 
-  // Predefined interests options
-  final List<String> _availableInterests = [
-    'Sport',
-    'Voyage',
-    'Cuisine',
-    'Lecture',
-    'Cinéma',
-    'Musique',
-    'Art',
-    'Nature',
-    'Fitness',
-    'Gaming',
-    'Photographie',
-    'Danse',
-    'Théâtre',
-    'Mode',
-    'Technologie',
-    'Animaux',
-    'Jardinage',
-    'Yoga',
-    'Running',
-    'Escalade',
-    'Surf',
-    'Ski',
-    'Randonnée',
-    'Vélo',
-    'Méditation',
-    'Spiritualité',
-    'Entrepreneuriat',
-    'Bénévolat'
-  ];
-
-  // Predefined languages options
-  final List<String> _availableLanguages = [
-    'Français',
-    'Anglais',
-    'Espagnol',
-    'Italien',
-    'Allemand',
-    'Portugais',
-    'Arabe',
-    'Chinois',
-    'Japonais',
-    'Russe',
-    'Néerlandais',
-    'Suédois',
-    'Norvégien',
-    'Danois',
-    'Polonais',
-    'Tchèque',
-    'Hongrois',
-    'Grec'
-  ];
+  // Lists will be populated in build method using translations
+  List<String> _availableInterests = [];
+  List<String> _availableLanguages = [];
 
   @override
   void dispose() {
@@ -86,9 +38,15 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Initialize translated lists
+    _availableInterests = TranslationsHelper.getAvailableInterests(context);
+    _availableLanguages = TranslationsHelper.getAvailableLanguages(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Informations complémentaires'),
+        title: Text(l10n.additionalInfoTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -107,7 +65,7 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
 
                     // Title and subtitle
                     Text(
-                      'Partagez-en plus sur vous',
+                      l10n.shareMoreTitle,
                       style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
@@ -115,7 +73,7 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                     const SizedBox(height: AppSpacing.md),
 
                     Text(
-                      'Ces informations sont optionnelles mais aident à créer des connexions plus profondes.',
+                      l10n.shareMoreSubtitle,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -125,15 +83,15 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                     const SizedBox(height: AppSpacing.xxl),
 
                     // Professional info section
-                    _buildSectionTitle('Informations professionnelles'),
+                    _buildSectionTitle(l10n.professionalInfoSection),
                     const SizedBox(height: AppSpacing.md),
 
                     TextFormField(
                       controller: _jobTitleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Métier',
-                        hintText: 'Développeur, Designer, Médecin...',
-                        prefixIcon: Icon(Icons.work_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n.jobTitleLabel,
+                        hintText: l10n.jobTitleHint,
+                        prefixIcon: const Icon(Icons.work_outline),
                       ),
                       textCapitalization: TextCapitalization.words,
                       validator: (value) => TextValidator.validateText(
