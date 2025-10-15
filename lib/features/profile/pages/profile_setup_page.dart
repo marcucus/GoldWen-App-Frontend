@@ -1123,9 +1123,22 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
           print('Error saving profile data: $e');
           if (mounted) {
+            // Get better error message from ApiException if available
+            String errorMessage = 'Erreur lors de la sauvegarde';
+            if (e is ApiException) {
+              // Use the formatted error message from ApiException
+              if (e.errorMessages.isNotEmpty) {
+                errorMessage = e.errorMessages.join('\n');
+              } else {
+                errorMessage = e.message;
+              }
+            } else {
+              errorMessage = e.toString();
+            }
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Erreur lors de la sauvegarde: $e'),
+                content: Text(errorMessage),
                 backgroundColor: Colors.red,
                 duration: const Duration(seconds: 10),
               ),
