@@ -398,6 +398,13 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
             child: Card(
               elevation: isSelected ? 4 : 1,
               color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primaryGold : Colors.transparent,
+                  width: 2,
+                ),
+              ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(AppSpacing.md),
                 title: Text(
@@ -500,6 +507,13 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     return Card(
       elevation: isSelected ? 4 : 1,
       color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+        side: BorderSide(
+          color: isSelected ? AppColors.primaryGold : Colors.transparent,
+          width: 2,
+        ),
+      ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(AppSpacing.md),
         title: Text(
