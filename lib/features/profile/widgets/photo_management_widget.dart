@@ -389,12 +389,42 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
       setState(() => _isLoading = true);
 
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
+      XFile? image;
+      try {
+        image = await _picker.pickImage(
+          source: source,
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 85,
+        );
+      } on Exception catch (e) {
+        // Handle platform-specific errors (permissions denied, camera unavailable, etc.)
+        if (mounted) {
+          setState(() => _isLoading = false);
+          
+          String errorMessage = 'Erreur lors de l\'accès à l\'appareil photo';
+          
+          // Check for common error types
+          if (e.toString().contains('camera_access_denied') || 
+              e.toString().contains('photo_access_denied') ||
+              e.toString().contains('Permission')) {
+            errorMessage = source == ImageSource.camera 
+                ? 'Permission d\'accès à l\'appareil photo refusée. Veuillez autoriser l\'accès dans les réglages de votre appareil.'
+                : 'Permission d\'accès à la galerie photo refusée. Veuillez autoriser l\'accès dans les réglages de votre appareil.';
+          } else if (e.toString().contains('camera_access_restricted')) {
+            errorMessage = 'L\'accès à l\'appareil photo est restreint sur cet appareil.';
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: AppColors.error,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
 
       if (image != null && mounted) {
         // Validate image
