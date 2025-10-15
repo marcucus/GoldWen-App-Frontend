@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat.dart';
+import '../../../core/utils/text_validator.dart';
 import '../../../core/widgets/moderation_widgets.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_countdown_timer.dart';
@@ -719,24 +720,46 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   void _sendMessage(ChatProvider chatProvider) {
     final message = _messageController.text.trim();
-    if (message.isNotEmpty) {
-      chatProvider.sendMessage(widget.chatId, message);
-      _messageController.clear();
-      
-      // Stop typing indicator since message was sent
-      chatProvider.stopTyping(widget.chatId);
-
-      // Scroll to bottom
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+    if (message.isEmpty) return;
+    
+    // Validate message for forbidden words and inappropriate content
+    final validationError = TextValidator.validateText(
+      message,
+      checkForbiddenWords: true,
+      checkContactInfo: true,
+      checkSpamPatterns: true,
+    );
+    
+    if (validationError != null) {
+      // Show error message to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(validationError),
+          backgroundColor: AppColors.errorRed,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
     }
+    
+    // Send message if validation passes
+    chatProvider.sendMessage(widget.chatId, message);
+    _messageController.clear();
+    
+    // Stop typing indicator since message was sent
+    chatProvider.stopTyping(widget.chatId);
+
+    // Scroll to bottom
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _showChatInfo() {

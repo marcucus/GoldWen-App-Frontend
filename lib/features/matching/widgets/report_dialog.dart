@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart';
+import '../../../core/utils/text_validator.dart';
 import '../providers/report_provider.dart';
 
 class ReportDialog extends StatefulWidget {
@@ -151,7 +152,13 @@ class _ReportDialogState extends State<ReportDialog> {
                       if (value.trim().length < 10) {
                         return 'Description trop courte (minimum 10 caractères)';
                       }
-                      return null;
+                      // Validate for forbidden words
+                      return TextValidator.validateText(
+                        value,
+                        checkForbiddenWords: true,
+                        checkContactInfo: false,
+                        checkSpamPatterns: false,
+                      );
                     },
                   ),
                   const SizedBox(height: 8),

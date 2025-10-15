@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/accessibility_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/text_validator.dart';
 
 /// Enhanced text field with sophisticated focus animations and validation feedback
 class EnhancedTextField extends StatefulWidget {
@@ -27,6 +28,9 @@ class EnhancedTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final bool enableHapticFeedback;
+  final bool validateForbiddenWords;
+  final bool validateContactInfo;
+  final bool validateSpamPatterns;
 
   const EnhancedTextField({
     super.key,
@@ -51,6 +55,9 @@ class EnhancedTextField extends StatefulWidget {
     this.inputFormatters,
     this.validator,
     this.enableHapticFeedback = true,
+    this.validateForbiddenWords = true,
+    this.validateContactInfo = false,
+    this.validateSpamPatterns = false,
   });
 
   @override
@@ -249,7 +256,19 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                 maxLines: widget.maxLines,
                 maxLength: widget.maxLength,
                 inputFormatters: widget.inputFormatters,
-                validator: widget.validator,
+                validator: (value) {
+                  // First run custom validator if provided
+                  final customError = widget.validator?.call(value);
+                  if (customError != null) return customError;
+                  
+                  // Then run forbidden words validation
+                  return TextValidator.validateText(
+                    value,
+                    checkForbiddenWords: widget.validateForbiddenWords,
+                    checkContactInfo: widget.validateContactInfo,
+                    checkSpamPatterns: widget.validateSpamPatterns,
+                  );
+                },
                 onChanged: widget.onChanged,
                 onFieldSubmitted: widget.onSubmitted,
                 onTap: widget.onTap,
