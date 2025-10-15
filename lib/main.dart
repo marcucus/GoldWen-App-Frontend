@@ -26,6 +26,7 @@ import 'features/admin/providers/admin_auth_provider.dart';
 import 'features/admin/providers/admin_provider.dart';
 import 'features/feedback/providers/feedback_provider.dart';
 import 'core/config/app_config.dart';
+import 'shared/widgets/keyboard_dismissible.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,7 +113,9 @@ class GoldWenApp extends StatelessWidget {
                   textScaler:
                       TextScaler.linear(accessibilityService.textScaleFactor),
                 ),
-                child: child!,
+                child: KeyboardDismissible(
+                  child: child!,
+                ),
               );
             },
           );
