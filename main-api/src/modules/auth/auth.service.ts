@@ -9,9 +9,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 import { User } from '../../database/entities/user.entity';
 import { Profile } from '../../database/entities/profile.entity';
+import { PushToken } from '../../database/entities/push-token.entity';
 import { UserStatus } from '../../common/enums';
 import { PasswordUtil, StringUtil } from '../../common/utils';
 import { EmailService } from '../email/email.service';
@@ -38,9 +41,12 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(Profile)
     private profileRepository: Repository<Profile>,
+    @InjectRepository(PushToken)
+    private pushTokenRepository: Repository<PushToken>,
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    @InjectRedis() private redis: Redis,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -313,5 +319,55 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async logout(userId: string, token?: string): Promise<void> {
+    try {
+      // 1. Invalidate the token in Redis (if token is provided)
+      if (token) {
+        // Store the token in a blacklist with expiration matching JWT expiration
+        const jwtExpiresIn = this.configService.get('jwt.expiresIn') || '7d';
+        // Convert expiration to seconds (simple parsing for common formats)
+        let expirationSeconds = 7 * 24 * 60 * 60; // default 7 days
+        
+        if (typeof jwtExpiresIn === 'string') {
+          const match = jwtExpiresIn.match(/^(\d+)([smhd])$/);
+          if (match) {
+            const value = parseInt(match[1]);
+            const unit = match[2];
+            switch (unit) {
+              case 's': expirationSeconds = value; break;
+              case 'm': expirationSeconds = value * 60; break;
+              case 'h': expirationSeconds = value * 60 * 60; break;
+              case 'd': expirationSeconds = value * 24 * 60 * 60; break;
+            }
+          }
+        }
+        
+        await this.redis.setex(
+          `blacklist:token:${token}`,
+          expirationSeconds,
+          'true'
+        );
+      }
+
+      // 2. Remove all push tokens for this user (FCM tokens)
+      await this.pushTokenRepository.delete({ userId });
+
+      // 3. Clear any user-specific cache entries
+      const cacheKeys = await this.redis.keys(`user:${userId}:*`);
+      if (cacheKeys.length > 0) {
+        await this.redis.del(...cacheKeys);
+      }
+
+      // 4. Clear session data
+      await this.redis.del(`session:${userId}`);
+      
+      console.log(`User ${userId} logged out successfully`);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Don't throw error - logout should always succeed on the client side
+      // even if cleanup fails on the backend
+    }
   }
 }

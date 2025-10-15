@@ -8,6 +8,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../../database/entities/user.entity';
 import { Profile } from '../../database/entities/profile.entity';
+import { PushToken } from '../../database/entities/push-token.entity';
 import { EmailModule } from '../email/email.module';
 
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -15,7 +16,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Profile]),
+    TypeOrmModule.forFeature([User, Profile, PushToken]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -253,4 +253,21 @@ export class AuthController {
       },
     };
   }
+
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({ status: 200, description: 'User logged out successfully' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Post('logout')
+  async logout(@Req() req: Request) {
+    const userId = (req.user as any).id;
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    await this.authService.logout(userId, token);
+    
+    return {
+      success: true,
+      message: 'Logged out successfully',
+    };
+  }
 }

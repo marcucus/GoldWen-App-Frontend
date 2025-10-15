@@ -4,6 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 import { User } from '../../../database/entities/user.entity';
 import { UserStatus } from '../../../common/enums';
 
@@ -20,6 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private configService: ConfigService,
+    @InjectRedis() private redis: Redis,
   ) {
     const secret = configService.get('jwt.secret');
     if (!secret) {
@@ -30,11 +33,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: secret,
+      passReqToCallback: true, // Enable to get the request object
     });
   }
 
-  async validate(payload: JwtPayload): Promise<User> {
+  async validate(req: any, payload: JwtPayload): Promise<User> {
     const { sub: userId } = payload;
+
+    // Extract token from request
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    
+    // Check if token is blacklisted
+    if (token) {
+      const isBlacklisted = await this.redis.get(`blacklist:token:${token}`);
+      if (isBlacklisted) {
+        throw new UnauthorizedException('Token has been revoked');
+      }
+    }
 
     const user = await this.userRepository.findOne({
       where: { id: userId },
