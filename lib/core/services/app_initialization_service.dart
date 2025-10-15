@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_messaging_service.dart';
 import 'local_notification_service.dart';
 import 'analytics_service.dart';
+import 'location_service.dart';
 
 class AppInitializationService {
   static bool _initialized = false;
@@ -30,6 +31,18 @@ class AppInitializationService {
       await localNotificationService.initialize();
       await localNotificationService.requestPermissions();
       debugPrint('Local notifications initialized successfully');
+      
+      // Request location permissions at app startup
+      try {
+        final hasLocationPermission = await LocationService.requestLocationAccess();
+        if (hasLocationPermission) {
+          debugPrint('Location permission granted');
+        } else {
+          debugPrint('Location permission denied or not available');
+        }
+      } catch (e) {
+        debugPrint('Error requesting location permission: $e');
+      }
       
       // Try to initialize Firebase messaging if available
       if (_firebaseAvailable) {
