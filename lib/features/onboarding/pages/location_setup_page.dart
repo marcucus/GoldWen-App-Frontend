@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/location_service.dart';
 import '../../profile/providers/profile_provider.dart';
@@ -295,11 +294,38 @@ Future<void> _detectLocation() async {
   });
 
   try {
-    // Demande explicite de la permission
-    final status = await Permission.location.request();
+    // Check if location services are enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      setState(() {
+        _errorMessage = 'Les services de localisation sont désactivés. Veuillez les activer dans les paramètres de votre appareil.';
+        _isLoadingLocation = false;
+      });
+      return;
+    }
 
-    if (status.isGranted) {
-      // Get current position
+    // Check current permission status
+    LocationPermission permission = await Geolocator.checkPermission();
+    
+    // If permission is denied forever, show settings option
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        _permissionPermanentlyDenied = true;
+        _errorMessage = 'L\'autorisation de localisation a été définitivement refusée. Vous devez l\'activer dans les paramètres pour continuer.';
+        _isLoadingLocation = false;
+      });
+      return;
+    }
+    
+    // If permission is denied, request it
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    // Check the result after request
+    if (permission == LocationPermission.whileInUse || 
+        permission == LocationPermission.always) {
+      // Permission granted, get position
       Position? position = await LocationService.getCurrentPosition();
       if (position == null) {
         setState(() {
@@ -308,20 +334,23 @@ Future<void> _detectLocation() async {
         });
         return;
       }
+      
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
         _detectedCity = 'Position détectée (${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)})';
         _isLoadingLocation = false;
       });
+      
+      // Initialize location service for background updates
       LocationService().initialize();
-    } else if (status.isPermanentlyDenied) {
+    } else if (permission == LocationPermission.deniedForever) {
       setState(() {
         _permissionPermanentlyDenied = true;
         _errorMessage = 'L\'autorisation de localisation a été définitivement refusée. Vous devez l\'activer dans les paramètres pour continuer.';
         _isLoadingLocation = false;
       });
-    } else if (status.isDenied) {
+    } else {
       setState(() {
         _errorMessage = 'L\'autorisation de localisation est nécessaire pour utiliser GoldWen. Veuillez accepter l\'autorisation pour continuer.';
         _isLoadingLocation = false;
@@ -329,7 +358,7 @@ Future<void> _detectLocation() async {
     }
   } catch (e) {
     setState(() {
-      _errorMessage = 'Erreur lors de la détection de votre position. Veuillez réessayer.';
+      _errorMessage = 'Erreur lors de la détection de votre position: ${e.toString()}';
       _isLoadingLocation = false;
     });
   }
@@ -356,7 +385,7 @@ Future<void> _detectLocation() async {
   }
 
   void _openAppSettings() async {
-    await openAppSettings();
+    await Geolocator.openAppSettings();
     // After user returns from settings, check permission again
     await Future.delayed(const Duration(milliseconds: 500));
     bool hasPermission = await LocationService.checkLocationPermission();
