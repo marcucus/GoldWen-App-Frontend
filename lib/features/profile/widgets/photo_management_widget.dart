@@ -39,6 +39,15 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
   }
 
   @override
+  void didUpdateWidget(PhotoManagementWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update local state when the photos prop changes from parent
+    if (widget.photos != oldWidget.photos) {
+      _photos = List.from(widget.photos);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
