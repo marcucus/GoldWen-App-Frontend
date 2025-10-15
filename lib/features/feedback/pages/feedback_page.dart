@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/feedback.dart';
+import '../../../core/utils/text_validator.dart';
 import '../providers/feedback_provider.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -313,7 +314,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         if (value == null || value.trim().isEmpty) {
           return 'Veuillez entrer un sujet';
         }
-        return null;
+        // Validate for forbidden words
+        return TextValidator.validateText(
+          value,
+          checkForbiddenWords: true,
+          checkContactInfo: false,
+          checkSpamPatterns: false,
+        );
       },
     );
   }
@@ -400,7 +407,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         if (value.trim().length < 10) {
           return 'Le message doit contenir au moins 10 caractères';
         }
-        return null;
+        // Validate for forbidden words and inappropriate content
+        return TextValidator.validateText(
+          value,
+          checkForbiddenWords: true,
+          checkContactInfo: false,
+          checkSpamPatterns: true,
+        );
       },
     );
   }

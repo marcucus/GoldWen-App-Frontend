@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/text_validator.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../profile/pages/profile_setup_page.dart';
 
@@ -135,6 +136,12 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                         prefixIcon: Icon(Icons.work_outline),
                       ),
                       textCapitalization: TextCapitalization.words,
+                      validator: (value) => TextValidator.validateText(
+                        value,
+                        checkForbiddenWords: true,
+                        checkContactInfo: false,
+                        checkSpamPatterns: false,
+                      ),
                     ),
 
                     const SizedBox(height: AppSpacing.lg),
@@ -147,6 +154,12 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                         prefixIcon: Icon(Icons.business_center),
                       ),
                       textCapitalization: TextCapitalization.words,
+                      validator: (value) => TextValidator.validateText(
+                        value,
+                        checkForbiddenWords: true,
+                        checkContactInfo: false,
+                        checkSpamPatterns: false,
+                      ),
                     ),
 
                     const SizedBox(height: AppSpacing.lg),
@@ -159,6 +172,12 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                         prefixIcon: Icon(Icons.school_outlined),
                       ),
                       textCapitalization: TextCapitalization.words,
+                      validator: (value) => TextValidator.validateText(
+                        value,
+                        checkForbiddenWords: true,
+                        checkContactInfo: false,
+                        checkSpamPatterns: false,
+                      ),
                     ),
 
                     const SizedBox(height: AppSpacing.xxl),

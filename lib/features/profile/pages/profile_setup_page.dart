@@ -7,6 +7,8 @@ import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
+import '../../../core/utils/text_validator.dart';
+import '../../../shared/widgets/enhanced_input.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
 import '../widgets/media_management_widget.dart';
@@ -266,15 +268,25 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
             const SizedBox(height: AppSpacing.xxl),
 
-            // Name field
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Pseudo',
-                hintText: 'Votre pseudo',
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
+          // Name field
+          EnhancedTextField(
+            controller: _nameController,
+            labelText: 'Pseudo',
+            hintText: 'Votre pseudo',
+            textInputAction: TextInputAction.next,
+            validateForbiddenWords: true,
+            validateContactInfo: false,
+            validateSpamPatterns: false,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Veuillez entrer votre pseudo';
+              }
+              if (value.trim().length < 2) {
+                return 'Le pseudo doit contenir au moins 2 caractères';
+              }
+              return null;
+            },
+          ),
 
             const SizedBox(height: AppSpacing.lg),
 
@@ -321,16 +333,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
             const SizedBox(height: AppSpacing.lg),
 
-            // Bio field
-            TextFormField(
-              controller: _bioController,
-              decoration: const InputDecoration(
-                labelText: 'Bio',
-                hintText: 'Décrivez-vous en quelques mots...',
-              ),
-              maxLines: 10,
-              maxLength: 200,
-            ),
+          // Bio field
+          EnhancedTextField(
+            controller: _bioController,
+            labelText: 'Bio',
+            hintText: 'Décrivez-vous en quelques mots...',
+            maxLines: 10,
+            maxLength: 200,
+            enableCounter: true,
+            validateForbiddenWords: true,
+            validateContactInfo: true,
+            validateSpamPatterns: true,
+          ),
 
             const SizedBox(height: AppSpacing.xxl),
 
@@ -648,15 +662,15 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          TextFormField(
+                          EnhancedTextField(
                             controller: _promptControllers[index],
-                            decoration: InputDecoration(
-                              hintText: 'Votre réponse... (max 150 caractères)',
-                              counterText:
-                                  '${_promptControllers[index].text.length}/150',
-                            ),
+                            hintText: 'Votre réponse... (max 150 caractères)',
                             maxLines: 3,
                             maxLength: 150,
+                            enableCounter: true,
+                            validateForbiddenWords: true,
+                            validateContactInfo: true,
+                            validateSpamPatterns: true,
                             onChanged: (text) {
                               setState(() {
                                 // This will trigger a rebuild to update validation and counter
