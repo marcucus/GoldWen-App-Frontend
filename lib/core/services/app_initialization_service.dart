@@ -32,17 +32,10 @@ class AppInitializationService {
       await localNotificationService.requestPermissions();
       debugPrint('Local notifications initialized successfully');
       
-      // Request location permissions at app startup
-      try {
-        final hasLocationPermission = await LocationService.requestLocationAccess();
-        if (hasLocationPermission) {
-          debugPrint('Location permission granted');
-        } else {
-          debugPrint('Location permission denied or not available');
-        }
-      } catch (e) {
-        debugPrint('Error requesting location permission: $e');
-      }
+      // Note: Location permission is NOT requested here
+      // It will be requested during onboarding in LocationSetupPage
+      // This prevents iOS from silently denying permission when requested too early
+      debugPrint('Location permission will be requested during onboarding');
       
       // Try to initialize Firebase messaging if available
       if (_firebaseAvailable) {

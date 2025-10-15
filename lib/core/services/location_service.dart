@@ -3,9 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'api_service.dart';
-import 'package:flutter/widgets.dart';
 
 class LocationService extends ChangeNotifier with WidgetsBindingObserver {
   static final LocationService _instance = LocationService._internal();
@@ -40,14 +38,15 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       // Check current permission status
-      PermissionStatus permission = await Permission.location.status;
+      LocationPermission permission = await Geolocator.checkPermission();
 
-      if (permission != PermissionStatus.granted) {
+      if (permission == LocationPermission.denied) {
         // Request location permission
-        permission = await Permission.location.request();
+        permission = await Geolocator.requestPermission();
       }
 
-      _hasPermission = permission == PermissionStatus.granted;
+      _hasPermission = permission == LocationPermission.whileInUse || 
+                       permission == LocationPermission.always;
 
       if (!_hasPermission) {
         debugPrint('LocationService: Location permission denied');
@@ -131,8 +130,9 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       // Check permission status
-      PermissionStatus permission = await Permission.location.status;
-      return permission == PermissionStatus.granted;
+      LocationPermission permission = await Geolocator.checkPermission();
+      return permission == LocationPermission.whileInUse || 
+             permission == LocationPermission.always;
     } catch (e) {
       debugPrint('LocationService: Error checking permission: $e');
       return false;
@@ -145,31 +145,43 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        // Try to open location settings
-        await Geolocator.openLocationSettings();
-
-        // Check again after potential user action
-        serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (!serviceEnabled) {
-          return false;
-        }
-      }
-
-      // Request location permission
-      PermissionStatus permission = await Permission.location.request();
-
-      if (permission == PermissionStatus.denied) {
-        // Try again if denied
-        permission = await Permission.location.request();
-      }
-
-      if (permission == PermissionStatus.permanentlyDenied) {
-        // Open app settings for user to manually grant permission
-        await openAppSettings();
+        // On iOS/Android, prompt user to enable location services
+        debugPrint('LocationService: Location services are disabled');
         return false;
       }
 
-      return permission == PermissionStatus.granted;
+      // Check current permission status
+      LocationPermission permission = await Geolocator.checkPermission();
+      
+      // If permission is already granted, return true
+      if (permission == LocationPermission.whileInUse || 
+          permission == LocationPermission.always) {
+        debugPrint('LocationService: Permission already granted');
+        return true;
+      }
+
+      // If permission is denied, request it
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        
+        // Check the result
+        if (permission == LocationPermission.whileInUse || 
+            permission == LocationPermission.always) {
+          debugPrint('LocationService: Permission granted after request');
+          return true;
+        }
+      }
+
+      // If permission is denied forever, we cannot request again
+      if (permission == LocationPermission.deniedForever) {
+        debugPrint('LocationService: Permission permanently denied');
+        // On iOS, user needs to go to Settings to enable
+        // On Android, openAppSettings can be called
+        return false;
+      }
+
+      debugPrint('LocationService: Permission denied');
+      return false;
     } catch (e) {
       debugPrint('LocationService: Error requesting location access: $e');
       return false;

@@ -28,10 +28,6 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>GoldWen a besoin d'accéder à votre appareil photo pour prendre des photos de profil et personnaliser votre expérience.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>GoldWen utilise votre localisation pour vous proposer des profils compatibles dans votre région et améliorer votre expérience de matching.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Nous avons besoin de votre localisation pour vous proposer des profils à proximité.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>GoldWen utilise votre localisation pour vous proposer des profils compatibles dans votre région et améliorer votre expérience de matching.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
