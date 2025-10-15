@@ -347,7 +347,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildPhotosPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
@@ -366,21 +366,20 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xxl),
-          Expanded(
-            child: Consumer<ProfileProvider>(
-              builder: (context, profileProvider, child) {
-                return PhotoManagementWidget(
-                  photos: profileProvider.photos,
-                  onPhotosChanged: (photos) {
-                    profileProvider.updatePhotos(photos);
-                  },
-                  minPhotos: 3,
-                  maxPhotos: 6,
-                  showAddButton: true,
-                );
-              },
-            ),
+          Consumer<ProfileProvider>(
+            builder: (context, profileProvider, child) {
+              return PhotoManagementWidget(
+                photos: profileProvider.photos,
+                onPhotosChanged: (photos) {
+                  profileProvider.updatePhotos(photos);
+                },
+                minPhotos: 3,
+                maxPhotos: 6,
+                showAddButton: true,
+              );
+            },
           ),
+          const SizedBox(height: AppSpacing.lg),
           Consumer<ProfileProvider>(
             builder: (context, profileProvider, child) {
               final hasMinPhotos = profileProvider.photos.length >= 3;
@@ -435,7 +434,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildMediaPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
@@ -454,20 +453,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xxl),
-          Expanded(
-            child: Consumer<ProfileProvider>(
-              builder: (context, profileProvider, child) {
-                return MediaManagementWidget(
-                  mediaFiles: profileProvider.mediaFiles,
-                  onMediaFilesChanged: (mediaFiles) {
-                    profileProvider.updateMediaFiles(mediaFiles);
-                  },
-                  maxAudioFiles: 2,
-                  maxVideoFiles: 1,
-                  showAddButton: true,
-                );
-              },
-            ),
+          Consumer<ProfileProvider>(
+            builder: (context, profileProvider, child) {
+              return MediaManagementWidget(
+                mediaFiles: profileProvider.mediaFiles,
+                onMediaFilesChanged: (mediaFiles) {
+                  profileProvider.updateMediaFiles(mediaFiles);
+                },
+                maxAudioFiles: 2,
+                maxVideoFiles: 1,
+                showAddButton: true,
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.lg),
           SizedBox(
@@ -719,7 +716,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildValidationPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
@@ -784,17 +781,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             },
           ),
           const SizedBox(height: AppSpacing.xl),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Consumer<ProfileProvider>(
-                builder: (context, profileProvider, child) {
-                  return ProfileCompletionWidget(
-                    showProgress: true,
-                    onMissingStepTap: _handleMissingStepTap,
-                  );
-                },
-              ),
-            ),
+          Consumer<ProfileProvider>(
+            builder: (context, profileProvider, child) {
+              return ProfileCompletionWidget(
+                showProgress: true,
+                onMissingStepTap: _handleMissingStepTap,
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
@@ -869,7 +862,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildReviewPage() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
