@@ -95,9 +95,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // Récupère le pseudo du profil via ApiService.getProfile
     Future.microtask(() async {
       try {
-        final profile = await ApiService.getProfile();
+        final response = await ApiService.getProfile();
+        final profileData = response['data'] ?? response;
         setState(() {
-          _profilePseudo = profile['pseudo'] as String?;
+          _profilePseudo = profileData['pseudo'] as String?;
         });
       } catch (e) {
         // ignore ou log l'erreur

@@ -264,7 +264,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user?.displayName ?? 'Utilisateur',
+                            profileProvider.name ?? user?.displayName ?? 'Utilisateur',
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
