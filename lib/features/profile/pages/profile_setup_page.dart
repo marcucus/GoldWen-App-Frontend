@@ -339,7 +339,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             labelText: 'Bio',
             hintText: 'Décrivez-vous en quelques mots...',
             maxLines: 10,
-            maxLength: 200,
+            maxLength: 600,
             enableCounter: true,
             validateForbiddenWords: true,
             validateContactInfo: true,
@@ -945,7 +945,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   bool _isBasicInfoValid() {
     return _nameController.text.isNotEmpty &&
         _birthDate != null &&
-        _bioController.text.isNotEmpty;
+        _bioController.text.isNotEmpty &&
+        _bioController.text.length <= 600;
   }
 
   bool _arePromptsValid() {
@@ -1014,6 +1015,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     if (_currentPage < 5) { // Changed from 4 to 5 since we have 6 pages (0-5)
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
+
+      // Validate basic info when leaving basic info page
+      if (_currentPage == 0) {
+        // Check bio length
+        if (_bioController.text.length > 600) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'La bio dépasse la limite de 600 caractères (${_bioController.text.length}/600)'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
 
       // Save basic info when leaving basic info page
       if (_currentPage == 0) {
@@ -1136,6 +1152,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez rédiger votre bio'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validate bio length (including spaces and line breaks)
+    if (_bioController.text.length > 600) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'La bio dépasse la limite de 600 caractères (${_bioController.text.length}/600)'),
           backgroundColor: Colors.red,
         ),
       );
