@@ -414,12 +414,11 @@ export class ProfilesService {
   }
 
   async getPrompts(): Promise<Prompt[]> {
-    // Return only 3 prompts (required prompts first, then optional if needed)
-    // This aligns with frontend limitation of 3 prompts selection
+    // Return ALL active prompts so users can select any 3 of them
+    // Users must select exactly 3 prompts to answer for profile completion
     return this.promptRepository.find({
       where: { isActive: true },
       order: { isRequired: 'DESC', order: 'ASC' },
-      take: 3,
     });
   }
 

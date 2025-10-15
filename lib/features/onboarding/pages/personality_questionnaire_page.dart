@@ -6,6 +6,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'gender_selection_page.dart';
 
 class PersonalityQuestionnairePage extends StatefulWidget {
   const PersonalityQuestionnairePage({super.key});
@@ -614,8 +615,12 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       await authProvider.refreshUser();
       
       if (mounted) {
-        // Use GoRouter for navigation instead of Navigator.pushReplacement
-        context.go('/profile-setup');
+        // Navigate to gender selection to start the full onboarding flow
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const GenderSelectionPage(),
+          ),
+        );
       }
     } catch (e) {
       print('Error submitting personality answers: $e');

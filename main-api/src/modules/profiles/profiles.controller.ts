@@ -200,7 +200,7 @@ export class ProfilesController {
   @ApiOperation({
     summary: 'Get available prompts',
     description:
-      'Returns exactly 3 active prompts that users can answer. Required prompts are prioritized first, then ordered by their order field.',
+      'Returns all active prompts. Users can select and answer any 3 of them. Required prompts are prioritized first, then ordered by their order field.',
   })
   @ApiResponse({ status: 200, description: 'Prompts retrieved successfully' })
   async getPrompts() {
