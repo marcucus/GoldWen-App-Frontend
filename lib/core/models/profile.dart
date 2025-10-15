@@ -25,6 +25,7 @@ class Profile {
   final List<MediaFile> mediaFiles;
   final List<PersonalityAnswer> personalityAnswers;
   final List<PromptAnswer> promptAnswers;
+  final String? favoriteSong;
   final bool isComplete;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -55,6 +56,7 @@ class Profile {
     this.mediaFiles = const [],
     this.personalityAnswers = const [],
     this.promptAnswers = const [],
+    this.favoriteSong,
     required this.isComplete,
     required this.createdAt,
     required this.updatedAt,
@@ -130,6 +132,7 @@ class Profile {
               ?.map((e) => PromptAnswer.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      favoriteSong: json['favoriteSong'] as String?,
       isComplete: json['isComplete'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -163,6 +166,7 @@ class Profile {
       'mediaFiles': mediaFiles.map((m) => m.toJson()).toList(),
       'personalityAnswers': personalityAnswers.map((a) => a.toJson()).toList(),
       'promptAnswers': promptAnswers.map((a) => a.toJson()).toList(),
+      if (favoriteSong != null) 'favoriteSong': favoriteSong,
       'isComplete': isComplete,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

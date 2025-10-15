@@ -189,6 +189,17 @@ class ProfileDetailPage extends StatelessWidget {
                   
                   const SizedBox(height: AppSpacing.xl),
                   
+                  // Favorite song section
+                  if (profile.favoriteSong != null) ...[
+                    _buildSection(
+                      context,
+                      'Morceau/Artiste préféré',
+                      profile.favoriteSong,
+                      Icons.music_note,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                  
                   // Prompts section
                   Text(
                     'En savoir plus',

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/services/api_service.dart';
@@ -287,38 +288,83 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
         fileTypeLabel = 'Vidéo';
       }
 
-      // Pick file
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: allowedExtensions,
-        allowMultiple: false,
-      );
+      String? filePath;
+      
+      // For videos, use ImagePicker to access gallery
+      if (type == 'video') {
+        final ImageSource? source = await _showVideoSourceDialog();
+        if (source == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
 
-      if (result == null || result.files.isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
+        final picker = ImagePicker();
+        final XFile? pickedFile = await picker.pickVideo(source: source);
+        
+        if (pickedFile == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+        
+        filePath = pickedFile.path;
+        
+        // Validate file size
+        final fileSize = await File(filePath).length();
+        if (fileSize > maxFileSizeMB * 1024 * 1024) {
+          setState(() {
+            _errorMessage =
+                'Le fichier est trop volumineux. Taille maximale: ${maxFileSizeMB}MB';
+            _isLoading = false;
+          });
+          return;
+        }
+      } else {
+        // For audio, use FilePicker
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: allowedExtensions,
+          allowMultiple: false,
+        );
+
+        if (result == null || result.files.isEmpty) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        final file = result.files.first;
+
+        // Validate file size
+        if (file.size > maxFileSizeMB * 1024 * 1024) {
+          setState(() {
+            _errorMessage =
+                'Le fichier est trop volumineux. Taille maximale: ${maxFileSizeMB}MB';
+            _isLoading = false;
+          });
+          return;
+        }
+
+        // Validate file extension
+        final extension = file.extension?.toLowerCase();
+        if (extension == null || !allowedExtensions.contains(extension)) {
+          setState(() {
+            _errorMessage =
+                'Format de fichier non supporté. Formats acceptés: ${allowedExtensions.join(", ")}';
+            _isLoading = false;
+          });
+          return;
+        }
+        
+        filePath = file.path;
       }
 
-      final file = result.files.first;
-
-      // Validate file size
-      if (file.size > maxFileSizeMB * 1024 * 1024) {
+      if (filePath == null) {
         setState(() {
-          _errorMessage =
-              'Le fichier est trop volumineux. Taille maximale: ${maxFileSizeMB}MB';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // Validate file extension
-      final extension = file.extension?.toLowerCase();
-      if (extension == null || !allowedExtensions.contains(extension)) {
-        setState(() {
-          _errorMessage =
-              'Format de fichier non supporté. Formats acceptés: ${allowedExtensions.join(", ")}';
           _isLoading = false;
         });
         return;
@@ -326,7 +372,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
 
       // Upload file
       final response = await ApiService.uploadMediaFile(
-        file.path!,
+        filePath,
         type: type,
         order: _mediaFiles.length,
       );
@@ -415,6 +461,32 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
     showDialog(
       context: context,
       builder: (context) => MediaPreviewDialog(mediaFile: mediaFile),
+    );
+  }
+
+  Future<ImageSource?> _showVideoSourceDialog() async {
+    return showDialog<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sélectionner une vidéo'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.videocam),
+                title: const Text('Caméra'),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galerie'),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
