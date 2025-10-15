@@ -128,10 +128,10 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppColors.backgroundGrey,
-                    backgroundImage: otherUser?.photoUrls?.isNotEmpty == true
-                        ? NetworkImage(otherUser!.photoUrls!.first)
+                    backgroundImage: otherUser?.photos?.isNotEmpty == true
+                        ? NetworkImage(otherUser!.photos!.first as String)
                         : null,
-                    child: otherUser?.photoUrls?.isEmpty ?? true
+                    child: otherUser?.photos?.isEmpty ?? true
                         ? const Icon(Icons.person, color: AppColors.textSecondary)
                         : null,
                   ),

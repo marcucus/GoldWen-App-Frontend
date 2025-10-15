@@ -9,6 +9,7 @@ class MatchProfile {
   final List<MediaFile> mediaFiles;
   final List<String> prompts;
   final double compatibilityScore;
+  final String? favoriteSong; // New field for favorite song
 
   MatchProfile({
     required this.id,
@@ -19,6 +20,7 @@ class MatchProfile {
     this.mediaFiles = const [],
     required this.prompts,
     required this.compatibilityScore,
+    required this.favoriteSong,
   });
 
   factory MatchProfile.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class MatchProfile {
           [],
       prompts: List<String>.from(json['prompts']),
       compatibilityScore: json['compatibilityScore'].toDouble(),
+      favoriteSong: json['favoriteSong'] as String?, // Parse favorite song
     );
   }
 

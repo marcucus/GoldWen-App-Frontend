@@ -31,6 +31,7 @@ class ProfileDetailPage extends StatelessWidget {
         'Je ne peux pas vivre sans mes séances de yoga matinales et mon café parfait.',
         'Ma passion secrète est de collectionner des vinyles de musique du monde entier.'
       ],
+      favoriteSong: 'Imagine - John Lennon',
       compatibilityScore: 0.92,
     );
 
@@ -194,7 +195,7 @@ class ProfileDetailPage extends StatelessWidget {
                     _buildSection(
                       context,
                       'Morceau/Artiste préféré',
-                      profile.favoriteSong,
+                      profile.favoriteSong ?? '',
                       Icons.music_note,
                     ),
                     const SizedBox(height: AppSpacing.xl),

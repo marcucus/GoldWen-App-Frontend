@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_validator.dart';
 import '../../../core/utils/translations_helper.dart';
