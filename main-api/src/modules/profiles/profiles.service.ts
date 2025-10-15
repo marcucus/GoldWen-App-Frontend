@@ -635,6 +635,7 @@ export class ProfilesService {
     });
 
     if (!user || !user.profile) {
+      console.log(`[updateProfileCompletionStatus] User or profile not found for userId: ${userId}`);
       return;
     }
 
@@ -671,14 +672,39 @@ export class ProfilesService {
     // Onboarding is completed when personality questions are answered
     const isOnboardingCompleted = hasPersonalityAnswers;
 
+    // Log completion status for debugging
+    console.log(`[updateProfileCompletionStatus] Completion check for userId: ${userId}`, {
+      hasMinPhotos,
+      photosCount: user.profile.photos?.length || 0,
+      hasPromptAnswers,
+      promptsCount,
+      hasPersonalityAnswers,
+      personalityAnswersCount: user.personalityAnswers?.length || 0,
+      requiredQuestionsCount,
+      hasRequiredProfileFields,
+      hasBirthDate: !!user.profile.birthDate,
+      hasBio: !!user.profile.bio,
+      isProfileCompleted,
+      isOnboardingCompleted,
+      currentIsProfileCompleted: user.isProfileCompleted,
+      currentIsOnboardingCompleted: user.isOnboardingCompleted,
+    });
+
     // Update user status
     if (
       user.isProfileCompleted !== isProfileCompleted ||
       user.isOnboardingCompleted !== isOnboardingCompleted
     ) {
+      console.log(`[updateProfileCompletionStatus] Updating completion flags for userId: ${userId}`, {
+        from: { isProfileCompleted: user.isProfileCompleted, isOnboardingCompleted: user.isOnboardingCompleted },
+        to: { isProfileCompleted, isOnboardingCompleted },
+      });
       user.isProfileCompleted = isProfileCompleted;
       user.isOnboardingCompleted = isOnboardingCompleted;
       await this.userRepository.save(user);
+      console.log(`[updateProfileCompletionStatus] Successfully updated completion flags for userId: ${userId}`);
+    } else {
+      console.log(`[updateProfileCompletionStatus] No changes needed for userId: ${userId}`);
     }
   }
 

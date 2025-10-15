@@ -614,8 +614,8 @@ class ProfileProvider with ChangeNotifier {
       await loadProfileCompletion();
       
       if (_profileCompletion?.isCompleted ?? false) {
-        // Profile is complete, update status to mark as validated
-        await ApiService.updateProfileStatus(completed: true);
+        // Profile is complete, update status to make profile visible
+        await ApiService.updateProfileStatus(isVisible: true);
         await loadProfileCompletion(); // Reload to get updated status
         
         // Track profile completion

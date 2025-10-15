@@ -265,15 +265,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> updateProfileStatus({
-    String? status,
-    bool? completed,
+    bool? isVisible,
   }) async {
     final response = await http.put(
       Uri.parse('$baseUrl/profiles/me/status'),
       headers: _headers,
       body: jsonEncode({
-        if (status != null) 'status': status,
-        if (completed != null) 'completed': completed,
+        if (isVisible != null) 'isVisible': isVisible,
       }),
     );
 
