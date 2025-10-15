@@ -66,10 +66,34 @@ class MatchingProvider with ChangeNotifier {
 
     try {
       final response = await ApiService.getDailySelection();
-      final selectionData = response['data'] ?? response;
       
-      _dailySelection = DailySelection.fromJson(selectionData);
-      _dailyProfiles = _dailySelection!.profiles;
+      // Handle different response structures
+      dynamic selectionData;
+      if (response.containsKey('data')) {
+        selectionData = response['data'];
+      } else {
+        selectionData = response;
+      }
+      
+      // If selectionData is null or empty, create an empty selection
+      if (selectionData == null) {
+        _dailySelection = DailySelection(
+          profiles: [],
+          generatedAt: DateTime.now(),
+          expiresAt: DateTime.now().add(const Duration(days: 1)),
+          remainingLikes: 0,
+          hasUsedSuperLike: false,
+          choicesRemaining: 0,
+          choicesMade: 0,
+          maxChoices: 1,
+          refreshTime: DateTime.now().add(const Duration(days: 1)),
+        );
+        _dailyProfiles = [];
+      } else {
+        _dailySelection = DailySelection.fromJson(selectionData as Map<String, dynamic>);
+        _dailyProfiles = _dailySelection!.profiles;
+      }
+      
       _lastUpdateTime = DateTime.now();
       _error = null;
       

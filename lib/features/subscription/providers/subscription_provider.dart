@@ -95,9 +95,23 @@ class SubscriptionProvider with ChangeNotifier {
       // Also try to load plans from API as fallback
       try {
         final response = await ApiService.getSubscriptionPlans();
-        final plansData = response['data'] ?? response['plans'] ?? [];
+        
+        // Handle different response structures
+        dynamic plansData;
+        if (response.containsKey('data')) {
+          plansData = response['data'];
+        } else if (response.containsKey('plans')) {
+          plansData = response['plans'];
+        } else if (response is List) {
+          plansData = response;
+        } else {
+          plansData = [];
+        }
 
-        final apiPlans = (plansData as List)
+        // Ensure plansData is a list
+        final List<dynamic> plansList = plansData is List ? plansData : [];
+
+        final apiPlans = plansList
             .map((p) => SubscriptionPlan.fromJson(p as Map<String, dynamic>))
             .toList();
 
