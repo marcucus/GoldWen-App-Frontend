@@ -344,6 +344,13 @@ class AuthProvider with ChangeNotifier {
 
       // Clear stored auth data
       await _clearAuthData();
+      
+      // Reset analytics data
+      try {
+        await AnalyticsService.reset();
+      } catch (e) {
+        print('Failed to reset analytics: $e');
+      }
     } catch (e) {
       // Even if logout fails, clear local state
       _user = null;
@@ -352,6 +359,13 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       ApiService.clearToken();
       await _clearAuthData();
+      
+      // Try to reset analytics even if logout failed
+      try {
+        await AnalyticsService.reset();
+      } catch (e) {
+        print('Failed to reset analytics: $e');
+      }
     }
 
     notifyListeners();
