@@ -142,7 +142,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Mot de passe',
-                    hintText: _isSignUp ? 'Minimum 6 caractères' : 'Votre mot de passe',
+                    hintText: _isSignUp ? 'Min 6 caractères, 1 majuscule, 1 caractère spécial' : 'Votre mot de passe',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -160,8 +160,16 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer votre mot de passe';
                     }
-                    if (_isSignUp && value.length < 6) {
-                      return 'Le mot de passe doit contenir au moins 6 caractères';
+                    if (_isSignUp) {
+                      if (value.length < 6) {
+                        return 'Le mot de passe doit contenir au moins 6 caractères';
+                      }
+                      if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                        return 'Le mot de passe doit contenir au moins une majuscule';
+                      }
+                      if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                        return 'Le mot de passe doit contenir au moins un caractère spécial';
+                      }
                     }
                     return null;
                   },
