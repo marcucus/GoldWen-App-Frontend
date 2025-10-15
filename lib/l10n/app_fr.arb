@@ -1,0 +1,506 @@
+{
+  "@@locale": "fr",
+  
+  "appTitle": "GoldWen",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "stepTitle": "Étape {step}/6",
+  "@stepTitle": {
+    "description": "Step indicator in profile setup",
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  
+  "aboutYouTitle": "Parlez-nous de vous",
+  "@aboutYouTitle": {
+    "description": "Title for basic info page"
+  },
+  
+  "aboutYouSubtitle": "Ces informations aideront les autres à mieux vous connaître",
+  "@aboutYouSubtitle": {
+    "description": "Subtitle for basic info page"
+  },
+  
+  "pseudoLabel": "Pseudo",
+  "@pseudoLabel": {
+    "description": "Label for pseudo field"
+  },
+  
+  "pseudoHint": "Votre pseudo",
+  "@pseudoHint": {
+    "description": "Hint for pseudo field"
+  },
+  
+  "pseudoRequired": "Veuillez entrer votre pseudo",
+  "@pseudoRequired": {
+    "description": "Error message when pseudo is empty"
+  },
+  
+  "pseudoMinLength": "Le pseudo doit contenir au moins 2 caractères",
+  "@pseudoMinLength": {
+    "description": "Error message when pseudo is too short"
+  },
+  
+  "bioLabel": "Bio",
+  "@bioLabel": {
+    "description": "Label for bio field"
+  },
+  
+  "bioHint": "Décrivez-vous en quelques mots...",
+  "@bioHint": {
+    "description": "Hint for bio field"
+  },
+  
+  "bioRequired": "Veuillez rédiger votre bio",
+  "@bioRequired": {
+    "description": "Error message when bio is empty"
+  },
+  
+  "bioMaxLength": "La bio dépasse la limite de 600 caractères ({current}/600)",
+  "@bioMaxLength": {
+    "description": "Error message when bio exceeds max length",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "650"
+      }
+    }
+  },
+  
+  "continueButton": "Continuer",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  
+  "continueWithPhotos": "Continuer ({count}/6)",
+  "@continueWithPhotos": {
+    "description": "Continue button with photo count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  
+  "continueMinPhotos": "Continuer ({count}/3 minimum)",
+  "@continueMinPhotos": {
+    "description": "Continue button with minimum photo count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  
+  "photosAddedCount": "{count}/3 photos minimum ajoutées",
+  "@photosAddedCount": {
+    "description": "Photo count indicator",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  
+  "photosMissing": "Photos manquantes",
+  "@photosMissing": {
+    "description": "Title for photo missing alert"
+  },
+  
+  "understood": "J'ai compris",
+  "@understood": {
+    "description": "Button text for understanding"
+  },
+  
+  "mediaOptionalTitle": "Médias Audio/Vidéo (Optionnel)",
+  "@mediaOptionalTitle": {
+    "description": "Title for media page"
+  },
+  
+  "mediaOptionalSubtitle": "Ajoutez des fichiers audio ou vidéo pour enrichir votre profil",
+  "@mediaOptionalSubtitle": {
+    "description": "Subtitle for media page"
+  },
+  
+  "choosePromptsTitle": "Choisissez vos prompts",
+  "@choosePromptsTitle": {
+    "description": "Title for prompt selection"
+  },
+  
+  "choosePromptsSubtitle": "Sélectionnez 3 questions qui vous représentent",
+  "@choosePromptsSubtitle": {
+    "description": "Subtitle for prompt selection"
+  },
+  
+  "promptLoadingError": "Erreur lors du chargement des prompts",
+  "@promptLoadingError": {
+    "description": "Error message when prompts fail to load"
+  },
+  
+  "retry": "Réessayer",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  
+  "promptAnswerHint": "Votre réponse... (max 150 caractères)",
+  "@promptAnswerHint": {
+    "description": "Hint for prompt answer field"
+  },
+  
+  "promptRequired": "Erreur: 3 prompts requis pour continuer",
+  "@promptRequired": {
+    "description": "Error when not all prompts are selected"
+  },
+  
+  "promptAnswerRequired": "Veuillez répondre à la question {number}",
+  "@promptAnswerRequired": {
+    "description": "Error when prompt answer is empty",
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  
+  "promptAnswerMaxLength": "La réponse {number} dépasse 150 caractères ({current}/150)",
+  "@promptAnswerMaxLength": {
+    "description": "Error when prompt answer exceeds max length",
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "1"
+      },
+      "current": {
+        "type": "int",
+        "example": "160"
+      }
+    }
+  },
+  
+  "savingInProgress": "Sauvegarde en cours...",
+  "@savingInProgress": {
+    "description": "Text shown while saving"
+  },
+  
+  "startAdventure": "Commencer mon aventure",
+  "@startAdventure": {
+    "description": "Button to start using the app"
+  },
+  
+  "profileIncompleteTitle": "Profil incomplet",
+  "@profileIncompleteTitle": {
+    "description": "Title for incomplete profile dialog"
+  },
+  
+  "profileNotVisibleYet": "Votre profil n'est pas encore visible. Complétez toutes les étapes pour le rendre visible.",
+  "@profileNotVisibleYet": {
+    "description": "Message when profile is not complete"
+  },
+  
+  "profileIncompleteSteps": "Votre profil n'est pas encore complet. Étapes manquantes:",
+  "@profileIncompleteSteps": {
+    "description": "Message listing incomplete steps"
+  },
+  
+  "errorSaving": "Erreur lors de la sauvegarde: {error}",
+  "@errorSaving": {
+    "description": "Error message when save fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "errorSavingProfile": "Erreur lors de la sauvegarde du profil: {error}",
+  "@errorSavingProfile": {
+    "description": "Error message when profile save fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "pseudoRequiredError": "Veuillez saisir votre pseudo",
+  "@pseudoRequiredError": {
+    "description": "Snackbar error for missing pseudo"
+  },
+  
+  "birthDateRequired": "Veuillez sélectionner votre date de naissance",
+  "@birthDateRequired": {
+    "description": "Snackbar error for missing birth date"
+  },
+  
+  "additionalInfoTitle": "Informations complémentaires",
+  "@additionalInfoTitle": {
+    "description": "Title for additional info page"
+  },
+  
+  "shareMoreTitle": "Partagez-en plus sur vous",
+  "@shareMoreTitle": {
+    "description": "Title for additional info section"
+  },
+  
+  "shareMoreSubtitle": "Ces informations sont optionnelles mais aident à créer des connexions plus profondes.",
+  "@shareMoreSubtitle": {
+    "description": "Subtitle for additional info section"
+  },
+  
+  "professionalInfoSection": "Informations professionnelles",
+  "@professionalInfoSection": {
+    "description": "Section title for professional info"
+  },
+  
+  "jobTitleLabel": "Métier",
+  "@jobTitleLabel": {
+    "description": "Label for job title field"
+  },
+  
+  "jobTitleHint": "Développeur, Designer, Médecin...",
+  "@jobTitleHint": {
+    "description": "Hint for job title field"
+  },
+  
+  "interestSport": "Sport",
+  "@interestSport": {
+    "description": "Interest: Sport"
+  },
+  
+  "interestTravel": "Voyage",
+  "@interestTravel": {
+    "description": "Interest: Travel"
+  },
+  
+  "interestCooking": "Cuisine",
+  "@interestCooking": {
+    "description": "Interest: Cooking"
+  },
+  
+  "interestReading": "Lecture",
+  "@interestReading": {
+    "description": "Interest: Reading"
+  },
+  
+  "interestCinema": "Cinéma",
+  "@interestCinema": {
+    "description": "Interest: Cinema"
+  },
+  
+  "interestMusic": "Musique",
+  "@interestMusic": {
+    "description": "Interest: Music"
+  },
+  
+  "interestArt": "Art",
+  "@interestArt": {
+    "description": "Interest: Art"
+  },
+  
+  "interestNature": "Nature",
+  "@interestNature": {
+    "description": "Interest: Nature"
+  },
+  
+  "interestFitness": "Fitness",
+  "@interestFitness": {
+    "description": "Interest: Fitness"
+  },
+  
+  "interestGaming": "Gaming",
+  "@interestGaming": {
+    "description": "Interest: Gaming"
+  },
+  
+  "interestPhotography": "Photographie",
+  "@interestPhotography": {
+    "description": "Interest: Photography"
+  },
+  
+  "interestDance": "Danse",
+  "@interestDance": {
+    "description": "Interest: Dance"
+  },
+  
+  "interestTheater": "Théâtre",
+  "@interestTheater": {
+    "description": "Interest: Theater"
+  },
+  
+  "interestFashion": "Mode",
+  "@interestFashion": {
+    "description": "Interest: Fashion"
+  },
+  
+  "interestTechnology": "Technologie",
+  "@interestTechnology": {
+    "description": "Interest: Technology"
+  },
+  
+  "interestAnimals": "Animaux",
+  "@interestAnimals": {
+    "description": "Interest: Animals"
+  },
+  
+  "interestGardening": "Jardinage",
+  "@interestGardening": {
+    "description": "Interest: Gardening"
+  },
+  
+  "interestYoga": "Yoga",
+  "@interestYoga": {
+    "description": "Interest: Yoga"
+  },
+  
+  "interestRunning": "Running",
+  "@interestRunning": {
+    "description": "Interest: Running"
+  },
+  
+  "interestClimbing": "Escalade",
+  "@interestClimbing": {
+    "description": "Interest: Climbing"
+  },
+  
+  "interestSurfing": "Surf",
+  "@interestSurfing": {
+    "description": "Interest: Surfing"
+  },
+  
+  "interestSkiing": "Ski",
+  "@interestSkiing": {
+    "description": "Interest: Skiing"
+  },
+  
+  "interestHiking": "Randonnée",
+  "@interestHiking": {
+    "description": "Interest: Hiking"
+  },
+  
+  "interestCycling": "Vélo",
+  "@interestCycling": {
+    "description": "Interest: Cycling"
+  },
+  
+  "interestMeditation": "Méditation",
+  "@interestMeditation": {
+    "description": "Interest: Meditation"
+  },
+  
+  "interestSpirituality": "Spiritualité",
+  "@interestSpirituality": {
+    "description": "Interest: Spirituality"
+  },
+  
+  "interestEntrepreneurship": "Entrepreneuriat",
+  "@interestEntrepreneurship": {
+    "description": "Interest: Entrepreneurship"
+  },
+  
+  "interestVolunteering": "Bénévolat",
+  "@interestVolunteering": {
+    "description": "Interest: Volunteering"
+  },
+  
+  "languageFrench": "Français",
+  "@languageFrench": {
+    "description": "Language: French"
+  },
+  
+  "languageEnglish": "Anglais",
+  "@languageEnglish": {
+    "description": "Language: English"
+  },
+  
+  "languageSpanish": "Espagnol",
+  "@languageSpanish": {
+    "description": "Language: Spanish"
+  },
+  
+  "languageItalian": "Italien",
+  "@languageItalian": {
+    "description": "Language: Italian"
+  },
+  
+  "languageGerman": "Allemand",
+  "@languageGerman": {
+    "description": "Language: German"
+  },
+  
+  "languagePortuguese": "Portugais",
+  "@languagePortuguese": {
+    "description": "Language: Portuguese"
+  },
+  
+  "languageArabic": "Arabe",
+  "@languageArabic": {
+    "description": "Language: Arabic"
+  },
+  
+  "languageChinese": "Chinois",
+  "@languageChinese": {
+    "description": "Language: Chinese"
+  },
+  
+  "languageJapanese": "Japonais",
+  "@languageJapanese": {
+    "description": "Language: Japanese"
+  },
+  
+  "languageRussian": "Russe",
+  "@languageRussian": {
+    "description": "Language: Russian"
+  },
+  
+  "languageDutch": "Néerlandais",
+  "@languageDutch": {
+    "description": "Language: Dutch"
+  },
+  
+  "languageSwedish": "Suédois",
+  "@languageSwedish": {
+    "description": "Language: Swedish"
+  },
+  
+  "languageNorwegian": "Norvégien",
+  "@languageNorwegian": {
+    "description": "Language: Norwegian"
+  },
+  
+  "languageDanish": "Danois",
+  "@languageDanish": {
+    "description": "Language: Danish"
+  },
+  
+  "languagePolish": "Polonais",
+  "@languagePolish": {
+    "description": "Language: Polish"
+  },
+  
+  "languageCzech": "Tchèque",
+  "@languageCzech": {
+    "description": "Language: Czech"
+  },
+  
+  "languageHungarian": "Hongrois",
+  "@languageHungarian": {
+    "description": "Language: Hungarian"
+  },
+  
+  "languageGreek": "Grec",
+  "@languageGreek": {
+    "description": "Language: Greek"
+  }
+}

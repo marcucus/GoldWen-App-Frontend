@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
@@ -147,13 +148,14 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     } catch (e) {
       print('Error loading prompts: $e');
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement des prompts: $e'),
+            content: Text('${l10n.promptLoadingError}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
-              label: 'Réessayer',
+              label: l10n.retry,
               textColor: Colors.white,
               onPressed: _loadPrompts,
             ),
@@ -170,15 +172,16 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _showMinPhotosAlert() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber),
-              SizedBox(width: AppSpacing.sm),
-              Text('Photos manquantes'),
+              const Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber),
+              const SizedBox(width: AppSpacing.sm),
+              Text(l10n.photosMissing),
             ],
           ),
           content: const Text(
@@ -188,7 +191,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('J\'ai compris'),
+              child: Text(l10n.understood),
             ),
           ],
         );
@@ -198,10 +201,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Étape ${_currentPage + 1}/6'),
+        title: Text(l10n.stepTitle(_currentPage + 1)),
         leading: _currentPage > 0
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -244,6 +249,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildBasicInfoPage() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return KeyboardDismissible(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -252,7 +259,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             const SizedBox(height: AppSpacing.xl),
 
             Text(
-              'Parlez-nous de vous',
+              l10n.aboutYouTitle,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
@@ -260,7 +267,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             const SizedBox(height: AppSpacing.md),
 
             Text(
-              'Ces informations aideront les autres à mieux vous connaître',
+              l10n.aboutYouSubtitle,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -272,18 +279,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           // Name field
           EnhancedTextField(
             controller: _nameController,
-            labelText: 'Pseudo',
-            hintText: 'Votre pseudo',
+            labelText: l10n.pseudoLabel,
+            hintText: l10n.pseudoHint,
             textInputAction: TextInputAction.next,
             validateForbiddenWords: true,
             validateContactInfo: false,
             validateSpamPatterns: false,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Veuillez entrer votre pseudo';
+                return l10n.pseudoRequired;
               }
               if (value.trim().length < 2) {
-                return 'Le pseudo doit contenir au moins 2 caractères';
+                return l10n.pseudoMinLength;
               }
               return null;
             },
@@ -337,8 +344,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           // Bio field
           EnhancedTextField(
             controller: _bioController,
-            labelText: 'Bio',
-            hintText: 'Décrivez-vous en quelques mots...',
+            labelText: l10n.bioLabel,
+            hintText: l10n.bioHint,
             maxLines: 10,
             maxLength: 600,
             enableCounter: true,
@@ -353,7 +360,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isBasicInfoValid() ? _nextPage : null,
-                child: const Text('Continuer'),
+                child: Text(l10n.continueButton),
               ),
             ),
 
@@ -365,6 +372,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildPhotosPage() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -416,7 +425,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          '${profileProvider.photos.length}/3 photos minimum ajoutées',
+                          l10n.photosAddedCount(profileProvider.photos.length),
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: hasMinPhotos ? AppColors.success : AppColors.warningAmber,
                             fontWeight: FontWeight.w500,
@@ -436,8 +445,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       ),
                       child: Text(
                         hasMinPhotos
-                            ? 'Continuer (${profileProvider.photos.length}/6)'
-                            : 'Continuer (${profileProvider.photos.length}/3 minimum)',
+                            ? l10n.continueWithPhotos(profileProvider.photos.length)
+                            : l10n.continueMinPhotos(profileProvider.photos.length),
                       ),
                     ),
                   ),
@@ -452,19 +461,21 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildMediaPage() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Médias Audio/Vidéo (Optionnel)',
+            l10n.mediaOptionalTitle,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Ajoutez des fichiers audio ou vidéo pour enrichir votre profil',
+            l10n.mediaOptionalSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -502,7 +513,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _nextPage,
-              child: const Text('Continuer'),
+              child: Text(l10n.continueButton),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -512,6 +523,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildPromptsPage() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         if (profileProvider.isLoading) {
@@ -529,11 +542,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   color: AppColors.errorRed,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                const Text('Erreur lors du chargement des prompts'),
+                Text(l10n.promptLoadingError),
                 const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   onPressed: _loadPrompts,
-                  child: const Text('Réessayer'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -550,13 +563,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   children: [
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      'Choisissez vos prompts',
+                      l10n.choosePromptsTitle,
                       style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Sélectionnez 3 questions qui vous représentent',
+                      l10n.choosePromptsSubtitle,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -678,7 +691,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           const SizedBox(height: AppSpacing.sm),
                           EnhancedTextField(
                             controller: _promptControllers[index],
-                            hintText: 'Votre réponse... (max 150 caractères)',
+                            hintText: l10n.promptAnswerHint,
                             maxLines: 3,
                             maxLength: 150,
                             enableCounter: true,
@@ -893,6 +906,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   Widget _buildReviewPage() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -947,7 +962,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _finishSetup,
-              child: const Text('Commencer mon aventure'),
+              child: Text(l10n.startAdventure),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -1137,6 +1152,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _finishSetup() {
+    final l10n = AppLocalizations.of(context)!;
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -1144,8 +1160,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     // Validate required fields
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez saisir votre pseudo'),
+        SnackBar(
+          content: Text(l10n.pseudoRequiredError),
           backgroundColor: Colors.red,
         ),
       );
@@ -1154,8 +1170,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
     if (_birthDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner votre date de naissance'),
+        SnackBar(
+          content: Text(l10n.birthDateRequired),
           backgroundColor: Colors.red,
         ),
       );
@@ -1164,8 +1180,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
     if (_bioController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez rédiger votre bio'),
+        SnackBar(
+          content: Text(l10n.bioRequired),
           backgroundColor: Colors.red,
         ),
       );
@@ -1176,8 +1192,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     if (_bioController.text.length > 600) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              'La bio dépasse la limite de 600 caractères (${_bioController.text.length}/600)'),
+          content: Text(l10n.bioMaxLength(_bioController.text.length)),
           backgroundColor: Colors.red,
         ),
       );
@@ -1201,8 +1216,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     // Validate prompt answers - must have exactly 3 valid responses
     if (_promptControllers.length != 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur: 3 prompts requis pour continuer'),
+        SnackBar(
+          content: Text(l10n.promptRequired),
           backgroundColor: Colors.red,
         ),
       );
@@ -1214,7 +1229,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       if (text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Veuillez répondre à la question ${i + 1}'),
+            content: Text(l10n.promptAnswerRequired(i + 1)),
             backgroundColor: Colors.red,
           ),
         );
@@ -1224,8 +1239,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       if (text.length > 150) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                'La réponse ${i + 1} dépasse 150 caractères (${text.length}/150)'),
+            content: Text(l10n.promptAnswerMaxLength(i + 1, text.length)),
             backgroundColor: Colors.red,
           ),
         );
@@ -1258,17 +1272,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Future<void> _saveProfileToBackend(
       ProfileProvider profileProvider, AuthProvider authProvider) async {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Sauvegarde en cours...'),
+            Text(l10n.savingInProgress),
           ],
         ),
       ),
@@ -1322,10 +1338,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-                Text('Erreur lors de la sauvegarde du profil: ${e.toString()}'),
+                Text(l10n.errorSavingProfile(e.toString())),
             backgroundColor: Colors.red,
             action: SnackBarAction(
-              label: 'Réessayer',
+              label: l10n.retry,
               textColor: Colors.white,
               onPressed: () =>
                   _saveProfileToBackend(profileProvider, authProvider),
@@ -1338,16 +1354,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _showProfileIncompleteDialog(ProfileCompletion? completion) {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Profil incomplet'),
+        title: Text(l10n.profileIncompleteTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-                'Votre profil n\'est pas encore complet. Étapes manquantes:'),
+            Text(l10n.profileIncompleteSteps),
             const SizedBox(height: 8),
             if (completion?.missingSteps.isNotEmpty ?? false)
               ...completion!.missingSteps
@@ -1371,7 +1388,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         actions: [
           TextButton(
             onPressed: () => context.pop(),
-            child: const Text('Compris'),
+            child: Text(l10n.understood),
           ),
         ],
       ),
