@@ -79,6 +79,56 @@ void main() {
       expect(notFoundError.isNotFound, isTrue);
       expect(serverError.isServerError, isTrue);
     });
+
+    test('should handle validation errors as List', () {
+      final exception = ApiException(
+        statusCode: 400,
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        errors: [
+          'latitude must be a number conforming to the specified constraints',
+          'longitude must be a number conforming to the specified constraints'
+        ],
+      );
+
+      expect(exception.statusCode, equals(400));
+      expect(exception.message, equals('Validation failed'));
+      expect(exception.code, equals('VALIDATION_ERROR'));
+      expect(exception.isValidationError, isTrue);
+      expect(exception.errorMessages.length, equals(2));
+      expect(exception.errorMessages[0], contains('latitude'));
+      expect(exception.errorMessages[1], contains('longitude'));
+      expect(exception.errorMessage, contains('latitude'));
+      expect(exception.errorMessage, contains('longitude'));
+    });
+
+    test('should handle validation errors as Map', () {
+      final exception = ApiException(
+        statusCode: 400,
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        errors: {
+          'email': ['Email is required', 'Email must be valid'],
+          'password': ['Password is too short'],
+        },
+      );
+
+      expect(exception.statusCode, equals(400));
+      expect(exception.isValidationError, isTrue);
+      expect(exception.errorMessages.length, equals(3));
+      expect(exception.errorMessages.any((msg) => msg.contains('email')), isTrue);
+      expect(exception.errorMessages.any((msg) => msg.contains('password')), isTrue);
+    });
+
+    test('should handle null errors gracefully', () {
+      final exception = ApiException(
+        statusCode: 500,
+        message: 'Internal server error',
+      );
+
+      expect(exception.errorMessages, isEmpty);
+      expect(exception.errorMessage, equals('Internal server error'));
+    });
   });
 
   group('MatchingServiceApi Tests', () {

@@ -1446,13 +1446,14 @@ class ApiService {
         // Si erreur, essaye d'extraire le message d'un Map, sinon retourne le body brut
         String message;
         String? code;
-        Map<String, dynamic>? errors;
+        dynamic errors; // Can be List or Map
         RateLimitInfo? rateLimitInfo;
         
         if (decoded is Map<String, dynamic>) {
           message = decoded['message'] ??
               _getDefaultErrorMessage(response.statusCode);
           code = decoded['code'];
+          // errors can be either a List or a Map, so we keep it as dynamic
           errors = decoded['errors'];
           
           // Extract retry information from response body if available
@@ -1654,11 +1655,13 @@ class MatchingServiceApi {
       } else {
         String message;
         String? code;
+        dynamic errors; // Can be List or Map
         RateLimitInfo? rateLimitInfo;
         
         if (decoded is Map<String, dynamic>) {
           message = decoded['message'] ?? 'Unknown error';
           code = decoded['code'];
+          errors = decoded['errors'];
           
           // Extract retry information from response body if available
           if (response.statusCode == 429 && decoded['retryAfter'] != null) {
@@ -1668,6 +1671,8 @@ class MatchingServiceApi {
           }
         } else {
           message = response.body;
+          code = null;
+          errors = null;
         }
         
         // Extract rate limit info from headers
@@ -1686,6 +1691,7 @@ class MatchingServiceApi {
           statusCode: response.statusCode,
           message: message,
           code: code,
+          errors: errors,
           rateLimitInfo: rateLimitInfo,
         );
       }
@@ -1937,6 +1943,7 @@ class MatchingServiceApi {
         statusCode: response.statusCode,
         message: data['message'] ?? 'Matching service error occurred',
         code: data['code'],
+        errors: data['errors'],
         rateLimitInfo: rateLimitInfo,
       );
     }
@@ -1947,7 +1954,7 @@ class ApiException implements Exception {
   final int statusCode;
   final String message;
   final String? code;
-  final Map<String, dynamic>? errors;
+  final dynamic errors; // Can be Map<String, dynamic> or List<dynamic>
   final RateLimitInfo? rateLimitInfo;
 
   ApiException({
@@ -1960,6 +1967,34 @@ class ApiException implements Exception {
 
   @override
   String toString() => 'ApiException: $message (Status: $statusCode)';
+
+  /// Get formatted error messages as a list of strings
+  List<String> get errorMessages {
+    if (errors == null) return [];
+    
+    if (errors is List) {
+      return (errors as List).map((e) => e.toString()).toList();
+    } else if (errors is Map<String, dynamic>) {
+      final result = <String>[];
+      (errors as Map<String, dynamic>).forEach((key, value) {
+        if (value is List) {
+          result.addAll((value as List).map((e) => '$key: $e'));
+        } else {
+          result.add('$key: $value');
+        }
+      });
+      return result;
+    }
+    
+    return [errors.toString()];
+  }
+
+  /// Get a single formatted error message
+  String get errorMessage {
+    final messages = errorMessages;
+    if (messages.isEmpty) return message;
+    return messages.join(', ');
+  }
 
   bool get isAuthError => statusCode == 401;
   bool get isValidationError => statusCode == 400 || statusCode == 422;
