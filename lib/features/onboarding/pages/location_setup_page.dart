@@ -36,68 +36,127 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            children: [
-              // Scrollable content area
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.xl),
-                      
-                      // Title and subtitle
-                      Text(
-                        'Localisation requise',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: AppSpacing.md),
-                      
-                      Text(
-                        'Pour vous proposer les meilleurs profils à proximité, nous avons besoin d\'accéder à votre position. Cette autorisation est obligatoire pour utiliser GoldWen.',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+            child: Column(
+              children: [
+                // Scrollable content area
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: AppSpacing.xl),
+                        
+                        // Icon header
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGold.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.location_on_outlined,
+                            size: 32,
+                            color: AppColors.primaryGold,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: AppSpacing.xxl),
-                      
-                      // Auto-detect location button
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentCream,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                          border: Border.all(color: AppColors.dividerLight),
+                        
+                        const SizedBox(height: AppSpacing.lg),
+                        
+                        // Title and subtitle
+                        Text(
+                          'Localisation requise',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: AppColors.primaryGold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.my_location,
-                              color: AppColors.primaryGold,
-                              size: 48,
+                        
+                        const SizedBox(height: AppSpacing.md),
+                        
+                        Text(
+                          'Pour vous proposer les meilleurs profils à proximité, nous avons besoin d\'accéder à votre position. Cette autorisation est obligatoire pour utiliser GoldWen.',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textSecondary,
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        
+                        const SizedBox(height: AppSpacing.xxl),
+                        
+                        // Auto-detect location button
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.accentCream.withOpacity(0.8),
+                                AppColors.accentCream.withOpacity(0.5),
+                              ],
                             ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Activer la localisation',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: AppColors.primaryGold,
-                              ),
+                            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                            border: Border.all(
+                              color: AppColors.primaryGold.withOpacity(0.2),
+                              width: 1,
                             ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              'Autorisez l\'accès à votre position pour continuer',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.md),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.primaryGold.withOpacity(0.2),
+                                      AppColors.primaryGold.withOpacity(0.1),
+                                    ],
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.my_location_rounded,
+                                  color: AppColors.primaryGold,
+                                  size: 48,
+                                ),
                               ),
-                              textAlign: TextAlign.center,
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(
+                                'Activer la localisation',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: AppColors.primaryGold,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                'Autorisez l\'accès à votre position pour continuer',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: AppSpacing.md),
                             SizedBox(
