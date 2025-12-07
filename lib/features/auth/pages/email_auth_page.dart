@@ -87,7 +87,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                   
                   // Title
                   Text(
-                    _isSignUp ? 'Créer un compte' : 'Bon retour',
+                    _isSignUp ? 'Créer un compte' : 'Se connecter',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: AppColors.primaryGold,
                     ),

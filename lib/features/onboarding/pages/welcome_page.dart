@@ -122,7 +122,7 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    '✨ Conçue pour être désinstallée',
+                    'Conçue pour être désinstallée',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontStyle: FontStyle.italic,
                       color: AppColors.primaryGold,
