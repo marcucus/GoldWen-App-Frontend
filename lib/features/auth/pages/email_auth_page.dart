@@ -44,36 +44,70 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const Spacer(),
-                
-                // Title
-                Text(
-                  _isSignUp ? 'Créer un compte' : 'Se connecter',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: AppSpacing.md),
-                
-                Text(
-                  _isSignUp 
-                    ? 'Rejoignez GoldWen pour des rencontres authentiques'
-                    : 'Retrouvez votre compte GoldWen',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Spacer(),
+                  
+                  // Title with icon
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGold.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isSignUp ? Icons.person_add_outlined : Icons.lock_outline,
+                      size: 32,
+                      color: AppColors.primaryGold,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: AppSpacing.xxl),
+                  
+                  const SizedBox(height: AppSpacing.lg),
+                  
+                  // Title
+                  Text(
+                    _isSignUp ? 'Créer un compte' : 'Bon retour',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppColors.primaryGold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.md),
+                  
+                  Text(
+                    _isSignUp 
+                      ? 'Rejoignez GoldWen pour des rencontres authentiques et significatives'
+                      : 'Reconnectez-vous à votre parcours vers l\'amour',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.6,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.xxl),
                 
                 // Sign up fields
                 if (_isSignUp) ...[
@@ -218,18 +252,34 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.errorRed.withOpacity(0.1),
+                          AppColors.errorRed.withOpacity(0.05),
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(
+                        color: AppColors.errorRed.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade600),
+                        Icon(
+                          Icons.error_outline_rounded,
+                          color: AppColors.errorRed,
+                          size: 22,
+                        ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: TextStyle(color: Colors.red.shade600),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.errorRed,
+                            ),
                           ),
                         ),
                       ],
@@ -241,22 +291,44 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                 // Submit button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: authProvider.status == AuthStatus.loading
-                            ? null
-                            : _submitForm,
-                        child: authProvider.status == AuthStatus.loading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                        boxShadow: authProvider.status != AuthStatus.loading ? [
+                          BoxShadow(
+                            color: AppColors.primaryGold.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ] : [],
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: authProvider.status == AuthStatus.loading
+                              ? null
+                              : _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            elevation: 0,
+                          ),
+                          child: authProvider.status == AuthStatus.loading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  _isSignUp ? 'Créer mon compte' : 'Se connecter',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              )
-                            : Text(_isSignUp ? 'Créer mon compte' : 'Se connecter'),
+                        ),
                       ),
                     );
                   },

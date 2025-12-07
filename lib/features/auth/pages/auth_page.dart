@@ -22,50 +22,104 @@ class _AuthPageState extends State<AuthPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            children: [
-              const Spacer(),
-              
-              // Title
-              Text(
-                'Connectez-vous',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.md),
-              
-              Text(
-                'Choisissez votre méthode de connexion préférée',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+            child: Column(
+              children: [
+                const Spacer(),
+                
+                // Decorative element
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGold.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      size: 48,
+                      color: AppColors.primaryGold,
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.xxl),
+                
+                const SizedBox(height: AppSpacing.xl),
+                
+                // Title
+                Text(
+                  'Bienvenue',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color: AppColors.primaryGold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.md),
+                
+                Text(
+                  'Connectez-vous pour commencer\nvotre parcours vers des connexions authentiques',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.xxl),
               
               // Email/Password Sign In
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EmailAuthPage(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.email_outlined, size: 24),
-                  label: const Text('Continuer avec email'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryGold,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryGold.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EmailAuthPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.email_outlined, size: 22),
+                    label: const Text('Continuer avec email'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGold,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 0,
+                    ),
                   ),
                 ),
               ),
@@ -75,15 +129,27 @@ class _AuthPageState extends State<AuthPage> {
               // Divider
               Row(
                 children: [
-                  const Expanded(child: Divider()),
+                  const Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: AppColors.dividerLight,
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Text(
-                      'ou',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      'ou continuer avec',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ),
-                  const Expanded(child: Divider()),
+                  const Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: AppColors.dividerLight,
+                    ),
+                  ),
                 ],
               ),
               
@@ -92,56 +158,77 @@ class _AuthPageState extends State<AuthPage> {
               // Google Sign In
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
-                  return SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: authProvider.status == AuthStatus.loading
-                          ? null
-                          : () async {
-                              try {
-                                await authProvider.signInWithGoogle();
-                                if (authProvider.isAuthenticated && mounted) {
-                                  // Let the app routing handle where to go based on completion status
-                                  context.go('/splash');
-                                } else if (authProvider.error != null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Erreur de connexion Google: ${authProvider.error}'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: authProvider.status == AuthStatus.loading
+                            ? null
+                            : () async {
+                                try {
+                                  await authProvider.signInWithGoogle();
+                                  if (authProvider.isAuthenticated && mounted) {
+                                    // Let the app routing handle where to go based on completion status
+                                    context.go('/splash');
+                                  } else if (authProvider.error != null && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur de connexion Google: ${authProvider.error}'),
+                                        backgroundColor: AppColors.errorRed,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur de connexion: $e'),
+                                        backgroundColor: AppColors.errorRed,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 }
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Erreur de connexion: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                      icon: authProvider.status == AuthStatus.loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.g_mobiledata, size: 24),
-                      label: Text(
-                        authProvider.status == AuthStatus.loading
-                            ? 'Connexion...'
-                            : 'Continuer avec Google',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.textDark,
-                        side: const BorderSide(color: AppColors.dividerLight),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                              },
+                        icon: authProvider.status == AuthStatus.loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.textDark),
+                                ),
+                              )
+                            : const Icon(Icons.g_mobiledata, size: 28),
+                        label: Text(
+                          authProvider.status == AuthStatus.loading
+                              ? 'Connexion...'
+                              : 'Continuer avec Google',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.textDark,
+                          side: const BorderSide(color: AppColors.dividerLight, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          elevation: 0,
+                        ),
                       ),
                     ),
                   );
@@ -153,55 +240,76 @@ class _AuthPageState extends State<AuthPage> {
               // Apple Sign In
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
-                  return SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: authProvider.status == AuthStatus.loading
-                          ? null
-                          : () async {
-                              try {
-                                await authProvider.signInWithApple();
-                                if (authProvider.isAuthenticated && mounted) {
-                                  // Let the app routing handle where to go based on completion status
-                                  context.go('/splash');
-                                } else if (authProvider.error != null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Erreur de connexion Apple: ${authProvider.error}'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: authProvider.status == AuthStatus.loading
+                            ? null
+                            : () async {
+                                try {
+                                  await authProvider.signInWithApple();
+                                  if (authProvider.isAuthenticated && mounted) {
+                                    // Let the app routing handle where to go based on completion status
+                                    context.go('/splash');
+                                  } else if (authProvider.error != null && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur de connexion Apple: ${authProvider.error}'),
+                                        backgroundColor: AppColors.errorRed,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur de connexion: $e'),
+                                        backgroundColor: AppColors.errorRed,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 }
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Erreur de connexion: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                      icon: authProvider.status == AuthStatus.loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.apple, size: 24),
-                      label: Text(
-                        authProvider.status == AuthStatus.loading
-                            ? 'Connexion...'
-                            : 'Continuer avec Apple',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                              },
+                        icon: authProvider.status == AuthStatus.loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Icon(Icons.apple, size: 24),
+                        label: Text(
+                          authProvider.status == AuthStatus.loading
+                              ? 'Connexion...'
+                              : 'Continuer avec Apple',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.textDark,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          elevation: 0,
+                        ),
                       ),
                     ),
                   );
@@ -210,48 +318,58 @@ class _AuthPageState extends State<AuthPage> {
               
               const SizedBox(height: AppSpacing.xxl),
               
-              // Divider
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text(
-                      'Sécurisé et privé',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              
-              const SizedBox(height: AppSpacing.lg),
-              
               // Privacy note
               Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: AppColors.accentCream,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.accentCream.withOpacity(0.6),
+                      AppColors.accentCream.withOpacity(0.3),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                  border: Border.all(
+                    color: AppColors.primaryGold.withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
-                child: Column(
+                child: Row(
                   children: [
-                    Icon(
-                      Icons.security,
-                      color: AppColors.primaryGold,
-                      size: 32,
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGold.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.shield_outlined,
+                        color: AppColors.primaryGold,
+                        size: 24,
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Vos données sont protégées',
-                      style: Theme.of(context).textTheme.labelLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Nous utilisons des méthodes de connexion sécurisées et ne stockons jamais vos mots de passe.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Vos données sont protégées',
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'Connexion sécurisée et conforme RGPD',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
