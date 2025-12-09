@@ -51,34 +51,70 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Title and subtitle
-                    Text(
-                      l10n.shareMoreTitle,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: AppSpacing.md),
-
-                    Text(
-                      l10n.shareMoreSubtitle,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: AppSpacing.lg),
+                      
+                      // Icon header
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGold.withOpacity(0.1),
+                            shape: BoxShape.circle,
                           ),
-                      textAlign: TextAlign.center,
-                    ),
+                          child: Icon(
+                            Icons.info_outline_rounded,
+                            size: 32,
+                            color: AppColors.primaryGold,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: AppSpacing.lg),
+
+                      // Title and subtitle
+                      Text(
+                        l10n.shareMoreTitle,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.primaryGold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      Text(
+                        l10n.shareMoreSubtitle,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.6,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
 
                     const SizedBox(height: AppSpacing.xxl),
 

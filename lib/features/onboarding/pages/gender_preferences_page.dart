@@ -35,32 +35,66 @@ class _GenderPreferencesPageState extends State<GenderPreferencesPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.xl),
-              
-              // Title and subtitle
-              Text(
-                'Je suis intéressé(e) par...',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.md),
-              
-              Text(
-                'Vous pouvez sélectionner plusieurs options. Ces préférences nous aident à vous proposer des profils compatibles.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+            child: Column(
+              children: [
+                const SizedBox(height: AppSpacing.xl),
+                
+                // Icon header
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.favorite_border_rounded,
+                    size: 32,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.xxl),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // Title and subtitle
+                Text(
+                  'Je suis intéressé(e) par...',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primaryGold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.md),
+                
+                Text(
+                  'Vous pouvez sélectionner plusieurs options. Ces préférences nous aident à vous proposer des profils compatibles.',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.xxl),
               
               // Gender preference options
               Expanded(
@@ -82,24 +116,46 @@ class _GenderPreferencesPageState extends State<GenderPreferencesPage> {
                             }
                           });
                         },
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : Colors.transparent,
+                            gradient: isSelected ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primaryGold.withOpacity(0.15),
+                                AppColors.primaryGold.withOpacity(0.08),
+                              ],
+                            ) : null,
+                            color: isSelected ? null : AppColors.backgroundWhite,
                             borderRadius: BorderRadius.circular(AppBorderRadius.large),
                             border: Border.all(
                               color: isSelected ? AppColors.primaryGold : AppColors.dividerLight,
                               width: isSelected ? 2 : 1,
                             ),
+                            boxShadow: isSelected ? [
+                              BoxShadow(
+                                color: AppColors.primaryGold.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ] : [],
                           ),
                           child: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.md),
                                 decoration: BoxDecoration(
-                                  color: isSelected 
-                                      ? AppColors.primaryGold.withOpacity(0.2)
-                                      : AppColors.accentCream,
+                                  gradient: isSelected ? LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.primaryGold.withOpacity(0.3),
+                                      AppColors.primaryGold.withOpacity(0.2),
+                                    ],
+                                  ) : null,
+                                  color: isSelected ? null : AppColors.accentCream,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -107,7 +163,7 @@ class _GenderPreferencesPageState extends State<GenderPreferencesPage> {
                                   color: isSelected 
                                       ? AppColors.primaryGold
                                       : AppColors.textSecondary,
-                                  size: 32,
+                                  size: 28,
                                 ),
                               ),
                               
@@ -181,11 +237,33 @@ class _GenderPreferencesPageState extends State<GenderPreferencesPage> {
                 ),
               
               // Continue button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _selectedGenders.isNotEmpty ? _continue : null,
-                  child: const Text('Continuer'),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                  boxShadow: _selectedGenders.isNotEmpty ? [
+                    BoxShadow(
+                      color: AppColors.primaryGold.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ] : [],
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _selectedGenders.isNotEmpty ? _continue : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Continuer',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               

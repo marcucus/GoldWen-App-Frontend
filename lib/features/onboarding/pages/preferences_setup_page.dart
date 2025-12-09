@@ -29,32 +29,66 @@ class _PreferencesSetupPageState extends State<PreferencesSetupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.xl),
-              
-              // Title and subtitle
-              Text(
-                'Personnalisez vos critères',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.md),
-              
-              Text(
-                'Définissez vos préférences pour que nous puissions vous proposer les profils les plus compatibles.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.3),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+            child: Column(
+              children: [
+                const SizedBox(height: AppSpacing.xl),
+                
+                // Icon header
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    size: 32,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: AppSpacing.xxl),
+                
+                const SizedBox(height: AppSpacing.lg),
+                
+                // Title and subtitle
+                Text(
+                  'Personnalisez vos critères',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primaryGold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.md),
+                
+                Text(
+                  'Définissez vos préférences pour que nous puissions vous proposer les profils les plus compatibles.',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: AppSpacing.xxl),
               
               Expanded(
                 child: SingleChildScrollView(

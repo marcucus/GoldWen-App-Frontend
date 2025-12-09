@@ -287,32 +287,60 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                 onPressed: _previousQuestion,
               )
             : null,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Column(
-        children: [
-          // Progress indicator
-          LinearProgressIndicator(
-            value: (_currentPage + 1) / _questions.length,
-            backgroundColor: AppColors.dividerLight,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundWhite,
+              AppColors.accentCream.withOpacity(0.2),
+              AppColors.backgroundWhite,
+            ],
+            stops: const [0.0, 0.5, 1.0],
           ),
-          
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
-              onPageChanged: (page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
-              itemCount: _questions.length,
-              itemBuilder: (context, index) {
-                return _buildQuestionPage(_questions[index]);
-              },
+        ),
+        child: Column(
+          children: [
+            // Progress indicator with enhanced design
+            Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryGold.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: LinearProgressIndicator(
+                value: (_currentPage + 1) / _questions.length,
+                backgroundColor: AppColors.dividerLight,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                minHeight: 4,
+              ),
             ),
-          ),
-        ],
+            
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
+                onPageChanged: (page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+                itemCount: _questions.length,
+                itemBuilder: (context, index) {
+                  return _buildQuestionPage(_questions[index]);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -321,15 +349,34 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     final selectedAnswer = _answers[question.id];
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
           
+          // Icon representing the question
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.primaryGold.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.psychology_outlined,
+              size: 32,
+              color: AppColors.primaryGold,
+            ),
+          ),
+          
+          const SizedBox(height: AppSpacing.lg),
+          
           // Question
           Text(
             question.question,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.primaryGold,
+              fontSize: 24,
+            ),
             textAlign: TextAlign.center,
           ),
           
@@ -345,25 +392,51 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
             children: [
               if (_currentPage > 0)
                 Expanded(
-                  child: TextButton(
+                  child: TextButton.icon(
                     onPressed: _previousQuestion,
-                    child: const Text('Précédent'),
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    label: const Text('Précédent'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                   ),
                 ),
               if (_currentPage > 0) const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: (selectedAnswer != null && !_isSubmitting) ? _nextQuestion : null,
-                  child: _isSubmitting && _currentPage == _questions.length - 1
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                    boxShadow: (selectedAnswer != null && !_isSubmitting) ? [
+                      BoxShadow(
+                        color: AppColors.primaryGold.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ] : [],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: (selectedAnswer != null && !_isSubmitting) ? _nextQuestion : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 0,
+                    ),
+                    child: _isSubmitting && _currentPage == _questions.length - 1
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                      : Text(
+                          _currentPage == _questions.length - 1 ? 'Terminer' : 'Suivant',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
-                      : Text(_currentPage == _questions.length - 1 ? 'Terminer' : 'Suivant'),
+                        ),
+                  ),
                 ),
               ),
             ],
@@ -396,35 +469,70 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Card(
-              elevation: isSelected ? 4 : 1,
-              color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                side: BorderSide(
-                  color: isSelected ? AppColors.primaryGold : Colors.transparent,
-                  width: 2,
-                ),
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(AppSpacing.md),
-                title: Text(
-                  option,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: isSelected ? AppColors.primaryGold : null,
-                    fontWeight: isSelected ? FontWeight.w600 : null,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _answers[question.id] = option;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  gradient: isSelected ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primaryGold.withOpacity(0.15),
+                      AppColors.primaryGold.withOpacity(0.08),
+                    ],
+                  ) : null,
+                  color: isSelected ? null : AppColors.backgroundWhite,
+                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primaryGold : AppColors.dividerLight,
+                    width: isSelected ? 2 : 1,
                   ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: AppColors.primaryGold.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ] : [
+                    BoxShadow(
+                      color: AppColors.shadowLight,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                trailing: isSelected
-                    ? Icon(
-                        Icons.check_circle,
-                        color: AppColors.primaryGold,
-                      )
-                    : const Icon(
-                        Icons.radio_button_unchecked,
-                        color: AppColors.textSecondary,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        option,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: isSelected ? AppColors.primaryGold : AppColors.textDark,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        ),
                       ),
-                onTap: () => _selectAnswer(question.id, option),
+                    ),
+                    if (isSelected)
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGold,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           );
