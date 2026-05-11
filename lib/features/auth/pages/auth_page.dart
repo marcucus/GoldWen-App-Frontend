@@ -178,6 +178,16 @@ class _AuthPageState extends State<AuthPage> {
                                 try {
                                   await authProvider.signInWithGoogle();
                                   if (authProvider.isAuthenticated && mounted) {
+                                    final isComplete = authProvider.user?.isOnboardingCompleted ?? false;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(isComplete 
+                                          ? 'Heureux de vous revoir !' 
+                                          : 'Bienvenue ! Création de votre profil en cours...'),
+                                        backgroundColor: AppColors.primaryGold,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
                                     // Let the app routing handle where to go based on completion status
                                     context.go('/splash');
                                   } else if (authProvider.error != null && mounted) {
@@ -260,6 +270,16 @@ class _AuthPageState extends State<AuthPage> {
                                 try {
                                   await authProvider.signInWithApple();
                                   if (authProvider.isAuthenticated && mounted) {
+                                    final isComplete = authProvider.user?.isOnboardingCompleted ?? false;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(isComplete 
+                                          ? 'Heureux de vous revoir !' 
+                                          : 'Bienvenue ! Création de votre profil en cours...'),
+                                        backgroundColor: AppColors.textDark, // Distinct color for Apple
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
                                     // Let the app routing handle where to go based on completion status
                                     context.go('/splash');
                                   } else if (authProvider.error != null && mounted) {

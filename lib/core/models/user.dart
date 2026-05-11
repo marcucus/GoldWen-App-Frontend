@@ -11,6 +11,7 @@ class User {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? status;
+  final String? onboardingStep;
   final bool? isOnboardingCompleted;
   final bool? isProfileCompleted;
   final bool? hasActiveSubscription;
@@ -30,6 +31,7 @@ class User {
     this.createdAt,
     this.updatedAt,
     this.status,
+    this.onboardingStep,
     this.isOnboardingCompleted,
     this.isProfileCompleted,
     this.hasActiveSubscription,
@@ -88,6 +90,7 @@ class User {
                   ? _parseDateTime(json['updatedAt'] ?? json['updated_at']) 
                   : null,
         status: json['status'] is String ? json['status'] as String : json['status']?.toString(),
+        onboardingStep: json['onboardingStep'] is String ? json['onboardingStep'] as String : json['onboardingStep']?.toString(),
         isOnboardingCompleted: json['isOnboardingCompleted'] is bool ? json['isOnboardingCompleted'] as bool :
                               (json['isOnboardingCompleted']?.toString().toLowerCase() == 'true') ? true :
                               json['isOnboardingCompleted'] == null ? null : false,
@@ -145,6 +148,7 @@ class User {
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
       if (status != null) 'status': status,
+      if (onboardingStep != null) 'onboardingStep': onboardingStep,
       if (isOnboardingCompleted != null) 'isOnboardingCompleted': isOnboardingCompleted,
       if (isProfileCompleted != null) 'isProfileCompleted': isProfileCompleted,
       if (hasActiveSubscription != null) 'hasActiveSubscription': hasActiveSubscription,
@@ -166,6 +170,7 @@ class User {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? status,
+    String? onboardingStep,
     bool? isOnboardingCompleted,
     bool? isProfileCompleted,
     bool? hasActiveSubscription,
@@ -185,6 +190,7 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      onboardingStep: onboardingStep ?? this.onboardingStep,
       isOnboardingCompleted: isOnboardingCompleted ?? this.isOnboardingCompleted,
       isProfileCompleted: isProfileCompleted ?? this.isProfileCompleted,
       hasActiveSubscription: hasActiveSubscription ?? this.hasActiveSubscription,

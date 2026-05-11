@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/rate_limit_dialog.dart';
+import '../../../core/utils/form_validators.dart';
 
 class EmailAuthPage extends StatefulWidget {
   const EmailAuthPage({super.key});
@@ -121,12 +122,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                             hintText: 'Votre prénom',
                           ),
                           textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre prénom';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validateFirstName,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
@@ -138,12 +134,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                             hintText: 'Votre nom',
                           ),
                           textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre nom';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validateLastName,
                         ),
                       ),
                     ],
@@ -161,15 +152,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Veuillez entrer un email valide';
-                    }
-                    return null;
-                  },
+                  validator: FormValidators.validateEmail,
                 ),
                 
                 const SizedBox(height: AppSpacing.lg),
@@ -194,20 +177,8 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
                   ),
                   obscureText: _obscurePassword,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre mot de passe';
-                    }
-                    if (_isSignUp) {
-                      if (value.length < 6) {
-                        return 'Le mot de passe doit contenir au moins 6 caractères';
-                      }
-                      if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                        return 'Le mot de passe doit contenir au moins une majuscule';
-                      }
-                      if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-                        return 'Le mot de passe doit contenir au moins un caractère spécial';
-                      }
-                    }
+                    if (_isSignUp) return FormValidators.validatePassword(value);
+                    if (value == null || value.isEmpty) return 'Veuillez entrer votre mot de passe';
                     return null;
                   },
                 ),
@@ -385,12 +356,6 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
-        print('Sign in completed. Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
-        
-        // Wait a moment for the provider to notify listeners
-        await Future.delayed(const Duration(milliseconds: 50));
-        print('After delay - Auth status: ${authProvider.status}, isAuthenticated: ${authProvider.isAuthenticated}');
-      }
 
       print('Checking authentication status...');
       print('authProvider.isAuthenticated: ${authProvider.isAuthenticated}');
@@ -433,18 +398,6 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
         // Debug information for development
         if (mounted) {
           print('Auth error: $e');
-          if (e is ApiException) {
-            print('Status code: ${e.statusCode}');
-            print('Error code: ${e.code}');
-          }
-          
-          // Check if this might be a successful response that failed to parse
-          if (e.toString().contains('201') || 
-              e.toString().contains('200') || 
-              e.toString().contains('JWT') ||
-              e.toString().contains('token')) {
-            _errorMessage = 'Connexion réussie mais erreur de traitement. Veuillez réessayer ou contacter le support si le problème persiste.';
-          }
         }
       });
     }

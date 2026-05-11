@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../features/auth/providers/auth_provider.dart';
 import '../../features/onboarding/pages/gender_selection_page.dart';
 import '../../features/onboarding/pages/welcome_page.dart';
 import '../../features/onboarding/pages/personality_questionnaire_page.dart';
@@ -40,6 +42,69 @@ import '../../features/reports/pages/user_reports_page.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final authProvider = context.read<AuthProvider>();
+      final status = authProvider.status;
+      
+      // Let splash handle initial auth resolution
+      if (status == AuthStatus.initial || status == AuthStatus.loading) {
+        return null;
+      }
+
+      final isAuthenticated = authProvider.isAuthenticated;
+      final user = authProvider.user;
+      final currentPath = state.matchedLocation;
+      
+      final publicRoutes = ['/welcome', '/auth', '/auth/email', '/splash'];
+      final isPublicRoute = publicRoutes.contains(currentPath);
+      final isAdminRoute = currentPath.startsWith('/admin');
+
+      // Unauthenticated users
+      if (!isAuthenticated && status == AuthStatus.unauthenticated) {
+        if (!isPublicRoute && !isAdminRoute) {
+          return '/welcome';
+        }
+        return null; // safe to navigate to public route
+      }
+
+      // Authenticated users
+      if (isAuthenticated && user != null && !isAdminRoute) {
+        // Enforce onboarding resumption automatically
+        if (user.isOnboardingCompleted != true) {
+          final allowedOnboardingRoutes = [
+            '/gender-selection', 
+            '/questionnaire', 
+            '/profile-setup'
+          ];
+          
+          if (!allowedOnboardingRoutes.contains(currentPath)) {
+             // Bounce them precisely to the step stored in backend
+             switch (user.onboardingStep) {
+               case 'gender': return '/gender-selection';
+               case 'basic_info': return '/questionnaire';
+               case 'personality': return '/questionnaire';
+               case 'photos': return '/profile-setup';
+               case 'prompts': return '/profile-setup';
+               default: return '/gender-selection'; // Default safe start
+             }
+          }
+        } 
+        // Enforce profile completion
+        else if (user.isProfileCompleted != true) {
+           if (currentPath != '/profile-setup' && !currentPath.startsWith('/settings') && currentPath != '/splash') {
+              return '/profile-setup';
+           }
+        } 
+        // Fully authenticated and mapped
+        else {
+           if (isPublicRoute) {
+             return '/home';
+           }
+        }
+      }
+
+      return null;
+    },
     routes: [
       // Splash screen
       GoRoute(

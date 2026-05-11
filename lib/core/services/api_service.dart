@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+
 import '../config/app_config.dart';
 import '../models/models.dart';
 
@@ -11,6 +12,38 @@ class ApiService {
       ? AppConfig.devMainApiBaseUrl
       : AppConfig.mainApiBaseUrl;
   static String? _token;
+
+  // Dio is initialized lazily so that `baseUrl` (a getter itself) is resolved
+  // at the first call time, not at class loading time.
+  static Dio? _dioInstance;
+
+  static Dio get _dio {
+    if (_dioInstance == null) {
+      _dioInstance = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: AppConfig.defaultTimeout,
+        receiveTimeout: AppConfig.defaultTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ));
+      _dioInstance!.interceptors.add(InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_token != null) {
+            options.headers['Authorization'] = 'Bearer $_token';
+          }
+          return handler.next(options);
+        },
+        onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 401) {
+            clearToken();
+          }
+          return handler.next(e);
+        },
+      ));
+    }
+    return _dioInstance!;
+  }
 
   static void setToken(String token) {
     _token = token;
@@ -28,18 +61,27 @@ class ApiService {
       };
 
   // Helper method to handle HTTP requests with timeout and error handling
-  static Future<http.Response> _makeRequest(
-    Future<http.Response> request, [
+    static Future<Response> _makeRequest(
+    Future<Response> request, [
     Duration? timeout,
   ]) async {
     try {
-      return await request.timeout(timeout ?? AppConfig.defaultTimeout);
-    } on TimeoutException catch (_) {
+      return await request;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        throw ApiException(
+          statusCode: 0,
+          message: 'Request timeout - Please check your internet connection and try again',
+          code: 'TIMEOUT_ERROR',
+        );
+      }
+      if (e.response != null) {
+        return e.response!; // Let _handleResponse manage the error parsing from response body
+      }
       throw ApiException(
         statusCode: 0,
-        message:
-            'Request timeout - Please check your internet connection and try again',
-        code: 'TIMEOUT_ERROR',
+        message: 'Network error - Unable to connect to server',
+        code: 'NETWORK_ERROR',
       );
     } catch (e) {
       throw ApiException(
@@ -50,22 +92,19 @@ class ApiService {
     }
   }
 
+
   // Health check endpoints
   static Future<Map<String, dynamic>> healthCheck() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/health'),
-        headers: _headers,
-      ),
+      _dio.get('/health'),
     );
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getWelcome() async {
-    final response = await http.get(
-      Uri.parse('${baseUrl.replaceAll('/api/v1', '')}/'),
-      headers: _headers,
+    final response = await _dio.get(
+      '${baseUrl.replaceAll('/api/v1', '')}/',
     );
 
     return _handleResponse(response);
@@ -78,10 +117,7 @@ class ApiService {
     required String firstName,
     required String lastName,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/auth/register', data: jsonEncode({
         'email': email,
         'password': password,
         'firstName': firstName,
@@ -97,10 +133,7 @@ class ApiService {
     required String password,
   }) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: _headers,
-        body: jsonEncode({
+      _dio.post('/auth/login', data: jsonEncode({
           'email': email,
           'password': password,
         }),
@@ -118,10 +151,7 @@ class ApiService {
     String? lastName,
   }) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/auth/social-login'),
-        headers: _headers,
-        body: jsonEncode({
+      _dio.post('/auth/social-login', data: jsonEncode({
           'socialId': socialId,
           'provider': provider,
           'email': email,
@@ -135,10 +165,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> logout() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/logout'),
-      headers: _headers,
-    );
+    final response = await _dio.post('/auth/logout');
 
     return _handleResponse(response);
   }
@@ -146,10 +173,7 @@ class ApiService {
   // Profile endpoints
   static Future<Map<String, dynamic>> updateProfile(
       Map<String, dynamic> profileData) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me'),
-      headers: _headers,
-      body: jsonEncode(profileData),
+    final response = await _dio.put('/profiles/me', data: jsonEncode(profileData),
     );
 
     return _handleResponse(response);
@@ -163,10 +187,7 @@ class ApiService {
       print('Request body: ${jsonEncode({'answers': answers})}');
     }
     
-    final response = await http.post(
-      Uri.parse('$baseUrl/profiles/me/personality-answers'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/profiles/me/personality-answers', data: jsonEncode({
         'answers': answers
       }), // Wrap answers in object as expected by DTO
     );
@@ -176,11 +197,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPersonalityQuestions() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse(
-            '$baseUrl/profiles/personality-questions'), // Corrected endpoint - was /profiles/questions
-        headers: _headers,
-      ),
+      _dio.get('/profiles/personality-questions'),
     );
     
     final result = _handleResponse(response);
@@ -207,10 +224,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPrompts() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/profiles/prompts'),
-        headers: _headers,
-      ),
+      _dio.get('/profiles/prompts'),
     );
     
     final result = _handleResponse(response);
@@ -254,10 +268,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> submitPromptAnswers(
       List<Map<String, dynamic>> answers) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/profiles/me/prompt-answers'),
-      headers: _headers,
-      body: jsonEncode(
+    final response = await _dio.post('/profiles/me/prompt-answers', data: jsonEncode(
           {'answers': answers}), // Wrap in answers object as expected by DTO
     );
 
@@ -267,10 +278,7 @@ class ApiService {
   static Future<Map<String, dynamic>> updateProfileStatus({
     bool? isVisible,
   }) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me/status'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.put('/profiles/me/status', data: jsonEncode({
         if (isVisible != null) 'isVisible': isVisible,
       }),
     );
@@ -280,10 +288,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getProfileCompletion() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/profiles/completion'),
-        headers: _headers,
-      ),
+      _dio.get('/profiles/completion'),
     );
 
     return _handleResponse(response);
@@ -291,10 +296,7 @@ class ApiService {
 
   // Authentication extensions
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/forgot-password'),
-      headers: _headers,
-      body: jsonEncode({'email': email}),
+    final response = await _dio.post('/auth/forgot-password', data: jsonEncode({'email': email}),
     );
 
     return _handleResponse(response);
@@ -302,10 +304,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> resetPassword(
       String token, String newPassword) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/reset-password'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/auth/reset-password', data: jsonEncode({
         'token': token,
         'newPassword': newPassword,
       }),
@@ -316,10 +315,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> changePassword(
       String currentPassword, String newPassword) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/change-password'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/auth/change-password', data: jsonEncode({
         'currentPassword': currentPassword,
         'newPassword': newPassword,
       }),
@@ -329,40 +325,28 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> verifyEmail(String token) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/verify-email'),
-      headers: _headers,
-      body: jsonEncode({'token': token}),
+    final response = await _dio.post('/auth/verify-email', data: jsonEncode({'token': token}),
     );
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getCurrentUser() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/auth/me'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/auth/me');
 
     return _handleResponse(response);
   }
 
   // User endpoints
   static Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> updateUser(
       Map<String, dynamic> userData) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/users/me'),
-      headers: _headers,
-      body: jsonEncode(userData),
+    final response = await _dio.put('/users/me', data: jsonEncode(userData),
     );
 
     return _handleResponse(response);
@@ -370,192 +354,105 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateUserSettings(
       Map<String, dynamic> settings) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/users/me/settings'),
-      headers: _headers,
-      body: jsonEncode(settings),
+    final response = await _dio.put('/users/me/settings', data: jsonEncode(settings),
     );
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getUserStats() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me/stats'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me/stats');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deactivateAccount() async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/users/me/deactivate'),
-      headers: _headers,
-    );
+    final response = await _dio.put('/users/me/deactivate');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deleteAccount() async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/users/me'),
-      headers: _headers,
-    );
+    final response = await _dio.delete('/users/me');
 
     return _handleResponse(response);
   }
 
   // Enhanced Profile endpoints
   static Future<Map<String, dynamic>> getProfile() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/profiles/me'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/profiles/me');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getProfileById(String userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/profiles/$userId'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/profiles/$userId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> uploadPhoto(String filePath,
       {int? order}) async {
-    var request =
-        http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
-    request.headers.addAll(_headers);
-    
     String extension = filePath.split('.').last.toLowerCase();
+    String subtype = extension == 'png' ? 'png' : extension == 'webp' ? 'webp' : 'jpeg';
     
-    // Determine media type based on file extension
-    String subtype;
-    switch (extension) {
-      case 'png':
-        subtype = 'png';
-        break;
-      case 'webp':
-        subtype = 'webp';
-        break;
-      case 'jpg':
-      case 'jpeg':
-      default:
-        subtype = 'jpeg';
-        break;
-    }
-    
-    // Read file as bytes to ensure proper MIME type handling
     final file = File(filePath);
-    final bytes = await file.readAsBytes();
     final filename = file.uri.pathSegments.last;
     
-    final multipartFile = http.MultipartFile.fromBytes(
-      'photos',
-      bytes,
-      filename: filename,
-      contentType: MediaType('image', subtype),
-    );
+    final formData = FormData.fromMap({
+      'photos': await MultipartFile.fromFile(
+        filePath,
+        filename: filename,
+        contentType: MediaType('image', subtype),
+      ),
+      if (order != null) 'order': order.toString(),
+    });
     
-    request.files.add(multipartFile);
-    
-    if (order != null) {
-      request.fields['order'] = order.toString();
-    }
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await _dio.post('/profiles/me/photos', data: formData);
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> uploadPhotos(List<String> filePaths) async {
-    var request =
-        http.MultipartRequest('POST', Uri.parse('$baseUrl/profiles/me/photos'));
-    request.headers.addAll(_headers);
+    final formData = FormData();
     
     for (int i = 0; i < filePaths.length; i++) {
       String filePath = filePaths[i];
       String extension = filePath.split('.').last.toLowerCase();
       
-      // Determine media type based on file extension
-      String subtype;
-      String mimeType;
-      switch (extension) {
-        case 'png':
-          subtype = 'png';
-          mimeType = 'image/png';
-          break;
-        case 'webp':
-          subtype = 'webp';
-          mimeType = 'image/webp';
-          break;
-        case 'jpg':
-        case 'jpeg':
-        default:
-          subtype = 'jpeg';
-          mimeType = 'image/jpeg';
-          break;
-      }
-      
-      // Read file as bytes to ensure proper MIME type handling
+      String subtype = extension == 'png' ? 'png' : extension == 'webp' ? 'webp' : 'jpeg';
       final file = File(filePath);
-      final bytes = await file.readAsBytes();
       final filename = file.uri.pathSegments.last;
       
-      print('Adding file: $filename with MIME type: $mimeType');
-      
-      // Create multipart file with explicit MIME type
-      final multipartFile = http.MultipartFile.fromBytes(
+      formData.files.add(MapEntry(
         'photos',
-        bytes,
-        filename: filename,
-        contentType: MediaType('image', subtype),
-      );
-      
-      request.files.add(multipartFile);
-    }
-    
-    // Debug: Log the request headers and content type
-    print('Request headers: ${request.headers}');
-    print('Files being uploaded: ${request.files.length}');
-    for (var file in request.files) {
-      print('File field: ${file.field}, filename: ${file.filename}, contentType: ${file.contentType}');
+        await MultipartFile.fromFile(
+          filePath,
+          filename: filename,
+          contentType: MediaType('image', subtype),
+        ),
+      ));
     }
 
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await _dio.post('/profiles/me/photos', data: formData);
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> updatePhotoOrder(
       String photoId, int newOrder) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me/photos/$photoId/order'),
-      headers: _headers,
-      body: jsonEncode({'newOrder': newOrder}),
+    final response = await _dio.put('/profiles/me/photos/$photoId/order', data: jsonEncode({'newOrder': newOrder}),
     );
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deletePhoto(String photoId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/profiles/me/photos/$photoId'),
-      headers: _headers,
-    );
+    final response = await _dio.delete('/profiles/me/photos/$photoId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> setPrimaryPhoto(String photoId) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me/photos/$photoId/primary'),
-      headers: _headers,
-    );
+    final response = await _dio.put('/profiles/me/photos/$photoId/primary');
 
     return _handleResponse(response);
   }
@@ -566,94 +463,35 @@ class ApiService {
     required String type,
     int? order,
   }) async {
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/profiles/me/media'),
-    );
-    request.headers.addAll(_headers);
-
     String extension = filePath.split('.').last.toLowerCase();
 
-    // Determine media type based on file extension
-    String mainType;
+    String mainType = type == 'audio' ? 'audio' : 'video';
     String subtype;
-
     if (type == 'audio') {
-      mainType = 'audio';
-      switch (extension) {
-        case 'mp3':
-          subtype = 'mpeg';
-          break;
-        case 'wav':
-          subtype = 'wav';
-          break;
-        case 'm4a':
-          subtype = 'mp4';
-          break;
-        case 'aac':
-          subtype = 'aac';
-          break;
-        case 'ogg':
-          subtype = 'ogg';
-          break;
-        default:
-          subtype = 'mpeg';
-          break;
-      }
+      subtype = extension == 'mp3' ? 'mpeg' : extension == 'm4a' ? 'mp4' : extension;
     } else {
-      // video
-      mainType = 'video';
-      switch (extension) {
-        case 'mp4':
-          subtype = 'mp4';
-          break;
-        case 'mov':
-          subtype = 'quicktime';
-          break;
-        case 'avi':
-          subtype = 'x-msvideo';
-          break;
-        case 'mkv':
-          subtype = 'x-matroska';
-          break;
-        case 'webm':
-          subtype = 'webm';
-          break;
-        default:
-          subtype = 'mp4';
-          break;
-      }
+      subtype = extension == 'mov' ? 'quicktime' : extension == 'mkv' ? 'x-matroska' : extension;
     }
 
-    // Read file as bytes
     final file = File(filePath);
-    final bytes = await file.readAsBytes();
     final filename = file.uri.pathSegments.last;
 
-    final multipartFile = http.MultipartFile.fromBytes(
-      'mediaFile',
-      bytes,
-      filename: filename,
-      contentType: MediaType(mainType, subtype),
-    );
+    final formData = FormData.fromMap({
+      'mediaFile': await MultipartFile.fromFile(
+        filePath,
+        filename: filename,
+        contentType: MediaType(mainType, subtype),
+      ),
+      'type': type,
+      if (order != null) 'order': order.toString(),
+    });
 
-    request.files.add(multipartFile);
-    request.fields['type'] = type;
-
-    if (order != null) {
-      request.fields['order'] = order.toString();
-    }
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await _dio.post('/profiles/me/media', data: formData);
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deleteMediaFile(String mediaId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/profiles/me/media/$mediaId'),
-      headers: _headers,
-    );
+    final response = await _dio.delete('/profiles/me/media/$mediaId');
 
     return _handleResponse(response);
   }
@@ -662,10 +500,7 @@ class ApiService {
     String mediaId,
     int newOrder,
   ) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/profiles/me/media/$mediaId/order'),
-      headers: _headers,
-      body: jsonEncode({'newOrder': newOrder}),
+    final response = await _dio.put('/profiles/me/media/$mediaId/order', data: jsonEncode({'newOrder': newOrder}),
     );
 
     return _handleResponse(response);
@@ -674,10 +509,7 @@ class ApiService {
   // Matching endpoints
   static Future<Map<String, dynamic>> getDailySelection() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/matching/daily-selection'),
-        headers: _headers,
-      ),
+      _dio.get('/matching/daily-selection'),
     );
 
     return _handleResponse(response);
@@ -687,10 +519,7 @@ class ApiService {
     String profileId, {
     String choice = 'like',
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/matching/choose/$profileId'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/matching/choose/$profileId', data: jsonEncode({
         'choice': choice,
       }),
     );
@@ -705,36 +534,26 @@ class ApiService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (status != null) queryParams['status'] = status;
 
-    final uri = Uri.parse('$baseUrl/matching/matches')
-        .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse('/matching/matches').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getMatchDetails(String matchId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/matching/matches/$matchId'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/matching/matches/$matchId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deleteMatch(String matchId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/matching/matches/$matchId'),
-      headers: _headers,
-    );
+    final response = await _dio.delete('/matching/matches/$matchId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getCompatibility(String profileId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/matching/compatibility/$profileId'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/matching/compatibility/$profileId');
 
     return _handleResponse(response);
   }
@@ -742,10 +561,7 @@ class ApiService {
   // Premium feature: Who liked me
   static Future<Map<String, dynamic>> getWhoLikedMe() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/matching/who-liked-me'),
-        headers: _headers,
-      ),
+      _dio.get('/matching/who-liked-me'),
     );
 
     return _handleResponse(response);
@@ -754,10 +570,7 @@ class ApiService {
   // Chat endpoints
   static Future<Map<String, dynamic>> getConversations() async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/chat'),
-        headers: _headers,
-      ),
+      _dio.get('/chat'),
     );
 
     return _handleResponse(response);
@@ -766,10 +579,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getConversationDetails(
       String chatId) async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/chat/$chatId'),
-        headers: _headers,
-      ),
+      _dio.get('/chat/$chatId'),
     );
 
     return _handleResponse(response);
@@ -777,10 +587,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getChatByMatchId(String matchId) async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/chat/match/$matchId'),
-        headers: _headers,
-      ),
+      _dio.get('/chat/match/$matchId'),
     );
 
     return _handleResponse(response);
@@ -793,10 +600,9 @@ class ApiService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (before != null) queryParams['before'] = before;
 
-    final uri = Uri.parse('$baseUrl/chat/$chatId/messages')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse('/chat/$chatId/messages').replace(queryParameters: queryParams).toString();
     final response = await _makeRequest(
-      http.get(uri, headers: _headers),
+      _dio.get(uri),
     );
 
     return _handleResponse(response);
@@ -805,10 +611,7 @@ class ApiService {
   static Future<Map<String, dynamic>> sendMessage(String chatId,
       {required String type, required String content}) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/chat/$chatId/messages'),
-        headers: _headers,
-        body: jsonEncode({
+      _dio.post('/chat/$chatId/messages', data: jsonEncode({
           'type': type,
           'content': content,
         }),
@@ -821,10 +624,7 @@ class ApiService {
   static Future<Map<String, dynamic>> acceptMatch(String matchId,
       {required bool accept}) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/chat/accept/$matchId'),
-        headers: _headers,
-        body: jsonEncode({
+      _dio.post('/chat/accept/$matchId', data: jsonEncode({
           'accept': accept,
         }),
       ),
@@ -835,10 +635,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> markMessagesAsRead(String chatId) async {
     final response = await _makeRequest(
-      http.put(
-        Uri.parse('$baseUrl/chat/$chatId/messages/read'),
-        headers: _headers,
-      ),
+      _dio.put('/chat/$chatId/messages/read'),
     );
 
     return _handleResponse(response);
@@ -846,10 +643,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> deleteMessage(String messageId) async {
     final response = await _makeRequest(
-      http.delete(
-        Uri.parse('$baseUrl/chat/messages/$messageId'),
-        headers: _headers,
-      ),
+      _dio.delete('/chat/messages/$messageId'),
     );
 
     return _handleResponse(response);
@@ -857,10 +651,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> expireChat(String chatId) async {
     final response = await _makeRequest(
-      http.put(
-        Uri.parse('$baseUrl/chat/$chatId/expire'),
-        headers: _headers,
-      ),
+      _dio.put('/chat/$chatId/expire'),
     );
 
     return _handleResponse(response);
@@ -870,19 +661,13 @@ class ApiService {
 
   // Subscription endpoints
   static Future<Map<String, dynamic>> getSubscriptionPlans() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/subscriptions/plans'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/subscriptions/plans');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getCurrentSubscription() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/subscriptions/me'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/subscriptions/me');
 
     return _handleResponse(response);
   }
@@ -892,10 +677,7 @@ class ApiService {
     required String platform,
     required String receiptData,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/subscriptions/purchase'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/subscriptions/purchase', data: jsonEncode({
         'plan': plan,
         'platform': platform,
         'receiptData': receiptData,
@@ -909,10 +691,7 @@ class ApiService {
     required String receiptData,
     required String platform,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/subscriptions/verify-receipt'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/subscriptions/verify-receipt', data: jsonEncode({
         'receiptData': receiptData,
         'platform': platform,
       }),
@@ -922,28 +701,19 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> cancelSubscription() async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/subscriptions/cancel'),
-      headers: _headers,
-    );
+    final response = await _dio.put('/subscriptions/cancel');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> restoreSubscription() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/subscriptions/restore'),
-      headers: _headers,
-    );
+    final response = await _dio.post('/subscriptions/restore');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getSubscriptionUsage() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/subscriptions/usage'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/subscriptions/usage');
 
     return _handleResponse(response);
   }
@@ -961,57 +731,41 @@ class ApiService {
     if (type != null) queryParams['type'] = type;
     if (read != null) queryParams['read'] = read.toString();
 
-    final uri = Uri.parse('$baseUrl/notifications')
-        .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse('/notifications').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> markNotificationAsRead(
       String notificationId) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/notifications/$notificationId/read'),
-      headers: _headers,
-    );
+    final response = await _dio.put('/notifications/$notificationId/read');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> markAllNotificationsAsRead() async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/notifications/read-all'),
-      headers: _headers,
-    );
+    final response = await _dio.put('/notifications/read-all');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> deleteNotification(
       String notificationId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/notifications/$notificationId'),
-      headers: _headers,
-    );
+    final response = await _dio.delete('/notifications/$notificationId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getNotificationSettings() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/notifications/settings'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/notifications/settings');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> updateNotificationSettings(
       Map<String, dynamic> settings) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/notifications/settings'),
-      headers: _headers,
-      body: jsonEncode(settings),
+    final response = await _dio.put('/notifications/settings', data: jsonEncode(settings),
     );
 
     return _handleResponse(response);
@@ -1022,10 +776,7 @@ class ApiService {
     required String body,
     required String type,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/notifications/test'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/notifications/test', data: jsonEncode({
         'title': title,
         'body': body,
         'type': type,
@@ -1039,10 +790,7 @@ class ApiService {
     List<String>? targetUsers,
     String? customMessage,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/notifications/trigger-daily-selection'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/notifications/trigger-daily-selection', data: jsonEncode({
         if (targetUsers != null) 'targetUsers': targetUsers,
         if (customMessage != null) 'customMessage': customMessage,
       }),
@@ -1058,10 +806,7 @@ class ApiService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/notifications/send-group'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/notifications/send-group', data: jsonEncode({
         'userIds': userIds,
         'type': type,
         'title': title,
@@ -1079,10 +824,7 @@ class ApiService {
     String? appVersion,
     String? deviceId,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/users/me/push-tokens'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/users/me/push-tokens', data: jsonEncode({
         'token': token,
         'platform': platform,
         if (appVersion != null) 'appVersion': appVersion,
@@ -1096,10 +838,7 @@ class ApiService {
   static Future<Map<String, dynamic>> removePushToken({
     required String token,
   }) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/users/me/push-tokens'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.delete('/users/me/push-tokens', data: jsonEncode({
         'token': token,
       }),
     );
@@ -1124,10 +863,7 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/admin/auth/login'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/admin/auth/login', data: jsonEncode({
         'email': email,
         'password': password,
       }),
@@ -1149,27 +885,21 @@ class ApiService {
     if (search != null) queryParams['search'] = search;
 
     final uri =
-        Uri.parse('$baseUrl/admin/users').replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+        Uri.parse('/admin/users').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> getAdminUserDetails(String userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/admin/users/$userId'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/admin/users/$userId');
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> updateUserStatus(
       String userId, String status) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/admin/users/$userId/status'),
-      headers: _headers,
-      body: jsonEncode({'status': status}),
+    final response = await _dio.put('/admin/users/$userId/status', data: jsonEncode({'status': status}),
     );
 
     return _handleResponse(response);
@@ -1187,19 +917,15 @@ class ApiService {
     if (status != null) queryParams['status'] = status;
     if (type != null) queryParams['type'] = type;
 
-    final uri = Uri.parse('$baseUrl/admin/reports')
-        .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse('/admin/reports').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     return _handleResponse(response);
   }
 
   static Future<Map<String, dynamic>> updateReportStatus(
       String reportId, String status, String resolution) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/admin/reports/$reportId'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.put('/admin/reports/$reportId', data: jsonEncode({
         'status': status,
         'resolution': resolution,
       }),
@@ -1209,10 +935,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getAdminAnalytics() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/admin/analytics'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/admin/analytics');
 
     return _handleResponse(response);
   }
@@ -1222,10 +945,7 @@ class ApiService {
     required String body,
     required String type,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/admin/notifications/broadcast'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/admin/notifications/broadcast', data: jsonEncode({
         'title': title,
         'body': body,
         'type': type,
@@ -1241,10 +961,7 @@ class ApiService {
     bool? marketing,
     bool? analytics,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/users/consent'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/users/consent', data: jsonEncode({
         'dataProcessing': dataProcessing,
         if (marketing != null) 'marketing': marketing,
         if (analytics != null) 'analytics': analytics,
@@ -1264,10 +981,7 @@ class ApiService {
     Map<String, dynamic>? metadata,
   }) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/feedback'),
-        headers: _headers,
-        body: jsonEncode({
+      _dio.post('/feedback', data: jsonEncode({
           'type': type,
           'subject': subject,
           'message': message,
@@ -1288,9 +1002,8 @@ class ApiService {
     if (version != null) queryParams['version'] = version;
     queryParams['format'] = format;
 
-    final uri = Uri.parse('$baseUrl/legal/privacy-policy')
-        .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse('/legal/privacy-policy').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     return _handleResponse(response);
   }
@@ -1298,17 +1011,16 @@ class ApiService {
   static Future<dynamic> exportUserData({String format = 'json'}) async {
     final queryParams = <String, String>{'format': format};
     
-    final uri = Uri.parse('$baseUrl/users/me/export-data')
-        .replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse('/users/me/export-data').replace(queryParameters: queryParams).toString();
+    final response = await _dio.get(uri);
 
     // For file downloads, we might need to handle differently
     if (format == 'pdf') {
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return response.bodyBytes; // Return raw bytes for PDF
+      if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+        return (response.data as List<int>); // Return raw bytes for PDF
       } else {
         throw ApiException(
-          statusCode: response.statusCode,
+          statusCode: response.statusCode ?? 500,
           message: 'Failed to export data as PDF',
           code: 'EXPORT_ERROR',
         );
@@ -1324,10 +1036,7 @@ class ApiService {
     required bool functionalCookies,
     int? dataRetention,
   }) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/users/me/privacy-settings'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.put('/users/me/privacy-settings', data: jsonEncode({
         'analytics': analytics,
         'marketing': marketing,
         'functionalCookies': functionalCookies,
@@ -1339,46 +1048,34 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getPrivacySettings() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me/privacy-settings'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me/privacy-settings');
 
     return _handleResponse(response);
   }
 
   // Request data export
   static Future<Map<String, dynamic>> requestDataExport() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/users/me/data-export'),
-      headers: _headers,
-    );
+    final response = await _dio.post('/users/me/data-export');
 
     return _handleResponse(response);
   }
 
   // Get data export status
   static Future<Map<String, dynamic>> getDataExportStatus(String requestId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me/data-export/$requestId'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me/data-export/$requestId');
 
     return _handleResponse(response);
   }
 
   // Download data export
   static Future<dynamic> downloadDataExport(String requestId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me/data-export/$requestId/download'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me/data-export/$requestId/download');
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return response.bodyBytes; // Return raw bytes for file download
+    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+      return (response.data as List<int>); // Return raw bytes for file download
     } else {
       throw ApiException(
-        statusCode: response.statusCode,
+        statusCode: response.statusCode ?? 500,
         message: 'Failed to download data export',
         code: 'DOWNLOAD_ERROR',
       );
@@ -1391,10 +1088,7 @@ class ApiService {
     String? reason,
     bool immediateDelete = false,
   }) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/users/me'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.delete('/users/me', data: jsonEncode({
         'password': password,
         if (reason != null) 'reason': reason,
         'immediateDelete': immediateDelete,
@@ -1406,97 +1100,63 @@ class ApiService {
 
   // Cancel account deletion
   static Future<Map<String, dynamic>> cancelAccountDeletion() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/users/me/cancel-deletion'),
-      headers: _headers,
-    );
+    final response = await _dio.post('/users/me/cancel-deletion');
 
     return _handleResponse(response);
   }
 
   // Get account deletion status
   static Future<Map<String, dynamic>> getAccountDeletionStatus() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/users/me/deletion-status'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/users/me/deletion-status');
 
     return _handleResponse(response);
   }
 
-  static dynamic _handleResponse(http.Response response) {
-    try {
-      if (AppConfig.isDevelopment) {
-        print('API Response Status: ${response.statusCode}');
-        print('API Response Body: ${response.body}');
+    static dynamic _handleResponse(Response response) {
+    var rawData = response.data;
+    if (rawData is String && rawData.isNotEmpty) {
+      try {
+        rawData = jsonDecode(rawData);
+      } catch (_) {}
+    }
+    
+    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+      return rawData;
+    } else {
+      String message = 'API Error';
+      String code = 'ERROR';
+      dynamic errors;
+      RateLimitInfo? rateLimitInfo;
+      
+      if (rawData is Map) {
+         message = rawData['message'] ?? message;
+         code = rawData['code'] ?? code;
+         errors = rawData['errors'];
+         
+         if (response.statusCode == 429 && rawData['retryAfter'] != null) {
+           rateLimitInfo = RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
+         }
       }
-
-      final decoded = jsonDecode(response.body);
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (AppConfig.isDevelopment) {
-          print('API Response successful, returning data: $decoded');
-          print('Data type: ${decoded.runtimeType}');
-          if (decoded is Map<String, dynamic>) {
-            print('Map keys: ${decoded.keys.toList()}');
-          }
-        }
-        return decoded; // Peut être Map ou List
-      } else {
-        // Si erreur, essaye d'extraire le message d'un Map, sinon retourne le body brut
-        String message;
-        String? code;
-        dynamic errors; // Can be List or Map
-        RateLimitInfo? rateLimitInfo;
-        
-        if (decoded is Map<String, dynamic>) {
-          message = decoded['message'] ??
-              _getDefaultErrorMessage(response.statusCode);
-          code = decoded['code'];
-          // errors can be either a List or a Map, so we keep it as dynamic
-          errors = decoded['errors'];
-          
-          // Extract retry information from response body if available
-          if (response.statusCode == 429 && decoded['retryAfter'] != null) {
-            rateLimitInfo = RateLimitInfo(
-              retryAfterSeconds: decoded['retryAfter'] as int?,
-            );
-          }
-        } else {
-          message = _getDefaultErrorMessage(response.statusCode);
-          code = null;
-          errors = null;
-        }
-        
-        // Extract rate limit info from headers
-        if (rateLimitInfo == null) {
-          final headerMap = <String, String>{};
-          response.headers.forEach((key, value) {
-            headerMap[key.toLowerCase()] = value;
-          });
-          final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
-          if (rateLimitFromHeaders.hasData) {
-            rateLimitInfo = rateLimitFromHeaders;
-          }
-        }
-        
-        throw ApiException(
-          statusCode: response.statusCode,
-          message: message,
-          code: code,
-          errors: errors,
-          rateLimitInfo: rateLimitInfo,
-        );
+      
+      if (rateLimitInfo == null) {
+         final headerMap = <String, String>{};
+         response.headers.forEach((key, value) {
+            headerMap[key.toLowerCase()] = value.join(',');
+         });
+         final rli = RateLimitInfo.fromHeaders(headerMap);
+         if (rli.hasData) rateLimitInfo = rli;
       }
-    } catch (e) {
-      if (e is ApiException) rethrow;
+      
       throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Failed to parse response: $e',
-        code: 'PARSE_ERROR',
+        statusCode: response.statusCode ?? 500,
+        message: message,
+        code: code,
+        errors: errors,
+        rateLimitInfo: rateLimitInfo
       );
     }
   }
+
 
   static String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
@@ -1571,10 +1231,9 @@ class ApiService {
     if (type != null) queryParams['type'] = type;
     if (status != null) queryParams['status'] = status;
 
-    final uri = Uri.parse('$baseUrl/users/me/email-history')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse('/users/me/email-history').replace(queryParameters: queryParams).toString();
     final response = await _makeRequest(
-      http.get(uri, headers: _headers),
+      _dio.get(uri),
     );
 
     return _handleResponse(response);
@@ -1582,10 +1241,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getEmailDetails(String emailId) async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/users/me/email-history/$emailId'),
-        headers: _headers,
-      ),
+      _dio.get('/users/me/email-history/$emailId'),
     );
 
     return _handleResponse(response);
@@ -1593,10 +1249,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> retryEmail(String emailId) async {
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/users/me/email-history/$emailId/retry'),
-        headers: _headers,
-      ),
+      _dio.post('/users/me/email-history/$emailId/retry'),
     );
 
     return _handleResponse(response);
@@ -1610,24 +1263,43 @@ class MatchingServiceApi {
       : AppConfig.matchingServiceBaseUrl;
   static String get apiKey => AppConfig.matchingServiceApiKey;
 
+  static final Dio _dio = Dio(BaseOptions(
+    connectTimeout: AppConfig.defaultTimeout,
+    receiveTimeout: AppConfig.defaultTimeout,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': AppConfig.matchingServiceApiKey,
+    },
+  ));
+
+
   static Map<String, String> get _headers => {
         'Content-Type': 'application/json',
         'X-API-Key': apiKey,
       };
 
   // Helper method to handle HTTP requests with timeout and error handling
-  static Future<http.Response> _makeRequest(
-    Future<http.Response> request, [
+    static Future<Response> _makeRequest(
+    Future<Response> request, [
     Duration? timeout,
   ]) async {
     try {
-      return await request.timeout(timeout ?? AppConfig.defaultTimeout);
-    } on TimeoutException catch (_) {
+      return await request;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        throw ApiException(
+          statusCode: 0,
+          message: 'Request timeout - Please check your internet connection and try again',
+          code: 'TIMEOUT_ERROR',
+        );
+      }
+      if (e.response != null) {
+        return e.response!; // Let _handleResponse manage the error parsing from response body
+      }
       throw ApiException(
         statusCode: 0,
-        message:
-            'Request timeout - Please check your internet connection and try again',
-        code: 'TIMEOUT_ERROR',
+        message: 'Network error - Unable to connect to server',
+        code: 'NETWORK_ERROR',
       );
     } catch (e) {
       throw ApiException(
@@ -1638,83 +1310,58 @@ class MatchingServiceApi {
     }
   }
 
-  static dynamic _handleResponse(http.Response response) {
-    try {
-      if (AppConfig.isDevelopment) {
-        print('Matching API Response Status: ${response.statusCode}');
-        print('Matching API Response Body: ${response.body}');
-      }
 
-      final decoded = jsonDecode(response.body);
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (AppConfig.isDevelopment) {
-          print('Matching API Response successful, returning data: $decoded');
-        }
-        return decoded;
-      } else {
-        String message;
-        String? code;
-        dynamic errors; // Can be List or Map
-        RateLimitInfo? rateLimitInfo;
-        
-        if (decoded is Map<String, dynamic>) {
-          message = decoded['message'] ?? 'Unknown error';
-          code = decoded['code'];
-          errors = decoded['errors'];
-          
-          // Extract retry information from response body if available
-          if (response.statusCode == 429 && decoded['retryAfter'] != null) {
-            rateLimitInfo = RateLimitInfo(
-              retryAfterSeconds: decoded['retryAfter'] as int?,
-            );
-          }
-        } else {
-          message = response.body;
-          code = null;
-          errors = null;
-        }
-        
-        // Extract rate limit info from headers
-        if (rateLimitInfo == null) {
-          final headerMap = <String, String>{};
-          response.headers.forEach((key, value) {
-            headerMap[key.toLowerCase()] = value;
-          });
-          final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
-          if (rateLimitFromHeaders.hasData) {
-            rateLimitInfo = rateLimitFromHeaders;
-          }
-        }
-
-        throw ApiException(
-          statusCode: response.statusCode,
-          message: message,
-          code: code,
-          errors: errors,
-          rateLimitInfo: rateLimitInfo,
-        );
+    static dynamic _handleResponse(Response response) {
+    var rawData = response.data;
+    if (rawData is String && rawData.isNotEmpty) {
+      try {
+        rawData = jsonDecode(rawData);
+      } catch (_) {}
+    }
+    
+    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+      return rawData;
+    } else {
+      String message = 'API Error';
+      String code = 'ERROR';
+      dynamic errors;
+      RateLimitInfo? rateLimitInfo;
+      
+      if (rawData is Map) {
+         message = rawData['message'] ?? message;
+         code = rawData['code'] ?? code;
+         errors = rawData['errors'];
+         
+         if (response.statusCode == 429 && rawData['retryAfter'] != null) {
+           rateLimitInfo = RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
+         }
       }
-    } catch (e) {
-      if (e is ApiException) {
-        rethrow;
+      
+      if (rateLimitInfo == null) {
+         final headerMap = <String, String>{};
+         response.headers.forEach((key, value) {
+            headerMap[key.toLowerCase()] = value.join(',');
+         });
+         final rli = RateLimitInfo.fromHeaders(headerMap);
+         if (rli.hasData) rateLimitInfo = rli;
       }
+      
       throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Invalid response format',
-        code: 'INVALID_RESPONSE',
+        statusCode: response.statusCode ?? 500,
+        message: message,
+        code: code,
+        errors: errors,
+        rateLimitInfo: rateLimitInfo
       );
     }
   }
+
 
   static Future<Map<String, dynamic>> calculateCompatibility({
     required Map<String, dynamic> user1Profile,
     required Map<String, dynamic> user2Profile,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/matching-service/calculate-compatibility'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/matching-service/calculate-compatibility', data: jsonEncode({
         'user1Profile': user1Profile,
         'user2Profile': user2Profile,
       }),
@@ -1729,10 +1376,7 @@ class MatchingServiceApi {
     required List<Map<String, dynamic>> availableProfiles,
     int selectionSize = 5,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/matching-service/generate-daily-selection'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/matching-service/generate-daily-selection', data: jsonEncode({
         'userId': userId,
         'userProfile': userProfile,
         'availableProfiles': availableProfiles,
@@ -1747,10 +1391,7 @@ class MatchingServiceApi {
     required Map<String, dynamic> baseProfile,
     required List<Map<String, dynamic>> profilesToCompare,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/matching-service/batch-compatibility'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/matching-service/batch-compatibility', data: jsonEncode({
         'baseProfile': baseProfile,
         'profilesToCompare': profilesToCompare,
       }),
@@ -1767,10 +1408,7 @@ class MatchingServiceApi {
     Map<String, dynamic>? userLocation,
     bool includeAdvancedScoring = true,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/matching/calculate-compatibility-v2'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _dio.post('/matching/calculate-compatibility-v2', data: jsonEncode({
         'userId': userId,
         'candidateIds': candidateIds,
         'personalityAnswers': personalityAnswers,
@@ -1784,10 +1422,7 @@ class MatchingServiceApi {
   }
 
   static Future<Map<String, dynamic>> getAlgorithmStats() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/matching-service/algorithm/stats'),
-      headers: _headers,
-    );
+    final response = await _dio.get('/matching-service/algorithm/stats');
 
     return _handleMatchingResponse(response);
   }
@@ -1796,10 +1431,7 @@ class MatchingServiceApi {
 
   static Future<Map<String, dynamic>> getMatchDetails(String matchId) async {
     final response = await _makeRequest(
-      http.get(
-        Uri.parse('$baseUrl/matching/matches/$matchId'),
-        headers: _headers,
-      ),
+      _dio.get('/matching/matches/$matchId'),
     );
 
     return _handleResponse(response);
@@ -1820,12 +1452,10 @@ class MatchingServiceApi {
     if (startDate != null) queryParams['startDate'] = startDate;
     if (endDate != null) queryParams['endDate'] = endDate;
 
-    final uri = Uri.parse('$baseUrl/matching/history').replace(
-      queryParameters: queryParams,
-    );
+    final uri = Uri.parse('/matching/history').replace(queryParameters: queryParams).toString();
 
     final response = await _makeRequest(
-      http.get(uri, headers: _headers),
+      _dio.get(uri),
     );
 
     return _handleResponse(response);
@@ -1850,10 +1480,7 @@ class MatchingServiceApi {
     };
 
     final response = await _makeRequest(
-      http.post(
-        Uri.parse('$baseUrl/reports'),
-        headers: _headers,
-        body: jsonEncode(body),
+      _dio.post('/reports', data: jsonEncode(body),
       ),
     );
 
@@ -1872,12 +1499,10 @@ class MatchingServiceApi {
     
     if (status != null) queryParams['status'] = _reportStatusToString(status);
 
-    final uri = Uri.parse('$baseUrl/reports/me').replace(
-      queryParameters: queryParams,
-    );
+    final uri = Uri.parse('/reports/me').replace(queryParameters: queryParams).toString();
 
     final response = await _makeRequest(
-      http.get(uri, headers: _headers),
+      _dio.get(uri),
     );
 
     return _handleResponse(response);
@@ -1912,26 +1537,28 @@ class MatchingServiceApi {
     }
   }
 
-  static Map<String, dynamic> _handleMatchingResponse(http.Response response) {
-    final Map<String, dynamic> data = jsonDecode(response.body);
+  static Map<String, dynamic> _handleMatchingResponse(Response response) {
+    dynamic rawData = response.data;
+    if (rawData is String && rawData.isNotEmpty) {
+      try { rawData = jsonDecode(rawData); } catch (_) {}
+    }
+    final Map<String, dynamic> data = rawData is Map ? Map<String, dynamic>.from(rawData) : {};
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
       return data;
     } else {
       RateLimitInfo? rateLimitInfo;
       
-      // Extract retry information from response body if available
       if (response.statusCode == 429 && data['retryAfter'] != null) {
         rateLimitInfo = RateLimitInfo(
           retryAfterSeconds: data['retryAfter'] as int?,
         );
       }
       
-      // Extract rate limit info from headers
       if (rateLimitInfo == null) {
         final headerMap = <String, String>{};
         response.headers.forEach((key, value) {
-          headerMap[key.toLowerCase()] = value;
+          headerMap[key.toLowerCase()] = value.join(',');
         });
         final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
         if (rateLimitFromHeaders.hasData) {
@@ -1940,7 +1567,7 @@ class MatchingServiceApi {
       }
       
       throw ApiException(
-        statusCode: response.statusCode,
+        statusCode: response.statusCode ?? 500,
         message: data['message'] ?? 'Matching service error occurred',
         code: data['code'],
         errors: data['errors'],
