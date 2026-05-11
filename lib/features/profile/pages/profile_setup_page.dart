@@ -152,7 +152,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.promptLoadingError}: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: l10n.retry,
@@ -721,7 +721,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           ? Icons.check_circle
                           : Icons.pending,
                       color: _getValidAnswersCount() == 3
-                          ? Colors.green
+                          ? AppColors.successGreen
                           : AppColors.textSecondary,
                       size: 20,
                     ),
@@ -730,7 +730,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       'Réponses complétées: ${_getValidAnswersCount()}/3',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: _getValidAnswersCount() == 3
-                                ? Colors.green
+                                ? AppColors.successGreen
                                 : AppColors.textSecondary,
                             fontWeight: _getValidAnswersCount() == 3
                                 ? FontWeight.w600
@@ -1053,7 +1053,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             SnackBar(
               content: Text(
                   'La bio dépasse la limite de 600 caractères (${_bioController.text.length}/600)'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.errorRed,
             ),
           );
           return;
@@ -1139,7 +1139,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(errorMessage),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.errorRed,
                 duration: const Duration(seconds: 10),
               ),
             );
@@ -1175,7 +1175,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.pseudoRequiredError),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
         ),
       );
       return;
@@ -1185,7 +1185,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.birthDateRequired),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
         ),
       );
       return;
@@ -1195,7 +1195,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.bioRequired),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
         ),
       );
       return;
@@ -1206,7 +1206,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.bioMaxLength(_bioController.text.length)),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
         ),
       );
       return;
@@ -1219,7 +1219,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         const SnackBar(
           content: Text(
               'Erreur: Les prompts n\'ont pas été chargés correctement. Veuillez redémarrer l\'application.'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
           duration: Duration(seconds: 5),
         ),
       );
@@ -1231,7 +1231,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.promptRequired),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorRed,
         ),
       );
       return;
@@ -1243,7 +1243,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.promptAnswerRequired(i + 1)),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
           ),
         );
         return;
@@ -1253,7 +1253,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.promptAnswerMaxLength(i + 1, text.length)),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
           ),
         );
         return;
@@ -1352,7 +1352,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           SnackBar(
             content:
                 Text(l10n.errorSavingProfile(e.toString())),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
             action: SnackBarAction(
               label: l10n.retry,
               textColor: Colors.white,

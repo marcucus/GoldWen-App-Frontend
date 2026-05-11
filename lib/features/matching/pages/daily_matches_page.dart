@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
@@ -231,7 +232,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             Text(
                               'Découvrez vos matchs parfaits',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey[600],
+                                color: AppColors.textSecondary,
                               ),
                               semanticsLabel: 'Description: Découvrez vos matchs parfaits',
                             ),
@@ -268,14 +269,14 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.green[400]!,
-                            Colors.green[600]!,
+                            AppColors.successGreen.withAlpha(180),
+                            AppColors.successGreen,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withOpacity(0.3),
+                            color: AppColors.successGreen.withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -309,7 +310,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       margin: const EdgeInsets.only(top: 12),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: AppColors.backgroundGrey,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -317,7 +318,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                         children: [
                           Icon(
                             Icons.timer_outlined,
-                            color: Colors.grey[700],
+                            color: AppColors.textDark,
                             size: 18,
                             semanticLabel: 'Timer',
                           ),
@@ -325,7 +326,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           Text(
                             'Prochaine sélection dans $countdown',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[700],
+                              color: AppColors.textDark,
                               fontWeight: FontWeight.w600,
                             ),
                             semanticsLabel: 'Prochaine sélection dans $countdown',
@@ -493,7 +494,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       Text(
                         'GoldWen Plus: 3 choix/jour',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -524,7 +525,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       decoration: BoxDecoration(
                         color: remainingSelections > 0 
                           ? Theme.of(context).primaryColor
-                          : Colors.grey[400],
+                          : AppColors.dividerLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -547,13 +548,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   Icon(
                     Icons.schedule,
                     size: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Reset: ${_formatResetTime(refreshTime) ?? 'demain'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -775,8 +776,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                   label: const Text('Choisir'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: matchingProvider.canSelectMore
-                                        ? Colors.red
-                                        : Colors.grey,
+                                        ? AppColors.primaryGold
+                                        : AppColors.dividerLight,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(vertical: 12),
                                   ),
@@ -886,12 +887,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.2),
+                  color: AppColors.errorRed.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: AppColors.errorRed,
                   size: 48,
                   semanticLabel: 'Icône d\'erreur',
                 ),
@@ -1080,7 +1081,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Profil passé. Continuez à explorer !'),
-            backgroundColor: Colors.grey[700],
+            backgroundColor: AppColors.backgroundDark,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1091,7 +1092,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -1151,15 +1152,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.1),
+                        color: AppColors.primaryGold.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                        border: Border.all(color: AppColors.primaryGold.withOpacity(0.25)),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.upgrade,
-                            color: Colors.amber[700],
+                            color: AppColors.goldDeep,
                             size: 16,
                             semanticLabel: 'Icône de mise à niveau',
                           ),
@@ -1168,7 +1169,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             child: Text(
                               'GoldWen Plus : 3 choix/jour',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.amber[700],
+                                color: AppColors.goldDeep,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -1238,7 +1239,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warningAmber,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -1275,7 +1276,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Match décliné'),
-                    backgroundColor: Colors.orange,
+                    backgroundColor: AppColors.warningAmber,
                   ),
                 );
               },
@@ -1296,7 +1297,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -1319,7 +1320,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
             duration: const Duration(seconds: 3),
           ),
         );

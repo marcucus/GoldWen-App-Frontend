@@ -224,7 +224,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
   Widget _buildMediaTile(MediaFile mediaFile, int index) {
     final isAudio = mediaFile.type == 'audio';
     final icon = isAudio ? Icons.audiotrack : Icons.videocam;
-    final color = isAudio ? Colors.blue : Colors.purple;
+    final color = isAudio ? AppColors.infoBlue : Colors.purple;
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -391,7 +391,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$fileTypeLabel ajouté avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
           ),
         );
       }
@@ -444,7 +444,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Média supprimé avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
           ),
         );
       }

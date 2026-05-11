@@ -150,7 +150,7 @@ class _ReportPageState extends State<ReportPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: const BoxDecoration(
-                color: Colors.green,
+                color: AppColors.successGreen,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -193,12 +193,12 @@ class _ReportPageState extends State<ReportPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: AppColors.warningAmber.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.info_outline,
-                color: Colors.orange.shade700,
+                color: AppColors.warningAmber,
                 size: 24,
               ),
             ),
@@ -228,7 +228,7 @@ class _ReportPageState extends State<ReportPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Erreur : $message'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(
           label: 'OK',
@@ -355,13 +355,13 @@ class _ReportPageState extends State<ReportPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: AppColors.warningAmber.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.report_problem_outlined,
                 size: 64,
-                color: Colors.orange.shade700,
+                color: AppColors.warningAmber,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),

@@ -59,6 +59,21 @@ class AppColors {
   // Background Colors variations
   static const Color backgroundDark = Color(0xFF1A1A1A);
 
+  // Dark mode palette (warm coal)
+  static const Color darkBg = Color(0xFF0F0E0B);
+  static const Color darkBgCream = Color(0xFF171511);
+  static const Color darkCard = Color(0xFF1C1A15);
+  static const Color darkText = Color(0xFFF5F1E8);
+  static const Color darkText2 = Color(0xFFA8A398);
+  static const Color darkText3 = Color(0xFF6E6A60);
+  static const Color darkDivider = Color(0xFF2A2823);
+  static const Color darkGold = Color(0xFFE8C547);
+  static const Color darkGoldDeep = Color(0xFFB8941F);
+
+  // Extra gold tones
+  static const Color goldDeep = Color(0xFF8B6914);
+  static const Color goldPale = Color(0xFFF5E6B8);
+
   // High Contrast Colors (WCAG AAA compliant)
   static const Color highContrastPrimary = Color(0xFF8B6914);
   static const Color highContrastText = Color(0xFF000000);
@@ -84,12 +99,48 @@ class AppColors {
   );
   
   static LinearGradient get premiumGradient => const LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [primaryGoldLight, primaryGold, primaryGoldDark],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [gradientStart, gradientMiddle, gradientEnd],
     stops: [0.0, 0.5, 1.0],
   );
-  
+
+  static LinearGradient get welcomeGradient => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      backgroundWhite,
+      accentCream.withOpacity(0.4),
+      primaryGold.withOpacity(0.10),
+      backgroundWhite,
+    ],
+    stops: const [0.0, 0.30, 0.70, 1.0],
+  );
+
+  static LinearGradient get heroGradient => const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFFFFE5D1),
+      Color(0xFFF5E6B8),
+      Color(0xFFE8C547),
+      Color(0xFFD4AF37),
+    ],
+    stops: [0.0, 0.30, 0.70, 1.0],
+  );
+
+  static LinearGradient get heroGradientDark => const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF2a1f08),
+      Color(0xFF5e4408),
+      Color(0xFFB8941F),
+      Color(0xFFE8C547),
+    ],
+    stops: [0.0, 0.35, 0.75, 1.0],
+  );
+
   static LinearGradient get subtleGradient => LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -425,6 +476,22 @@ class AppShadows {
       color: highContrast ? AppColors.highContrastBorder.withOpacity(0.5) : AppColors.shadowMedium,
       blurRadius: highContrast ? 8 : 20,
       offset: const Offset(0, 8),
+    ),
+  ];
+
+  static List<BoxShadow> gold() => [
+    BoxShadow(
+      color: AppColors.primaryGold.withOpacity(0.30),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
+    ),
+  ];
+
+  static List<BoxShadow> darkNav() => [
+    BoxShadow(
+      color: const Color(0x4D000000),
+      blurRadius: 30,
+      offset: const Offset(0, 10),
     ),
   ];
 }

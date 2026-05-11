@@ -184,13 +184,13 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
                 Icon(
                   Icons.schedule,
                   size: 16,
-                  color: Colors.grey[600],
+                  color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   'Nouvelle sélection $resetTimeText',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

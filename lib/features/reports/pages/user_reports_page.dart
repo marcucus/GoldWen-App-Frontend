@@ -322,23 +322,23 @@ class _UserReportsPageState extends State<UserReportsPage> {
 
     switch (status) {
       case ReportStatus.pending:
-        backgroundColor = Colors.orange.withOpacity(0.1);
-        textColor = Colors.orange.shade700;
+        backgroundColor = AppColors.warningAmber.withOpacity(0.1);
+        textColor = AppColors.warningAmber;
         label = 'En attente';
         break;
       case ReportStatus.reviewed:
-        backgroundColor = Colors.blue.withOpacity(0.1);
-        textColor = Colors.blue.shade700;
+        backgroundColor = AppColors.infoBlue.withOpacity(0.1);
+        textColor = AppColors.infoBlue;
         label = 'Examiné';
         break;
       case ReportStatus.resolved:
-        backgroundColor = Colors.green.withOpacity(0.1);
-        textColor = Colors.green.shade700;
+        backgroundColor = AppColors.successGreen.withOpacity(0.1);
+        textColor = AppColors.successGreen;
         label = 'Résolu';
         break;
       case ReportStatus.dismissed:
-        backgroundColor = Colors.grey.withOpacity(0.1);
-        textColor = Colors.grey.shade700;
+        backgroundColor = AppColors.textSecondary.withOpacity(0.1);
+        textColor = AppColors.backgroundDark;
         label = 'Rejeté';
         break;
     }
@@ -421,7 +421,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.shade400,
+              color: AppColors.errorRed,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(

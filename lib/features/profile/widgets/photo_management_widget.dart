@@ -502,7 +502,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Photo ajoutée avec succès'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.successGreen,
               ),
             );
           }
@@ -598,7 +598,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('La photo est trop volumineuse (max 10MB). Veuillez choisir une photo plus petite.'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.warningAmber,
             ),
           );
         }
@@ -614,7 +614,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Format d\'image non supporté (JPG, PNG, HEIC uniquement)'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.warningAmber,
             ),
           );
         }
@@ -714,7 +714,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Photo supprimée'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
           ),
         );
       }
@@ -782,7 +782,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Photo principale mise à jour'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
           ),
         );
       }

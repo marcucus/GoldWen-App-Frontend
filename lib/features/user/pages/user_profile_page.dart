@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -151,12 +152,12 @@ class _UserProfilePageState extends State<UserProfilePage>
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: AppColors.dividerLight.withOpacity(0.5),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.close,
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -348,7 +349,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 context.go('/profile-setup');
               },
               gradient: const LinearGradient(
-                colors: [Colors.purple, Colors.deepPurple],
+                colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
               ),
             ),
             _buildMenuCard(
@@ -359,7 +360,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 context.go('/questionnaire');
               },
               gradient: const LinearGradient(
-                colors: [Colors.pink, Colors.red],
+                colors: [AppColors.errorRed, Color(0xFFC62828)],
               ),
             ),
             _buildMenuCard(
@@ -370,7 +371,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 _showPreferencesDialog();
               },
               gradient: const LinearGradient(
-                colors: [Colors.blue, Colors.indigo],
+                colors: [AppColors.infoBlue, Color(0xFF1565C0)],
               ),
             ),
             _buildMenuCard(
@@ -379,7 +380,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               subtitle: 'Accédez aux fonctionnalités premium',
               onTap: () => context.go('/subscription'),
               gradient: const LinearGradient(
-                colors: [Colors.amber, Colors.orange],
+                colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
               ),
               isHighlighted: true,
             ),
@@ -456,19 +457,19 @@ class _UserProfilePageState extends State<UserProfilePage>
         SlideInAnimation(
           delay: const Duration(milliseconds: 800),
           child: FloatingCard(
-            backgroundColor: Colors.red.withOpacity(0.1),
+            backgroundColor: AppColors.errorRed.withOpacity(0.08),
             onTap: () => _showLogoutDialog(authProvider),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: AppColors.errorRed.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.logout,
-                    color: Colors.red,
+                    color: AppColors.errorRed,
                     size: 24,
                   ),
                 ),
@@ -480,7 +481,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                       Text(
                         'Se déconnecter',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.red,
+                          color: AppColors.errorRed,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -488,7 +489,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                       Text(
                         'Quitter votre compte',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.red.withOpacity(0.7),
+                          color: AppColors.errorRed.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -497,7 +498,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: Colors.red,
+                  color: AppColors.errorRed,
                 ),
               ],
             ),
@@ -517,7 +518,7 @@ class _UserProfilePageState extends State<UserProfilePage>
   }) {
     return FloatingCard(
       onTap: onTap,
-      backgroundColor: isHighlighted ? Colors.amber.withOpacity(0.1) : null,
+      backgroundColor: isHighlighted ? AppColors.primaryGold.withOpacity(0.08) : null,
       child: Row(
         children: [
           Container(
@@ -548,14 +549,14 @@ class _UserProfilePageState extends State<UserProfilePage>
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isHighlighted ? Colors.amber[700] : null,
+                    color: isHighlighted ? AppColors.goldDeep : null,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -564,7 +565,7 @@ class _UserProfilePageState extends State<UserProfilePage>
           Icon(
             Icons.arrow_forward_ios,
             size: 16,
-            color: isHighlighted ? Colors.amber[700] : Colors.grey[600],
+            color: isHighlighted ? AppColors.goldDeep : AppColors.textSecondary,
           ),
         ],
       ),
@@ -605,7 +606,7 @@ class _UserProfilePageState extends State<UserProfilePage>
             trailing ?? const Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Colors.grey,
+              color: AppColors.textSecondary,
             ),
           ],
         ),
@@ -633,7 +634,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.errorRed,
               foregroundColor: Colors.white,
             ),
             child: const Text('Se déconnecter'),

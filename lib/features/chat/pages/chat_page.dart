@@ -333,7 +333,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     color: isFromCurrentUser
                         ? AppColors.primaryGold
                         : AppColors.accentCream,
-                    borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(18),
+                      topRight: const Radius.circular(18),
+                      bottomLeft: Radius.circular(isFromCurrentUser ? 18 : 6),
+                      bottomRight: Radius.circular(isFromCurrentUser ? 6 : 18),
+                    ),
+                    boxShadow: isFromCurrentUser ? AppShadows.gold() : AppShadows.soft(),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,8 +369,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             Icon(
                               message.isRead ? Icons.done_all : Icons.done,
                               size: 14,
-                              color: message.isRead 
-                                  ? Colors.lightBlue 
+                              color: message.isRead
+                                  ? AppColors.infoBlue
                                   : Colors.white70,
                             ),
                           ],
@@ -611,8 +617,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 checkPlatformCompatibility: true,
                 bottomActionBarConfig: BottomActionBarConfig(),
                 skinToneConfig: SkinToneConfig(
-                  dialogBackgroundColor: Colors.white,
-                  indicatorColor: Colors.grey,
+                  dialogBackgroundColor: AppColors.backgroundWhite,
+                  indicatorColor: AppColors.primaryGold,
                 ),
                 categoryViewConfig: CategoryViewConfig(
                   recentTabBehavior: RecentTabBehavior.RECENT,

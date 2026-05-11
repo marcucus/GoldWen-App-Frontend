@@ -35,8 +35,8 @@ class EmailStatusSummary extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: failedCount > 0 
-                    ? Colors.red.shade200
-                    : Colors.orange.shade200,
+                    ? AppColors.errorRed
+                    : AppColors.warningAmber.withOpacity(0.15),
                 width: 1,
               ),
             ),
@@ -44,7 +44,7 @@ class EmailStatusSummary extends StatelessWidget {
               children: [
                 Icon(
                   Icons.email,
-                  color: failedCount > 0 ? Colors.red : Colors.orange,
+                  color: failedCount > 0 ? AppColors.errorRed : AppColors.warningAmber,
                   size: 24,
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -66,7 +66,7 @@ class EmailStatusSummary extends StatelessWidget {
                             _buildBadge(
                               context,
                               '$failedCount Failed',
-                              Colors.red,
+                              AppColors.errorRed,
                             ),
                             if (pendingCount > 0)
                               const SizedBox(width: AppSpacing.sm),
@@ -75,7 +75,7 @@ class EmailStatusSummary extends StatelessWidget {
                             _buildBadge(
                               context,
                               '$pendingCount Pending',
-                              Colors.orange,
+                              AppColors.warningAmber,
                             ),
                         ],
                       ),

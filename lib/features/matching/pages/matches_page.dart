@@ -231,7 +231,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
             Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red.shade300,
+              color: AppColors.errorRed,
             ),
             const SizedBox(height: 16),
             Text(

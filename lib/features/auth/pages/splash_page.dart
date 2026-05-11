@@ -12,115 +12,142 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: AppAnimations.verySlow,
+      vsync: this,
+    );
+    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _controller.forward();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAuthStatus();
     });
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkAuthStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // Wait a bit for visual effect
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 1800));
 
     try {
-      // Check authentication status and refresh user data from backend
       await authProvider.checkAuthStatus();
-      
-      // After checking auth status, refresh user data to get latest completion flags from backend
+
       if (authProvider.isAuthenticated && authProvider.user != null) {
-        await authProvider.refreshUser(); // Fetch fresh user data from backend
+        await authProvider.refreshUser();
         final user = authProvider.user!;
 
-        print('=== USER AUTHENTICATION STATUS ===');
-        print('User ID: ${user.id}');
-        print('User email: ${user.email}');
-        print('isOnboardingCompleted: ${user.isOnboardingCompleted}');
-        print('isProfileCompleted: ${user.isProfileCompleted}');
-        print('==================================');
+        final bool hasLocationPermission =
+            await LocationService.checkLocationPermission();
 
-        // User is authenticated, check location permission first
-        bool hasLocationPermission = await LocationService.checkLocationPermission();
-        
-        print('Location permission status: $hasLocationPermission');
-        
         if (!hasLocationPermission) {
-          // In development/debug mode, skip location requirement for testing authentication
-          print('DEBUG: No location permission - would redirect to /welcome');
-          // TODO: Uncomment the lines below after location setup is configured
-          if (mounted) {
-            context.go('/gender-selection'); // Start fresh onboarding to handle location
-          }
+          if (mounted) context.go('/welcome');
           return;
         }
 
-        // Has location permission, check completion status from backend
-        // Backend automatically updates these flags based on user progress:
-        // - isOnboardingCompleted: true when personality questionnaire is completed
-        // - isProfileCompleted: true when all requirements met (photos, prompts, personality, profile fields)
-        if (user.isOnboardingCompleted == true && user.isProfileCompleted == true) {
-          // Both onboarding and profile completed, initialize location service and go to main app
+        if (user.isOnboardingCompleted == true &&
+            user.isProfileCompleted == true) {
           LocationService().initialize();
-          if (mounted) {
-            context.go('/home');
-          }
+          if (mounted) context.go('/home');
           return;
         } else if (user.isOnboardingCompleted == true) {
-          // Onboarding done but profile not completed, go to profile setup
-          if (mounted) {
-            context.go('/profile-setup');
-          }
+          if (mounted) context.go('/profile-setup');
           return;
         } else {
-          // Authenticated but onboarding not completed, go to questionnaire
-          if (mounted) {
-            context.go('/questionnaire');
-          }
+          if (mounted) context.go('/questionnaire');
           return;
         }
       }
     } catch (e) {
-      print('Error checking auth status: $e');
+      debugPrint('Splash: auth check error: $e');
     }
 
-    // Not authenticated or error, go to welcome
-    if (mounted) {
-      context.go('/welcome');
-    }
+    if (mounted) context.go('/welcome');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App logo or icon
-            const Icon(
-              Icons.favorite,
-              size: 80,
-              color: AppColors.primaryGold,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'GoldWen',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: AppColors.primaryGold,
-                    fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(gradient: AppColors.welcomeGradient),
+        child: FadeTransition(
+          opacity: _fadeAnim,
+          child: ScaleTransition(
+            scale: _scaleAnim,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo circle
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppColors.premiumGradient,
+                      boxShadow: AppShadows.gold(),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Image.asset(
+                        'assets/images/logo_light.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // App name
+                  Text(
+                    'GoldWen',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 38,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  // Tagline
+                  Text(
+                    '« Prenez le temps. »',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 15,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  // Loading indicator
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryGold.withOpacity(0.6),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.xxl),
-            // Loading indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
-            ),
-          ],
+          ),
         ),
       ),
     );

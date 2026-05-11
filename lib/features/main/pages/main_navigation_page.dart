@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/services/location_service.dart';
 import 'home_page.dart';
-import '../../matching/pages/daily_matches_page.dart';
 import '../../chat/pages/chat_list_page.dart';
-import '../../subscription/pages/subscription_page.dart';
+import '../../user/pages/user_profile_page.dart';
+import '../../settings/pages/settings_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -16,123 +17,60 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
-  late TabController _tabController;
-  late AnimationController _navigationController;
-  late Animation<double> _scaleAnimation;
+  late AnimationController _navController;
   late Animation<Offset> _slideAnimation;
 
+  static const List<_NavItem> _navItems = [
+    _NavItem(icon: Icons.favorite_border_rounded, activeIcon: Icons.favorite_rounded, label: 'Du jour'),
+    _NavItem(icon: Icons.chat_bubble_outline_rounded, activeIcon: Icons.chat_bubble_rounded, label: 'Messages'),
+    _NavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Profil'),
+    _NavItem(icon: Icons.settings_outlined, activeIcon: Icons.settings_rounded, label: 'Réglages'),
+  ];
+
   late final List<Widget> _pages;
-  late final List<NavigationItem> _navigationItems;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _initializeAnimations();
-    _initializePages();
-    _initializeNavigationItems();
-    _initializeLocationService();
-    _startAnimations();
-  }
-
-  void _initializeAnimations() {
-    _navigationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+    _navController = AnimationController(
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _navigationController,
-      curve: Curves.elasticOut,
-    ));
-
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
+      begin: const Offset(0, 1.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _navigationController,
-      curve: Curves.easeOut,
-    ));
-  }
+    ).animate(CurvedAnimation(parent: _navController, curve: Curves.easeOut));
 
-  void _initializePages() {
     _pages = [
-      HomePage(onNavigate: (index) {
-        _navigateToTab(index);
-      }),
-      const DailyMatchesPage(),
+      HomePage(onNavigate: _navigateToTab),
       const ChatListPage(),
-      const SubscriptionPage(),
+      const UserProfilePage(),
+      const SettingsPage(),
     ];
-  }
 
-  void _initializeNavigationItems() {
-    _navigationItems = [
-      NavigationItem(
-        icon: Icons.home_outlined,
-        activeIcon: Icons.home,
-        label: 'Accueil',
-        color: Colors.amber,
-      ),
-      NavigationItem(
-        icon: Icons.favorite_outline,
-        activeIcon: Icons.favorite,
-        label: 'Découvrir',
-        color: Colors.red,
-      ),
-      NavigationItem(
-        icon: Icons.chat_bubble_outline,
-        activeIcon: Icons.chat_bubble,
-        label: 'Messages',
-        color: Colors.blue,
-      ),
-      NavigationItem(
-        icon: Icons.star_outline,
-        activeIcon: Icons.star,
-        label: 'Premium',
-        color: Colors.purple,
-      ),
-    ];
-  }
+    _initLocationService();
 
-  void _startAnimations() {
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) {
-        _navigationController.forward();
-      }
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) _navController.forward();
     });
   }
 
-  Future<void> _initializeLocationService() async {
+  Future<void> _initLocationService() async {
     try {
-      // Try to get location service from provider if available
-      if (mounted) {
-        final context = this.context;
-        final locationService = context.read<LocationService?>();
-        await locationService?.initialize();
-      }
-    } catch (e) {
-      debugPrint(
-          'MainNavigationPage: Failed to initialize location service: $e');
-    }
+      final locationService = context.read<LocationService?>();
+      await locationService?.initialize();
+    } catch (_) {}
   }
 
   void _navigateToTab(int index) {
     if (index >= 0 && index < _pages.length) {
-      setState(() {
-        _currentIndex = index;
-      });
-      _tabController.animateTo(index);
+      setState(() => _currentIndex = index);
     }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _navigationController.dispose();
+    _navController.dispose();
     super.dispose();
   }
 
@@ -141,184 +79,108 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     return Scaffold(
       body: Stack(
         children: [
-          // Main content
-          TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
+          // Page content
+          IndexedStack(
+            index: _currentIndex,
             children: _pages,
           ),
-
-          // Floating bottom navigation
-          _buildFloatingNavigation(),
+          // Floating dark glass bottom nav
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: _buildNav(),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildFloatingNavigation() {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: AnimatedBuilder(
-        animation: _navigationController,
-        builder: (context, child) {
-          return SlideTransition(
-            position: _slideAnimation,
-            child: Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Container(
-                margin: const EdgeInsets.all(16.0),
-                child: _buildNavigationBar(),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildNavigationBar() {
+  Widget _buildNav() {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      height: 80,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + (bottomPadding > 0 ? 0 : 0)),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.amber.shade700,
-            Colors.amber.shade800,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
+        color: const Color(0xEB1A1A1A),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.30),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: AppColors.primaryGold.withOpacity(0.18),
+            blurRadius: 0,
+            spreadRadius: 1,
           ),
         ],
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white.withOpacity(0.1),
-                Colors.transparent,
-              ],
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(
-              _navigationItems.length,
-              (index) => _buildNavigationItem(index),
-            ),
-          ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(
+          _navItems.length,
+          (i) => _buildNavItem(i),
         ),
       ),
     );
   }
 
-  Widget _buildNavigationItem(int index) {
-    final item = _navigationItems[index];
-    final isSelected = _currentIndex == index;
+  Widget _buildNavItem(int index) {
+    final item = _navItems[index];
+    final isActive = _currentIndex == index;
 
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _navigateToTab(index),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
+      child: GestureDetector(
+        onTap: () => _navigateToTab(index),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: AppAnimations.fast,
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: isActive ? AppColors.premiumGradient : null,
+                color: isActive ? null : Colors.transparent,
+              ),
+              child: Icon(
+                isActive ? item.activeIcon : item.icon,
+                size: 24,
+                color: isActive
+                    ? Colors.white
+                    : Colors.white.withOpacity(0.55),
+              ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icon with animation
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.white.withOpacity(0.2)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      isSelected ? item.activeIcon : item.icon,
-                      key: ValueKey('${index}_${isSelected}'),
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                // Label with fade animation
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: isSelected ? 1.0 : 0.7,
-                  child: Text(
-                    item.label,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          fontSize: 11,
-                        ),
-                  ),
-                ),
-
-                // Selection indicator
-                const SizedBox(height: 4),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: isSelected ? 20 : 0,
-                  height: 2,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(1),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 4),
+            AnimatedDefaultTextStyle(
+              duration: AppAnimations.fast,
+              style: TextStyle(
+                fontFamily: 'Lato',
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive
+                    ? AppColors.primaryGold
+                    : Colors.white.withOpacity(0.55),
+              ),
+              child: Text(item.label),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class NavigationItem {
+class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final Color color;
-
-  NavigationItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.color,
-  });
+  const _NavItem({required this.icon, required this.activeIcon, required this.label});
 }

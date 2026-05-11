@@ -24,7 +24,7 @@ class EmailNotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(
           color: email.hasError 
-              ? Colors.red.shade100 
+              ? AppColors.errorRed 
               : Colors.transparent,
           width: 1,
         ),
@@ -119,7 +119,7 @@ class EmailNotificationCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: AppColors.errorRed,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Row(
@@ -127,14 +127,14 @@ class EmailNotificationCard extends StatelessWidget {
                       Icon(
                         Icons.error_outline,
                         size: 16,
-                        color: Colors.red.shade700,
+                        color: AppColors.errorRed,
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
                           email.errorMessage!,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.red.shade700,
+                                color: AppColors.errorRed,
                               ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

@@ -401,7 +401,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             children: [
               Icon(
                 isLike ? Icons.favorite : Icons.close,
-                color: isLike ? Colors.pink : Colors.grey,
+                color: isLike ? AppColors.errorRed : AppColors.textSecondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -409,7 +409,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.green,
+                    color: AppColors.successGreen,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(

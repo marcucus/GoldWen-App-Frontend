@@ -143,10 +143,10 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: AppColors.infoBlue,
                 borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                 border: Border.all(
-                  color: Colors.blue.shade200,
+                  color: AppColors.infoBlue,
                   width: 1,
                 ),
               ),
@@ -155,7 +155,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Colors.blue.shade700,
+                    color: AppColors.infoBlue,
                     size: 20,
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -163,7 +163,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                     child: Text(
                       'Votre signalement sera examiné par notre équipe de modération. Vous ne pouvez signaler le même contenu qu\'une seule fois.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.blue.shade900,
+                        color: AppColors.infoBlue,
                       ),
                     ),
                   ),
@@ -188,7 +188,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.errorRed,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.md,

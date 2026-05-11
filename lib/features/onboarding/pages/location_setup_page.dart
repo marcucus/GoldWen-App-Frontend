@@ -274,18 +274,18 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
                           padding: const EdgeInsets.all(AppSpacing.md),
                           margin: const EdgeInsets.only(top: AppSpacing.xl),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: AppColors.successGreen,
                             borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                            border: Border.all(color: Colors.green.shade200),
+                            border: Border.all(color: AppColors.successGreen),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.check_circle, color: Colors.green.shade600),
+                              Icon(Icons.check_circle, color: AppColors.successGreen),
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
                                   'Position détectée: $_detectedCity',
-                                  style: TextStyle(color: Colors.green.shade600),
+                                  style: TextStyle(color: AppColors.successGreen),
                                 ),
                               ),
                             ],
@@ -299,18 +299,18 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
                           padding: const EdgeInsets.all(AppSpacing.md),
                           margin: const EdgeInsets.only(top: AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
+                            color: AppColors.errorRed,
                             borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                            border: Border.all(color: Colors.red.shade200),
+                            border: Border.all(color: AppColors.errorRed),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red.shade600),
+                              Icon(Icons.error_outline, color: AppColors.errorRed),
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: TextStyle(color: Colors.red.shade600),
+                                  style: TextStyle(color: AppColors.errorRed),
                                 ),
                               ),
                             ],

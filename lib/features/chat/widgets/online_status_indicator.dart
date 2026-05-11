@@ -29,12 +29,12 @@ class OnlineStatusIndicator extends StatelessWidget {
           width: compact ? 6 : 8,
           height: compact ? 6 : 8,
           decoration: BoxDecoration(
-            color: isOnline ? Colors.green : AppColors.textTertiary,
+            color: isOnline ? AppColors.successGreen : AppColors.textTertiary,
             shape: BoxShape.circle,
             boxShadow: isOnline
                 ? [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.5),
+                      color: AppColors.successGreen.withOpacity(0.5),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -47,7 +47,7 @@ class OnlineStatusIndicator extends StatelessWidget {
           Text(
             statusText,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isOnline ? Colors.green : AppColors.textSecondary,
+                  color: isOnline ? AppColors.successGreen : AppColors.textSecondary,
                   fontSize: compact ? 10 : 12,
                 ),
           ),

@@ -247,7 +247,7 @@ class MatchCardWidget extends StatelessWidget {
                       else if (isPending)
                         const Icon(
                           Icons.hourglass_empty,
-                          color: Colors.orange,
+                          color: AppColors.warningAmber,
                           size: 24,
                         ),
                     ],
@@ -305,14 +305,14 @@ class MatchCardWidget extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'active':
-        return Colors.green;
+        return AppColors.successGreen;
       case 'pending':
-        return Colors.orange;
+        return AppColors.warningAmber;
       case 'expired':
       case 'archived':
-        return Colors.red;
+        return AppColors.errorRed;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 

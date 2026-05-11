@@ -206,7 +206,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
               Icon(
                 Icons.error_outline,
                 size: 64,
-                color: Colors.red[400],
+                color: AppColors.errorRed,
               ),
               const SizedBox(height: 16),
               Text(
@@ -751,7 +751,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
             duration: const Duration(seconds: 5),
           ),
         );

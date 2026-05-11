@@ -70,7 +70,7 @@ class _EmailHistoryPageState extends State<EmailHistoryPage>
                 ? 'Email retry initiated successfully'
                 : 'Failed to retry email. Please try again.',
           ),
-          backgroundColor: success ? Colors.green : Colors.red,
+          backgroundColor: success ? AppColors.successGreen : AppColors.errorRed,
         ),
       );
     }
@@ -274,20 +274,20 @@ class _EmailDetailsSheet extends StatelessWidget {
                         'Error Details',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700,
+                              color: AppColors.errorRed,
                             ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: AppColors.errorRed,
                           borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Text(
                           email.errorMessage!,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.red.shade700,
+                                color: AppColors.errorRed,
                               ),
                         ),
                       ),

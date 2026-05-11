@@ -3,728 +3,342 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/widgets/animated_widgets.dart';
-import '../../../core/widgets/modern_cards.dart';
+import '../../../core/models/profile.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../matching/providers/matching_provider.dart';
-import '../../notifications/providers/notification_provider.dart';
+import '../../chat/providers/chat_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(int)? onNavigate;
-
   const HomePage({super.key, this.onNavigate});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late AnimationController _backgroundController;
-  late AnimationController _headerController;
-  late Animation<double> _backgroundAnimation;
-  late Animation<Offset> _headerSlideAnimation;
-  late Animation<double> _headerFadeAnimation;
-  String? _profilePseudo;
-
-  void Function(int)? get _navigateToTab => widget.onNavigate;
+class _HomePageState extends State<HomePage> {
+  String? _pseudo;
 
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-      _startAnimations();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
-  void _initializeAnimations() {
-    _backgroundController = AnimationController(
-      duration: AppAnimations.verySlow,
-      vsync: this,
-    );
-    _headerController = AnimationController(
-      duration: AppAnimations.medium,
-      vsync: this,
-    );
-
-    _backgroundAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _backgroundController,
-      curve: AppAnimations.easeInOut,
-    ));
-
-    _headerSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _headerController,
-      curve: AppAnimations.elasticOut,
-    ));
-
-    _headerFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _headerController,
-      curve: AppAnimations.easeOut,
-    ));
+  Future<void> _loadData() async {
+    context.read<MatchingProvider>().loadDailySelection();
+    try {
+      final res = await ApiService.getProfile();
+      final data = res['data'] ?? res;
+      if (mounted) setState(() => _pseudo = data['pseudo'] as String?);
+    } catch (_) {}
   }
 
-  void _startAnimations() {
-    _backgroundController.forward();
-    Future.delayed(const Duration(milliseconds: 200), () {
-      _headerController.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _backgroundController.dispose();
-    _headerController.dispose();
-    super.dispose();
-  }
-
-  void _loadData() {
-    final matchingProvider =
-        Provider.of<MatchingProvider>(context, listen: false);
-    matchingProvider.loadDailySelection();
-    // Récupère le pseudo du profil via ApiService.getProfile
-    Future.microtask(() async {
-      try {
-        final response = await ApiService.getProfile();
-        final profileData = response['data'] ?? response;
-        setState(() {
-          _profilePseudo = profileData['pseudo'] as String?;
-        });
-      } catch (e) {
-        // ignore ou log l'erreur
-      }
-    });
-  }
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Bon matin';
-    } else if (hour < 17) {
-      return 'Bon après-midi';
-    } else {
-      return 'Bonsoir';
-    }
+  String get _greeting {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Bonjour';
+    if (h < 17) return 'Bon après-midi';
+    return 'Bonsoir';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _backgroundAnimation,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.gradientStart,
-                  AppColors.gradientMiddle,
-                  AppColors.gradientEnd
-                      .withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _buildAnimatedHeader(),
-                  Expanded(
-                    child: _buildContent(),
-                  ),
-                ],
-              ),
-            ),
+      backgroundColor: AppColors.backgroundWhite,
+      body: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          final firstName = _pseudo ?? auth.user?.displayName ?? 'vous';
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHero(firstName)),
+              SliverToBoxAdapter(child: _buildStreakCard()),
+              SliverToBoxAdapter(child: _buildProfilesHeader()),
+              SliverToBoxAdapter(child: _buildProfilesList()),
+              SliverToBoxAdapter(child: _buildActiveConversation()),
+              SliverToBoxAdapter(child: _buildConseilDuJour()),
+              SliverToBoxAdapter(child: _buildPlusBanner()),
+              const SliverToBoxAdapter(child: SizedBox(height: 110)),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildAnimatedHeader() {
-    return AnimatedBuilder(
-      animation: _headerController,
-      builder: (context, child) {
-        return SlideTransition(
-          position: _headerSlideAnimation,
-          child: FadeTransition(
-            opacity: _headerFadeAnimation,
-            child: _buildHeader(),
-          ),
-        );
-      },
-    );
-  }
+  // --- Hero header -------------------------------------------------------
 
-  Widget _buildHeader() {
+  Widget _buildHero(String firstName) {
     return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        final user = authProvider.user;
+      builder: (context, auth, _) {
         return Container(
-          margin: const EdgeInsets.all(AppSpacing.lg),
-          child: GlassCard(
-            borderRadius: AppBorderRadius.xLarge,
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                // Animated Profile Avatar
-                AnimatedPressable(
-                  onPressed: () => context.go('/profile'),
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: AppColors.premiumGradient,
-                      boxShadow: AppShadows.medium(),
-                    ),
-                    padding: const EdgeInsets.all(3),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.backgroundWhite,
-                      ),
-                      child: ClipOval(
-                        child: user?.photoUrl != null
-                            ? Image.network(
-                                user!.photoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.person,
-                                    color: AppColors.primaryGold,
-                                    size: 30,
-                                  );
-                                },
-                              )
-                            : const Icon(
-                                Icons.person,
-                                color: AppColors.primaryGold,
-                                size: 30,
-                              ),
-                      ),
-                    ),
-                  ),
+          height: 280,
+          decoration: BoxDecoration(gradient: AppColors.heroGradient),
+          child: Stack(
+            children: [
+              // Mountain silhouettes
+              Positioned(
+                bottom: 0, left: 0, right: 0,
+                child: CustomPaint(
+                  size: const Size(double.infinity, 120),
+                  painter: _MountainPainter(),
                 ),
-
-                const SizedBox(width: AppSpacing.md),
-
-                // Greeting and Name with animation
-                Expanded(
+              ),
+              // Safe area padding + content
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FadeInAnimation(
-                        delay: const Duration(milliseconds: 300),
-                        child: Text(
-                          _getGreeting(),
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: AppColors.textDark,
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                        ),
-                      ),
-                      FadeInAnimation(
-                        delay: const Duration(milliseconds: 400),
-                        child: Text(
-                          _profilePseudo ?? user?.displayName ?? 'Utilisateur',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: AppColors.textDark,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Notification icon with badge
-                FadeInAnimation(
-                  delay: const Duration(milliseconds: 500),
-                  child: AnimatedPressable(
-                    onPressed: () {
-                      // Navigate to notifications
-                      Navigator.pushNamed(context, '/notifications');
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primaryGold.withOpacity(0.1),
-                      ),
-                      child: Stack(
+                      // Top row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(
-                            Icons.notifications_outlined,
-                            color: AppColors.primaryGold,
-                            size: 24,
-                          ),
-                          Consumer<NotificationProvider>(
-                            builder: (context, notificationProvider, _) {
-                              final unreadCount = notificationProvider.unreadCount;
-                              if (unreadCount == 0) return const SizedBox.shrink();
-                              
-                              return Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: EdgeInsets.all(unreadCount > 9 ? 4 : 6),
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: AppColors.errorRed,
+                          // Avatar button
+                          GestureDetector(
+                            onTap: () => widget.onNavigate?.call(2),
+                            child: Container(
+                              width: 44, height: 44,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: AppColors.premiumGradient,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.25),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  firstName.isNotEmpty ? firstName[0].toUpperCase() : 'G',
+                                  style: const TextStyle(
+                                    fontFamily: 'Playfair Display',
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
                                   ),
-                                  child: unreadCount <= 9 
-                                    ? const SizedBox.shrink() // Just show dot for small counts
-                                    : Text(
-                                        unreadCount > 99 ? '99+' : unreadCount.toString(),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
                                 ),
-                              );
-                            },
+                              ),
+                            ),
+                          ),
+                          // Notifications
+                          GestureDetector(
+                            onTap: () => context.push('/notifications'),
+                            child: Container(
+                              width: 40, height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.20),
+                              ),
+                              child: const Icon(
+                                Icons.notifications_outlined,
+                                size: 18,
+                                color: AppColors.textDark,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 28),
+                      // Greeting
+                      Text(
+                        '$_greeting,',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        firstName,
+                        style: const TextStyle(
+                          fontFamily: 'Playfair Display',
+                          fontSize: 36,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
+                          height: 1.05,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '« Prenez le temps. »',
+                        style: TextStyle(
+                          fontFamily: 'Playfair Display',
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                          color: AppColors.textDark.withOpacity(0.78),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Quick Stats Section
-          _buildQuickStats(),
+  // --- Streak / Ritual card -----------------------------------------------
 
-          const SizedBox(height: AppSpacing.xl),
+  Widget _buildStreakCard() {
+    final days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+    final todayIdx = DateTime.now().weekday - 1; // Mon=0
+    const streak = 7; // TODO: wire to real data
 
-          // Daily Matches Section
-          _buildDailyMatches(),
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // Quick Actions
-          _buildQuickActions(),
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // Recent Activity
-          _buildRecentActivity(),
-
-          const SizedBox(height: AppSpacing.xxl),
-        ],
+    return Container(
+      margin: const EdgeInsets.fromLTRB(18, -22, 18, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: AppShadows.medium(),
       ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 600),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: Text(
-              'Votre activité',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.favorite,
-                  value: '12',
-                  label: 'Matchs',
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.errorRed.withOpacity(0.8),
-                      AppColors.errorRed,
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.chat_bubble_outline,
-                  value: '8',
-                  label: 'Messages',
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.infoBlue.withOpacity(0.8),
-                      AppColors.infoBlue,
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.visibility,
-                  value: '24',
-                  label: 'Vues',
-                  gradient: AppColors.premiumGradient,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Gradient gradient,
-  }) {
-    return GlassCard(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              gradient: gradient,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-          ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDailyMatches() {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 700),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Sélection du jour',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textLight,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                AnimatedPressable(
-                  onPressed: () {
-                    if (_navigateToTab != null) {
-                      _navigateToTab!(1); // Navigate to discover tab
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.textLight.withOpacity(0.2),
-                      borderRadius:
-                          BorderRadius.circular(AppBorderRadius.large),
-                    ),
-                    child: Text(
-                      'Voir tout',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textLight,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 200,
-            child: Consumer<MatchingProvider>(
-              builder: (context, matchingProvider, child) {
-                if (matchingProvider.isLoading) {
-                  return _buildMatchesShimmer();
-                }
-
-                // For now, create dummy data to avoid compilation errors
-                final matches = <dynamic>[];
-                if (matches.isEmpty) {
-                  return _buildEmptyMatches();
-                }
-
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                  itemCount: matches.length,
-                  itemBuilder: (context, index) {
-                    final match = matches[index];
-                    return FadeInAnimation(
-                      delay: Duration(milliseconds: 800 + (index * 100)),
-                      child: _buildMatchCard(match, index),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMatchCard(dynamic match, int index) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: AppSpacing.md),
-      child: GlassCard(
-        margin: EdgeInsets.zero,
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
+              Container(
+                width: 44, height: 44,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppBorderRadius.large),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.primaryGold.withOpacity(0.3),
-                      AppColors.primaryGold.withOpacity(0.1),
-                    ],
-                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.primaryGold.withOpacity(0.12),
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.person,
-                    size: 50,
-                    color: AppColors.primaryGold,
-                  ),
-                ),
+                child: const Icon(Icons.local_fire_department_rounded,
+                    size: 22, color: AppColors.primaryGold),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Column(
+              const SizedBox(width: 12),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Profil ${index + 1}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    'Votre rituel',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                  Text(
-                    '${20 + index} ans',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    '$streak jours d\'affilée',
+                    style: TextStyle(
+                      fontFamily: 'Playfair Display',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: AppColors.textDark,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMatchesShimmer() {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Container(
-          width: 150,
-          margin: const EdgeInsets.only(right: AppSpacing.md),
-          child: ShimmerLoading(
-            isLoading: true,
-            child: GlassCard(
-              margin: EdgeInsets.zero,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundGrey,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                ),
-              ),
-            ),
+            ],
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyMatches() {
-    return GlassCard(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_outline,
-              size: 48,
-              color: AppColors.textSecondary.withOpacity(0.5),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Aucun match disponible',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-          ],
-        ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(7, (i) {
+              final done = i < todayIdx;
+              final today = i == todayIdx;
+              return Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 28, height: 28,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: done ? AppColors.primaryGold : Colors.transparent,
+                        border: Border.all(
+                          color: today
+                              ? AppColors.primaryGold
+                              : done
+                                  ? Colors.transparent
+                                  : AppColors.dividerLight,
+                          width: today ? 2 : 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: done
+                            ? const Icon(Icons.check, size: 13, color: Colors.white)
+                            : today
+                                ? Container(
+                                    width: 8, height: 8,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.primaryGold,
+                                    ),
+                                  )
+                                : null,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      days[i],
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: today ? AppColors.primaryGold : AppColors.textTertiary,
+                        fontWeight: today ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildQuickActions() {
-    return Consumer<SubscriptionProvider>(
-      builder: (context, subscriptionProvider, child) {
-        return SlideInAnimation(
-          delay: const Duration(milliseconds: 800),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  // --- Profiles du jour --------------------------------------------------
+
+  Widget _buildProfilesHeader() {
+    return Consumer<MatchingProvider>(
+      builder: (context, mp, _) {
+        final used = mp.remainingSelections == 0;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text(
-                  'Actions rapides',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textLight,
-                        fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Profils du jour',
+                      style: TextStyle(
+                        fontFamily: 'Playfair Display',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
                       ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${mp.dailyProfiles.length} personnes choisies pour vous',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              StaggeredList(
-                itemDelay: const Duration(milliseconds: 100),
-                children: [
-                  _buildActionCard(
-                    icon: Icons.search,
-                    title: 'Découvrir',
-                    subtitle: 'Trouvez votre match parfait',
-                    onTap: () {
-                      if (_navigateToTab != null) {
-                        _navigateToTab!(1);
-                      }
-                    },
-                  ),
-                  _buildActionCard(
-                    icon: Icons.favorite,
-                    title: 'Mes Matches',
-                    subtitle: 'Voir tous vos matches',
-                    onTap: () => context.go('/matches'),
-                  ),
-                  // Premium feature: Who liked me
-                  _buildActionCard(
-                    icon: Icons.visibility,
-                    title: 'Qui m\'a sélectionné',
-                    subtitle: subscriptionProvider.canSeeWhoLikedYou 
-                        ? 'Découvrez qui s\'intéresse à vous'
-                        : 'Fonctionnalité premium - Abonnez-vous',
-                    onTap: () {
-                      if (subscriptionProvider.canSeeWhoLikedYou) {
-                        context.go('/who-liked-me');
-                      } else {
-                        context.go('/subscription');
-                      }
-                    },
-                    isHighlighted: !subscriptionProvider.canSeeWhoLikedYou,
-                  ),
-                  _buildActionCard(
-                    icon: Icons.history,
-                    title: 'Historique',
-                    subtitle: 'Vos sélections passées',
-                    onTap: () => context.go('/history'),
-                  ),
-                  _buildActionCard(
-                    icon: Icons.person,
-                    title: 'Profil',
-                    subtitle: 'Gérez votre profil et préférences',
-                    onTap: () => context.go('/profile'),
-                  ),
-                  _buildActionCard(
-                    icon: Icons.star,
-                    title: 'GoldWen Plus',
-                    subtitle: 'Accédez aux fonctionnalités premium',
-                    onTap: () => context.go('/subscription'),
-                    isHighlighted: true,
-                  ),
-                ],
+              Text(
+                used ? 'Choix utilisé' : '${mp.remainingSelections} choix',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryGold,
+                ),
               ),
             ],
           ),
@@ -733,116 +347,437 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildActionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool isHighlighted = false,
-  }) {
-    return FloatingCard(
-      onTap: onTap,
-      backgroundColor:
-          isHighlighted ? AppColors.primaryGold.withOpacity(0.1) : null,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              gradient: isHighlighted
-                  ? AppColors.premiumGradient
-                  : LinearGradient(
-                      colors: [
-                        AppColors.primaryGold.withOpacity(0.1),
-                        AppColors.primaryGold.withOpacity(0.2),
-                      ],
+  Widget _buildProfilesList() {
+    return Consumer<MatchingProvider>(
+      builder: (context, mp, _) {
+        if (mp.isLoading) {
+          return const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.primaryGold),
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        final profiles = mp.dailyProfiles;
+        if (profiles.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        final used = mp.remainingSelections == 0;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: profiles.map((p) {
+              final isChosen = mp.dailySelection?.choicesMade != null &&
+                  mp.dailySelection!.choicesMade > 0;
+              return _buildProfileCard(p, dimmed: used && !isChosen);
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileCard(Profile profile, {bool dimmed = false}) {
+    final score = ((profile.compatibilityScore ?? 0.88) * 100).round();
+    final firstPhoto = profile.photos.isNotEmpty ? profile.photos.first.url : null;
+    final firstPrompt = profile.promptAnswers.isNotEmpty
+        ? profile.promptAnswers.first
+        : null;
+
+    // Gradient colors for the card header when no photo
+    final cardGradients = [
+      [const Color(0xFFF5E6B8), const Color(0xFFD4AF37), const Color(0xFF8B6914)],
+      [const Color(0xFFFFE5D1), const Color(0xFFE8C547), const Color(0xFFB8941F)],
+      [const Color(0xFFFAF0E6), const Color(0xFFF5E6B8), const Color(0xFFD4AF37)],
+    ];
+    final gradIdx = profile.id.hashCode.abs() % cardGradients.length;
+    final grad = cardGradients[gradIdx];
+
+    return GestureDetector(
+      onTap: () => context.push('/profile/${profile.id}'),
+      child: AnimatedOpacity(
+        duration: AppAnimations.fast,
+        opacity: dimmed ? 0.55 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppShadows.soft(),
+            border: Border.all(
+              color: AppColors.primaryGold.withOpacity(0.20),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Photo / gradient area (240px)
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(23)),
+                child: SizedBox(
+                  height: 240,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Background
+                      firstPhoto != null
+                          ? Image.network(firstPhoto, fit: BoxFit.cover)
+                          : Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: grad,
+                                ),
+                              ),
+                            ),
+                      // Compatibility badge
+                      Positioned(
+                        top: 14, right: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.90),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star_rounded,
+                                  size: 11, color: AppColors.primaryGold),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$score% compatible',
+                                style: const TextStyle(
+                                  fontFamily: 'Playfair Display',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: AppColors.goldDeep,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Name / city overlay bottom
+                      Positioned(
+                        bottom: 18, left: 18,
+                        child: DefaultTextStyle(
+                          style: const TextStyle(
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Color(0x66000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${profile.pseudo ?? 'Profil'}, ${profile.age ?? '?'}',
+                                style: const TextStyle(
+                                  fontFamily: 'Playfair Display',
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.1,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              if (profile.location != null)
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on_rounded,
+                                        size: 12, color: Colors.white),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      profile.location!,
+                                      style: const TextStyle(
+                                          fontSize: 12.5, height: 1),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Prompt preview
+              if (firstPrompt != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+                  child: Text(
+                    '« ${firstPrompt.answer} »',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Playfair Display',
+                      fontStyle: FontStyle.italic,
+                      fontSize: 14.5,
+                      color: AppColors.textDark,
+                      height: 1.45,
                     ),
-              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-            ),
-            child: Icon(
-              icon,
-              color: isHighlighted ? Colors.white : AppColors.primaryGold,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isHighlighted
-                            ? AppColors.primaryGold
-                            : AppColors.textDark,
-                      ),
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+                  child: Text(
+                    profile.bio ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-              ],
-            ),
+            ],
           ),
-          Icon(
-            Icons.arrow_forward_ios,
-            size: 16,
-            color: AppColors.textSecondary,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildRecentActivity() {
-    return SlideInAnimation(
-      delay: const Duration(milliseconds: 900),
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: AppShadows.soft(),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 56, height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryGold.withOpacity(0.12),
+              ),
+              child: const Icon(Icons.favorite_outline_rounded,
+                  size: 28, color: AppColors.primaryGold),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Revenez à midi',
+              style: TextStyle(
+                fontFamily: 'Playfair Display',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Votre sélection du jour sera prête à midi.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.5,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Active conversation -----------------------------------------------
+
+  Widget _buildActiveConversation() {
+    return Consumer<ChatProvider>(
+      builder: (context, chatProvider, _) {
+        final activeChats = chatProvider.activeConversations;
+        if (activeChats.isEmpty) return const SizedBox.shrink();
+        final chat = activeChats.first;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Conversation active',
+                    style: TextStyle(
+                      fontFamily: 'Playfair Display',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => widget.onNavigate?.call(1),
+                    child: const Text(
+                      'Toutes →',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryGold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () => context.push('/chat/${chat.id}'),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: AppShadows.soft(),
+                  ),
+                  child: Row(
+                    children: [
+                      // Avatar
+                      Container(
+                        width: 48, height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppColors.premiumGradient,
+                        ),
+                        child: Center(
+                          child: Text(
+                            (chat.otherParticipant?.pseudo ?? 'M')[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Playfair Display',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  chat.otherParticipant?.pseudo ?? 'Match',
+                                  style: const TextStyle(
+                                    fontFamily: 'Playfair Display',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14.5,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                                if (chat.expiresAt != null)
+                                  _buildTimer(chat.expiresAt!),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              chat.lastMessage?.content ?? 'Commencez la conversation',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTimer(DateTime expiresAt) {
+    final remaining = expiresAt.difference(DateTime.now());
+    final hours = remaining.inHours;
+    final color = hours < 4 ? AppColors.errorRed : AppColors.primaryGold;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.access_time_rounded, size: 10, color: color),
+        const SizedBox(width: 3),
+        Text(
+          '${hours}h',
+          style: TextStyle(
+            fontSize: 10.5,
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Conseil du jour ---------------------------------------------------
+
+  Widget _buildConseilDuJour() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGold.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.primaryGold.withOpacity(0.25),
+          width: 1,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: Text(
-              'Activité récente',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded,
+                  size: 12, color: AppColors.primaryGold),
+              const SizedBox(width: 6),
+              const Text(
+                'CONSEIL DU JOUR',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryGold,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          GlassCard(
-            child: Column(
-              children: [
-                _buildActivityItem(
-                  icon: Icons.favorite,
-                  title: 'Nouveau match',
-                  subtitle: 'Vous avez un nouveau match avec Sarah',
-                  time: 'Il y a 2h',
-                  iconColor: AppColors.errorRed,
-                ),
-                const Divider(height: 1),
-                _buildActivityItem(
-                  icon: Icons.message,
-                  title: 'Nouveau message',
-                  subtitle: 'Marie vous a envoyé un message',
-                  time: 'Il y a 5h',
-                  iconColor: AppColors.infoBlue,
-                ),
-                const Divider(height: 1),
-                _buildActivityItem(
-                  icon: Icons.visibility,
-                  title: 'Profil consulté',
-                  subtitle: 'Votre profil a été consulté 3 fois aujourd\'hui',
-                  time: 'Il y a 1j',
-                  iconColor: AppColors.primaryGold,
-                ),
-              ],
+          const SizedBox(height: 8),
+          const Text(
+            '« Une question ouverte vaut mille messages. Demandez ce qui les fait vibrer. »',
+            style: TextStyle(
+              fontFamily: 'Playfair Display',
+              fontStyle: FontStyle.italic,
+              fontSize: 15,
+              color: AppColors.textDark,
+              height: 1.55,
             ),
           ),
         ],
@@ -850,58 +785,111 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildActivityItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String time,
-    required Color iconColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+  // --- GoldWen Plus banner -----------------------------------------------
+
+  Widget _buildPlusBanner() {
+    return Consumer<SubscriptionProvider>(
+      builder: (context, sub, _) {
+        if (sub.hasActiveSubscription) return const SizedBox.shrink();
+        return GestureDetector(
+          onTap: () => context.push('/subscription'),
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppBorderRadius.small),
+              gradient: AppColors.premiumGradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppShadows.gold(),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    Icon(Icons.star_rounded, size: 15, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text(
+                      'GoldWen Plus',
+                      style: TextStyle(
+                        fontFamily: 'Playfair Display',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white,
                       ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 8),
                 Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                  'Triplez vos rencontres',
+                  style: TextStyle(
+                    fontFamily: 'Playfair Display',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Choisissez 3 profils chaque jour. Et prolongez vos conversations.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
           ),
-          Text(
-            time,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textTertiary,
-                ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
+}
+
+// Mountain silhouette painter for hero
+class _MountainPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()
+      ..color = AppColors.goldDeep.withOpacity(0.20)
+      ..style = PaintingStyle.fill;
+
+    final paint2 = Paint()
+      ..color = AppColors.primaryGoldDark.withOpacity(0.14)
+      ..style = PaintingStyle.fill;
+
+    final path1 = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * 0.67)
+      ..lineTo(size.width * 0.15, size.height * 0.33)
+      ..lineTo(size.width * 0.275, size.height * 0.58)
+      ..lineTo(size.width * 0.40, size.height * 0.25)
+      ..lineTo(size.width * 0.55, size.height * 0.625)
+      ..lineTo(size.width * 0.70, size.height * 0.375)
+      ..lineTo(size.width * 0.85, size.height * 0.67)
+      ..lineTo(size.width, size.height * 0.46)
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    final path2 = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * 0.79)
+      ..lineTo(size.width * 0.10, size.height * 0.625)
+      ..lineTo(size.width * 0.25, size.height * 0.75)
+      ..lineTo(size.width * 0.375, size.height * 0.54)
+      ..lineTo(size.width * 0.525, size.height * 0.75)
+      ..lineTo(size.width * 0.675, size.height * 0.58)
+      ..lineTo(size.width * 0.825, size.height * 0.79)
+      ..lineTo(size.width, size.height * 0.67)
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    canvas.drawPath(path1, paint1);
+    canvas.drawPath(path2, paint2);
+  }
+
+  @override
+  bool shouldRepaint(_MountainPainter old) => false;
 }

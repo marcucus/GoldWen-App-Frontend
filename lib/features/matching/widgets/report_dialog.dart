@@ -69,7 +69,7 @@ class _ReportDialogState extends State<ReportDialog> {
               children: [
                 Icon(
                   Icons.flag,
-                  color: Colors.red,
+                  color: AppColors.errorRed,
                   size: 28,
                 ),
                 const SizedBox(width: 12),
@@ -167,15 +167,15 @@ class _ReportDialogState extends State<ReportDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: AppColors.infoBlue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.infoBlue.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.info_outline,
-                          color: Colors.blue[700],
+                          color: AppColors.infoBlue,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -183,7 +183,7 @@ class _ReportDialogState extends State<ReportDialog> {
                           child: Text(
                             'Votre signalement sera examiné par notre équipe de modération.',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.blue[700],
+                              color: AppColors.infoBlue,
                             ),
                           ),
                         ),
@@ -210,7 +210,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitReport,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.errorRed,
                       foregroundColor: Colors.white,
                     ),
                     child: _isSubmitting
@@ -242,7 +242,7 @@ class _ReportDialogState extends State<ReportDialog> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(
-            color: _selectedType == type ? AppColors.primaryGold : Colors.grey.shade300,
+            color: _selectedType == type ? AppColors.primaryGold : AppColors.dividerLight,
             width: _selectedType == type ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -311,7 +311,7 @@ class _ReportDialogState extends State<ReportDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Signalement envoyé avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.successGreen,
           ),
         );
       }
@@ -320,7 +320,7 @@ class _ReportDialogState extends State<ReportDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de l\'envoi: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorRed,
           ),
         );
       }
