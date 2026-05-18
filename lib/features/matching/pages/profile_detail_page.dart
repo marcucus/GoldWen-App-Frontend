@@ -201,6 +201,12 @@ class ProfileDetailPage extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xl),
                   ],
                   
+                  // Compatibility breakdown
+                  if (profile.compatibilityDetails != null || profile.sharedInterests.isNotEmpty) ...[
+                    _buildCompatibilityBreakdown(context, profile),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+
                   // Prompts section
                   Text(
                     'En savoir plus',
@@ -343,6 +349,94 @@ class ProfileDetailPage extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompatibilityBreakdown(BuildContext context, MatchProfile profile) {
+    final details = profile.compatibilityDetails;
+    final labels = <String, String>{
+      'communication': 'Communication',
+      'values': 'Valeurs',
+      'lifestyle': 'Style de vie',
+      'personality': 'Personnalité',
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGold.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(AppBorderRadius.large),
+        border: Border.all(color: AppColors.primaryGold.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.insights, color: AppColors.primaryGold, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Compatibilité détaillée',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+          if (details != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            ...labels.entries.map((entry) {
+              final value = details[entry.key] ?? 0.0;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(entry.value,
+                            style: Theme.of(context).textTheme.bodySmall),
+                        Text('${(value * 100).round()}%',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryGold)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 6,
+                        backgroundColor: AppColors.backgroundGrey,
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+          if (profile.sharedInterests.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text('Intérêts communs',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600)),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: profile.sharedInterests
+                  .map((interest) => Chip(
+                        label: Text(interest,
+                            style: const TextStyle(fontSize: 12)),
+                        backgroundColor: AppColors.primaryGold.withOpacity(0.15),
+                        side: BorderSide.none,
+                      ))
+                  .toList(),
+            ),
+          ],
         ],
       ),
     );

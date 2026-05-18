@@ -15,6 +15,13 @@ class WebSocketService {
   String? _token;
   bool _isConnected = false;
   BuildContext? _context; // Add context for notification management
+
+  // Exponential backoff state
+  static const Duration _initialReconnectDelay = Duration(seconds: 1);
+  static const Duration _maxReconnectDelay = Duration(seconds: 30);
+  Duration _currentReconnectDelay = _initialReconnectDelay;
+  int _reconnectAttempt = 0;
+  Timer? _reconnectTimer;
   
   // Stream controllers for different event types
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
@@ -50,10 +57,13 @@ class WebSocketService {
     try {
       final uri = Uri.parse('$baseUrl?token=$_token');
       _channel = IOWebSocketChannel.connect(uri);
-      
+
       _isConnected = true;
+      // Reset backoff on successful connection.
+      _currentReconnectDelay = _initialReconnectDelay;
+      _reconnectAttempt = 0;
       _connectionController.add(true);
-      
+
       // Listen to incoming messages
       _channel!.stream.listen(
         _handleMessage,
@@ -68,9 +78,36 @@ class WebSocketService {
   }
 
   void disconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     _channel?.sink.close();
     _isConnected = false;
     _connectionController.add(false);
+  }
+
+  /// Schedules a reconnection attempt using unlimited exponential backoff.
+  /// Delay starts at 1 s, doubles on each attempt, and is capped at 30 s.
+  void _scheduleReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectAttempt++;
+    print(
+      'WebSocket reconnect attempt #$_reconnectAttempt '
+      'in ${_currentReconnectDelay.inSeconds}s',
+    );
+    _reconnectTimer = Timer(_currentReconnectDelay, () async {
+      // Double the delay for the next attempt, capped at the maximum.
+      _currentReconnectDelay = Duration(
+        milliseconds: (_currentReconnectDelay.inMilliseconds * 2)
+            .clamp(0, _maxReconnectDelay.inMilliseconds),
+      );
+      try {
+        await connect();
+      } catch (_) {
+        // connect() failed synchronously; _handleError / _handleDisconnection
+        // will trigger the next scheduled reconnect.
+        _scheduleReconnect();
+      }
+    });
   }
 
   void _handleMessage(dynamic message) {
@@ -167,12 +204,14 @@ class WebSocketService {
     print('WebSocket error: $error');
     _isConnected = false;
     _connectionController.add(false);
+    _scheduleReconnect();
   }
 
   void _handleDisconnection() {
     print('WebSocket disconnected');
     _isConnected = false;
     _connectionController.add(false);
+    _scheduleReconnect();
   }
 
   // Send events to server
@@ -258,6 +297,7 @@ class WebSocketService {
   }
 
   void dispose() {
+    _reconnectTimer?.cancel();
     disconnect();
     _messageController.close();
     _typingController.close();

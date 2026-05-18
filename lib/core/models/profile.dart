@@ -29,7 +29,9 @@ class Profile {
   final bool isComplete;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final double? compatibilityScore; // Optional - only present in matching context
+  final double? compatibilityScore;
+  final Map<String, double>? compatibilityDetails; // e.g. {communication, values, lifestyle, personality}
+  final List<String> sharedInterests;
 
   Profile({
     required this.id,
@@ -61,6 +63,8 @@ class Profile {
     required this.createdAt,
     required this.updatedAt,
     this.compatibilityScore,
+    this.compatibilityDetails,
+    this.sharedInterests = const [],
   });
 
   // Add missing getters that are expected by components
@@ -137,6 +141,12 @@ class Profile {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       compatibilityScore: (json['compatibilityScore'] as num?)?.toDouble(),
+      compatibilityDetails: (json['compatibilityDetails'] as Map<String, dynamic>?)
+          ?.map((k, v) => MapEntry(k, (v as num).toDouble())),
+      sharedInterests: (json['sharedInterests'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 
@@ -171,6 +181,8 @@ class Profile {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       if (compatibilityScore != null) 'compatibilityScore': compatibilityScore,
+      if (compatibilityDetails != null) 'compatibilityDetails': compatibilityDetails,
+      if (sharedInterests.isNotEmpty) 'sharedInterests': sharedInterests,
     };
   }
 }

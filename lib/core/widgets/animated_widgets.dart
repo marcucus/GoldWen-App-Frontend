@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../services/accessibility_service.dart';
 
 /// A widget that animates its scale when pressed
 class AnimatedPressable extends StatefulWidget {
@@ -111,8 +113,10 @@ class _SlideInAnimationState extends State<SlideInAnimation>
   @override
   void initState() {
     super.initState();
+    final reducedMotion =
+        context.read<AccessibilityService?>()?.reducedMotion ?? false;
     _controller = AnimationController(
-      duration: widget.duration,
+      duration: reducedMotion ? Duration.zero : widget.duration,
       vsync: this,
     );
 
@@ -132,7 +136,10 @@ class _SlideInAnimationState extends State<SlideInAnimation>
       curve: widget.curve,
     ));
 
-    Future.delayed(widget.delay, () {
+    final reducedMotion =
+        context.read<AccessibilityService?>()?.reducedMotion ?? false;
+    final actualDelay = reducedMotion ? Duration.zero : widget.delay;
+    Future.delayed(actualDelay, () {
       if (mounted) {
         _controller.forward();
       }
@@ -192,8 +199,10 @@ class _FadeInAnimationState extends State<FadeInAnimation>
   @override
   void initState() {
     super.initState();
+    final reducedMotion =
+        context.read<AccessibilityService?>()?.reducedMotion ?? false;
     _controller = AnimationController(
-      duration: widget.duration,
+      duration: reducedMotion ? Duration.zero : widget.duration,
       vsync: this,
     );
 
@@ -213,7 +222,10 @@ class _FadeInAnimationState extends State<FadeInAnimation>
       curve: widget.curve,
     ));
 
-    Future.delayed(widget.delay, () {
+    final reducedMotion =
+        context.read<AccessibilityService?>()?.reducedMotion ?? false;
+    final actualDelay = reducedMotion ? Duration.zero : widget.delay;
+    Future.delayed(actualDelay, () {
       if (mounted) {
         _controller.forward();
       }

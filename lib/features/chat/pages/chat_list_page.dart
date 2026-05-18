@@ -20,6 +20,7 @@ class _ChatListPageState extends State<ChatListPage>
   late AnimationController _contentController;
   late Animation<double> _backgroundAnimation;
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -227,7 +228,9 @@ class _ChatListPageState extends State<ChatListPage>
           controller: _searchController,
           hintText: 'Rechercher dans les conversations...',
           onChanged: (value) {
-            // Handle search
+            setState(() {
+              _searchQuery = value.trim().toLowerCase();
+            });
           },
         ),
       ),
@@ -241,10 +244,23 @@ class _ChatListPageState extends State<ChatListPage>
           return _buildLoadingState();
         }
 
-        final conversations = chatProvider.activeConversations;
+        final allConversations = chatProvider.activeConversations;
+
+        // Filter by search query (case-insensitive match on other participant's name)
+        final conversations = _searchQuery.isEmpty
+            ? allConversations
+            : allConversations.where((c) {
+                final name =
+                    (c.otherParticipant?.firstName ?? '').toLowerCase();
+                return name.contains(_searchQuery);
+              }).toList();
+
+        if (allConversations.isEmpty) {
+          return _buildEmptyState();
+        }
 
         if (conversations.isEmpty) {
-          return _buildEmptyState();
+          return _buildNoSearchResults();
         }
 
         return Container(
@@ -496,6 +512,47 @@ class _ChatListPageState extends State<ChatListPage>
                 ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoSearchResults() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: AppColors.primaryGold,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Aucun résultat',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Aucune conversation ne correspond à\n"$_searchQuery"',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textLight.withOpacity(0.7),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

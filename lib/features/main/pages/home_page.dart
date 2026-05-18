@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -19,11 +20,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _pseudo;
+  Timer? _noonRefreshTimer;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+      _scheduleNoonRefresh();
+    });
+  }
+
+  @override
+  void dispose() {
+    _noonRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Schedules a timer that fires at the next local noon and refreshes the
+  /// daily selection. After each firing it re-schedules itself for the
+  /// following noon, so the refresh recurs every day.
+  void _scheduleNoonRefresh() {
+    final now = DateTime.now();
+    var nextNoon = DateTime(now.year, now.month, now.day, 12);
+    if (!now.isBefore(nextNoon)) {
+      // Already past noon today — schedule for tomorrow.
+      nextNoon = nextNoon.add(const Duration(days: 1));
+    }
+    final delay = nextNoon.difference(now);
+
+    _noonRefreshTimer = Timer(delay, () {
+      if (mounted) {
+        context.read<MatchingProvider>().loadDailySelection();
+      }
+      // Re-schedule for the next noon.
+      _scheduleNoonRefresh();
+    });
   }
 
   Future<void> _loadData() async {

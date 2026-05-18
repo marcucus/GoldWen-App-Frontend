@@ -134,21 +134,85 @@ class ProfileCompletionWidget extends StatelessWidget {
   }
 
   Widget _buildCompletionStatus(BuildContext context, ProfileCompletion completion) {
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final photoCount = profileProvider.photos.length;
+    final promptCount = profileProvider.prompts.where((p) => p.isNotEmpty).length;
+    final questionnaireCount = profileProvider.personalityAnswers.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'État du profil:',
+          'Force du profil:',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
-        _buildStatusRow(context, 'Photos (minimum 3)', completion.hasPhotos),
-        _buildStatusRow(context, 'Prompts (3 réponses)', completion.hasPrompts),
-        _buildStatusRow(context, 'Questionnaire personnalité', completion.hasPersonalityAnswers),
+        _buildStrengthRow(context, 'Photos', photoCount, 6, completion.hasPhotos),
+        _buildStrengthRow(context, 'Prompts', promptCount, 3, completion.hasPrompts),
+        _buildStrengthRow(context, 'Questionnaire', questionnaireCount, 10, completion.hasPersonalityAnswers),
         _buildStatusRow(context, 'Informations de base', completion.hasRequiredProfileFields),
       ],
+    );
+  }
+
+  Widget _buildStrengthRow(
+    BuildContext context,
+    String label,
+    int current,
+    int max,
+    bool completed,
+  ) {
+    final clamped = current.clamp(0, max);
+    final fraction = clamped / max;
+    final color = completed ? AppColors.successGreen : AppColors.primaryGold;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    completed ? Icons.check_circle : Icons.radio_button_unchecked,
+                    size: 18,
+                    color: completed ? AppColors.successGreen : AppColors.textTertiary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: completed ? AppColors.textDark : AppColors.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '$clamped / $max',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: fraction,
+              minHeight: 4,
+              backgroundColor: AppColors.backgroundGrey,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

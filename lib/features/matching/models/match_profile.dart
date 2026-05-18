@@ -9,7 +9,9 @@ class MatchProfile {
   final List<MediaFile> mediaFiles;
   final List<String> prompts;
   final double compatibilityScore;
-  final String? favoriteSong; // New field for favorite song
+  final Map<String, double>? compatibilityDetails;
+  final List<String> sharedInterests;
+  final String? favoriteSong;
 
   MatchProfile({
     required this.id,
@@ -20,6 +22,8 @@ class MatchProfile {
     this.mediaFiles = const [],
     required this.prompts,
     required this.compatibilityScore,
+    this.compatibilityDetails,
+    this.sharedInterests = const [],
     required this.favoriteSong,
   });
 
@@ -36,7 +40,13 @@ class MatchProfile {
           [],
       prompts: List<String>.from(json['prompts']),
       compatibilityScore: json['compatibilityScore'].toDouble(),
-      favoriteSong: json['favoriteSong'] as String?, // Parse favorite song
+      compatibilityDetails: (json['compatibilityDetails'] as Map<String, dynamic>?)
+          ?.map((k, v) => MapEntry(k, (v as num).toDouble())),
+      sharedInterests: (json['sharedInterests'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      favoriteSong: json['favoriteSong'] as String?,
     );
   }
 

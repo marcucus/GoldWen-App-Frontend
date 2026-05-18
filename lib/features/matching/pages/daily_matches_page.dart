@@ -10,6 +10,7 @@ import '../../../core/services/accessibility_service.dart';
 import '../../../core/services/performance_cache_service.dart';
 import '../../../shared/widgets/optimized_image.dart';
 import '../../../shared/widgets/loading_animation.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../shared/widgets/enhanced_card.dart';
 import '../../../shared/widgets/enhanced_button.dart';
 import '../providers/matching_provider.dart';
@@ -800,9 +801,57 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   }
 
   Widget _buildLoadingState() {
-    return const LoadingAnimation(
-      message: 'Préparation de vos matchs...',
-      semanticLabel: 'Chargement des profils de la sélection quotidienne',
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: List.generate(3, (index) => _buildShimmerCard()),
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          height: 280,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppBorderRadius.large),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Photo placeholder
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(AppBorderRadius.large),
+                      topRight: Radius.circular(AppBorderRadius.large),
+                    ),
+                  ),
+                ),
+              ),
+              // Info placeholder
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height: 18, width: 140, color: Colors.white),
+                    const SizedBox(height: 8),
+                    Container(height: 14, width: 100, color: Colors.white),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

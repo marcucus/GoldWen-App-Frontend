@@ -4,6 +4,7 @@ import '../../../core/models/models.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/loading_animation.dart';
+import '../../profile/providers/profile_provider.dart';
 import '../widgets/score_breakdown_card.dart';
 import '../widgets/match_reasons_widget.dart';
 
@@ -46,12 +47,23 @@ class _AdvancedRecommendationsPageState extends State<AdvancedRecommendationsPag
       _error = null;
     });
 
+    // Read provider data before any async gap so context remains valid.
+    final profileProvider = context.read<ProfileProvider>();
+    final personalityAnswers = profileProvider.personalityAnswers;
+    final preferences = <String, dynamic>{
+      if (profileProvider.minAge != null) 'minAge': profileProvider.minAge,
+      if (profileProvider.maxAge != null) 'maxAge': profileProvider.maxAge,
+      if (profileProvider.maxDistance != null) 'maxDistance': profileProvider.maxDistance,
+      if (profileProvider.interestedInGenders.isNotEmpty)
+        'interestedInGenders': profileProvider.interestedInGenders,
+    };
+
     try {
       final response = await ApiService.calculateCompatibilityV2(
         userId: widget.userId!,
         candidateIds: widget.candidateIds!,
-        personalityAnswers: {}, // TODO: Get from user profile
-        preferences: {}, // TODO: Get from user preferences
+        personalityAnswers: personalityAnswers,
+        preferences: preferences,
         includeAdvancedScoring: true,
       );
 

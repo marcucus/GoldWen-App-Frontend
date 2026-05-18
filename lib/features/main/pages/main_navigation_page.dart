@@ -6,6 +6,7 @@ import 'home_page.dart';
 import '../../chat/pages/chat_list_page.dart';
 import '../../user/pages/user_profile_page.dart';
 import '../../settings/pages/settings_page.dart';
+import '../../onboarding/widgets/onboarding_tutorial_overlay.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -19,6 +20,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   int _currentIndex = 0;
   late AnimationController _navController;
   late Animation<Offset> _slideAnimation;
+  bool _showTutorial = false;
 
   static const List<_NavItem> _navItems = [
     _NavItem(icon: Icons.favorite_border_rounded, activeIcon: Icons.favorite_rounded, label: 'Du jour'),
@@ -49,10 +51,20 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     ];
 
     _initLocationService();
+    _checkTutorial();
 
     Future.delayed(const Duration(milliseconds: 600), () {
       if (mounted) _navController.forward();
     });
+  }
+
+  Future<void> _checkTutorial() async {
+    final shouldShow = await OnboardingTutorialOverlay.shouldShow();
+    if (mounted && shouldShow) {
+      setState(() {
+        _showTutorial = true;
+      });
+    }
   }
 
   Future<void> _initLocationService() async {
@@ -94,6 +106,17 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               child: _buildNav(),
             ),
           ),
+          // First-login tutorial overlay
+          if (_showTutorial)
+            Positioned.fill(
+              child: OnboardingTutorialOverlay(
+                onDismiss: () {
+                  setState(() {
+                    _showTutorial = false;
+                  });
+                },
+              ),
+            ),
         ],
       ),
     );

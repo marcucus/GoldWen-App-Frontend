@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/services/api_service.dart';
@@ -123,8 +124,8 @@ class SubscriptionProvider with ChangeNotifier {
       } catch (apiError) {
         print('API plans loading failed, using RevenueCat only: $apiError');
         
-        // Only create mock plans in development when API fails
-        if (AppConfig.isDevelopment && 
+        // Only create mock plans in debug mode when API fails
+        if (kDebugMode &&
             (apiError.toString().contains('NetworkException') ||
              apiError.toString().contains('ECONNREFUSED') ||
              apiError.toString().contains('Failed to connect'))) {
@@ -139,8 +140,8 @@ class SubscriptionProvider with ChangeNotifier {
 
       _error = null;
     } catch (e) {
-      // If all loading methods fail, provide mock data in development only
-      if (AppConfig.isDevelopment &&
+      // If all loading methods fail, provide mock data in debug mode only
+      if (kDebugMode &&
           (e.toString().contains('NetworkException') ||
            e.toString().contains('ECONNREFUSED') ||
            e.toString().contains('Failed to connect'))) {

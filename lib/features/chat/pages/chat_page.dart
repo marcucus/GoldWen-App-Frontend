@@ -35,6 +35,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final FocusNode _focusNode = FocusNode();
   Timer? _countdownTimer;
 
+  // Local reactions state: messageId -> emoji string
+  final Map<String, String> _reactions = {};
+
+  static const List<String> _quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+
   @override
   void initState() {
     super.initState();
@@ -300,7 +305,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     final isFromCurrentUser = message.senderId == currentUserId;
     final timestamp = message.createdAt;
 
-    return Padding(
+    final reaction = _reactions[message.id];
+
+    return GestureDetector(
+      onLongPress: () => _showMessageOptions(message, isFromCurrentUser),
+      child: Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         mainAxisAlignment:
@@ -320,8 +329,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isFromCurrentUser 
-                  ? CrossAxisAlignment.end 
+              crossAxisAlignment: isFromCurrentUser
+                  ? CrossAxisAlignment.end
                   : CrossAxisAlignment.start,
               children: [
                 Container(
@@ -380,13 +389,18 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   ),
                 ),
                 // Show moderation badge if pending
-                if (message.moderationResult != null && 
+                if (message.moderationResult != null &&
                     message.moderationResult!.isPending) ...[
                   const SizedBox(height: 4),
                   ModerationStatusBadge(
                     moderationResult: message.moderationResult!,
                     compact: true,
                   ),
+                ],
+                // Reaction chip
+                if (reaction != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  _buildReactionChip(reaction, message.id),
                 ],
               ],
             ),
@@ -404,6 +418,127 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             ),
           ],
         ],
+      ),
+      ), // end Padding
+    ); // end GestureDetector
+  }
+
+  Widget _buildReactionChip(String emoji, String messageId) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _reactions.remove(messageId);
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 2,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.accentCream,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.primaryGold.withOpacity(0.4),
+            width: 1,
+          ),
+          boxShadow: AppShadows.soft(),
+        ),
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  void _showMessageOptions(ChatMessage message, bool isFromCurrentUser) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // Quick reactions row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _quickReactions.map((emoji) {
+                final isSelected = _reactions[message.id] == emoji;
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      if (isSelected) {
+                        _reactions.remove(message.id);
+                      } else {
+                        _reactions[message.id] = emoji;
+                      }
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: AppAnimations.fast,
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryGold.withOpacity(0.15)
+                          : AppColors.backgroundGrey,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: AppColors.primaryGold,
+                              width: 2,
+                            )
+                          : null,
+                    ),
+                    child: Text(
+                      emoji,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Divider(),
+            // Delete option (own messages only)
+            if (isFromCurrentUser)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text(
+                  'Supprimer le message',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final chatProvider =
+                      Provider.of<ChatProvider>(context, listen: false);
+                  await chatProvider.deleteMessage(message.id);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Annuler'),
+              onTap: () => Navigator.pop(context),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
       ),
     );
   }

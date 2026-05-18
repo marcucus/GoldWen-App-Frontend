@@ -734,6 +734,33 @@ class _SettingsPageState extends State<SettingsPage> {
                         provider.toggleNewMessageNotifications();
                       } : null,
                     ),
+                    SwitchListTile(
+                      title: const Text('Chat expirant'),
+                      subtitle: const Text('Rappel avant expiration du chat 24h'),
+                      value: settings.chatExpiring,
+                      onChanged: settings.pushEnabled ? (value) {
+                        final s = settings.copyWith(chatExpiring: value);
+                        provider.updateNotificationSettings(s);
+                      } : null,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Promotions'),
+                      subtitle: const Text('Offres et actualités GoldWen Plus'),
+                      value: settings.promotions,
+                      onChanged: settings.pushEnabled ? (value) {
+                        final s = settings.copyWith(promotions: value);
+                        provider.updateNotificationSettings(s);
+                      } : null,
+                    ),
+                    SwitchListTile(
+                      title: const Text('Mises à jour système'),
+                      subtitle: const Text('Informations importantes sur le service'),
+                      value: settings.systemUpdates,
+                      onChanged: settings.pushEnabled ? (value) {
+                        final s = settings.copyWith(systemUpdates: value);
+                        provider.updateNotificationSettings(s);
+                      } : null,
+                    ),
                     const Divider(),
                     SwitchListTile(
                       title: const Text('Son'),
@@ -752,6 +779,22 @@ class _SettingsPageState extends State<SettingsPage> {
                         final newSettings = settings.copyWith(vibrationEnabled: value);
                         provider.updateNotificationSettings(newSettings);
                       } : null,
+                    ),
+                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Heures silencieuses',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${settings.quietHoursStart} – ${settings.quietHoursEnd}',
+                            style: const TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
