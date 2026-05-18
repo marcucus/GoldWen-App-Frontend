@@ -233,6 +233,7 @@ class _GenderSelectionPageState extends State<GenderSelectionPage> {
           ),
         ),
       ),
+      ),
     );
   }
 

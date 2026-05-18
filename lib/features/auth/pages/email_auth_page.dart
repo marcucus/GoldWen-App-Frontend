@@ -328,6 +328,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -351,21 +352,14 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           lastName: _lastNameController.text.trim(),
         );
       } else {
-        print('Starting sign in with email: ${_emailController.text.trim()}');
         await authProvider.signInWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+      }
 
-      print('Checking authentication status...');
-      print('authProvider.isAuthenticated: ${authProvider.isAuthenticated}');
-      print('mounted: $mounted');
-      
-      if (authProvider.isAuthenticated) {
-        if (mounted) {
-          print('Authentication successful, navigating to splash for proper routing...');
-          context.go('/splash');
-        }
+      if (authProvider.isAuthenticated && mounted) {
+        context.go('/splash');
       }
     } catch (e) {
       setState(() {

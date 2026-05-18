@@ -136,8 +136,6 @@ class _SlideInAnimationState extends State<SlideInAnimation>
       curve: widget.curve,
     ));
 
-    final reducedMotion =
-        context.read<AccessibilityService?>()?.reducedMotion ?? false;
     final actualDelay = reducedMotion ? Duration.zero : widget.delay;
     Future.delayed(actualDelay, () {
       if (mounted) {
@@ -222,8 +220,6 @@ class _FadeInAnimationState extends State<FadeInAnimation>
       curve: widget.curve,
     ));
 
-    final reducedMotion =
-        context.read<AccessibilityService?>()?.reducedMotion ?? false;
     final actualDelay = reducedMotion ? Duration.zero : widget.delay;
     Future.delayed(actualDelay, () {
       if (mounted) {

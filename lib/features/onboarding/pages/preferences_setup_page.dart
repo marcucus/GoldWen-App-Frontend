@@ -259,6 +259,7 @@ class _PreferencesSetupPageState extends State<PreferencesSetupPage> {
           ),
         ),
       ),
+      ),
     );
   }
 

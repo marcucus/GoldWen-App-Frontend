@@ -381,6 +381,7 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
           ],
         ),
       ),
+      ),
     );
   }
 

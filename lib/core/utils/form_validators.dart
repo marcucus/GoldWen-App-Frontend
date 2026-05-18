@@ -1,5 +1,5 @@
 class FormValidators {
-  static const String _passwordRegex = "r'^(?=.*[A-Z])(?=.*[!@#\$%^&*()_+\-=\[\]{};\':\"\\|,.<>/?]).*$'";
+  static const String _passwordRegex = r'^(?=.*[A-Z])(?=.*[!@#$%^&*()\-_+=\[\]{};:,.<>/?|\\]).*$';
 
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {

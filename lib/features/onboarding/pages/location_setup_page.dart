@@ -338,6 +338,7 @@ class _LocationSetupPageState extends State<LocationSetupPage> {
           ),
         ),
       ),
+      ),
     );
   }
 
