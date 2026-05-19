@@ -112,6 +112,7 @@ class RevenueCatService {
       } else {
         platform = 'android';
         // For Android, get the purchase token from the latest entitlement
+        if (activeEntitlements.isEmpty) return false;
         final entitlement = activeEntitlements.values.first;
         receiptData = entitlement.originalPurchaseDate.toString();
       }

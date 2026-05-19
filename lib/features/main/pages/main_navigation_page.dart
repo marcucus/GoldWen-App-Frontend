@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -16,17 +17,33 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _navController;
   late Animation<Offset> _slideAnimation;
   bool _showTutorial = false;
 
   static const List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.favorite_border_rounded, activeIcon: Icons.favorite_rounded, label: 'Du jour'),
-    _NavItem(icon: Icons.chat_bubble_outline_rounded, activeIcon: Icons.chat_bubble_rounded, label: 'Messages'),
-    _NavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Profil'),
-    _NavItem(icon: Icons.settings_outlined, activeIcon: Icons.settings_rounded, label: 'Réglages'),
+    _NavItem(
+      icon: Icons.diamond_outlined,
+      activeIcon: Icons.diamond_rounded,
+      label: 'Du jour',
+    ),
+    _NavItem(
+      icon: Icons.chat_bubble_outline_rounded,
+      activeIcon: Icons.chat_bubble_rounded,
+      label: 'Messages',
+    ),
+    _NavItem(
+      icon: Icons.person_outline_rounded,
+      activeIcon: Icons.person_rounded,
+      label: 'Profil',
+    ),
+    _NavItem(
+      icon: Icons.tune_outlined,
+      activeIcon: Icons.tune_rounded,
+      label: 'Réglages',
+    ),
   ];
 
   late final List<Widget> _pages;
@@ -35,13 +52,13 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   void initState() {
     super.initState();
     _navController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _navController, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _navController, curve: Curves.easeOutCubic));
 
     _pages = [
       HomePage(onNavigate: _navigateToTab),
@@ -50,10 +67,10 @@ class _MainNavigationPageState extends State<MainNavigationPage>
       const SettingsPage(),
     ];
 
-    _initLocationService();
-    _checkTutorial();
+    unawaited(_initLocationService());
+    unawaited(_checkTutorial());
 
-    Future.delayed(const Duration(milliseconds: 600), () {
+    Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) _navController.forward();
     });
   }
@@ -61,9 +78,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   Future<void> _checkTutorial() async {
     final shouldShow = await OnboardingTutorialOverlay.shouldShow();
     if (mounted && shouldShow) {
-      setState(() {
-        _showTutorial = true;
-      });
+      setState(() => _showTutorial = true);
     }
   }
 
@@ -89,14 +104,13 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundWhite,
       body: Stack(
         children: [
-          // Page content
           IndexedStack(
             index: _currentIndex,
             children: _pages,
           ),
-          // Floating dark glass bottom nav
           Positioned(
             bottom: 0,
             left: 0,
@@ -106,15 +120,10 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               child: _buildNav(),
             ),
           ),
-          // First-login tutorial overlay
           if (_showTutorial)
             Positioned.fill(
               child: OnboardingTutorialOverlay(
-                onDismiss: () {
-                  setState(() {
-                    _showTutorial = false;
-                  });
-                },
+                onDismiss: () => setState(() => _showTutorial = false),
               ),
             ),
         ],
@@ -125,29 +134,35 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   Widget _buildNav() {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + (bottomPadding > 0 ? 0 : 0)),
-      decoration: BoxDecoration(
-        color: const Color(0xEB1A1A1A),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.30),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
+      margin: EdgeInsets.fromLTRB(20, 0, 20, (bottomPadding > 0 ? bottomPadding : 16)),
+      child: Container(
+        height: 68,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
             color: AppColors.primaryGold.withOpacity(0.18),
-            blurRadius: 0,
-            spreadRadius: 1,
+            width: 1.0,
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(
-          _navItems.length,
-          (i) => _buildNavItem(i),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryGold.withOpacity(0.10),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: List.generate(
+            _navItems.length,
+            (i) => _buildNavItem(i),
+          ),
         ),
       ),
     );
@@ -162,35 +177,43 @@ class _MainNavigationPageState extends State<MainNavigationPage>
         onTap: () => _navigateToTab(index),
         behavior: HitTestBehavior.opaque,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedContainer(
-              duration: AppAnimations.fast,
-              width: 52,
-              height: 52,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 44,
+              height: 38,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: isActive ? AppColors.premiumGradient : null,
-                color: isActive ? null : Colors.transparent,
-              ),
-              child: Icon(
-                isActive ? item.activeIcon : item.icon,
-                size: 24,
                 color: isActive
-                    ? Colors.white
-                    : Colors.white.withOpacity(0.55),
+                    ? AppColors.primaryGold.withOpacity(0.10)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Icon(
+                  isActive ? item.activeIcon : item.icon,
+                  size: 22,
+                  color: isActive
+                      ? AppColors.primaryGold
+                      : AppColors.textTertiary,
+                ),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             AnimatedDefaultTextStyle(
-              duration: AppAnimations.fast,
+              duration: const Duration(milliseconds: 220),
               style: TextStyle(
                 fontFamily: 'Lato',
-                fontSize: 11,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 10,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive
                     ? AppColors.primaryGold
-                    : Colors.white.withOpacity(0.55),
+                    : AppColors.textTertiary,
+                letterSpacing: isActive ? 0.2 : 0,
+                height: 1.0,
               ),
               child: Text(item.label),
             ),
@@ -205,5 +228,9 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const _NavItem({required this.icon, required this.activeIcon, required this.label});
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }

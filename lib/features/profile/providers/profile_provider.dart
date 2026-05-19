@@ -592,7 +592,10 @@ class ProfileProvider with ChangeNotifier {
         'hasPhotos': completionData['requirements']?['minimumPhotos']?['satisfied'] ?? false,
         'hasPrompts': completionData['requirements']?['minimumPrompts']?['satisfied'] ?? false,
         'hasPersonalityAnswers': completionData['requirements']?['personalityQuestionnaire']?['satisfied'] ?? false,
-        'hasRequiredProfileFields': completionData['requirements']?['basicInfo']?['satisfied'] ?? false,
+        'hasRequiredProfileFields': (() {
+          final basicInfo = completionData['requirements']?['basicInfo'];
+          return basicInfo == true || (basicInfo is Map && basicInfo['satisfied'] == true);
+        })(),
         'missingSteps': completionData['missingSteps'] ?? [],
       };
       

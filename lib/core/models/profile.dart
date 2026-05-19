@@ -68,10 +68,16 @@ class Profile {
   });
 
   // Add missing getters that are expected by components
-  String? get firstName => pseudo?.split(' ').first;
-  String? get lastName => pseudo!.split(' ').length > 1
-      ? pseudo?.split(' ').skip(1).join(' ')
-      : null;
+  String? get firstName {
+    final parts = pseudo?.trim().split(' ');
+    return (parts != null && parts.isNotEmpty) ? parts.first : null;
+  }
+
+  String? get lastName {
+    if (pseudo == null) return null;
+    final parts = pseudo!.trim().split(' ');
+    return parts.length > 1 ? parts.skip(1).join(' ') : null;
+  }
 
   int? get age {
     if (birthDate == null) return null;

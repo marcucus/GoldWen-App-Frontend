@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
-    context.read<MatchingProvider>().loadDailySelection();
+    unawaited(context.read<MatchingProvider>().loadDailySelection());
     try {
       final res = await ApiService.getProfile();
       final data = res['data'] ?? res;
@@ -223,7 +223,13 @@ class _HomePageState extends State<HomePage> {
   Widget _buildStreakCard() {
     final days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
     final todayIdx = DateTime.now().weekday - 1; // Mon=0
-    const streak = 7; // TODO: wire to real data
+
+    return Consumer<MatchingProvider>(
+      builder: (context, mp, _) {
+        final hasEngagedToday = mp.dailySelection != null;
+        final subtitle = hasEngagedToday
+            ? 'Actif aujourd\'hui ✓'
+            : 'Revenez chaque jour';
 
     return Container(
       margin: const EdgeInsets.fromLTRB(18, -22, 18, 0),
@@ -260,9 +266,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    '$streak jours d\'affilée',
-                    style: TextStyle(
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
                       fontFamily: 'Playfair Display',
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
@@ -277,7 +283,7 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (i) {
-              final done = i < todayIdx;
+              final done = i < todayIdx && hasEngagedToday;
               final today = i == todayIdx;
               return Expanded(
                 child: Column(
@@ -327,6 +333,8 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+      }, // end Consumer builder
+    ); // end Consumer
   }
 
   // --- Profiles du jour --------------------------------------------------
@@ -404,9 +412,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: profiles.map((p) {
-              final isChosen = mp.dailySelection?.choicesMade != null &&
-                  mp.dailySelection!.choicesMade > 0;
-              return _buildProfileCard(p, dimmed: used && !isChosen);
+              return _buildProfileCard(p, dimmed: used);
             }).toList(),
           ),
         );
