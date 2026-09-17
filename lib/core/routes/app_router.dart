@@ -26,7 +26,6 @@ import '../../features/legal/pages/account_deletion_page.dart';
 import '../../features/legal/pages/consent_page.dart';
 import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
-import '../../features/settings/pages/email_history_page.dart';
 import '../../features/notifications/pages/notifications_page.dart';
 import '../../features/notifications/pages/notification_test_page.dart';
 import '../../features/admin/pages/admin_login_page.dart';
@@ -269,13 +268,6 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
-      ),
-
-      // Email History
-      GoRoute(
-        path: '/email-history',
-        name: 'email-history',
-        builder: (context, state) => const EmailHistoryPage(),
       ),
 
       // Notifications
