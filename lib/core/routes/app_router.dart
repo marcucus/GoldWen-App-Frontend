@@ -28,15 +28,12 @@ import '../../features/user/pages/user_profile_page.dart';
 import '../../features/settings/pages/settings_page.dart';
 import '../../features/notifications/pages/notifications_page.dart';
 import '../../features/notifications/pages/notification_test_page.dart';
-import '../../features/admin/pages/admin_login_page.dart';
-import '../../features/admin/pages/admin_dashboard_page.dart';
-import '../../features/admin/pages/admin_users_page.dart';
-import '../../features/admin/pages/admin_reports_page.dart';
-import '../../features/admin/pages/admin_support_page.dart';
 import '../../features/reports/pages/user_reports_page.dart';
+import '../services/navigation_service.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
+    navigatorKey: NavigationService.navigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) {
       final authProvider = context.read<AuthProvider>();
@@ -53,18 +50,17 @@ class AppRouter {
       
       final publicRoutes = ['/welcome', '/auth', '/auth/email', '/splash'];
       final isPublicRoute = publicRoutes.contains(currentPath);
-      final isAdminRoute = currentPath.startsWith('/admin');
 
       // Unauthenticated users
       if (!isAuthenticated && status == AuthStatus.unauthenticated) {
-        if (!isPublicRoute && !isAdminRoute) {
+        if (!isPublicRoute) {
           return '/welcome';
         }
         return null; // safe to navigate to public route
       }
 
       // Authenticated users
-      if (isAuthenticated && user != null && !isAdminRoute) {
+      if (isAuthenticated && user != null) {
         // Enforce onboarding resumption automatically
         if (user.isOnboardingCompleted != true) {
           final allowedOnboardingRoutes = [
@@ -291,32 +287,6 @@ class AppRouter {
         builder: (context, state) => const NotificationTestPage(),
       ),
 
-      // Admin Routes
-      GoRoute(
-        path: '/admin/login',
-        name: 'admin-login',
-        builder: (context, state) => const AdminLoginPage(),
-      ),
-      GoRoute(
-        path: '/admin/dashboard',
-        name: 'admin-dashboard',
-        builder: (context, state) => const AdminDashboardPage(),
-      ),
-      GoRoute(
-        path: '/admin/users',
-        name: 'admin-users',
-        builder: (context, state) => const AdminUsersPage(),
-      ),
-      GoRoute(
-        path: '/admin/reports',
-        name: 'admin-reports',
-        builder: (context, state) => const AdminReportsPage(),
-      ),
-      GoRoute(
-        path: '/admin/support',
-        name: 'admin-support',
-        builder: (context, state) => const AdminSupportPage(),
-      ),
     ],
   );
 }

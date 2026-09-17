@@ -104,40 +104,30 @@ class RevenueCatService {
     }
   }
 
+  // There is no client-side "receipt verification" endpoint on the
+  // backend (nor should there be one — the only thing that can safely
+  // decide a purchase is genuine is RevenueCat's own signed webhook,
+  // handled server-side and hardened in Phase 0.4). This call just records
+  // the purchase attempt against the account (POST /subscriptions, status
+  // PENDING); the subscription only ever becomes ACTIVE once that webhook
+  // confirms it independently.
   static Future<bool> verifySubscriptionWithBackend(
       CustomerInfo customerInfo) async {
     try {
-      final activeEntitlements = customerInfo.entitlements.active;
-      if (activeEntitlements.isEmpty) return false;
+      final entitlement = getActiveEntitlement(customerInfo);
+      if (entitlement == null) return false;
 
-      // Get the receipt data based on platform
-      String receiptData;
-      String platform;
-
-      if (Platform.isIOS) {
-        platform = 'ios';
-        // For iOS, we need to get the original app transaction ID
-        final latestTransaction = customerInfo.originalAppUserId;
-        receiptData = latestTransaction;
-      } else {
-        platform = 'android';
-        // For Android, get the purchase token from the latest entitlement
-        if (activeEntitlements.isEmpty) return false;
-        final entitlement = activeEntitlements.values.first;
-        receiptData = entitlement.originalPurchaseDate.toString();
-      }
-
-      if (receiptData.isEmpty) return false;
-
-      // Verify with backend
-      await ApiService.verifyReceipt(
-        receiptData: receiptData,
-        platform: platform,
+      await ApiService.createSubscription(
+        plan: 'goldwen_plus',
+        revenueCatCustomerId: customerInfo.originalAppUserId,
+        revenueCatSubscriptionId: entitlement.productIdentifier,
+        originalTransactionId: entitlement.originalPurchaseDate.toString(),
+        platform: Platform.isIOS ? 'ios' : 'android',
       );
 
       return true;
     } catch (e) {
-      debugPrint('Error verifying subscription with backend: $e');
+      debugPrint('Error recording subscription with backend: $e');
       return false;
     }
   }

@@ -8,23 +8,27 @@ class AppConfig {
     'MAIN_API_BASE_URL',
     defaultValue: 'https://api.goldwen.app/api/v1', // Production URL
   );
-  static const String matchingServiceBaseUrl = String.fromEnvironment(
-    'MATCHING_SERVICE_BASE_URL',
-    defaultValue: 'https://matching.goldwen.app/api/v1', // Production URL
-  );
   static const String webSocketBaseUrl = String.fromEnvironment(
     'WEBSOCKET_BASE_URL',
     defaultValue: 'wss://api.goldwen.app/chat', // Production WebSocket URL
   );
-  static const String matchingServiceApiKey = String.fromEnvironment(
-    'MATCHING_SERVICE_API_KEY',
-    defaultValue: 'matching-service-secret-key',
+
+  // Development host, used to reach a locally-running backend from a device
+  // or emulator (see _getDevUrl / _getDevWebSocketUrl below). Defaults to
+  // 10.0.2.2, the standard Android-emulator alias for the host machine's
+  // localhost — this used to be a developer's real personal LAN IP address
+  // hardcoded in source (192.168.1.183), which (a) leaked a piece of
+  // someone's home network into the repo and (b) silently broke for anyone
+  // else running the emulator. Testing against a physical device on a LAN
+  // still works — override at build/run time:
+  //   flutter run --dart-define=DEV_HOST_IP=192.168.1.42
+  static const String devHostIp = String.fromEnvironment(
+    'DEV_HOST_IP',
+    defaultValue: '10.0.2.2',
   );
 
   // Development URLs (can be overridden with environment variables)
-  // Use 10.0.2.2 for Android emulator to access host machine, localhost for others
   static String get devMainApiBaseUrl => _getDevUrl('3000');
-  static String get devMatchingServiceBaseUrl => _getDevUrl('8000');
   static String get devWebSocketBaseUrl => _getDevWebSocketUrl('3000');
 
   /// Ajout d'un log pour debug l'URL utilisée sur le device
@@ -38,7 +42,7 @@ class AppConfig {
   static String _getDevUrl(String port) {
     try {
       if (Platform.isAndroid) {
-        return 'http://192.168.1.183:$port/api/v1';
+        return 'http://$devHostIp:$port/api/v1';
       } else if (Platform.isIOS) {
         // iOS simulator shares the Mac's network stack — localhost works directly
         return 'http://localhost:$port/api/v1';
@@ -54,7 +58,7 @@ class AppConfig {
   static String _getDevWebSocketUrl(String port) {
     try {
       if (Platform.isAndroid) {
-        return 'ws://192.168.1.183:$port/chat';
+        return 'ws://$devHostIp:$port/chat';
       } else if (Platform.isIOS) {
         return 'ws://localhost:$port/chat';
       }
@@ -79,7 +83,6 @@ class AppConfig {
 
   // Feature flags (could be loaded from remote config)
   static const bool enableWebSocketChat = true;
-  static const bool enableMatchingService = true;
   static const bool enablePushNotifications = true;
   static const bool enableAnalytics = true;
 

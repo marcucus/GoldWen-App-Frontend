@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart';
 import '../providers/chat_provider.dart';
@@ -192,10 +193,7 @@ class _MatchAcceptanceDialogState extends State<MatchAcceptanceDialog> {
         if (context.mounted) {
           Navigator.of(context).pop();
           // Navigate to the new chat
-          Navigator.pushNamed(
-            context,
-            '/chat/${result['chatId']}',
-          );
+          context.push('/chat/${result['chatId']}');
         }
       } else {
         if (context.mounted) {

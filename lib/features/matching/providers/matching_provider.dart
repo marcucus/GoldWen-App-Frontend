@@ -609,7 +609,7 @@ class MatchingProvider with ChangeNotifier {
     _setLoading();
 
     try {
-      final response = await MatchingServiceApi.getHistory(
+      final response = await ApiService.getHistory(
         page: page,
         limit: limit,
         startDate: startDate,

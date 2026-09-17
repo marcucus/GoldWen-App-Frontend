@@ -7,6 +7,5 @@ export 'subscription.dart';
 export 'notification.dart';
 export 'report.dart';
 export 'feedback.dart';
-export 'email_notification.dart';
 export 'moderation.dart';
 export 'gdpr_consent.dart';

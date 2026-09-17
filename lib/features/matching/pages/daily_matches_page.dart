@@ -1191,7 +1191,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   void _showProfileDetails(Profile profile) {
     // Navigate to profile detail page
-    context.push('/profile-detail/${profile.id}');
+    context.push('/profile/${profile.id}');
   }
 
   Future<void> _passProfile(Profile profile, MatchingProvider matchingProvider,

@@ -402,10 +402,13 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
           }
 
           _errorMessage = e.message;
-          // Show more specific error messages for common issues
+          // Show more specific error messages for common issues. This must
+          // stay free of any implementation detail (host, port, "backend")
+          // — end users can't act on that, and it exposes infrastructure
+          // information that has no business reaching the client.
           if (e.statusCode == 0 || e.message.contains('connection')) {
             _errorMessage =
-                'Problème de connexion au serveur. Vérifiez votre connexion internet et que le serveur backend est démarré.';
+                'Connexion au serveur impossible. Vérifiez votre connexion internet et réessayez dans quelques instants.';
           }
         } else {
           _errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
@@ -414,7 +417,7 @@ class _EmailAuthPageState extends State<EmailAuthPage> {
               e.toString().contains('Network') ||
               e.toString().contains('Socket')) {
             _errorMessage =
-                'Impossible de se connecter au serveur. Assurez-vous que le backend est démarré sur localhost:3000.';
+                'Connexion au serveur impossible. Vérifiez votre connexion internet et réessayez dans quelques instants.';
           }
         }
         // Debug information for development

@@ -52,7 +52,7 @@ dependencies:
   timezone: ^0.10.1
   uuid: ^4.2.1
   video_player: ^2.9.2
-  web_socket_channel: ^3.0.3
+  socket_io_client: ^2.0.3+1
 
 dev_dependencies:
   build_runner: ^2.4.7

@@ -14,6 +14,25 @@ class ApiService {
       ? AppConfig.devMainApiBaseUrl
       : AppConfig.mainApiBaseUrl;
   static String? _token;
+  static String? _refreshToken;
+
+  // Resolved once a refresh is in flight and shared by every concurrent
+  // 401 so a burst of requests triggers exactly one POST /auth/refresh
+  // instead of one per request (Dart futures already broadcast their
+  // result/error to every listener, which is the "queue" the fix needs).
+  static Future<String>? _refreshCompleter;
+
+  /// Set by AuthProvider so newly-issued tokens (access + refresh) get
+  /// persisted to storage the same way a fresh login does. ApiService owns
+  /// the HTTP/token-refresh mechanics but not where tokens are stored.
+  static void Function(String accessToken, String refreshToken)?
+      onTokensRefreshed;
+
+  /// Set by AuthProvider. Called once a refresh attempt has definitively
+  /// failed (refresh token itself expired/revoked) so the app can clear
+  /// auth state and redirect to a public route. ApiService has no
+  /// BuildContext of its own, so it only signals — it never navigates.
+  static void Function()? onSessionExpired;
 
   // Dio is initialized lazily so that `baseUrl` (a getter itself) is resolved
   // at the first call time, not at class loading time.
@@ -37,10 +56,54 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 401) {
-            clearToken();
+          // Only the *unauthenticated* auth endpoints are excluded from the
+          // refresh flow (a 401 there means bad credentials, not an expired
+          // token). Authenticated auth endpoints like /auth/me or
+          // /auth/logout should still trigger a refresh-and-retry.
+          const unauthenticatedAuthPaths = [
+            '/auth/login',
+            '/auth/register',
+            '/auth/google',
+            '/auth/apple',
+            '/auth/forgot-password',
+            '/auth/reset-password',
+            '/auth/verify-email',
+          ];
+          final isUnauthenticatedAuthEndpoint = unauthenticatedAuthPaths
+              .any((path) => e.requestOptions.path.contains(path));
+          if (e.response?.statusCode != 401 || isUnauthenticatedAuthEndpoint) {
+            return handler.next(e);
           }
-          return handler.next(e);
+
+          if (_refreshToken == null) {
+            // Nothing to refresh with — this session cannot be salvaged.
+            clearToken();
+            onSessionExpired?.call();
+            return handler.next(e);
+          }
+
+          final String newToken;
+          try {
+            newToken = await _refreshAccessToken();
+          } catch (_) {
+            // _performRefresh() already cleared tokens and fired
+            // onSessionExpired — the refresh token itself is dead, so
+            // surface the request's original 401.
+            return handler.next(e);
+          }
+
+          try {
+            final retryRequest = e.requestOptions
+              ..headers['Authorization'] = 'Bearer $newToken';
+            final retryResponse = await _dio.fetch(retryRequest);
+            return handler.resolve(retryResponse);
+          } on DioException catch (retryError) {
+            // Refresh succeeded, but the retried request failed for its
+            // own reason (e.g. the freshly-issued token was rejected too,
+            // or an unrelated network error) — surface that instead of
+            // the stale original 401.
+            return handler.next(retryError);
+          }
         },
       ));
     }
@@ -53,8 +116,74 @@ class ApiService {
 
   static String? get token => _token;
 
+  static void setRefreshToken(String token) {
+    _refreshToken = token;
+  }
+
+  static String? get refreshToken => _refreshToken;
+
   static void clearToken() {
     _token = null;
+    _refreshToken = null;
+  }
+
+  /// Returns a valid access token, refreshing it first if needed. Every
+  /// concurrent caller (e.g. several requests that all 401'd at once)
+  /// shares the same in-flight refresh instead of racing separate calls.
+  static Future<String> _refreshAccessToken() {
+    return _refreshCompleter ??= _performRefresh().whenComplete(() {
+      _refreshCompleter = null;
+    });
+  }
+
+  static Future<String> _performRefresh() async {
+    final currentRefreshToken = _refreshToken;
+    if (currentRefreshToken == null) {
+      throw ApiException(
+        statusCode: 401,
+        message: 'No refresh token available',
+        code: 'NO_REFRESH_TOKEN',
+      );
+    }
+
+    try {
+      // A separate, interceptor-free Dio: this call must never carry the
+      // (expired) access token, and must never itself be caught by the
+      // onError handler above (that would recurse).
+      final refreshDio = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: AppConfig.defaultTimeout,
+        receiveTimeout: AppConfig.defaultTimeout,
+        headers: {'Content-Type': 'application/json'},
+      ));
+      final response = await refreshDio.post(
+        '/auth/refresh',
+        data: jsonEncode({'refreshToken': currentRefreshToken}),
+      );
+      final body = _handleResponse(response) as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>?;
+      final newAccessToken = data?['accessToken'] as String?;
+      final newRefreshToken = data?['refreshToken'] as String?;
+      if (newAccessToken == null) {
+        throw ApiException(
+          statusCode: 401,
+          message: 'Refresh response missing accessToken',
+          code: 'REFRESH_FAILED',
+        );
+      }
+
+      _token = newAccessToken;
+      _refreshToken = newRefreshToken ?? currentRefreshToken;
+      onTokensRefreshed?.call(_token!, _refreshToken!);
+      return _token!;
+    } catch (e) {
+      // The refresh token is itself invalid/expired (or the refresh call
+      // failed outright) — there is no way to recover this session.
+      _token = null;
+      _refreshToken = null;
+      onSessionExpired?.call();
+      rethrow;
+    }
   }
 
   // Helper method to handle HTTP requests with timeout and error handling
@@ -725,9 +854,12 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> expireChat(String chatId) async {
+  // Backend route is `extend` (see chat.controller.ts) — there is no
+  // `expire` route; the chat expires on its own once its 24h window ends.
+  static Future<Map<String, dynamic>> extendChatTime(String chatId,
+      {int hours = 24}) async {
     final response = await _makeRequest(
-      _dio.put('/chat/$chatId/expire'),
+      _dio.put('/chat/$chatId/extend', data: jsonEncode({'hours': hours})),
     );
 
     return _handleResponse(response);
@@ -746,32 +878,33 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> purchaseSubscription({
+  // `/subscriptions/purchase` and `/subscriptions/verify-receipt` don't
+  // exist on the backend — the only legitimate write path is
+  // `POST /subscriptions`, which records the purchase as PENDING; only
+  // RevenueCat's own verified webhook (hardened in Phase 0.4) ever flips a
+  // subscription to ACTIVE, so this call never grants premium by itself.
+  static Future<Map<String, dynamic>> createSubscription({
     required String plan,
-    required String platform,
-    required String receiptData,
+    String? revenueCatCustomerId,
+    String? revenueCatSubscriptionId,
+    String? originalTransactionId,
+    num? price,
+    String? currency,
+    String? platform,
   }) async {
     final response = await _dio.post(
-      '/subscriptions/purchase',
+      '/subscriptions',
       data: jsonEncode({
         'plan': plan,
-        'platform': platform,
-        'receiptData': receiptData,
-      }),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> verifyReceipt({
-    required String receiptData,
-    required String platform,
-  }) async {
-    final response = await _dio.post(
-      '/subscriptions/verify-receipt',
-      data: jsonEncode({
-        'receiptData': receiptData,
-        'platform': platform,
+        if (revenueCatCustomerId != null)
+          'revenueCatCustomerId': revenueCatCustomerId,
+        if (revenueCatSubscriptionId != null)
+          'revenueCatSubscriptionId': revenueCatSubscriptionId,
+        if (originalTransactionId != null)
+          'originalTransactionId': originalTransactionId,
+        if (price != null) 'price': price,
+        if (currency != null) 'currency': currency,
+        if (platform != null) 'platform': platform,
       }),
     );
 
@@ -950,114 +1083,6 @@ class ApiService {
     );
   }
 
-  // Admin endpoints
-  static Future<Map<String, dynamic>> adminLogin({
-    required String email,
-    required String password,
-  }) async {
-    final response = await _dio.post(
-      '/admin/auth/login',
-      data: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getAdminUsers({
-    int? page,
-    int? limit,
-    String? status,
-    String? search,
-  }) async {
-    final queryParams = <String, String>{};
-    if (page != null) queryParams['page'] = page.toString();
-    if (limit != null) queryParams['limit'] = limit.toString();
-    if (status != null) queryParams['status'] = status;
-    if (search != null) queryParams['search'] = search;
-
-    final uri = Uri.parse('/admin/users')
-        .replace(queryParameters: queryParams)
-        .toString();
-    final response = await _dio.get(uri);
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getAdminUserDetails(String userId) async {
-    final response = await _dio.get('/admin/users/$userId');
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> updateUserStatus(
-      String userId, String status) async {
-    final response = await _dio.put(
-      '/admin/users/$userId/status',
-      data: jsonEncode({'status': status}),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getAdminReports({
-    int? page,
-    int? limit,
-    String? status,
-    String? type,
-  }) async {
-    final queryParams = <String, String>{};
-    if (page != null) queryParams['page'] = page.toString();
-    if (limit != null) queryParams['limit'] = limit.toString();
-    if (status != null) queryParams['status'] = status;
-    if (type != null) queryParams['type'] = type;
-
-    final uri = Uri.parse('/admin/reports')
-        .replace(queryParameters: queryParams)
-        .toString();
-    final response = await _dio.get(uri);
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> updateReportStatus(
-      String reportId, String status, String resolution) async {
-    final response = await _dio.put(
-      '/admin/reports/$reportId',
-      data: jsonEncode({
-        'status': status,
-        'resolution': resolution,
-      }),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getAdminAnalytics() async {
-    final response = await _dio.get('/admin/analytics');
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> broadcastNotification({
-    required String title,
-    required String body,
-    required String type,
-  }) async {
-    final response = await _dio.post(
-      '/admin/notifications/broadcast',
-      data: jsonEncode({
-        'title': title,
-        'body': body,
-        'type': type,
-      }),
-    );
-
-    return _handleResponse(response);
-  }
-
   // GDPR Compliance endpoints
   static Future<Map<String, dynamic>> submitGdprConsent({
     required bool dataProcessing,
@@ -1117,10 +1142,13 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // Real backend route (users.controller.ts) is `GET /users/me/export`,
+  // synchronous — not `/users/me/export-data` (that one is the *async*
+  // export request below, POST-only).
   static Future<dynamic> exportUserData({String format = 'json'}) async {
     final queryParams = <String, String>{'format': format};
 
-    final uri = Uri.parse('/users/me/export-data')
+    final uri = Uri.parse('/users/me/export')
         .replace(queryParameters: queryParams)
         .toString();
     final response = await _dio.get(uri);
@@ -1142,19 +1170,30 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // There is no dedicated `/users/me/privacy-settings` route. `analytics`
+  // and `marketing` map onto the RGPD consent record (`/users/consent`,
+  // the same endpoint `submitGdprConsent` already uses at signup).
+  // `functionalCookies` and `dataRetention` have no backend equivalent
+  // today (they read as website cookie-banner concepts, not user-account
+  // consent) and stay client-side only until/unless the backend grows one —
+  // callers still get them back via [PrivacySettings]'s own defaults.
   static Future<Map<String, dynamic>> updatePrivacySettings({
     required bool analytics,
     required bool marketing,
     required bool functionalCookies,
     int? dataRetention,
   }) async {
-    final response = await _dio.put(
-      '/users/me/privacy-settings',
+    final response = await _dio.post(
+      '/users/consent',
       data: jsonEncode({
-        'analytics': analytics,
+        // Data-processing consent is mandatory to use the app at all and is
+        // already recorded at signup (Phase 3.4) — keep it granted here
+        // rather than silently withdrawing it when only updating the
+        // optional analytics/marketing flags.
+        'dataProcessing': true,
         'marketing': marketing,
-        'functionalCookies': functionalCookies,
-        if (dataRetention != null) 'dataRetention': dataRetention,
+        'analytics': analytics,
+        'consentedAt': DateTime.now().toIso8601String(),
       }),
     );
 
@@ -1162,37 +1201,80 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getPrivacySettings() async {
-    final response = await _dio.get('/users/me/privacy-settings');
+    final response = await _dio.get('/users/consent');
+    final raw = _handleResponse(response);
+    final consent =
+        raw is Map ? raw['data'] as Map<String, dynamic>? : null;
 
-    return _handleResponse(response);
+    return {
+      'analytics': consent?['analytics'] ?? true,
+      'marketing': consent?['marketing'] ?? false,
+    };
   }
 
-  // Request data export
+  // Request data export (async job) — POST /users/me/export-data, not
+  // /users/me/data-export. Response is flat ({exportId, status,
+  // estimatedTime}), not wrapped in {data: ...} like most other endpoints.
   static Future<Map<String, dynamic>> requestDataExport() async {
-    final response = await _dio.post('/users/me/data-export');
+    final response = await _dio.post('/users/me/export-data');
+    final raw = _handleResponse(response) as Map<String, dynamic>;
 
-    return _handleResponse(response);
+    return {
+      'data': {
+        'requestId': raw['exportId'],
+        'status': raw['status'],
+        'requestedAt': DateTime.now().toIso8601String(),
+        'estimatedTime': raw['estimatedTime']?.toString(),
+      },
+    };
   }
 
-  // Get data export status
+  // Get data export status — GET /users/me/export-data/:exportId, not
+  // /users/me/data-export/:requestId. Also flat, not {data: ...}.
   static Future<Map<String, dynamic>> getDataExportStatus(
       String requestId) async {
-    final response = await _dio.get('/users/me/data-export/$requestId');
+    final response = await _dio.get('/users/me/export-data/$requestId');
+    final raw = _handleResponse(response) as Map<String, dynamic>;
 
-    return _handleResponse(response);
+    return {
+      'data': {
+        'requestId': requestId,
+        'status': raw['status'],
+        'requestedAt': DateTime.now().toIso8601String(),
+        'expiresAt': raw['expiresAt'],
+        'downloadUrl': raw['downloadUrl'],
+      },
+    };
   }
 
-  // Download data export
+  // Download data export: there is no byte-streaming download route on the
+  // main API — the status endpoint above returns a signed, time-limited
+  // `downloadUrl` (see gdpr/data-export.service.ts, StorageService) that is
+  // fetched directly, without the app's own JWT.
   static Future<dynamic> downloadDataExport(String requestId) async {
-    final response =
-        await _dio.get('/users/me/data-export/$requestId/download');
+    final statusResponse = await _dio.get('/users/me/export-data/$requestId');
+    final status = _handleResponse(statusResponse) as Map<String, dynamic>;
+    final downloadUrl = status['downloadUrl'] as String?;
 
-    if ((response.statusCode ?? 500) >= 200 &&
-        (response.statusCode ?? 500) < 300) {
-      return (response.data as List<int>); // Return raw bytes for file download
+    if (downloadUrl == null) {
+      throw ApiException(
+        statusCode: 409,
+        message: 'Export not ready yet',
+        code: 'EXPORT_NOT_READY',
+      );
+    }
+
+    final fileResponse = await Dio().get<List<int>>(
+      downloadUrl,
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    if ((fileResponse.statusCode ?? 500) >= 200 &&
+        (fileResponse.statusCode ?? 500) < 300) {
+      return fileResponse.data;
     } else {
       throw ApiException(
-        statusCode: response.statusCode ?? 500,
+        statusCode: fileResponse.statusCode ?? 500,
         message: 'Failed to download data export',
         code: 'DOWNLOAD_ERROR',
       );
@@ -1277,222 +1359,26 @@ class ApiService {
     }
   }
 
-  // Wrapper methods for MatchingServiceApi
-  static Future<Map<String, dynamic>> calculateCompatibilityV2({
-    required String userId,
-    required List<String> candidateIds,
-    required Map<String, dynamic> personalityAnswers,
-    required Map<String, dynamic> preferences,
-    Map<String, dynamic>? userLocation,
-    bool includeAdvancedScoring = true,
-  }) {
-    return MatchingServiceApi.calculateCompatibilityV2(
-      userId: userId,
-      candidateIds: candidateIds,
-      personalityAnswers: personalityAnswers,
-      preferences: preferences,
-      userLocation: userLocation,
-      includeAdvancedScoring: includeAdvancedScoring,
-    );
-  }
-
-  static Future<Map<String, dynamic>> getHistory({
-    int page = 1,
-    int limit = 20,
-    String? startDate,
-    String? endDate,
-  }) {
-    return MatchingServiceApi.getHistory(
-      page: page,
-      limit: limit,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  // Email notification endpoints
-  static Future<Map<String, dynamic>> getEmailHistory({
-    int? page,
-    int? limit,
-    String? type,
-    String? status,
-  }) async {
-    final queryParams = <String, String>{};
-    if (page != null) queryParams['page'] = page.toString();
-    if (limit != null) queryParams['limit'] = limit.toString();
-    if (type != null) queryParams['type'] = type;
-    if (status != null) queryParams['status'] = status;
-
-    final uri = Uri.parse('/users/me/email-history')
-        .replace(queryParameters: queryParams)
-        .toString();
-    final response = await _makeRequest(
-      _dio.get(uri),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getEmailDetails(String emailId) async {
-    final response = await _makeRequest(
-      _dio.get('/users/me/email-history/$emailId'),
-    );
-
-    return _handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> retryEmail(String emailId) async {
-    final response = await _makeRequest(
-      _dio.post('/users/me/email-history/$emailId/retry'),
-    );
-
-    return _handleResponse(response);
-  }
-}
-
-// External Matching Service API
-class MatchingServiceApi {
-  static String get baseUrl => AppConfig.isDevelopment
-      ? AppConfig.devMatchingServiceBaseUrl
-      : AppConfig.matchingServiceBaseUrl;
-  static String get apiKey => AppConfig.matchingServiceApiKey;
-
-  static final Dio _dio = Dio(BaseOptions(
-    connectTimeout: AppConfig.defaultTimeout,
-    receiveTimeout: AppConfig.defaultTimeout,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': AppConfig.matchingServiceApiKey,
-    },
-  ));
-
-  // Helper method to handle HTTP requests with timeout and error handling
-  static Future<Response> _makeRequest(Future<Response> request) async {
-    try {
-      return await request;
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        throw ApiException(
-          statusCode: 0,
-          message:
-              'Request timeout - Please check your internet connection and try again',
-          code: 'TIMEOUT_ERROR',
-        );
-      }
-      if (e.response != null) {
-        return e
-            .response!; // Let _handleResponse manage the error parsing from response body
-      }
-      throw ApiException(
-        statusCode: 0,
-        message: 'Network error - Unable to connect to server',
-        code: 'NETWORK_ERROR',
-      );
-    } catch (e) {
-      throw ApiException(
-        statusCode: 0,
-        message: 'Network error - Unable to connect to server',
-        code: 'NETWORK_ERROR',
-      );
-    }
-  }
-
-  static dynamic _handleResponse(Response response) {
-    var rawData = response.data;
-    if (rawData is String && rawData.isNotEmpty) {
-      try {
-        rawData = jsonDecode(rawData);
-      } catch (_) {}
-    }
-
-    if ((response.statusCode ?? 500) >= 200 &&
-        (response.statusCode ?? 500) < 300) {
-      return rawData;
-    } else {
-      String message = 'API Error';
-      String code = 'ERROR';
-      dynamic errors;
-      RateLimitInfo? rateLimitInfo;
-
-      if (rawData is Map) {
-        message = rawData['message'] ?? message;
-        code = rawData['code'] ?? code;
-        errors = rawData['errors'];
-
-        if (response.statusCode == 429 && rawData['retryAfter'] != null) {
-          rateLimitInfo =
-              RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
-        }
-      }
-
-      if (rateLimitInfo == null) {
-        final headerMap = <String, String>{};
-        response.headers.forEach((key, value) {
-          headerMap[key.toLowerCase()] = value.join(',');
-        });
-        final rli = RateLimitInfo.fromHeaders(headerMap);
-        if (rli.hasData) rateLimitInfo = rli;
-      }
-
-      throw ApiException(
-          statusCode: response.statusCode ?? 500,
-          message: message,
-          code: code,
-          errors: errors,
-          rateLimitInfo: rateLimitInfo);
-    }
-  }
-
-  static Future<Map<String, dynamic>> calculateCompatibility({
-    required Map<String, dynamic> user1Profile,
-    required Map<String, dynamic> user2Profile,
-  }) async {
-    final response = await _dio.post(
-      '/matching-service/calculate-compatibility',
-      data: jsonEncode({
-        'user1Profile': user1Profile,
-        'user2Profile': user2Profile,
-      }),
-    );
-
-    return _handleMatchingResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> generateDailySelection({
-    required String userId,
-    required Map<String, dynamic> userProfile,
-    required List<Map<String, dynamic>> availableProfiles,
-    int selectionSize = 5,
-  }) async {
-    final response = await _dio.post(
-      '/matching-service/generate-daily-selection',
-      data: jsonEncode({
-        'userId': userId,
-        'userProfile': userProfile,
-        'availableProfiles': availableProfiles,
-        'selectionSize': selectionSize,
-      }),
-    );
-
-    return _handleMatchingResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> batchCompatibility({
-    required Map<String, dynamic> baseProfile,
-    required List<Map<String, dynamic>> profilesToCompare,
-  }) async {
-    final response = await _dio.post(
-      '/matching-service/batch-compatibility',
-      data: jsonEncode({
-        'baseProfile': baseProfile,
-        'profilesToCompare': profilesToCompare,
-      }),
-    );
-
-    return _handleMatchingResponse(response);
-  }
-
+  // (Phase 2 / item 2.8) This used to call the Python matching-service
+  // directly (MatchingServiceApi.calculateCompatibilityV2), authenticated
+  // with a static X-API-Key baked into the client binary. That key is a
+  // server-to-server secret — shipping it in the app means anyone who
+  // decompiles the APK/IPA can extract it and call the matching-service
+  // directly, bypassing the main API entirely. The finalisation plan's
+  // decision is that the mobile client only ever talks to the main API,
+  // so this direct call has been removed rather than "secured" with
+  // --dart-define (a build-time define is still a compiled-in constant —
+  // it would not have actually fixed the exposure).
+  //
+  // There is currently no main-API proxy endpoint for this batch/advanced
+  // compatibility scoring (only GET /matching/compatibility/:targetUserId
+  // exists, which scores a single target). Until the backend exposes one,
+  // "Advanced Recommendations" (advanced_recommendations_page.dart) is
+  // unavailable — this throws a clear, typed error that the existing
+  // try/catch in MatchingProvider.loadAdvancedRecommendations() already
+  // surfaces as an error state, rather than silently returning fake data
+  // or shipping the secret. Flagged compromise: re-enable this once a
+  // `POST /matching/compatibility/batch-v2`-style proxy exists server-side.
   static Future<Map<String, dynamic>> calculateCompatibilityV2({
     required String userId,
     required List<String> candidateIds,
@@ -1501,38 +1387,14 @@ class MatchingServiceApi {
     Map<String, dynamic>? userLocation,
     bool includeAdvancedScoring = true,
   }) async {
-    final response = await _dio.post(
-      '/matching/calculate-compatibility-v2',
-      data: jsonEncode({
-        'userId': userId,
-        'candidateIds': candidateIds,
-        'personalityAnswers': personalityAnswers,
-        'preferences': preferences,
-        if (userLocation != null) 'userLocation': userLocation,
-        'includeAdvancedScoring': includeAdvancedScoring,
-      }),
+    throw ApiException(
+      statusCode: 501,
+      message:
+          'La compatibilité avancée n\'est pas encore disponible sur cette version.',
+      code: 'ADVANCED_COMPATIBILITY_UNAVAILABLE',
     );
-
-    return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getAlgorithmStats() async {
-    final response = await _dio.get('/matching-service/algorithm/stats');
-
-    return _handleMatchingResponse(response);
-  }
-
-  // Matches API methods
-
-  static Future<Map<String, dynamic>> getMatchDetails(String matchId) async {
-    final response = await _makeRequest(
-      _dio.get('/matching/matches/$matchId'),
-    );
-
-    return _handleResponse(response);
-  }
-
-  // History API methods
   static Future<Map<String, dynamic>> getHistory({
     int page = 1,
     int limit = 20,
@@ -1543,7 +1405,6 @@ class MatchingServiceApi {
       'page': page.toString(),
       'limit': limit.toString(),
     };
-
     if (startDate != null) queryParams['startDate'] = startDate;
     if (endDate != null) queryParams['endDate'] = endDate;
 
@@ -1551,14 +1412,12 @@ class MatchingServiceApi {
         .replace(queryParameters: queryParams)
         .toString();
 
-    final response = await _makeRequest(
-      _dio.get(uri),
-    );
+    final response = await _makeRequest(_dio.get(uri));
 
     return _handleResponse(response);
   }
 
-  // Reports API methods
+  // Reports API methods (main API, JWT — not the matching micro-service)
   static Future<Map<String, dynamic>> submitReport({
     required String targetUserId,
     required ReportType type,
@@ -1577,10 +1436,7 @@ class MatchingServiceApi {
     };
 
     final response = await _makeRequest(
-      _dio.post(
-        '/reports',
-        data: jsonEncode(body),
-      ),
+      _dio.post('/reports', data: jsonEncode(body)),
     );
 
     return _handleResponse(response);
@@ -1595,21 +1451,17 @@ class MatchingServiceApi {
       'page': page.toString(),
       'limit': limit.toString(),
     };
-
     if (status != null) queryParams['status'] = _reportStatusToString(status);
 
     final uri = Uri.parse('/reports/me')
         .replace(queryParameters: queryParams)
         .toString();
 
-    final response = await _makeRequest(
-      _dio.get(uri),
-    );
+    final response = await _makeRequest(_dio.get(uri));
 
     return _handleResponse(response);
   }
 
-  // Helper methods for report enums
   static String _reportTypeToString(ReportType type) {
     switch (type) {
       case ReportType.inappropriateContent:
@@ -1638,50 +1490,21 @@ class MatchingServiceApi {
     }
   }
 
-  static Map<String, dynamic> _handleMatchingResponse(Response response) {
-    dynamic rawData = response.data;
-    if (rawData is String && rawData.isNotEmpty) {
-      try {
-        rawData = jsonDecode(rawData);
-      } catch (_) {}
-    }
-    final Map<String, dynamic> data =
-        rawData is Map ? Map<String, dynamic>.from(rawData) : {};
-
-    if ((response.statusCode ?? 500) >= 200 &&
-        (response.statusCode ?? 500) < 300) {
-      return data;
-    } else {
-      RateLimitInfo? rateLimitInfo;
-
-      if (response.statusCode == 429 && data['retryAfter'] != null) {
-        rateLimitInfo = RateLimitInfo(
-          retryAfterSeconds: data['retryAfter'] as int?,
-        );
-      }
-
-      if (rateLimitInfo == null) {
-        final headerMap = <String, String>{};
-        response.headers.forEach((key, value) {
-          headerMap[key.toLowerCase()] = value.join(',');
-        });
-        final rateLimitFromHeaders = RateLimitInfo.fromHeaders(headerMap);
-        if (rateLimitFromHeaders.hasData) {
-          rateLimitInfo = rateLimitFromHeaders;
-        }
-      }
-
-      throw ApiException(
-        statusCode: response.statusCode ?? 500,
-        message: data['message'] ?? 'Matching service error occurred',
-        code: data['code'],
-        errors: data['errors'],
-        rateLimitInfo: rateLimitInfo,
-      );
-    }
-  }
+  // Note (Phase 2.4): the email-history feature (GET /users/me/email-history
+  // and friends) was removed rather than pointed at a real route — it has
+  // no backend implementation and its mobile screen was already
+  // unreachable (no route, no entry point in Réglages). See the session
+  // notes in the finalisation plan for the full reasoning.
 }
 
+// NOTE (Phase 2 / item 2.8): the client used to talk to the Python
+// matching-service directly here, authenticated with a static X-API-Key
+// baked into the binary (recoverable by decompiling the app). Nothing in
+// the app actually called any of these methods — MatchingServiceApi was
+// entirely dead code — and the architecture decision is that the mobile
+// client only ever talks to the main API; the main API is the one
+// authorized to call the matching-service server-to-server. See the
+// finalisation plan's Phase 2 notes for the full reasoning.
 class ApiException implements Exception {
   final int statusCode;
   final String message;

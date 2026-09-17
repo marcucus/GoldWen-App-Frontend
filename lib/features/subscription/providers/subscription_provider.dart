@@ -324,57 +324,16 @@ class SubscriptionProvider with ChangeNotifier {
         }
       }
 
-      // Fallback to API purchase if no RevenueCat package found
-      final response = await ApiService.purchaseSubscription(
-        plan: planId,
-        platform: platform,
-        receiptData: receiptData,
-      );
-
-      final subscriptionData = response['data'] ?? response;
-      _currentSubscription = Subscription.fromJson(subscriptionData);
-
-      // Track subscription started
-      if (_currentSubscription != null) {
-        await AnalyticsService.trackSubscriptionStarted(
-          _currentSubscription!.tier,
-          _currentSubscription!.period ?? 'unknown',
-        );
-      }
-
-      // Reload usage data
-      await loadSubscriptionUsage();
-
-      _error = null;
+      // There is no server-side purchase path independent of RevenueCat
+      // (the backend only ever records a purchase that's already gone
+      // through the store, it can't originate one) — if no matching
+      // RevenueCat package was found above, the plan simply isn't
+      // purchasable right now.
+      _error = 'Ce plan n\'est pas disponible actuellement.';
       _setLoaded();
-      return true;
+      return false;
     } catch (e) {
       _handleError(e, 'Failed to purchase subscription');
-      return false;
-    }
-  }
-
-  Future<bool> verifyReceipt({
-    required String receiptData,
-    required String platform,
-  }) async {
-    try {
-      final response = await ApiService.verifyReceipt(
-        receiptData: receiptData,
-        platform: platform,
-      );
-
-      final subscriptionData = response['data'] ?? response;
-      if (subscriptionData != null) {
-        _currentSubscription = Subscription.fromJson(subscriptionData);
-        await loadSubscriptionUsage();
-      }
-
-      _error = null;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _handleError(e, 'Failed to verify receipt');
       return false;
     }
   }

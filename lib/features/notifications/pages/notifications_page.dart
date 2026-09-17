@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart';
 import '../../../shared/widgets/loading_animation.dart';
@@ -109,8 +110,7 @@ class _NotificationsPageState extends State<NotificationsPage>
       // Add test page FAB in debug mode only
       floatingActionButton: kDebugMode
           ? FloatingActionButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/notifications/test'),
+              onPressed: () => context.push('/notifications/test'),
               backgroundColor: AppColors.primaryGold,
               child: const Icon(Icons.bug_report, color: Colors.white),
             )
@@ -387,21 +387,23 @@ class _NotificationsPageState extends State<NotificationsPage>
     // Navigate based on notification type
     switch (notification.type) {
       case 'daily_selection':
-        Navigator.pushNamed(context, '/discover');
+        // No standalone '/discover' route: the daily selection lives on the
+        // main navigation's first tab, which '/home' opens by default.
+        context.go('/home');
         break;
       case 'new_match':
-        Navigator.pushNamed(context, '/matches');
+        context.push('/matches');
         break;
       case 'new_message':
         final conversationId = notification.data?['conversationId'];
         if (conversationId != null) {
-          Navigator.pushNamed(context, '/chat/$conversationId');
+          context.push('/chat/$conversationId');
         }
         break;
       case 'chat_expiring':
         final conversationId = notification.data?['conversationId'];
         if (conversationId != null) {
-          Navigator.pushNamed(context, '/chat/$conversationId');
+          context.push('/chat/$conversationId');
         }
         break;
       default:

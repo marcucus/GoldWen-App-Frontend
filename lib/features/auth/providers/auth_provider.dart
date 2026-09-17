@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/services/firebase_messaging_service.dart';
+import '../../../core/services/navigation_service.dart';
 import '../../../core/models/models.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated }
@@ -14,7 +15,20 @@ class AuthProvider with ChangeNotifier {
   AuthStatus _status = AuthStatus.initial;
   User? _user;
   String? _token;
+  String? _refreshToken;
   String? _error;
+
+  AuthProvider() {
+    // ApiService has no BuildContext / persistent storage of its own — it
+    // owns the HTTP-level refresh mechanics (see api_service.dart) and
+    // delegates persistence and session teardown back here.
+    ApiService.onTokensRefreshed = (accessToken, refreshToken) {
+      _token = accessToken;
+      _refreshToken = refreshToken;
+      _storeAuthData();
+    };
+    ApiService.onSessionExpired = _handleSessionExpired;
+  }
 
   AuthStatus get status => _status;
   User? get user => _user;
@@ -273,13 +287,22 @@ class AuthProvider with ChangeNotifier {
       }
       debugPrint('Token: ${token.substring(0, 10)}...');
 
+      // Refresh token is only present on flows that call /auth/login,
+      // /auth/google or /auth/apple directly (not on every response shape
+      // that reaches this method), so it's optional here.
+      final refreshTokenValue = data['refreshToken'] as String?;
+
       _user = User.fromJson(userData);
       _token = token;
+      _refreshToken = refreshTokenValue;
       _status = AuthStatus.authenticated;
       _error = null;
 
-      // Set token for subsequent API calls
+      // Set token(s) for subsequent API calls
       ApiService.setToken(_token!);
+      if (_refreshToken != null) {
+        ApiService.setRefreshToken(_refreshToken!);
+      }
 
       // Store token and user data for session persistence
       await _storeAuthData();
@@ -338,6 +361,7 @@ class AuthProvider with ChangeNotifier {
 
       _user = null;
       _token = null;
+      _refreshToken = null;
       _status = AuthStatus.unauthenticated;
       _error = null;
 
@@ -357,6 +381,7 @@ class AuthProvider with ChangeNotifier {
       // Even if logout fails, clear local state
       _user = null;
       _token = null;
+      _refreshToken = null;
       _status = AuthStatus.unauthenticated;
       _error = null;
       ApiService.clearToken();
@@ -380,13 +405,19 @@ class AuthProvider with ChangeNotifier {
       // Check for stored authentication data
       final prefs = await SharedPreferences.getInstance();
       final storedToken = prefs.getString('auth_token');
+      final storedRefreshToken = prefs.getString('refresh_token');
       final storedUserData = prefs.getString('user_data');
 
       if (storedToken != null && storedUserData != null) {
         debugPrint('Found stored auth data, attempting to restore session...');
 
-        // Set the token for API calls
+        // Set the token(s) for API calls — the refresh token lets
+        // ApiService recover on its own if this access token has expired
+        // while the app was closed, instead of failing getCurrentUser().
         ApiService.setToken(storedToken);
+        if (storedRefreshToken != null) {
+          ApiService.setRefreshToken(storedRefreshToken);
+        }
 
         // Verify the token is still valid by getting current user
         try {
@@ -395,7 +426,8 @@ class AuthProvider with ChangeNotifier {
 
           // Update with fresh user data from server
           _user = User.fromJson(userData);
-          _token = storedToken;
+          _token = ApiService.token ?? storedToken;
+          _refreshToken = ApiService.refreshToken ?? storedRefreshToken;
           _status = AuthStatus.authenticated;
           _error = null;
 
@@ -486,6 +518,9 @@ class AuthProvider with ChangeNotifier {
       if (_token != null) {
         await prefs.setString('auth_token', _token!);
       }
+      if (_refreshToken != null) {
+        await prefs.setString('refresh_token', _refreshToken!);
+      }
       if (_user != null) {
         await prefs.setString('user_data', jsonEncode(_user!.toJson()));
       }
@@ -498,10 +533,29 @@ class AuthProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_token');
+      await prefs.remove('refresh_token');
       await prefs.remove('user_data');
     } catch (e) {
       debugPrint('Error clearing auth data: $e');
     }
+  }
+
+  /// Called by ApiService (via the onSessionExpired hook wired in the
+  /// constructor) once a 401 could not be recovered with a refresh — the
+  /// refresh token itself is expired/revoked. Tears down local auth state
+  /// exactly like signOut(), minus the (now pointless) call to
+  /// POST /auth/logout, and bounces to the welcome screen since whatever
+  /// page triggered the failing request is no longer reachable anyway.
+  Future<void> _handleSessionExpired() async {
+    _user = null;
+    _token = null;
+    _refreshToken = null;
+    _status = AuthStatus.unauthenticated;
+    _error = 'Votre session a expiré, veuillez vous reconnecter.';
+    notifyListeners();
+
+    await _clearAuthData();
+    NavigationService.navigateToSessionExpired();
   }
 
   /// Initialize Firebase Messaging after successful authentication

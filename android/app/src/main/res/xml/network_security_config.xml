@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Phase 2 / item 2.8: the manifest used to set android:usesCleartextTraffic
+  "true" globally, which permits plain HTTP to ANY host from every build of
+  the app, including production/Play Store releases, a much broader
+  exposure than the (also hardcoded, also since removed) personal LAN IP
+  it existed to support. This config scopes cleartext HTTP to exactly the
+  hosts the dev flow in core/config/app_config.dart actually uses:
+    * 10.0.2.2 : the Android emulator's alias for the host machine
+    * localhost: reachable via adb reverse tcp:3000 tcp:3000, the
+                 friction free way to test against a host backend from a
+                 real device without touching this file
+  Everywhere else, including production (api.goldwen.app), stays HTTPS
+  only, via the default base-config cleartextTrafficPermitted false.
+
+  Flagged compromise: a developer testing against a physical device over
+  LAN with a custom DEV_HOST_IP dart-define (see AppConfig) needs to also
+  add that IP as a domain entry below, since a static manifest resource
+  can't read a Dart compile time define. adb reverse avoids this entirely
+  and is the recommended path.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

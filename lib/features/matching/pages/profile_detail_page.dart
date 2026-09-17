@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../models/match_profile.dart';
+import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
+import '../../profile/providers/profile_provider.dart';
 import '../widgets/report_dialog.dart';
 import '../../profile/widgets/media_player_widget.dart';
+import '../../../shared/widgets/optimized_image.dart';
 
-class ProfileDetailPage extends StatelessWidget {
+/// Displays a real profile (from today's daily selection, from an existing
+/// match, or from "qui m'a choisi·e") — never mock data.
+///
+/// `profileId` is looked up in whatever list the app has already loaded
+/// (MatchingProvider keeps the daily selection, the matches list and the
+/// who-liked-me list in memory), which covers every place that navigates
+/// here. If none of those lists carry the profile yet — a deep link, or a
+/// cold start — the page fetches them once before giving up.
+class ProfileDetailPage extends StatefulWidget {
   final String profileId;
 
   const ProfileDetailPage({
@@ -16,28 +26,157 @@ class ProfileDetailPage extends StatelessWidget {
   });
 
   @override
+  State<ProfileDetailPage> createState() => _ProfileDetailPageState();
+}
+
+class _ProfileDetailPageState extends State<ProfileDetailPage> {
+  bool _isLoading = true;
+  String? _error;
+  Profile? _profile;
+  double? _compatibilityScore;
+  Map<String, double>? _compatibilityDetails;
+  List<String> _sharedInterests = const [];
+  bool _isFromDailySelection = false;
+  String? _activeChatId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Profile? _findInProvider(MatchingProvider provider) {
+    for (final p in provider.dailyProfiles) {
+      if (p.id == widget.profileId) return p;
+    }
+    for (final m in provider.matches) {
+      if (m.otherProfile?.id == widget.profileId) return m.otherProfile;
+    }
+    for (final item in provider.whoLikedMe) {
+      if (item.user.id == widget.profileId) return item.user;
+    }
+    return null;
+  }
+
+  Match? _findMatch(MatchingProvider provider) {
+    for (final m in provider.matches) {
+      if (m.otherProfile?.id == widget.profileId) return m;
+    }
+    return null;
+  }
+
+  Future<void> _load() async {
+    if (!mounted) return;
+    final matchingProvider = context.read<MatchingProvider>();
+
+    Profile? profile = _findInProvider(matchingProvider);
+
+    // Deep link or cold start: the list that normally already carries this
+    // profile hasn't been fetched yet in this session. Fetch them once
+    // before concluding the profile doesn't exist.
+    if (profile == null) {
+      await Future.wait([
+        matchingProvider.dailyProfiles.isEmpty
+            ? matchingProvider.loadDailySelection()
+            : Future<void>.value(),
+        matchingProvider.matches.isEmpty
+            ? matchingProvider.loadMatches()
+            : Future<void>.value(),
+        matchingProvider.whoLikedMe.isEmpty
+            ? matchingProvider.loadWhoLikedMe()
+            : Future<void>.value(),
+      ]);
+      if (!mounted) return;
+      profile = _findInProvider(matchingProvider);
+    }
+
+    if (profile == null) {
+      setState(() {
+        _isLoading = false;
+        _error = "Ce profil n'est plus disponible.";
+      });
+      return;
+    }
+
+    final match = _findMatch(matchingProvider);
+
+    setState(() {
+      _profile = profile;
+      _compatibilityScore = profile!.compatibilityScore ?? match?.compatibilityScore;
+      _compatibilityDetails = profile.compatibilityDetails;
+      _sharedInterests = profile.sharedInterests;
+      _isFromDailySelection =
+          matchingProvider.dailyProfiles.any((p) => p.id == widget.profileId);
+      _activeChatId =
+          (match != null && match.status == 'active') ? match.chatId : null;
+      _isLoading = false;
+    });
+
+    // No compatibility breakdown embedded yet (e.g. a "qui m'a choisi·e"
+    // profile) — fetch it in the background rather than block the page.
+    if (_compatibilityDetails == null) {
+      final result =
+          await matchingProvider.getCompatibility(widget.profileId);
+      if (!mounted || result == null) return;
+      setState(() {
+        _compatibilityScore ??= result.score;
+        _compatibilityDetails = result.categoryScores;
+        if (_sharedInterests.isEmpty) {
+          _sharedInterests = result.commonInterests;
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Mock data - in a real app, this would come from a provider or API
-    final profile = MatchProfile(
-      id: profileId,
-      name: 'Sophie',
-      age: 29,
-      bio:
-          'Passionnée par l\'art et les conversations significatives. J\'aime explorer de nouvelles cultures et créer des connexions authentiques.',
-      photos: ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'],
-      prompts: [
-        'Ce qui me rend vraiment heureuse, c\'est de découvrir un nouveau livre qui me transporte complètement.',
-        'Je ne peux pas vivre sans mes séances de yoga matinales et mon café parfait.',
-        'Ma passion secrète est de collectionner des vinyles de musique du monde entier.'
-      ],
-      favoriteSong: 'Imagine - John Lennon',
-      compatibilityScore: 0.92,
-    );
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null || _profile == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.person_off_outlined,
+                    size: 48, color: AppColors.textSecondary),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  _error ?? "Ce profil n'est plus disponible.",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final profile = _profile!;
+    final photos = [...profile.photos]..sort((a, b) => a.order.compareTo(b.order));
+    final displayName = profile.firstName ?? profile.pseudo ?? 'Profil';
+    final ageSuffix = profile.age != null ? ', ${profile.age}' : '';
+    final promptCatalog = context.watch<ProfileProvider>().availablePrompts;
+    final sortedPrompts = [...profile.promptAnswers]
+      ..sort((a, b) => a.order.compareTo(b.order));
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App bar with photo
+          // App bar with real photo(s)
           SliverAppBar(
             expandedHeight: 400,
             pinned: true,
@@ -75,24 +214,14 @@ class ProfileDetailPage extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Photo placeholder
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.primaryGold.withValues(alpha: 0.3),
-                          AppColors.primaryGold.withValues(alpha: 0.7),
-                        ],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 120,
-                      color: Colors.white,
-                    ),
-                  ),
+                  if (photos.isNotEmpty)
+                    OptimizedImage(
+                      imageUrl: photos.first.url,
+                      fit: BoxFit.cover,
+                      errorWidget: _photoFallback(),
+                    )
+                  else
+                    _photoFallback(),
 
                   // Gradient overlay
                   Positioned(
@@ -127,7 +256,7 @@ class ProfileDetailPage extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                '${profile.name}, ${profile.age}',
+                                '$displayName$ageSuffix',
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineMedium
@@ -139,38 +268,39 @@ class ProfileDetailPage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
+                        if (_compatibilityScore != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryGold,
+                              borderRadius: BorderRadius.circular(
+                                  AppBorderRadius.medium),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Text(
+                                  '${(_compatibilityScore! * 100).round()}% compatible',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGold,
-                            borderRadius:
-                                BorderRadius.circular(AppBorderRadius.medium),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                '${(profile.compatibilityScore * 100).round()}% compatible',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -190,119 +320,119 @@ class ProfileDetailPage extends StatelessWidget {
                   _buildSection(
                     context,
                     'À propos',
-                    profile.bio,
+                    (profile.bio == null || profile.bio!.trim().isEmpty)
+                        ? "Cette personne n'a pas encore ajouté de description."
+                        : profile.bio!,
                     Icons.info_outline,
                   ),
 
                   const SizedBox(height: AppSpacing.xl),
 
                   // Favorite song section
-                  if (profile.favoriteSong != null) ...[
+                  if (profile.favoriteSong != null &&
+                      profile.favoriteSong!.trim().isNotEmpty) ...[
                     _buildSection(
                       context,
                       'Morceau/Artiste préféré',
-                      profile.favoriteSong ?? '',
+                      profile.favoriteSong!,
                       Icons.music_note,
                     ),
                     const SizedBox(height: AppSpacing.xl),
                   ],
 
                   // Compatibility breakdown
-                  if (profile.compatibilityDetails != null ||
-                      profile.sharedInterests.isNotEmpty) ...[
-                    _buildCompatibilityBreakdown(context, profile),
+                  if (_compatibilityDetails != null ||
+                      _sharedInterests.isNotEmpty) ...[
+                    _buildCompatibilityBreakdown(context),
                     const SizedBox(height: AppSpacing.xl),
                   ],
 
                   // Prompts section
-                  Text(
-                    'En savoir plus',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
+                  if (sortedPrompts.isNotEmpty) ...[
+                    Text(
+                      'En savoir plus',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    ...sortedPrompts.map((promptAnswer) {
+                      Prompt? matchingPrompt;
+                      for (final p in promptCatalog) {
+                        if (p.id == promptAnswer.promptId) {
+                          matchingPrompt = p;
+                          break;
+                        }
+                      }
 
-                  const SizedBox(height: AppSpacing.lg),
-
-                  ...profile.prompts.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final prompt = entry.value;
-                    final questions = [
-                      'Ce qui me rend vraiment heureux(se), c\'est...',
-                      'Je ne peux pas vivre sans...',
-                      'Ma passion secrète est...',
-                    ];
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                      child: Container(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentCream,
-                          borderRadius:
-                              BorderRadius.circular(AppBorderRadius.large),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              questions[index],
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    color: AppColors.primaryGold,
-                                  ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              prompt,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Photo gallery placeholder
-                  Text(
-                    'Plus de photos',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 3,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            right: index < 2 ? AppSpacing.md : 0,
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(bottom: AppSpacing.lg),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentCream,
+                            borderRadius: BorderRadius.circular(
+                                AppBorderRadius.large),
                           ),
-                          child: Container(
-                            width: 120,
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.primaryGold.withValues(alpha: 0.3),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                matchingPrompt?.text ?? 'Prompt',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      color: AppColors.primaryGold,
+                                    ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                promptAnswer.answer,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+
+                  // Photo gallery
+                  if (photos.length > 1) ...[
+                    Text(
+                      'Plus de photos',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: photos.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: index < photos.length - 1
+                                  ? AppSpacing.md
+                                  : 0,
+                            ),
+                            child: ClipRRect(
                               borderRadius:
                                   BorderRadius.circular(AppBorderRadius.medium),
+                              child: OptimizedImage(
+                                imageUrl: photos[index].url,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.image,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
 
                   // Media files section (Audio/Video)
                   if (profile.mediaFiles.isNotEmpty) ...[
@@ -325,35 +455,7 @@ class ProfileDetailPage extends StatelessWidget {
                   ],
 
                   // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _showSelectionDialog(context, profile);
-                          },
-                          icon: const Icon(Icons.favorite),
-                          label: const Text('Choisir'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => context.pop(),
-                          icon: const Icon(Icons.close),
-                          label: const Text('Passer'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(
-                                color: AppColors.textSecondary),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildActionRow(context, profile),
 
                   const SizedBox(height: AppSpacing.lg),
                 ],
@@ -365,9 +467,88 @@ class ProfileDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCompatibilityBreakdown(
-      BuildContext context, MatchProfile profile) {
-    final details = profile.compatibilityDetails;
+  Widget _photoFallback() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryGold.withValues(alpha: 0.3),
+            AppColors.primaryGold.withValues(alpha: 0.7),
+          ],
+        ),
+      ),
+      child: const Icon(
+        Icons.person,
+        size: 120,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildActionRow(BuildContext context, Profile profile) {
+    // Still part of today's daily selection: the usual "Choisir / Passer".
+    if (_isFromDailySelection) {
+      return Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _showSelectionDialog(context, profile),
+              icon: const Icon(Icons.favorite),
+              label: const Text('Choisir'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => context.pop(),
+              icon: const Icon(Icons.close),
+              label: const Text('Passer'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                side: const BorderSide(color: AppColors.textSecondary),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Already an active match: go straight to the (ephemeral) chat.
+    if (_activeChatId != null) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () => context.push('/chat/$_activeChatId'),
+          icon: const Icon(Icons.chat_bubble_outline),
+          label: const Text('Discuter'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+        ),
+      );
+    }
+
+    // Otherwise (e.g. "qui m'a choisi·e"): choosing them completes the match.
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _showSelectionDialog(context, profile),
+        icon: const Icon(Icons.favorite),
+        label: const Text('Choisir'),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompatibilityBreakdown(BuildContext context) {
+    final details = _compatibilityDetails;
     final labels = <String, String>{
       'communication': 'Communication',
       'values': 'Valeurs',
@@ -380,7 +561,8 @@ class ProfileDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primaryGold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
+        border:
+            Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,7 +617,7 @@ class ProfileDetailPage extends StatelessWidget {
               );
             }),
           ],
-          if (profile.sharedInterests.isNotEmpty) ...[
+          if (_sharedInterests.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             Text('Intérêts communs',
                 style: Theme.of(context)
@@ -446,7 +628,7 @@ class ProfileDetailPage extends StatelessWidget {
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.xs,
-              children: profile.sharedInterests
+              children: _sharedInterests
                   .map((interest) => Chip(
                         label: Text(interest,
                             style: const TextStyle(fontSize: 12)),
@@ -490,7 +672,8 @@ class ProfileDetailPage extends StatelessWidget {
     );
   }
 
-  void _showSelectionDialog(BuildContext context, MatchProfile profile) {
+  void _showSelectionDialog(BuildContext context, Profile profile) {
+    final displayName = profile.firstName ?? profile.pseudo ?? 'cette personne';
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -509,7 +692,7 @@ class ProfileDetailPage extends StatelessWidget {
             ],
           ),
           content: Text(
-            'Voulez-vous vraiment choisir ${profile.name} ? Cette action terminera votre sélection du jour.',
+            'Voulez-vous vraiment choisir $displayName ? Cette action terminera votre sélection du jour.',
           ),
           actions: [
             TextButton(
@@ -529,17 +712,17 @@ class ProfileDetailPage extends StatelessWidget {
     );
   }
 
-  void _selectProfile(BuildContext context, MatchProfile profile) {
+  void _selectProfile(BuildContext context, Profile profile) {
     final matchingProvider =
         Provider.of<MatchingProvider>(context, listen: false);
+    final displayName = profile.firstName ?? profile.pseudo ?? 'ce profil';
 
-    // Add to selected profiles list
     matchingProvider.selectProfile(profile.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            'Vous avez choisi ${profile.name} ! Revenez demain pour votre nouvelle sélection.'),
+            'Vous avez choisi $displayName ! Revenez demain pour votre nouvelle sélection.'),
         backgroundColor: AppColors.successGreen,
         action: SnackBarAction(
           label: 'OK',
@@ -551,7 +734,6 @@ class ProfileDetailPage extends StatelessWidget {
       ),
     );
 
-    // Navigate back to home after a delay
     Future.delayed(const Duration(seconds: 2), () {
       if (context.mounted) {
         context.go('/home');
@@ -559,12 +741,12 @@ class ProfileDetailPage extends StatelessWidget {
     });
   }
 
-  void _showReportDialog(BuildContext context, MatchProfile profile) {
+  void _showReportDialog(BuildContext context, Profile profile) {
     showDialog(
       context: context,
       builder: (context) => ReportDialog(
-        targetUserId: profile.id,
-        targetUserName: profile.name,
+        targetUserId: profile.userId,
+        targetUserName: profile.firstName ?? profile.pseudo,
       ),
     );
   }

@@ -423,7 +423,19 @@ class ChatProvider with ChangeNotifier {
       final message = ChatMessage.fromJson(data['message']);
       final chatId = message.conversationId;
 
+      // The gateway broadcasts `new_message` to every socket in the room,
+      // including the sender's own — our own messages are already added
+      // optimistically and reconciled from the REST response in
+      // sendMessage(), so skip that echo (and any event we've already
+      // recorded) rather than duplicating the bubble.
       final messages = _chatMessages[chatId] ?? [];
+      final isOwnMessage =
+          _currentUserId != null && message.senderId == _currentUserId;
+      final alreadyKnown = messages.any((m) => m.id == message.id);
+      if (isOwnMessage || alreadyKnown) {
+        return;
+      }
+
       messages.add(message);
       _chatMessages[chatId] = messages;
 

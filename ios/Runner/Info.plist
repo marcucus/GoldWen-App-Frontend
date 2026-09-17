@@ -6,15 +6,23 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
+		<!-- Phase 2 / item 2.8: this used to also list 192.168.1.5 as an
+		     exception domain — a developer's personal LAN IP, hardcoded and
+		     shipped in every build (Debug AND Release/TestFlight/App Store),
+		     and one that didn't even match core/config/app_config.dart's own
+		     dev-URL logic (which only ever uses `localhost` on iOS — see
+		     AppConfig._getDevUrl). Removed as dead + leaked. `localhost`
+		     stays: it's what the iOS simulator dev flow in AppConfig
+		     actually uses.
+		     Flagged compromise: this exception still ships in Release
+		     builds as-is. The correct fix is Debug/Release-specific
+		     Info.plist files wired through Xcode build configurations, so
+		     NSAllowsArbitraryLoads/exceptions never reach a shipped build
+		     at all — that's an Xcode project change that needs Xcode
+		     itself to set up and verify, which wasn't available while
+		     making this pass. -->
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>192.168.1.5</key>
-			<dict>
-				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<false/>
-			</dict>
 			<key>localhost</key>
 			<dict>
 				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>

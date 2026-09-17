@@ -29,7 +29,7 @@ class ReportProvider with ChangeNotifier {
     _setLoading(true);
 
     try {
-      await MatchingServiceApi.submitReport(
+      await ApiService.submitReport(
         targetUserId: targetUserId,
         type: type,
         reason: reason,
@@ -65,7 +65,7 @@ class ReportProvider with ChangeNotifier {
     _setLoading(true);
 
     try {
-      final response = await MatchingServiceApi.getMyReports(
+      final response = await ApiService.getMyReports(
         page: page,
         limit: limit,
         status: status,

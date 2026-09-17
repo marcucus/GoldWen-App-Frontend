@@ -14,12 +14,7 @@ void main() {
         equals('http://localhost:3000/api/v1'),
         equals('http://10.0.2.2:3000/api/v1')
       ));
-      
-      expect(AppConfig.devMatchingServiceBaseUrl, anyOf(
-        equals('http://localhost:8000/api/v1'),
-        equals('http://10.0.2.2:8000/api/v1')
-      ));
-      
+
       expect(AppConfig.devWebSocketBaseUrl, anyOf(
         equals('ws://localhost:3000/chat'),
         equals('ws://10.0.2.2:3000/chat')
@@ -28,7 +23,6 @@ void main() {
 
     test('should have correct production URLs', () {
       expect(AppConfig.mainApiBaseUrl, equals('https://api.goldwen.app/api/v1'));
-      expect(AppConfig.matchingServiceBaseUrl, equals('https://matching.goldwen.app/api/v1'));
       expect(AppConfig.webSocketBaseUrl, equals('wss://api.goldwen.app/chat'));
     });
   });
@@ -131,24 +125,13 @@ void main() {
     });
   });
 
-  group('MatchingServiceApi Tests', () {
-    test('should have correct base URL and headers', () {
-      expect(MatchingServiceApi.baseUrl, contains('/api/v1'));
-      expect(MatchingServiceApi.baseUrl, anyOf(
-        equals('http://localhost:8000/api/v1'),
-        equals('http://10.0.2.2:8000/api/v1')
-      ));
-      expect(MatchingServiceApi.apiKey, equals('matching-service-secret-key'));
-    });
-  });
-
   group('WebSocketService Tests', () {
     test('should initialize with correct base URL', () {
       final wsService = WebSocketService();
       expect(WebSocketService.baseUrl, contains('/chat'));
       expect(WebSocketService.baseUrl, anyOf(
-        equals('ws://localhost:3000/chat'),
-        equals('ws://10.0.2.2:3000/chat')
+        equals('http://localhost:3000/chat'),
+        equals('http://10.0.2.2:3000/chat')
       ));
     });
 
