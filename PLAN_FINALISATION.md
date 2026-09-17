@@ -22,51 +22,58 @@ Les README des trois repos annoncent un MVP « ✅ implémenté ». La réalité
 
 ## Phase 0 — Sécurité backend (bloquant absolu)
 
+**Statut (2026-09-17) : ✅ Implémentée et vérifiée.** Les 10 correctifs ci-dessous sont en place dans le code (non commités — `git status` liste 42 fichiers modifiés/nouveaux dans `main-api` et `matching-service`). `npx tsc --noEmit` : aucune erreur dans le code touché. Suite de tests des modules concernés (`auth`, `admin`, `moderation`, `matching`, `chat`, `notifications`, `subscriptions`) : **285/290 tests passent** ; les 5 échecs restants sont dans `matching.scheduler.spec.ts`, un fichier à diff nul (jamais touché par ces correctifs) — pré-existant, hors périmètre Phase 0, à traiter en Phase 4.1 (cf. CI backend rouge). Vérifications manuelles faites au niveau code (routes, guards) : `POST /auth/social-login` supprimée, `GET /admin/*` protégé par `AdminGuard`, `POST /webhooks/revenuecat` exige la signature sur le raw body, `POST /subscriptions/purchase` vérifie l'achat via l'API REST RevenueCat, `POST /moderation/webhook/photo` exige le secret partagé. Les vérifications bout-en-bout avec serveur + Postgres + Redis réels (section « Vérification > Backend » plus bas) restent à faire par Adrien.
+
+**Points à arbitrer avant déploiement :**
+- `ConsentGuard` est maintenant global (`APP_GUARD`) : tout utilisateur existant sans ligne `UserConsent` sera bloqué sur toutes les routes authentifiées tant qu'il n'aura pas (re)donné son consentement. À valider avant mise en prod (migration de données ou fenêtre de grâce ?).
+- Le login admin (`POST /admin/auth/login`) est un flux réellement nouveau (avant : pas de vérification de mot de passe). Tout outillage/scripts admin existants doivent être mis à jour pour utiliser la nouvelle réponse `{accessToken}` en `Authorization: Bearer`.
+- Le JWT admin partage le même secret (`jwt.secret`) que les JWT utilisateurs, distingués par le claim `type: 'admin'` — acceptable mais à noter.
+
 Chacun de ces points est exploitable aujourd'hui en production.
 
-### 0.1 Usurpation d'identité via `POST /auth/social-login`
+### ✅ 0.1 Usurpation d'identité via `POST /auth/social-login`
 `main-api/src/modules/auth/auth.controller.ts:98` → `auth.service.ts:186-232`. Le body (`socialId`, `email`) est cru sur parole, l'utilisateur est retrouvé par email et un JWT est renvoyé. Un POST avec l'email de la victime suffit.
 → **Supprimer la route** `social-login` et son DTO. `POST /auth/google` et `POST /auth/apple` vérifient déjà les jetons ; ce sont les seuls chemins à conserver. Mettre à jour l'appelant Flutter (`api_service.dart`) si présent.
 
-### 0.2 Routes admin sans contrôle de rôle
+### ✅ 0.2 Routes admin sans contrôle de rôle
 `main-api/src/modules/admin/admin.controller.ts:32-233` n'utilise que `JwtAuthGuard` : tout utilisateur authentifié peut lister, suspendre et **supprimer** des comptes, diffuser des notifications et traiter les signalements. Idem `moderation.controller.ts:59-92`.
 → Créer `AdminGuard` (ou réutiliser le `RolesGuard` existant s'il y en a un dans `common/guards/`), l'appliquer au niveau contrôleur sur `AdminController`, `MonitoringController` et les routes `admin/*` de `ModerationController`.
 
-### 0.3 Mot de passe admin en dur + login sans jeton
+### ✅ 0.3 Mot de passe admin en dur + login sans jeton
 `admin.service.ts:87-89` : `if (password === 'admin_password_123')`. La colonne `passwordHash` de `admin.entity.ts:21` n'est jamais utilisée. `admin.controller.ts:47` ne renvoie aucun token et lève un `Error` nu (→ 500).
 → Comparer avec `bcrypt.compare(password, admin.passwordHash)`, émettre un JWT avec un claim de rôle consommé par `AdminGuard`, lever `UnauthorizedException`. Ajouter une migration + un script de seed pour créer le premier admin.
 
-### 0.4 Premium gratuit — trois chemins
+### ✅ 0.4 Premium gratuit — trois chemins
 - `subscriptions.controller.ts:131-138` : webhook RevenueCat **sans authentification ni signature**, accorde directement l'abonnement.
 - `revenuecat.controller.ts:81` : la signature n'est vérifiée *que si l'en-tête est présent* → l'omettre suffit. De plus le HMAC est calculé sur `JSON.stringify(parsedBody)` au lieu du corps brut, donc les vraies signatures échouent.
 - `revenuecat.service.ts:196-230` : `validatePurchase` active `goldwen_plus` à partir d'un `productId` fourni par le client, sans vérification de reçu.
 
 → Supprimer le webhook non signé de `SubscriptionsController` ; garder un seul point d'entrée dans `RevenueCatController`. Rendre la vérification obligatoire (`UnauthorizedException` si l'en-tête manque) et la calculer sur le **raw body** — activer `rawBody: true` dans `NestFactory.create` (`main.ts`) et lire `req.rawBody`. Faire de `validatePurchase` un appel à l'API REST RevenueCat (`GET /subscribers/{app_user_id}`) et n'accorder l'abonnement que selon la réponse.
 
-### 0.5 Webhook de modération ouvert
+### ✅ 0.5 Webhook de modération ouvert
 `moderation.controller.ts:32-42` accepte n'importe quel `photoId` sans auth.
 → Guard par secret partagé (`MODERATION_WEBHOOK_SECRET`), même mécanisme que RevenueCat.
 
-### 0.6 Déclencheurs internes exposés
+### ✅ 0.6 Déclencheurs internes exposés
 - `notifications.controller.ts:237-258` : la garde « dev only » est `if (this.scheduledNotificationsService)` → toujours vraie. Envoi de masse accessible à tous.
 - `matching.controller.ts:76-84` : génération manuelle de sélection quotidienne, non gardée, coûte un appel au service de matching par requête.
 
 → Passer les deux derrière `AdminGuard`, ou les conditionner à `NODE_ENV !== 'production'`.
 
-### 0.7 Modération d'images inopérante (tout est auto-approuvé)
+### ✅ 0.7 Modération d'images inopérante (tout est auto-approuvé)
 `moderation.service.ts:45-47` construit `./uploads/${photo.filename}` alors que `StorageService` stocke sous `photos/<timestamp>-<name>` ou une URL S3. `image-moderation.service.ts:122-129` intercepte l'échec de lecture et retourne `createSafeResult()` → **toutes les photos passent**.
 → Utiliser `moderateImageFromUrl` (déjà écrit, jamais appelé) avec `photo.url`. Faire échouer en « à réviser manuellement » plutôt qu'en « sûr » dans le `catch`.
 
-### 0.8 `isApproved` écrit mais jamais lu
+### ✅ 0.8 `isApproved` écrit mais jamais lu
 `moderation.service.ts:53` positionne le flag ; aucun consommateur (`grep isApproved` → aucune lecture). Les photos rejetées restent visibles.
 → Filtrer sur `isApproved` dans `ProfilesService` et dans la construction des profils de `MatchingService`.
 
-### 0.9 Traversée de chemin dans le stockage local *(code non commité)*
+### ✅ 0.9 Traversée de chemin dans le stockage local *(code non commité)*
 `main-api/src/common/services/storage.service.ts` (modifié, non commité) : `deleteLocal` fait `path.join(process.cwd(), new URL(fileUrl).pathname)` puis `unlink` sans vérifier que le chemin résolu reste sous `uploads/`.
 → Résoudre puis vérifier `resolved.startsWith(path.resolve(uploadsRoot) + path.sep)`.
 Par ailleurs `main.ts` sert `/uploads` en statique sans auth ni filtre d'approbation → à réserver au développement, ou passer par des URLs signées.
 
-### 0.10 Durcissements complémentaires
+### ✅ 0.10 Durcissements complémentaires
 - `ConsentGuard` (`auth/guards/consent.guard.ts`) existe et n'est enregistré nulle part, alors que `SkipConsentCheck` est déjà utilisé (`users.controller.ts:380,437`). L'enregistrer en `APP_GUARD` — le contrat RGPD documenté n'est pas appliqué aujourd'hui.
 - WebSocket : `chat.gateway.ts:38` CORS `origin: … || true` (joker) ; `handleConnection:73-96` ne consulte pas la liste noire Redis ni `user.status` → un logout ne coupe pas les sockets.
 - `auth.service.ts:352,391,398` utilise `KEYS refresh:*` sur chaque refresh et logout → commande bloquante O(N). Indexer les refresh tokens par utilisateur (`refresh:<userId>:<jti>`).
