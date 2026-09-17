@@ -23,9 +23,7 @@ class EmailNotificationCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(
-          color: email.hasError 
-              ? AppColors.errorRed 
-              : Colors.transparent,
+          color: email.hasError ? AppColors.errorRed : Colors.transparent,
           width: 1,
         ),
       ),
@@ -44,7 +42,7 @@ class EmailNotificationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: email.statusColor.withOpacity(0.1),
+                      color: email.statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Icon(
@@ -61,17 +59,19 @@ class EmailNotificationCard extends StatelessWidget {
                       children: [
                         Text(
                           email.typeName,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark,
+                                  ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           email.subject,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textMuted,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textMuted,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -82,13 +82,13 @@ class EmailNotificationCard extends StatelessWidget {
                   _buildStatusBadge(context),
                 ],
               ),
-              
+
               const SizedBox(height: AppSpacing.md),
-              
+
               // Recipient and time
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.email_outlined,
                     size: 14,
                     color: AppColors.textMuted,
@@ -112,7 +112,7 @@ class EmailNotificationCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               // Error message if failed
               if (email.hasError && email.errorMessage != null) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -124,7 +124,7 @@ class EmailNotificationCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
                         size: 16,
                         color: AppColors.errorRed,
@@ -133,9 +133,10 @@ class EmailNotificationCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           email.errorMessage!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.errorRed,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.errorRed,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -144,7 +145,7 @@ class EmailNotificationCard extends StatelessWidget {
                   ),
                 ),
               ],
-              
+
               // Retry button for failed emails
               if (email.hasError && email.canRetry && onRetry != null) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -156,7 +157,7 @@ class EmailNotificationCard extends StatelessWidget {
                     label: const Text('Retry Sending'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary),
+                      side: const BorderSide(color: AppColors.primary),
                     ),
                   ),
                 ),
@@ -175,7 +176,7 @@ class EmailNotificationCard extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: email.statusColor.withOpacity(0.1),
+        color: email.statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(

@@ -69,7 +69,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
   late AnimationController _focusController;
   late AnimationController _errorController;
   late AnimationController _successController;
-  
+
   late Animation<double> _focusAnimation;
   late Animation<double> _errorAnimation;
   late Animation<double> _successAnimation;
@@ -78,32 +78,29 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
   final FocusNode _focusNode = FocusNode();
   bool _isFocused = false;
   bool _hasError = false;
-  bool _hasSuccess = false;
+  final bool _hasSuccess = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _focusController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 200)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 200)),
       vsync: this,
     );
-    
+
     _errorController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
-    
+
     _successController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
 
@@ -139,10 +136,10 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
   @override
   void didUpdateWidget(EnhancedTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     final bool hadError = _hasError;
     _hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
-    
+
     if (!hadError && _hasError) {
       _showError();
     } else if (hadError && !_hasError) {
@@ -151,7 +148,10 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
 
     // Check for success (valid input after error)
     final controllerText = widget.controller?.text;
-    if (hadError && !_hasError && controllerText != null && controllerText.isNotEmpty) {
+    if (hadError &&
+        !_hasError &&
+        controllerText != null &&
+        controllerText.isNotEmpty) {
       _showSuccess();
     }
   }
@@ -167,7 +167,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
 
   void _onFocusChanged() {
     setState(() => _isFocused = _focusNode.hasFocus);
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (!accessibilityService.reducedMotion) {
       if (_isFocused) {
@@ -187,7 +187,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
     if (!accessibilityService.reducedMotion) {
       _errorController.forward();
     }
-    
+
     if (widget.enableHapticFeedback) {
       HapticFeedback.mediumImpact();
     }
@@ -211,7 +211,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
         });
       });
     }
-    
+
     if (widget.enableHapticFeedback) {
       HapticFeedback.lightImpact();
     }
@@ -221,7 +221,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return AnimatedBuilder(
       animation: Listenable.merge([
         _focusAnimation,
@@ -239,7 +239,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                 boxShadow: _isFocused && !accessibilityService.reducedMotion
                     ? [
                         BoxShadow(
-                          color: AppColors.primaryGold.withOpacity(0.2),
+                          color: AppColors.primaryGold.withValues(alpha: 0.2),
                           blurRadius: 8.0 * _focusAnimation.value,
                           spreadRadius: 1.0 * _focusAnimation.value,
                         ),
@@ -260,7 +260,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                   // First run custom validator if provided
                   final customError = widget.validator?.call(value);
                   if (customError != null) return customError;
-                  
+
                   // Then run forbidden words validation
                   return TextValidator.validateText(
                     value,
@@ -279,23 +279,23 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                   helperText: widget.helperText,
                   errorText: widget.errorText,
                   counterText: widget.enableCounter ? null : '',
-                  
+
                   // Prefix Icon with animation
                   prefixIcon: widget.prefixIcon != null
                       ? AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           child: Icon(
                             widget.prefixIcon,
-                            color: _isFocused 
+                            color: _isFocused
                                 ? AppColors.primaryGold
                                 : AppColors.textSecondary,
                           ),
                         )
                       : null,
-                  
+
                   // Suffix Icon with success/error states
                   suffixIcon: _buildSuffixIcon(),
-                  
+
                   // Enhanced border styling
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -304,17 +304,18 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _hasError 
-                          ? AppColors.errorRed.withOpacity(0.3)
+                      color: _hasError
+                          ? AppColors.errorRed.withValues(alpha: 0.3)
                           : AppColors.dividerLight,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _hasError 
+                      color: _hasError
                           ? AppColors.errorRed
-                          : _borderColorAnimation.value ?? AppColors.primaryGold,
+                          : _borderColorAnimation.value ??
+                              AppColors.primaryGold,
                       width: 2,
                     ),
                   ),
@@ -329,7 +330,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                       width: 2,
                     ),
                   ),
-                  
+
                   // Enhanced label styling
                   labelStyle: TextStyle(
                     color: _isFocused
@@ -337,14 +338,13 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                         : AppColors.textSecondary,
                   ),
                   floatingLabelStyle: TextStyle(
-                    color: _hasError
-                        ? AppColors.errorRed
-                        : AppColors.primaryGold,
+                    color:
+                        _hasError ? AppColors.errorRed : AppColors.primaryGold,
                   ),
                 ),
               ),
             ),
-            
+
             // Enhanced Error/Helper Text
             if (widget.errorText != null || widget.helperText != null)
               Padding(
@@ -354,8 +354,8 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
                   builder: (context, child) {
                     return Transform.translate(
                       offset: Offset(
-                        accessibilityService.reducedMotion 
-                            ? 0 
+                        accessibilityService.reducedMotion
+                            ? 0
                             : -5 * _errorAnimation.value,
                         0,
                       ),
@@ -379,7 +379,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
 
   Widget? _buildSuffixIcon() {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (_hasSuccess && !accessibilityService.reducedMotion) {
       return AnimatedBuilder(
         animation: _successAnimation,
@@ -394,7 +394,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
         },
       );
     }
-    
+
     if (_hasError && !accessibilityService.reducedMotion) {
       return AnimatedBuilder(
         animation: _errorAnimation,
@@ -409,7 +409,7 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
         },
       );
     }
-    
+
     if (widget.suffixIcon != null) {
       return GestureDetector(
         onTap: widget.onSuffixIconTap,
@@ -417,14 +417,12 @@ class _EnhancedTextFieldState extends State<EnhancedTextField>
           duration: const Duration(milliseconds: 200),
           child: Icon(
             widget.suffixIcon,
-            color: _isFocused 
-                ? AppColors.primaryGold
-                : AppColors.textSecondary,
+            color: _isFocused ? AppColors.primaryGold : AppColors.textSecondary,
           ),
         ),
       );
     }
-    
+
     return null;
   }
 }
@@ -457,20 +455,19 @@ class _EnhancedSearchBarState extends State<EnhancedSearchBar>
   late TextEditingController _controller;
   late AnimationController _expandController;
   late Animation<double> _expandAnimation;
-  
+
   bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     _controller = widget.controller ?? TextEditingController();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     _expandController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
 
@@ -495,7 +492,7 @@ class _EnhancedSearchBarState extends State<EnhancedSearchBar>
     final hasText = _controller.text.isNotEmpty;
     if (hasText != _hasText) {
       setState(() => _hasText = hasText);
-      
+
       final accessibilityService = context.read<AccessibilityService>();
       if (!accessibilityService.reducedMotion) {
         if (hasText) {
@@ -505,7 +502,7 @@ class _EnhancedSearchBarState extends State<EnhancedSearchBar>
         }
       }
     }
-    
+
     widget.onChanged?.call(_controller.text);
   }
 
@@ -518,16 +515,16 @@ class _EnhancedSearchBarState extends State<EnhancedSearchBar>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundGrey,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: AppColors.shadowLight,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),

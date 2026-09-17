@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -38,7 +37,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   // Local reactions state: messageId -> emoji string
   final Map<String, String> _reactions = {};
 
-  static const List<String> _quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+  static const List<String> _quickReactions = [
+    '👍',
+    '❤️',
+    '😂',
+    '😮',
+    '😢',
+    '🔥'
+  ];
 
   @override
   void initState() {
@@ -110,7 +116,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundColor: AppColors.primaryGold.withOpacity(0.3),
+              backgroundColor: AppColors.primaryGold.withValues(alpha: 0.3),
               child: const Icon(
                 Icons.person,
                 color: Colors.white,
@@ -120,17 +126,21 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             Expanded(
               child: Consumer<ChatProvider>(
                 builder: (context, chatProvider, child) {
-                  final conversation = chatProvider.getConversation(widget.chatId);
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  final conversation =
+                      chatProvider.getConversation(widget.chatId);
+                  final authProvider =
+                      Provider.of<AuthProvider>(context, listen: false);
                   final currentUserId = authProvider.user?.id;
-                  
+
                   // Get the other user's ID from the conversation participants
-                  final otherUserId = conversation?.participantIds
-                      .firstWhere((id) => id != currentUserId, orElse: () => '');
-                  final onlineStatus = otherUserId != null && otherUserId.isNotEmpty
-                      ? chatProvider.getOnlineStatus(otherUserId)
-                      : null;
-                  
+                  final otherUserId = conversation?.participantIds.firstWhere(
+                      (id) => id != currentUserId,
+                      orElse: () => '');
+                  final onlineStatus =
+                      otherUserId != null && otherUserId.isNotEmpty
+                          ? chatProvider.getOnlineStatus(otherUserId)
+                          : null;
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -180,7 +190,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             children: [
               // Timer indicator (only show for non-archived)
               if (!widget.isArchived)
-                Container(
+                SizedBox(
                   width: double.infinity,
                   height: 4,
                   child: AnimatedBuilder(
@@ -190,13 +200,15 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         value: _timerAnimationController.value,
                         backgroundColor: AppColors.dividerLight,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isExpired ? AppColors.errorRed : AppColors.primaryGold,
+                          isExpired
+                              ? AppColors.errorRed
+                              : AppColors.primaryGold,
                         ),
                       );
                     },
                   ),
                 ),
-              
+
               // Archive banner
               if (widget.isArchived)
                 Container(
@@ -206,16 +218,16 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     vertical: AppSpacing.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.errorRed.withOpacity(0.1),
+                    color: AppColors.errorRed.withValues(alpha: 0.1),
                     border: Border(
                       bottom: BorderSide(
-                        color: AppColors.errorRed.withOpacity(0.3),
+                        color: AppColors.errorRed.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.archive,
                         size: 16,
                         color: AppColors.errorRed,
@@ -224,10 +236,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       Expanded(
                         child: Text(
                           'Cette conversation est archivée - Lecture seule',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.errorRed,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.errorRed,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ),
                     ],
@@ -253,16 +266,19 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               if (!widget.isArchived)
                 Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
-                    final conversation = chatProvider.getConversation(widget.chatId);
-                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    final conversation =
+                        chatProvider.getConversation(widget.chatId);
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
                     final currentUserId = authProvider.user?.id;
-                    
+
                     // Get the other user's ID
-                    final otherUserId = conversation?.participantIds
-                        .firstWhere((id) => id != currentUserId, orElse: () => '');
-                    
-                    if (otherUserId != null && 
-                        otherUserId.isNotEmpty && 
+                    final otherUserId = conversation?.participantIds.firstWhere(
+                        (id) => id != currentUserId,
+                        orElse: () => '');
+
+                    if (otherUserId != null &&
+                        otherUserId.isNotEmpty &&
                         chatProvider.isUserTyping(widget.chatId, otherUserId)) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -270,7 +286,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           vertical: AppSpacing.sm,
                         ),
                         child: TypingIndicator(
-                          userName: conversation?.otherParticipant?.firstName ?? 'L\'utilisateur',
+                          userName: conversation?.otherParticipant?.firstName ??
+                              'L\'utilisateur',
                         ),
                       );
                     }
@@ -295,7 +312,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     }
 
     // Check if message is blocked by moderation
-    if (message.moderationResult != null && message.moderationResult!.isBlocked) {
+    if (message.moderationResult != null &&
+        message.moderationResult!.isBlocked) {
       return _buildBlockedMessage(message);
     }
 
@@ -310,115 +328,123 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     return GestureDetector(
       onLongPress: () => _showMessageOptions(message, isFromCurrentUser),
       child: Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Row(
-        mainAxisAlignment:
-            isFromCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          if (!isFromCurrentUser) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.primaryGold.withOpacity(0.3),
-              child: const Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-          Flexible(
-            child: Column(
-              crossAxisAlignment: isFromCurrentUser
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isFromCurrentUser
-                        ? AppColors.primaryGold
-                        : AppColors.accentCream,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(18),
-                      topRight: const Radius.circular(18),
-                      bottomLeft: Radius.circular(isFromCurrentUser ? 18 : 6),
-                      bottomRight: Radius.circular(isFromCurrentUser ? 6 : 18),
-                    ),
-                    boxShadow: isFromCurrentUser ? AppShadows.gold() : AppShadows.soft(),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        message.content,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isFromCurrentUser
-                                  ? Colors.white
-                                  : AppColors.textDark,
-                            ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isFromCurrentUser
-                                      ? Colors.white70
-                                      : AppColors.textSecondary,
-                                ),
-                          ),
-                          if (isFromCurrentUser) ...[
-                            const SizedBox(width: AppSpacing.xs),
-                            Icon(
-                              message.isRead ? Icons.done_all : Icons.done,
-                              size: 14,
-                              color: message.isRead
-                                  ? AppColors.infoBlue
-                                  : Colors.white70,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: Row(
+          mainAxisAlignment: isFromCurrentUser
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            if (!isFromCurrentUser) ...[
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.primaryGold.withValues(alpha: 0.3),
+                child: const Icon(
+                  Icons.person,
+                  size: 16,
+                  color: Colors.white,
                 ),
-                // Show moderation badge if pending
-                if (message.moderationResult != null &&
-                    message.moderationResult!.isPending) ...[
-                  const SizedBox(height: 4),
-                  ModerationStatusBadge(
-                    moderationResult: message.moderationResult!,
-                    compact: true,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Flexible(
+              child: Column(
+                crossAxisAlignment: isFromCurrentUser
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isFromCurrentUser
+                          ? AppColors.primaryGold
+                          : AppColors.accentCream,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(18),
+                        topRight: const Radius.circular(18),
+                        bottomLeft: Radius.circular(isFromCurrentUser ? 18 : 6),
+                        bottomRight:
+                            Radius.circular(isFromCurrentUser ? 6 : 18),
+                      ),
+                      boxShadow: isFromCurrentUser
+                          ? AppShadows.gold()
+                          : AppShadows.soft(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.content,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: isFromCurrentUser
+                                        ? Colors.white
+                                        : AppColors.textDark,
+                                  ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: isFromCurrentUser
+                                        ? Colors.white70
+                                        : AppColors.textSecondary,
+                                  ),
+                            ),
+                            if (isFromCurrentUser) ...[
+                              const SizedBox(width: AppSpacing.xs),
+                              Icon(
+                                message.isRead ? Icons.done_all : Icons.done,
+                                size: 14,
+                                color: message.isRead
+                                    ? AppColors.infoBlue
+                                    : Colors.white70,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                  // Show moderation badge if pending
+                  if (message.moderationResult != null &&
+                      message.moderationResult!.isPending) ...[
+                    const SizedBox(height: 4),
+                    ModerationStatusBadge(
+                      moderationResult: message.moderationResult!,
+                      compact: true,
+                    ),
+                  ],
+                  // Reaction chip
+                  if (reaction != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    _buildReactionChip(reaction, message.id),
+                  ],
                 ],
-                // Reaction chip
-                if (reaction != null) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  _buildReactionChip(reaction, message.id),
-                ],
-              ],
-            ),
-          ),
-          if (isFromCurrentUser) ...[
-            const SizedBox(width: AppSpacing.sm),
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.primaryGold,
-              child: const Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.white,
               ),
             ),
+            if (isFromCurrentUser) ...[
+              const SizedBox(width: AppSpacing.sm),
+              const CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.primaryGold,
+                child: Icon(
+                  Icons.person,
+                  size: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ],
-        ],
-      ),
+        ),
       ), // end Padding
     ); // end GestureDetector
   }
@@ -439,7 +465,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           color: AppColors.accentCream,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.4),
+            color: AppColors.primaryGold.withValues(alpha: 0.4),
             width: 1,
           ),
           boxShadow: AppShadows.soft(),
@@ -496,7 +522,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryGold.withOpacity(0.15)
+                          ? AppColors.primaryGold.withValues(alpha: 0.15)
                           : AppColors.backgroundGrey,
                       shape: BoxShape.circle,
                       border: isSelected
@@ -556,17 +582,17 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            color: AppColors.errorRed.withOpacity(0.1),
+            color: AppColors.errorRed.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppBorderRadius.large),
             border: Border.all(
-              color: AppColors.errorRed.withOpacity(0.3),
+              color: AppColors.errorRed.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.schedule_outlined,
                 color: AppColors.errorRed,
                 size: 16,
@@ -603,7 +629,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           if (!isFromCurrentUser) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: AppColors.primaryGold.withOpacity(0.3),
+              backgroundColor: AppColors.primaryGold.withValues(alpha: 0.3),
               child: const Icon(
                 Icons.person,
                 size: 16,
@@ -620,10 +646,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           ),
           if (isFromCurrentUser) ...[
             const SizedBox(width: AppSpacing.sm),
-            CircleAvatar(
+            const CircleAvatar(
               radius: 16,
               backgroundColor: AppColors.errorRed,
-              child: const Icon(
+              child: Icon(
                 Icons.block,
                 size: 16,
                 color: Colors.white,
@@ -641,7 +667,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       children: [
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.backgroundWhite,
             border: Border(
               top: BorderSide(color: AppColors.dividerLight),
@@ -672,7 +698,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 child: Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
                     final isExpired = chatProvider.isChatExpired(widget.chatId);
-                    
+
                     return TextField(
                       controller: _messageController,
                       focusNode: _focusNode,
@@ -693,8 +719,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         }
                       },
                       decoration: InputDecoration(
-                        hintText: isExpired 
-                            ? 'Cette conversation a expiré' 
+                        hintText: isExpired
+                            ? 'Cette conversation a expiré'
                             : 'Tapez votre message...',
                         border: OutlineInputBorder(
                           borderRadius:
@@ -702,8 +728,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: isExpired 
-                            ? AppColors.backgroundGrey 
+                        fillColor: isExpired
+                            ? AppColors.backgroundGrey
                             : AppColors.accentCream,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
@@ -712,7 +738,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       ),
                       maxLines: null,
                       textCapitalization: TextCapitalization.sentences,
-                      onSubmitted: isExpired ? null : (_) => _sendMessage(chatProvider),
+                      onSubmitted:
+                          isExpired ? null : (_) => _sendMessage(chatProvider),
                     );
                   },
                 ),
@@ -722,11 +749,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               Consumer<ChatProvider>(
                 builder: (context, chatProvider, child) {
                   final isExpired = chatProvider.isChatExpired(widget.chatId);
-                  
+
                   return FloatingActionButton(
-                    onPressed: isExpired ? null : () => _sendMessage(chatProvider),
-                    backgroundColor: isExpired 
-                        ? AppColors.backgroundGrey 
+                    onPressed:
+                        isExpired ? null : () => _sendMessage(chatProvider),
+                    backgroundColor: isExpired
+                        ? AppColors.backgroundGrey
                         : AppColors.primaryGold,
                     mini: true,
                     child: Icon(
@@ -785,14 +813,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.errorRed.withOpacity(0.1),
+        color: AppColors.errorRed.withValues(alpha: 0.1),
         border: Border(
-          top: BorderSide(color: AppColors.errorRed.withOpacity(0.3)),
+          top: BorderSide(color: AppColors.errorRed.withValues(alpha: 0.3)),
         ),
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.schedule_outlined,
             color: AppColors.errorRed,
             size: 32,
@@ -828,10 +856,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.favorite,
                 size: 40,
                 color: AppColors.primaryGold,
@@ -862,7 +890,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   void _sendMessage(ChatProvider chatProvider) {
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
-    
+
     // Validate message for forbidden words and inappropriate content
     final validationError = TextValidator.validateText(
       message,
@@ -870,7 +898,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       checkContactInfo: true,
       checkSpamPatterns: true,
     );
-    
+
     if (validationError != null) {
       // Show error message to user
       ScaffoldMessenger.of(context).showSnackBar(
@@ -883,11 +911,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       );
       return;
     }
-    
+
     // Send message if validation passes
     chatProvider.sendMessage(widget.chatId, message);
     _messageController.clear();
-    
+
     // Stop typing indicator since message was sent
     chatProvider.stopTyping(widget.chatId);
 
@@ -911,14 +939,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppBorderRadius.large),
           ),
-          title: Row(
+          title: const Row(
             children: [
               Icon(
                 Icons.info_outline,
                 color: AppColors.primaryGold,
               ),
-              const SizedBox(width: AppSpacing.sm),
-              const Text('À propos de cette conversation'),
+              SizedBox(width: AppSpacing.sm),
+              Text('À propos de cette conversation'),
             ],
           ),
           content: Column(

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -12,20 +14,20 @@ class RevenueCatService {
     defaultValue: '',
   );
   static bool _isInitialized = false;
-  
+
   static Future<void> initialize() async {
     if (_isInitialized) return;
     if (_apiKey.isEmpty) {
-      throw Exception('RevenueCat API key not configured. Set REVENUECAT_API_KEY or hardcode it in revenue_cat_service.dart.');
+      throw Exception(
+          'RevenueCat API key not configured. Set REVENUECAT_API_KEY or hardcode it in revenue_cat_service.dart.');
     }
     try {
       await Purchases.configure(
-        PurchasesConfiguration(_apiKey)
-          ..appUserID = null,
+        PurchasesConfiguration(_apiKey)..appUserID = null,
       );
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing RevenueCat: $e');
+      debugPrint('Error initializing RevenueCat: $e');
       rethrow;
     }
   }
@@ -34,7 +36,7 @@ class RevenueCatService {
     try {
       await Purchases.logIn(userId);
     } catch (e) {
-      print('Error setting RevenueCat user ID: $e');
+      debugPrint('Error setting RevenueCat user ID: $e');
     }
   }
 
@@ -42,7 +44,7 @@ class RevenueCatService {
     try {
       await Purchases.logOut();
     } catch (e) {
-      print('Error logging out of RevenueCat: $e');
+      debugPrint('Error logging out of RevenueCat: $e');
     }
   }
 
@@ -51,13 +53,13 @@ class RevenueCatService {
       await initialize();
       final offerings = await Purchases.getOfferings();
       final currentOffering = offerings.current;
-      
+
       if (currentOffering != null) {
         return currentOffering.availablePackages;
       }
       return [];
     } catch (e) {
-      print('Error getting available packages: $e');
+      debugPrint('Error getting available packages: $e');
       return [];
     }
   }
@@ -65,17 +67,18 @@ class RevenueCatService {
   static Future<CustomerInfo?> purchasePackage(Package package) async {
     try {
       await initialize();
-      final purchaserInfo = await Purchases.purchasePackage(package);
+      final purchaserInfo =
+          await Purchases.purchase(PurchaseParams.package(package));
       return purchaserInfo.customerInfo;
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-        print('Purchase error: $e');
+        debugPrint('Purchase error: $e');
         rethrow;
       }
       return null; // User cancelled
     } catch (e) {
-      print('Unexpected purchase error: $e');
+      debugPrint('Unexpected purchase error: $e');
       rethrow;
     }
   }
@@ -86,7 +89,7 @@ class RevenueCatService {
       final customerInfo = await Purchases.restorePurchases();
       return customerInfo;
     } catch (e) {
-      print('Error restoring purchases: $e');
+      debugPrint('Error restoring purchases: $e');
       rethrow;
     }
   }
@@ -96,12 +99,13 @@ class RevenueCatService {
       await initialize();
       return await Purchases.getCustomerInfo();
     } catch (e) {
-      print('Error getting customer info: $e');
+      debugPrint('Error getting customer info: $e');
       return null;
     }
   }
 
-  static Future<bool> verifySubscriptionWithBackend(CustomerInfo customerInfo) async {
+  static Future<bool> verifySubscriptionWithBackend(
+      CustomerInfo customerInfo) async {
     try {
       final activeEntitlements = customerInfo.entitlements.active;
       if (activeEntitlements.isEmpty) return false;
@@ -109,12 +113,12 @@ class RevenueCatService {
       // Get the receipt data based on platform
       String receiptData;
       String platform;
-      
+
       if (Platform.isIOS) {
         platform = 'ios';
         // For iOS, we need to get the original app transaction ID
         final latestTransaction = customerInfo.originalAppUserId;
-        receiptData = latestTransaction ?? '';
+        receiptData = latestTransaction;
       } else {
         platform = 'android';
         // For Android, get the purchase token from the latest entitlement
@@ -126,14 +130,14 @@ class RevenueCatService {
       if (receiptData.isEmpty) return false;
 
       // Verify with backend
-      final response = await ApiService.verifyReceipt(
+      await ApiService.verifyReceipt(
         receiptData: receiptData,
         platform: platform,
       );
-      
-      return response != null;
+
+      return true;
     } catch (e) {
-      print('Error verifying subscription with backend: $e');
+      debugPrint('Error verifying subscription with backend: $e');
       return false;
     }
   }
@@ -145,7 +149,7 @@ class RevenueCatService {
   static EntitlementInfo? getActiveEntitlement(CustomerInfo customerInfo) {
     final activeEntitlements = customerInfo.entitlements.active;
     if (activeEntitlements.isEmpty) return null;
-    
+
     // Return the first active entitlement (assuming one subscription type)
     return activeEntitlements.values.first;
   }
@@ -157,11 +161,11 @@ class RevenueCatService {
       // Handle both DateTime and String types
       if (expirationDate is DateTime) {
         return expirationDate as DateTime;
-      } else if (expirationDate is String) {
+      } else {
         try {
-          return DateTime.parse(expirationDate as String);
+          return DateTime.parse(expirationDate);
         } catch (e) {
-          print('Error parsing expiration date: $expirationDate');
+          debugPrint('Error parsing expiration date: $expirationDate');
           return null;
         }
       }
@@ -182,7 +186,7 @@ class RevenueCatService {
   // Convert RevenueCat Package to our SubscriptionPlan model
   static SubscriptionPlan packageToSubscriptionPlan(Package package) {
     final product = package.storeProduct;
-    
+
     return SubscriptionPlan(
       id: product.identifier,
       name: product.title,
@@ -203,7 +207,8 @@ class RevenueCatService {
   static String _getIntervalFromIdentifier(String identifier) {
     if (identifier.contains('monthly') || identifier.contains('month')) {
       return 'month';
-    } else if (identifier.contains('quarterly') || identifier.contains('quarter')) {
+    } else if (identifier.contains('quarterly') ||
+        identifier.contains('quarter')) {
       return 'month';
     } else if (identifier.contains('annual') || identifier.contains('year')) {
       return 'year';
@@ -214,7 +219,8 @@ class RevenueCatService {
   static int _getIntervalCountFromIdentifier(String identifier) {
     if (identifier.contains('quarterly') || identifier.contains('quarter')) {
       return 3;
-    } else if (identifier.contains('semiannual') || identifier.contains('6month')) {
+    } else if (identifier.contains('semiannual') ||
+        identifier.contains('6month')) {
       return 6;
     }
     return 1;
@@ -231,8 +237,8 @@ class RevenueCatService {
 
   static bool _isPopularPlan(String identifier) {
     // Mark quarterly/3-month plans as popular
-    return identifier.contains('quarterly') || 
-           identifier.contains('quarter') || 
-           identifier.contains('3month');
+    return identifier.contains('quarterly') ||
+        identifier.contains('quarter') ||
+        identifier.contains('3month');
   }
 }

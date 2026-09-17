@@ -53,8 +53,7 @@ class _OptimizedImageState extends State<OptimizedImage>
     with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
-  bool _hasError = false;
+
   bool _isLoaded = false;
 
   @override
@@ -82,17 +81,20 @@ class _OptimizedImageState extends State<OptimizedImage>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
       return _buildErrorWidget();
     }
 
-    final effectiveFadeDuration = accessibilityService.getAnimationDuration(widget.fadeDuration);
-    
-    Widget imageWidget = _buildImageWidget(accessibilityService, effectiveFadeDuration);
+    final effectiveFadeDuration =
+        accessibilityService.getAnimationDuration(widget.fadeDuration);
+
+    Widget imageWidget =
+        _buildImageWidget(accessibilityService, effectiveFadeDuration);
 
     // Apply accessibility enhancements
-    imageWidget = _applyAccessibilityEnhancements(imageWidget, accessibilityService);
+    imageWidget =
+        _applyAccessibilityEnhancements(imageWidget, accessibilityService);
 
     // Apply decorations
     if (widget.borderRadius != null || widget.shadows != null) {
@@ -129,7 +131,8 @@ class _OptimizedImageState extends State<OptimizedImage>
     );
   }
 
-  Widget _buildImageWidget(AccessibilityService accessibilityService, Duration fadeDuration) {
+  Widget _buildImageWidget(
+      AccessibilityService accessibilityService, Duration fadeDuration) {
     if (widget.lazyLoad) {
       return _buildLazyLoadedImage(accessibilityService, fadeDuration);
     } else {
@@ -137,7 +140,8 @@ class _OptimizedImageState extends State<OptimizedImage>
     }
   }
 
-  Widget _buildLazyLoadedImage(AccessibilityService accessibilityService, Duration fadeDuration) {
+  Widget _buildLazyLoadedImage(
+      AccessibilityService accessibilityService, Duration fadeDuration) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Only load when the widget is actually visible and has size
@@ -172,7 +176,8 @@ class _OptimizedImageState extends State<OptimizedImage>
     );
   }
 
-  Widget _buildDirectImage(AccessibilityService accessibilityService, Duration fadeDuration) {
+  Widget _buildDirectImage(
+      AccessibilityService accessibilityService, Duration fadeDuration) {
     return CachedNetworkImage(
       imageUrl: widget.imageUrl!,
       width: widget.width,
@@ -188,7 +193,8 @@ class _OptimizedImageState extends State<OptimizedImage>
     );
   }
 
-  Widget _buildFadeInImage(ImageProvider imageProvider, AccessibilityService accessibilityService, Duration fadeDuration) {
+  Widget _buildFadeInImage(ImageProvider imageProvider,
+      AccessibilityService accessibilityService, Duration fadeDuration) {
     if (!widget.fadeIn || accessibilityService.reducedMotion) {
       return Image(
         image: imageProvider,
@@ -281,8 +287,8 @@ class _OptimizedImageState extends State<OptimizedImage>
             Text(
               'Image non disponible',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textMuted,
-              ),
+                    color: AppColors.textMuted,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -291,7 +297,8 @@ class _OptimizedImageState extends State<OptimizedImage>
     );
   }
 
-  Widget _applyAccessibilityEnhancements(Widget child, AccessibilityService accessibilityService) {
+  Widget _applyAccessibilityEnhancements(
+      Widget child, AccessibilityService accessibilityService) {
     return Semantics(
       label: widget.semanticLabel ?? 'Image',
       image: true,
@@ -304,12 +311,18 @@ class _OptimizedImageState extends State<OptimizedImage>
 
   int? _getMemCacheWidth() {
     if (widget.width == null) return null;
-    return (widget.width! * MediaQuery.of(context).devicePixelRatio * widget.compressionQuality).round();
+    return (widget.width! *
+            MediaQuery.of(context).devicePixelRatio *
+            widget.compressionQuality)
+        .round();
   }
 
   int? _getMemCacheHeight() {
     if (widget.height == null) return null;
-    return (widget.height! * MediaQuery.of(context).devicePixelRatio * widget.compressionQuality).round();
+    return (widget.height! *
+            MediaQuery.of(context).devicePixelRatio *
+            widget.compressionQuality)
+        .round();
   }
 
   int? _getMaxDiskCacheWidth() {
@@ -349,7 +362,8 @@ class ProfileImage extends StatelessWidget {
       fit: BoxFit.cover,
       enableHero: enableHero,
       heroTag: enableHero ? 'profile_$imageUrl' : null,
-      semanticLabel: name != null ? 'Photo de profil de $name' : 'Photo de profil',
+      semanticLabel:
+          name != null ? 'Photo de profil de $name' : 'Photo de profil',
       borderRadius: BorderRadius.circular(size / 2),
       shadows: AppShadows.soft(),
       onTap: onTap,
@@ -357,7 +371,7 @@ class ProfileImage extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.primaryGold.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -370,7 +384,7 @@ class ProfileImage extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.primaryGold.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -423,9 +437,10 @@ class _LazyImageGridState extends State<LazyImageGrid> {
 
   void _preloadVisibleImages() {
     // Preload first few images that will be immediately visible
-    final initialLoadCount = (widget.crossAxisCount * 2).clamp(1, widget.imageUrls.length);
+    final initialLoadCount =
+        (widget.crossAxisCount * 2).clamp(1, widget.imageUrls.length);
     final cacheService = context.read<PerformanceCacheService>();
-    
+
     for (int i = 0; i < initialLoadCount; i++) {
       cacheService.loadImageWithCache(widget.imageUrls[i]);
     }
@@ -444,14 +459,14 @@ class _LazyImageGridState extends State<LazyImageGrid> {
       itemBuilder: (context, index) {
         final imageUrl = widget.imageUrls[index];
         final semanticLabel = widget.semanticLabels?.elementAtOrNull(index);
-        
+
         return OptimizedImage(
           imageUrl: imageUrl,
           semanticLabel: semanticLabel ?? 'Image ${index + 1}',
           fit: BoxFit.cover,
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           lazyLoad: !_visibleIndices.contains(index),
-          onTap: widget.onImageTap != null 
+          onTap: widget.onImageTap != null
               ? () => widget.onImageTap!(index, imageUrl)
               : null,
         );

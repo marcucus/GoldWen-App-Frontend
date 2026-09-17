@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
@@ -55,28 +57,23 @@ class ApiService {
     _token = null;
   }
 
-  static Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        if (_token != null) 'Authorization': 'Bearer $_token',
-      };
-
   // Helper method to handle HTTP requests with timeout and error handling
-    static Future<Response> _makeRequest(
-    Future<Response> request, [
-    Duration? timeout,
-  ]) async {
+  static Future<Response> _makeRequest(Future<Response> request) async {
     try {
       return await request;
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
         throw ApiException(
           statusCode: 0,
-          message: 'Request timeout - Please check your internet connection and try again',
+          message:
+              'Request timeout - Please check your internet connection and try again',
           code: 'TIMEOUT_ERROR',
         );
       }
       if (e.response != null) {
-        return e.response!; // Let _handleResponse manage the error parsing from response body
+        return e
+            .response!; // Let _handleResponse manage the error parsing from response body
       }
       throw ApiException(
         statusCode: 0,
@@ -91,7 +88,6 @@ class ApiService {
       );
     }
   }
-
 
   // Health check endpoints
   static Future<Map<String, dynamic>> healthCheck() async {
@@ -117,7 +113,9 @@ class ApiService {
     required String firstName,
     required String lastName,
   }) async {
-    final response = await _dio.post('/auth/register', data: jsonEncode({
+    final response = await _dio.post(
+      '/auth/register',
+      data: jsonEncode({
         'email': email,
         'password': password,
         'firstName': firstName,
@@ -133,7 +131,9 @@ class ApiService {
     required String password,
   }) async {
     final response = await _makeRequest(
-      _dio.post('/auth/login', data: jsonEncode({
+      _dio.post(
+        '/auth/login',
+        data: jsonEncode({
           'email': email,
           'password': password,
         }),
@@ -152,7 +152,9 @@ class ApiService {
     required String idToken,
   }) async {
     final response = await _makeRequest(
-      _dio.post('/auth/google', data: jsonEncode({
+      _dio.post(
+        '/auth/google',
+        data: jsonEncode({
           'idToken': idToken,
         }),
       ),
@@ -167,7 +169,9 @@ class ApiService {
     String? lastName,
   }) async {
     final response = await _makeRequest(
-      _dio.post('/auth/apple', data: jsonEncode({
+      _dio.post(
+        '/auth/apple',
+        data: jsonEncode({
           'identityToken': identityToken,
           if (firstName != null || lastName != null)
             'user': {
@@ -192,7 +196,9 @@ class ApiService {
   // Profile endpoints
   static Future<Map<String, dynamic>> updateProfile(
       Map<String, dynamic> profileData) async {
-    final response = await _dio.put('/profiles/me', data: jsonEncode(profileData),
+    final response = await _dio.put(
+      '/profiles/me',
+      data: jsonEncode(profileData),
     );
 
     return _handleResponse(response);
@@ -200,15 +206,15 @@ class ApiService {
 
   static Future<Map<String, dynamic>> submitPersonalityAnswers(
       List<Map<String, dynamic>> answers) async {
-    
     if (AppConfig.isDevelopment) {
-      print('Submitting personality answers: $answers');
-      print('Request body: ${jsonEncode({'answers': answers})}');
+      debugPrint('Submitting personality answers: $answers');
+      debugPrint('Request body: ${jsonEncode({'answers': answers})}');
     }
-    
-    final response = await _dio.post('/profiles/me/personality-answers', data: jsonEncode({
-        'answers': answers
-      }), // Wrap answers in object as expected by DTO
+
+    final response = await _dio.post(
+      '/profiles/me/personality-answers',
+      data: jsonEncode(
+          {'answers': answers}), // Wrap answers in object as expected by DTO
     );
 
     return _handleResponse(response);
@@ -218,9 +224,9 @@ class ApiService {
     final response = await _makeRequest(
       _dio.get('/profiles/personality-questions'),
     );
-    
+
     final result = _handleResponse(response);
-    
+
     // Handle both direct array and wrapped response formats
     if (result is List) {
       return result;
@@ -228,15 +234,17 @@ class ApiService {
       // If response is wrapped (e.g., {"success": true, "data": [...]})
       if (result.containsKey('data') && result['data'] is List) {
         return result['data'] as List<dynamic>;
-      } else if (result.containsKey('questions') && result['questions'] is List) {
+      } else if (result.containsKey('questions') &&
+          result['questions'] is List) {
         return result['questions'] as List<dynamic>;
       }
     }
-    
+
     // If we can't find a list, throw an error with debug info
     throw ApiException(
       statusCode: 200,
-      message: 'Invalid response format for personality questions. Expected List but got: ${result.runtimeType}',
+      message:
+          'Invalid response format for personality questions. Expected List but got: ${result.runtimeType}',
       code: 'INVALID_RESPONSE_FORMAT',
     );
   }
@@ -245,13 +253,13 @@ class ApiService {
     final response = await _makeRequest(
       _dio.get('/profiles/prompts'),
     );
-    
+
     final result = _handleResponse(response);
-    
+
     // Debug: Print the response structure
-    print('getPrompts response structure: ${result.runtimeType}');
-    print('getPrompts response data: $result');
-    
+    debugPrint('getPrompts response structure: ${result.runtimeType}');
+    debugPrint('getPrompts response data: $result');
+
     // Handle the wrapped response format from ResponseInterceptor
     if (result is Map<String, dynamic>) {
       // Standard wrapped response: {"success": true, "data": [...], "metadata": {...}}
@@ -260,7 +268,8 @@ class ApiService {
         if (data is List) {
           return data.cast<Map<String, dynamic>>();
         } else {
-          print('Error: data field is not a List, got: ${data.runtimeType}');
+          debugPrint(
+              'Error: data field is not a List, got: ${data.runtimeType}');
         }
       }
       // Legacy format (direct prompts field)
@@ -269,25 +278,28 @@ class ApiService {
       }
       // If it's a Map but no data/prompts field, maybe it's the direct object
       else {
-        print('Error: No data or prompts field found in response');
+        debugPrint('Error: No data or prompts field found in response');
       }
-    } 
+    }
     // Handle direct array response (shouldn't happen with ResponseInterceptor)
     else if (result is List) {
       return result.cast<Map<String, dynamic>>();
     }
-    
+
     // If we can't find a list, throw an error with debug info
     throw ApiException(
       statusCode: 200,
-      message: 'Invalid response format for prompts. Expected wrapped response with data field containing List, but got: ${result.runtimeType}\nResponse: $result',
+      message:
+          'Invalid response format for prompts. Expected wrapped response with data field containing List, but got: ${result.runtimeType}\nResponse: $result',
       code: 'INVALID_RESPONSE_FORMAT',
     );
   }
 
   static Future<Map<String, dynamic>> submitPromptAnswers(
       List<Map<String, dynamic>> answers) async {
-    final response = await _dio.post('/profiles/me/prompt-answers', data: jsonEncode(
+    final response = await _dio.post(
+      '/profiles/me/prompt-answers',
+      data: jsonEncode(
           {'answers': answers}), // Wrap in answers object as expected by DTO
     );
 
@@ -297,7 +309,9 @@ class ApiService {
   static Future<Map<String, dynamic>> updateProfileStatus({
     bool? isVisible,
   }) async {
-    final response = await _dio.put('/profiles/me/status', data: jsonEncode({
+    final response = await _dio.put(
+      '/profiles/me/status',
+      data: jsonEncode({
         if (isVisible != null) 'isVisible': isVisible,
       }),
     );
@@ -315,7 +329,9 @@ class ApiService {
 
   // Authentication extensions
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
-    final response = await _dio.post('/auth/forgot-password', data: jsonEncode({'email': email}),
+    final response = await _dio.post(
+      '/auth/forgot-password',
+      data: jsonEncode({'email': email}),
     );
 
     return _handleResponse(response);
@@ -323,7 +339,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> resetPassword(
       String token, String newPassword) async {
-    final response = await _dio.post('/auth/reset-password', data: jsonEncode({
+    final response = await _dio.post(
+      '/auth/reset-password',
+      data: jsonEncode({
         'token': token,
         'newPassword': newPassword,
       }),
@@ -334,7 +352,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> changePassword(
       String currentPassword, String newPassword) async {
-    final response = await _dio.post('/auth/change-password', data: jsonEncode({
+    final response = await _dio.post(
+      '/auth/change-password',
+      data: jsonEncode({
         'currentPassword': currentPassword,
         'newPassword': newPassword,
       }),
@@ -344,7 +364,9 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> verifyEmail(String token) async {
-    final response = await _dio.post('/auth/verify-email', data: jsonEncode({'token': token}),
+    final response = await _dio.post(
+      '/auth/verify-email',
+      data: jsonEncode({'token': token}),
     );
 
     return _handleResponse(response);
@@ -365,7 +387,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateUser(
       Map<String, dynamic> userData) async {
-    final response = await _dio.put('/users/me', data: jsonEncode(userData),
+    final response = await _dio.put(
+      '/users/me',
+      data: jsonEncode(userData),
     );
 
     return _handleResponse(response);
@@ -373,7 +397,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateUserSettings(
       Map<String, dynamic> settings) async {
-    final response = await _dio.put('/users/me/settings', data: jsonEncode(settings),
+    final response = await _dio.put(
+      '/users/me/settings',
+      data: jsonEncode(settings),
     );
 
     return _handleResponse(response);
@@ -413,11 +439,15 @@ class ApiService {
   static Future<Map<String, dynamic>> uploadPhoto(String filePath,
       {int? order}) async {
     String extension = filePath.split('.').last.toLowerCase();
-    String subtype = extension == 'png' ? 'png' : extension == 'webp' ? 'webp' : 'jpeg';
-    
+    String subtype = extension == 'png'
+        ? 'png'
+        : extension == 'webp'
+            ? 'webp'
+            : 'jpeg';
+
     final file = File(filePath);
     final filename = file.uri.pathSegments.last;
-    
+
     final formData = FormData.fromMap({
       'photos': await MultipartFile.fromFile(
         filePath,
@@ -426,22 +456,27 @@ class ApiService {
       ),
       if (order != null) 'order': order.toString(),
     });
-    
+
     final response = await _dio.post('/profiles/me/photos', data: formData);
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> uploadPhotos(List<String> filePaths) async {
+  static Future<Map<String, dynamic>> uploadPhotos(
+      List<String> filePaths) async {
     final formData = FormData();
-    
+
     for (int i = 0; i < filePaths.length; i++) {
       String filePath = filePaths[i];
       String extension = filePath.split('.').last.toLowerCase();
-      
-      String subtype = extension == 'png' ? 'png' : extension == 'webp' ? 'webp' : 'jpeg';
+
+      String subtype = extension == 'png'
+          ? 'png'
+          : extension == 'webp'
+              ? 'webp'
+              : 'jpeg';
       final file = File(filePath);
       final filename = file.uri.pathSegments.last;
-      
+
       formData.files.add(MapEntry(
         'photos',
         await MultipartFile.fromFile(
@@ -458,7 +493,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updatePhotoOrder(
       String photoId, int newOrder) async {
-    final response = await _dio.put('/profiles/me/photos/$photoId/order', data: jsonEncode({'newOrder': newOrder}),
+    final response = await _dio.put(
+      '/profiles/me/photos/$photoId/order',
+      data: jsonEncode({'newOrder': newOrder}),
     );
 
     return _handleResponse(response);
@@ -487,9 +524,17 @@ class ApiService {
     String mainType = type == 'audio' ? 'audio' : 'video';
     String subtype;
     if (type == 'audio') {
-      subtype = extension == 'mp3' ? 'mpeg' : extension == 'm4a' ? 'mp4' : extension;
+      subtype = extension == 'mp3'
+          ? 'mpeg'
+          : extension == 'm4a'
+              ? 'mp4'
+              : extension;
     } else {
-      subtype = extension == 'mov' ? 'quicktime' : extension == 'mkv' ? 'x-matroska' : extension;
+      subtype = extension == 'mov'
+          ? 'quicktime'
+          : extension == 'mkv'
+              ? 'x-matroska'
+              : extension;
     }
 
     final file = File(filePath);
@@ -519,7 +564,9 @@ class ApiService {
     String mediaId,
     int newOrder,
   ) async {
-    final response = await _dio.put('/profiles/me/media/$mediaId/order', data: jsonEncode({'newOrder': newOrder}),
+    final response = await _dio.put(
+      '/profiles/me/media/$mediaId/order',
+      data: jsonEncode({'newOrder': newOrder}),
     );
 
     return _handleResponse(response);
@@ -538,7 +585,9 @@ class ApiService {
     String profileId, {
     String choice = 'like',
   }) async {
-    final response = await _dio.post('/matching/choose/$profileId', data: jsonEncode({
+    final response = await _dio.post(
+      '/matching/choose/$profileId',
+      data: jsonEncode({
         'choice': choice,
       }),
     );
@@ -553,7 +602,9 @@ class ApiService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (status != null) queryParams['status'] = status;
 
-    final uri = Uri.parse('/matching/matches').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/matching/matches')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     return _handleResponse(response);
@@ -619,7 +670,9 @@ class ApiService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (before != null) queryParams['before'] = before;
 
-    final uri = Uri.parse('/chat/$chatId/messages').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/chat/$chatId/messages')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _makeRequest(
       _dio.get(uri),
     );
@@ -630,7 +683,9 @@ class ApiService {
   static Future<Map<String, dynamic>> sendMessage(String chatId,
       {required String type, required String content}) async {
     final response = await _makeRequest(
-      _dio.post('/chat/$chatId/messages', data: jsonEncode({
+      _dio.post(
+        '/chat/$chatId/messages',
+        data: jsonEncode({
           'type': type,
           'content': content,
         }),
@@ -643,7 +698,9 @@ class ApiService {
   static Future<Map<String, dynamic>> acceptMatch(String matchId,
       {required bool accept}) async {
     final response = await _makeRequest(
-      _dio.post('/chat/accept/$matchId', data: jsonEncode({
+      _dio.post(
+        '/chat/accept/$matchId',
+        data: jsonEncode({
           'accept': accept,
         }),
       ),
@@ -676,8 +733,6 @@ class ApiService {
     return _handleResponse(response);
   }
 
-
-
   // Subscription endpoints
   static Future<Map<String, dynamic>> getSubscriptionPlans() async {
     final response = await _dio.get('/subscriptions/plans');
@@ -696,7 +751,9 @@ class ApiService {
     required String platform,
     required String receiptData,
   }) async {
-    final response = await _dio.post('/subscriptions/purchase', data: jsonEncode({
+    final response = await _dio.post(
+      '/subscriptions/purchase',
+      data: jsonEncode({
         'plan': plan,
         'platform': platform,
         'receiptData': receiptData,
@@ -710,7 +767,9 @@ class ApiService {
     required String receiptData,
     required String platform,
   }) async {
-    final response = await _dio.post('/subscriptions/verify-receipt', data: jsonEncode({
+    final response = await _dio.post(
+      '/subscriptions/verify-receipt',
+      data: jsonEncode({
         'receiptData': receiptData,
         'platform': platform,
       }),
@@ -750,7 +809,9 @@ class ApiService {
     if (type != null) queryParams['type'] = type;
     if (read != null) queryParams['read'] = read.toString();
 
-    final uri = Uri.parse('/notifications').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/notifications')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     return _handleResponse(response);
@@ -784,7 +845,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateNotificationSettings(
       Map<String, dynamic> settings) async {
-    final response = await _dio.put('/notifications/settings', data: jsonEncode(settings),
+    final response = await _dio.put(
+      '/notifications/settings',
+      data: jsonEncode(settings),
     );
 
     return _handleResponse(response);
@@ -795,7 +858,9 @@ class ApiService {
     required String body,
     required String type,
   }) async {
-    final response = await _dio.post('/notifications/test', data: jsonEncode({
+    final response = await _dio.post(
+      '/notifications/test',
+      data: jsonEncode({
         'title': title,
         'body': body,
         'type': type,
@@ -809,7 +874,9 @@ class ApiService {
     List<String>? targetUsers,
     String? customMessage,
   }) async {
-    final response = await _dio.post('/notifications/trigger-daily-selection', data: jsonEncode({
+    final response = await _dio.post(
+      '/notifications/trigger-daily-selection',
+      data: jsonEncode({
         if (targetUsers != null) 'targetUsers': targetUsers,
         if (customMessage != null) 'customMessage': customMessage,
       }),
@@ -825,7 +892,9 @@ class ApiService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    final response = await _dio.post('/notifications/send-group', data: jsonEncode({
+    final response = await _dio.post(
+      '/notifications/send-group',
+      data: jsonEncode({
         'userIds': userIds,
         'type': type,
         'title': title,
@@ -843,7 +912,9 @@ class ApiService {
     String? appVersion,
     String? deviceId,
   }) async {
-    final response = await _dio.post('/users/me/push-tokens', data: jsonEncode({
+    final response = await _dio.post(
+      '/users/me/push-tokens',
+      data: jsonEncode({
         'token': token,
         'platform': platform,
         if (appVersion != null) 'appVersion': appVersion,
@@ -857,7 +928,9 @@ class ApiService {
   static Future<Map<String, dynamic>> removePushToken({
     required String token,
   }) async {
-    final response = await _dio.delete('/users/me/push-tokens', data: jsonEncode({
+    final response = await _dio.delete(
+      '/users/me/push-tokens',
+      data: jsonEncode({
         'token': token,
       }),
     );
@@ -882,7 +955,9 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final response = await _dio.post('/admin/auth/login', data: jsonEncode({
+    final response = await _dio.post(
+      '/admin/auth/login',
+      data: jsonEncode({
         'email': email,
         'password': password,
       }),
@@ -903,8 +978,9 @@ class ApiService {
     if (status != null) queryParams['status'] = status;
     if (search != null) queryParams['search'] = search;
 
-    final uri =
-        Uri.parse('/admin/users').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/admin/users')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     return _handleResponse(response);
@@ -918,7 +994,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateUserStatus(
       String userId, String status) async {
-    final response = await _dio.put('/admin/users/$userId/status', data: jsonEncode({'status': status}),
+    final response = await _dio.put(
+      '/admin/users/$userId/status',
+      data: jsonEncode({'status': status}),
     );
 
     return _handleResponse(response);
@@ -936,7 +1014,9 @@ class ApiService {
     if (status != null) queryParams['status'] = status;
     if (type != null) queryParams['type'] = type;
 
-    final uri = Uri.parse('/admin/reports').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/admin/reports')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     return _handleResponse(response);
@@ -944,7 +1024,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> updateReportStatus(
       String reportId, String status, String resolution) async {
-    final response = await _dio.put('/admin/reports/$reportId', data: jsonEncode({
+    final response = await _dio.put(
+      '/admin/reports/$reportId',
+      data: jsonEncode({
         'status': status,
         'resolution': resolution,
       }),
@@ -964,7 +1046,9 @@ class ApiService {
     required String body,
     required String type,
   }) async {
-    final response = await _dio.post('/admin/notifications/broadcast', data: jsonEncode({
+    final response = await _dio.post(
+      '/admin/notifications/broadcast',
+      data: jsonEncode({
         'title': title,
         'body': body,
         'type': type,
@@ -980,7 +1064,9 @@ class ApiService {
     bool? marketing,
     bool? analytics,
   }) async {
-    final response = await _dio.post('/users/consent', data: jsonEncode({
+    final response = await _dio.post(
+      '/users/consent',
+      data: jsonEncode({
         'dataProcessing': dataProcessing,
         if (marketing != null) 'marketing': marketing,
         if (analytics != null) 'analytics': analytics,
@@ -1000,7 +1086,9 @@ class ApiService {
     Map<String, dynamic>? metadata,
   }) async {
     final response = await _makeRequest(
-      _dio.post('/feedback', data: jsonEncode({
+      _dio.post(
+        '/feedback',
+        data: jsonEncode({
           'type': type,
           'subject': subject,
           'message': message,
@@ -1021,7 +1109,9 @@ class ApiService {
     if (version != null) queryParams['version'] = version;
     queryParams['format'] = format;
 
-    final uri = Uri.parse('/legal/privacy-policy').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/legal/privacy-policy')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     return _handleResponse(response);
@@ -1029,13 +1119,16 @@ class ApiService {
 
   static Future<dynamic> exportUserData({String format = 'json'}) async {
     final queryParams = <String, String>{'format': format};
-    
-    final uri = Uri.parse('/users/me/export-data').replace(queryParameters: queryParams).toString();
+
+    final uri = Uri.parse('/users/me/export-data')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _dio.get(uri);
 
     // For file downloads, we might need to handle differently
     if (format == 'pdf') {
-      if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+      if ((response.statusCode ?? 500) >= 200 &&
+          (response.statusCode ?? 500) < 300) {
         return (response.data as List<int>); // Return raw bytes for PDF
       } else {
         throw ApiException(
@@ -1055,7 +1148,9 @@ class ApiService {
     required bool functionalCookies,
     int? dataRetention,
   }) async {
-    final response = await _dio.put('/users/me/privacy-settings', data: jsonEncode({
+    final response = await _dio.put(
+      '/users/me/privacy-settings',
+      data: jsonEncode({
         'analytics': analytics,
         'marketing': marketing,
         'functionalCookies': functionalCookies,
@@ -1080,7 +1175,8 @@ class ApiService {
   }
 
   // Get data export status
-  static Future<Map<String, dynamic>> getDataExportStatus(String requestId) async {
+  static Future<Map<String, dynamic>> getDataExportStatus(
+      String requestId) async {
     final response = await _dio.get('/users/me/data-export/$requestId');
 
     return _handleResponse(response);
@@ -1088,9 +1184,11 @@ class ApiService {
 
   // Download data export
   static Future<dynamic> downloadDataExport(String requestId) async {
-    final response = await _dio.get('/users/me/data-export/$requestId/download');
+    final response =
+        await _dio.get('/users/me/data-export/$requestId/download');
 
-    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+    if ((response.statusCode ?? 500) >= 200 &&
+        (response.statusCode ?? 500) < 300) {
       return (response.data as List<int>); // Return raw bytes for file download
     } else {
       throw ApiException(
@@ -1107,7 +1205,9 @@ class ApiService {
     String? reason,
     bool immediateDelete = false,
   }) async {
-    final response = await _dio.delete('/users/me', data: jsonEncode({
+    final response = await _dio.delete(
+      '/users/me',
+      data: jsonEncode({
         'password': password,
         if (reason != null) 'reason': reason,
         'immediateDelete': immediateDelete,
@@ -1131,76 +1231,49 @@ class ApiService {
     return _handleResponse(response);
   }
 
-    static dynamic _handleResponse(Response response) {
+  static dynamic _handleResponse(Response response) {
     var rawData = response.data;
     if (rawData is String && rawData.isNotEmpty) {
       try {
         rawData = jsonDecode(rawData);
       } catch (_) {}
     }
-    
-    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+
+    if ((response.statusCode ?? 500) >= 200 &&
+        (response.statusCode ?? 500) < 300) {
       return rawData;
     } else {
       String message = 'API Error';
       String code = 'ERROR';
       dynamic errors;
       RateLimitInfo? rateLimitInfo;
-      
+
       if (rawData is Map) {
-         message = rawData['message'] ?? message;
-         code = rawData['code'] ?? code;
-         errors = rawData['errors'];
-         
-         if (response.statusCode == 429 && rawData['retryAfter'] != null) {
-           rateLimitInfo = RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
-         }
+        message = rawData['message'] ?? message;
+        code = rawData['code'] ?? code;
+        errors = rawData['errors'];
+
+        if (response.statusCode == 429 && rawData['retryAfter'] != null) {
+          rateLimitInfo =
+              RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
+        }
       }
-      
+
       if (rateLimitInfo == null) {
-         final headerMap = <String, String>{};
-         response.headers.forEach((key, value) {
-            headerMap[key.toLowerCase()] = value.join(',');
-         });
-         final rli = RateLimitInfo.fromHeaders(headerMap);
-         if (rli.hasData) rateLimitInfo = rli;
+        final headerMap = <String, String>{};
+        response.headers.forEach((key, value) {
+          headerMap[key.toLowerCase()] = value.join(',');
+        });
+        final rli = RateLimitInfo.fromHeaders(headerMap);
+        if (rli.hasData) rateLimitInfo = rli;
       }
-      
+
       throw ApiException(
-        statusCode: response.statusCode ?? 500,
-        message: message,
-        code: code,
-        errors: errors,
-        rateLimitInfo: rateLimitInfo
-      );
-    }
-  }
-
-
-  static String _getDefaultErrorMessage(int statusCode) {
-    switch (statusCode) {
-      case 400:
-        return 'Bad Request - Invalid input data';
-      case 401:
-        return 'Unauthorized - Please log in again';
-      case 403:
-        return 'Forbidden - Insufficient permissions';
-      case 404:
-        return 'Not Found - Resource does not exist';
-      case 409:
-        return 'Conflict - Resource already exists';
-      case 422:
-        return 'Unprocessable Entity - Validation failed';
-      case 429:
-        return 'Too Many Requests - Please try again later';
-      case 500:
-        return 'Internal Server Error - Please try again later';
-      case 502:
-        return 'Bad Gateway - Service temporarily unavailable';
-      case 503:
-        return 'Service Unavailable - Please try again later';
-      default:
-        return 'Unknown error occurred';
+          statusCode: response.statusCode ?? 500,
+          message: message,
+          code: code,
+          errors: errors,
+          rateLimitInfo: rateLimitInfo);
     }
   }
 
@@ -1250,7 +1323,9 @@ class ApiService {
     if (type != null) queryParams['type'] = type;
     if (status != null) queryParams['status'] = status;
 
-    final uri = Uri.parse('/users/me/email-history').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/users/me/email-history')
+        .replace(queryParameters: queryParams)
+        .toString();
     final response = await _makeRequest(
       _dio.get(uri),
     );
@@ -1291,29 +1366,23 @@ class MatchingServiceApi {
     },
   ));
 
-
-  static Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-      };
-
   // Helper method to handle HTTP requests with timeout and error handling
-    static Future<Response> _makeRequest(
-    Future<Response> request, [
-    Duration? timeout,
-  ]) async {
+  static Future<Response> _makeRequest(Future<Response> request) async {
     try {
       return await request;
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
         throw ApiException(
           statusCode: 0,
-          message: 'Request timeout - Please check your internet connection and try again',
+          message:
+              'Request timeout - Please check your internet connection and try again',
           code: 'TIMEOUT_ERROR',
         );
       }
       if (e.response != null) {
-        return e.response!; // Let _handleResponse manage the error parsing from response body
+        return e
+            .response!; // Let _handleResponse manage the error parsing from response body
       }
       throw ApiException(
         statusCode: 0,
@@ -1329,58 +1398,59 @@ class MatchingServiceApi {
     }
   }
 
-
-    static dynamic _handleResponse(Response response) {
+  static dynamic _handleResponse(Response response) {
     var rawData = response.data;
     if (rawData is String && rawData.isNotEmpty) {
       try {
         rawData = jsonDecode(rawData);
       } catch (_) {}
     }
-    
-    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+
+    if ((response.statusCode ?? 500) >= 200 &&
+        (response.statusCode ?? 500) < 300) {
       return rawData;
     } else {
       String message = 'API Error';
       String code = 'ERROR';
       dynamic errors;
       RateLimitInfo? rateLimitInfo;
-      
+
       if (rawData is Map) {
-         message = rawData['message'] ?? message;
-         code = rawData['code'] ?? code;
-         errors = rawData['errors'];
-         
-         if (response.statusCode == 429 && rawData['retryAfter'] != null) {
-           rateLimitInfo = RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
-         }
+        message = rawData['message'] ?? message;
+        code = rawData['code'] ?? code;
+        errors = rawData['errors'];
+
+        if (response.statusCode == 429 && rawData['retryAfter'] != null) {
+          rateLimitInfo =
+              RateLimitInfo(retryAfterSeconds: rawData['retryAfter'] as int?);
+        }
       }
-      
+
       if (rateLimitInfo == null) {
-         final headerMap = <String, String>{};
-         response.headers.forEach((key, value) {
-            headerMap[key.toLowerCase()] = value.join(',');
-         });
-         final rli = RateLimitInfo.fromHeaders(headerMap);
-         if (rli.hasData) rateLimitInfo = rli;
+        final headerMap = <String, String>{};
+        response.headers.forEach((key, value) {
+          headerMap[key.toLowerCase()] = value.join(',');
+        });
+        final rli = RateLimitInfo.fromHeaders(headerMap);
+        if (rli.hasData) rateLimitInfo = rli;
       }
-      
+
       throw ApiException(
-        statusCode: response.statusCode ?? 500,
-        message: message,
-        code: code,
-        errors: errors,
-        rateLimitInfo: rateLimitInfo
-      );
+          statusCode: response.statusCode ?? 500,
+          message: message,
+          code: code,
+          errors: errors,
+          rateLimitInfo: rateLimitInfo);
     }
   }
-
 
   static Future<Map<String, dynamic>> calculateCompatibility({
     required Map<String, dynamic> user1Profile,
     required Map<String, dynamic> user2Profile,
   }) async {
-    final response = await _dio.post('/matching-service/calculate-compatibility', data: jsonEncode({
+    final response = await _dio.post(
+      '/matching-service/calculate-compatibility',
+      data: jsonEncode({
         'user1Profile': user1Profile,
         'user2Profile': user2Profile,
       }),
@@ -1395,7 +1465,9 @@ class MatchingServiceApi {
     required List<Map<String, dynamic>> availableProfiles,
     int selectionSize = 5,
   }) async {
-    final response = await _dio.post('/matching-service/generate-daily-selection', data: jsonEncode({
+    final response = await _dio.post(
+      '/matching-service/generate-daily-selection',
+      data: jsonEncode({
         'userId': userId,
         'userProfile': userProfile,
         'availableProfiles': availableProfiles,
@@ -1410,7 +1482,9 @@ class MatchingServiceApi {
     required Map<String, dynamic> baseProfile,
     required List<Map<String, dynamic>> profilesToCompare,
   }) async {
-    final response = await _dio.post('/matching-service/batch-compatibility', data: jsonEncode({
+    final response = await _dio.post(
+      '/matching-service/batch-compatibility',
+      data: jsonEncode({
         'baseProfile': baseProfile,
         'profilesToCompare': profilesToCompare,
       }),
@@ -1427,7 +1501,9 @@ class MatchingServiceApi {
     Map<String, dynamic>? userLocation,
     bool includeAdvancedScoring = true,
   }) async {
-    final response = await _dio.post('/matching/calculate-compatibility-v2', data: jsonEncode({
+    final response = await _dio.post(
+      '/matching/calculate-compatibility-v2',
+      data: jsonEncode({
         'userId': userId,
         'candidateIds': candidateIds,
         'personalityAnswers': personalityAnswers,
@@ -1467,11 +1543,13 @@ class MatchingServiceApi {
       'page': page.toString(),
       'limit': limit.toString(),
     };
-    
+
     if (startDate != null) queryParams['startDate'] = startDate;
     if (endDate != null) queryParams['endDate'] = endDate;
 
-    final uri = Uri.parse('/matching/history').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/matching/history')
+        .replace(queryParameters: queryParams)
+        .toString();
 
     final response = await _makeRequest(
       _dio.get(uri),
@@ -1499,7 +1577,9 @@ class MatchingServiceApi {
     };
 
     final response = await _makeRequest(
-      _dio.post('/reports', data: jsonEncode(body),
+      _dio.post(
+        '/reports',
+        data: jsonEncode(body),
       ),
     );
 
@@ -1515,10 +1595,12 @@ class MatchingServiceApi {
       'page': page.toString(),
       'limit': limit.toString(),
     };
-    
+
     if (status != null) queryParams['status'] = _reportStatusToString(status);
 
-    final uri = Uri.parse('/reports/me').replace(queryParameters: queryParams).toString();
+    final uri = Uri.parse('/reports/me')
+        .replace(queryParameters: queryParams)
+        .toString();
 
     final response = await _makeRequest(
       _dio.get(uri),
@@ -1559,21 +1641,25 @@ class MatchingServiceApi {
   static Map<String, dynamic> _handleMatchingResponse(Response response) {
     dynamic rawData = response.data;
     if (rawData is String && rawData.isNotEmpty) {
-      try { rawData = jsonDecode(rawData); } catch (_) {}
+      try {
+        rawData = jsonDecode(rawData);
+      } catch (_) {}
     }
-    final Map<String, dynamic> data = rawData is Map ? Map<String, dynamic>.from(rawData) : {};
+    final Map<String, dynamic> data =
+        rawData is Map ? Map<String, dynamic>.from(rawData) : {};
 
-    if ((response.statusCode ?? 500) >= 200 && (response.statusCode ?? 500) < 300) {
+    if ((response.statusCode ?? 500) >= 200 &&
+        (response.statusCode ?? 500) < 300) {
       return data;
     } else {
       RateLimitInfo? rateLimitInfo;
-      
+
       if (response.statusCode == 429 && data['retryAfter'] != null) {
         rateLimitInfo = RateLimitInfo(
           retryAfterSeconds: data['retryAfter'] as int?,
         );
       }
-      
+
       if (rateLimitInfo == null) {
         final headerMap = <String, String>{};
         response.headers.forEach((key, value) {
@@ -1584,7 +1670,7 @@ class MatchingServiceApi {
           rateLimitInfo = rateLimitFromHeaders;
         }
       }
-      
+
       throw ApiException(
         statusCode: response.statusCode ?? 500,
         message: data['message'] ?? 'Matching service error occurred',
@@ -1617,21 +1703,21 @@ class ApiException implements Exception {
   /// Get formatted error messages as a list of strings
   List<String> get errorMessages {
     if (errors == null) return [];
-    
+
     if (errors is List) {
       return (errors as List).map((e) => e.toString()).toList();
     } else if (errors is Map<String, dynamic>) {
       final result = <String>[];
       (errors as Map<String, dynamic>).forEach((key, value) {
         if (value is List) {
-          result.addAll((value as List).map((e) => '$key: $e'));
+          result.addAll((value).map((e) => '$key: $e'));
         } else {
           result.add('$key: $value');
         }
       });
       return result;
     }
-    
+
     return [errors.toString()];
   }
 
@@ -1700,9 +1786,14 @@ class RateLimitInfo {
     );
   }
 
-  bool get hasData => limit != null || remaining != null || resetTime != null || retryAfterSeconds != null;
+  bool get hasData =>
+      limit != null ||
+      remaining != null ||
+      resetTime != null ||
+      retryAfterSeconds != null;
 
-  bool get isNearLimit => remaining != null && limit != null && remaining! < (limit! * 0.2);
+  bool get isNearLimit =>
+      remaining != null && limit != null && remaining! < (limit! * 0.2);
 
   String getRetryMessage() {
     if (retryAfterSeconds != null) {
@@ -1713,7 +1804,7 @@ class RateLimitInfo {
       }
       return 'Réessayez dans $seconds seconde${seconds > 1 ? 's' : ''}';
     }
-    
+
     if (resetTime != null) {
       final now = DateTime.now();
       final diff = resetTime!.difference(now);
@@ -1727,7 +1818,7 @@ class RateLimitInfo {
       }
       return 'Réessayez dans $seconds seconde${seconds > 1 ? 's' : ''}';
     }
-    
+
     return 'Veuillez réessayer plus tard';
   }
 }

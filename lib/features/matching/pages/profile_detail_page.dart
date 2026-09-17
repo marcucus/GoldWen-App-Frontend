@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/models/profile.dart';
 import '../models/match_profile.dart';
 import '../providers/matching_provider.dart';
-import '../providers/report_provider.dart';
 import '../widgets/report_dialog.dart';
 import '../../profile/widgets/media_player_widget.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   final String profileId;
-  
+
   const ProfileDetailPage({
     super.key,
     required this.profileId,
@@ -24,7 +22,8 @@ class ProfileDetailPage extends StatelessWidget {
       id: profileId,
       name: 'Sophie',
       age: 29,
-      bio: 'Passionnée par l\'art et les conversations significatives. J\'aime explorer de nouvelles cultures et créer des connexions authentiques.',
+      bio:
+          'Passionnée par l\'art et les conversations significatives. J\'aime explorer de nouvelles cultures et créer des connexions authentiques.',
       photos: ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'],
       prompts: [
         'Ce qui me rend vraiment heureuse, c\'est de découvrir un nouveau livre qui me transporte complètement.',
@@ -83,8 +82,8 @@ class ProfileDetailPage extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppColors.primaryGold.withOpacity(0.3),
-                          AppColors.primaryGold.withOpacity(0.7),
+                          AppColors.primaryGold.withValues(alpha: 0.3),
+                          AppColors.primaryGold.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -94,7 +93,7 @@ class ProfileDetailPage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  
+
                   // Gradient overlay
                   Positioned(
                     bottom: 0,
@@ -108,13 +107,13 @@ class ProfileDetailPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  
+
                   // Name and compatibility
                   Positioned(
                     bottom: 20,
@@ -129,10 +128,13 @@ class ProfileDetailPage extends StatelessWidget {
                             children: [
                               Text(
                                 '${profile.name}, ${profile.age}',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),
@@ -144,7 +146,8 @@ class ProfileDetailPage extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.primaryGold,
-                            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.medium),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -157,10 +160,13 @@ class ProfileDetailPage extends StatelessWidget {
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 '${(profile.compatibilityScore * 100).round()}% compatible',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -172,7 +178,7 @@ class ProfileDetailPage extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Content
           SliverToBoxAdapter(
             child: Padding(
@@ -187,9 +193,9 @@ class ProfileDetailPage extends StatelessWidget {
                     profile.bio,
                     Icons.info_outline,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xl),
-                  
+
                   // Favorite song section
                   if (profile.favoriteSong != null) ...[
                     _buildSection(
@@ -200,9 +206,10 @@ class ProfileDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                   ],
-                  
+
                   // Compatibility breakdown
-                  if (profile.compatibilityDetails != null || profile.sharedInterests.isNotEmpty) ...[
+                  if (profile.compatibilityDetails != null ||
+                      profile.sharedInterests.isNotEmpty) ...[
                     _buildCompatibilityBreakdown(context, profile),
                     const SizedBox(height: AppSpacing.xl),
                   ],
@@ -212,9 +219,9 @@ class ProfileDetailPage extends StatelessWidget {
                     'En savoir plus',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   ...profile.prompts.asMap().entries.map((entry) {
                     final index = entry.key;
                     final prompt = entry.value;
@@ -223,23 +230,27 @@ class ProfileDetailPage extends StatelessWidget {
                       'Je ne peux pas vivre sans...',
                       'Ma passion secrète est...',
                     ];
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                       child: Container(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         decoration: BoxDecoration(
                           color: AppColors.accentCream,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.large),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               questions[index],
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppColors.primaryGold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color: AppColors.primaryGold,
+                                  ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
@@ -250,18 +261,18 @@ class ProfileDetailPage extends StatelessWidget {
                         ),
                       ),
                     );
-                  }).toList(),
-                  
+                  }),
+
                   const SizedBox(height: AppSpacing.xl),
-                  
+
                   // Photo gallery placeholder
                   Text(
                     'Plus de photos',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
-                  
+
                   SizedBox(
                     height: 120,
                     child: ListView.builder(
@@ -275,8 +286,10 @@ class ProfileDetailPage extends StatelessWidget {
                           child: Container(
                             width: 120,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGold.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                              color:
+                                  AppColors.primaryGold.withValues(alpha: 0.3),
+                              borderRadius:
+                                  BorderRadius.circular(AppBorderRadius.medium),
                             ),
                             child: const Icon(
                               Icons.image,
@@ -288,18 +301,16 @@ class ProfileDetailPage extends StatelessWidget {
                       },
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xxl),
-                  
+
                   // Media files section (Audio/Video)
                   if (profile.mediaFiles.isNotEmpty) ...[
                     Text(
                       'Médias',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    
                     const SizedBox(height: AppSpacing.lg),
-                    
                     ...profile.mediaFiles.map((mediaFile) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -309,11 +320,10 @@ class ProfileDetailPage extends StatelessWidget {
                           showControls: true,
                         ),
                       );
-                    }).toList(),
-                    
+                    }),
                     const SizedBox(height: AppSpacing.xxl),
                   ],
-                  
+
                   // Action buttons
                   Row(
                     children: [
@@ -337,13 +347,14 @@ class ProfileDetailPage extends StatelessWidget {
                           label: const Text('Passer'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(color: AppColors.textSecondary),
+                            side: const BorderSide(
+                                color: AppColors.textSecondary),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.lg),
                 ],
               ),
@@ -354,7 +365,8 @@ class ProfileDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCompatibilityBreakdown(BuildContext context, MatchProfile profile) {
+  Widget _buildCompatibilityBreakdown(
+      BuildContext context, MatchProfile profile) {
     final details = profile.compatibilityDetails;
     final labels = <String, String>{
       'communication': 'Communication',
@@ -366,16 +378,17 @@ class ProfileDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.06),
+        color: AppColors.primaryGold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        border: Border.all(color: AppColors.primaryGold.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.insights, color: AppColors.primaryGold, size: 20),
+              const Icon(Icons.insights,
+                  color: AppColors.primaryGold, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Compatibilité détaillée',
@@ -398,9 +411,12 @@ class ProfileDetailPage extends StatelessWidget {
                         Text(entry.value,
                             style: Theme.of(context).textTheme.bodySmall),
                         Text('${(value * 100).round()}%',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryGold)),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primaryGold)),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -410,19 +426,22 @@ class ProfileDetailPage extends StatelessWidget {
                         value: value,
                         minHeight: 6,
                         backgroundColor: AppColors.backgroundGrey,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryGold),
                       ),
                     ),
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
           if (profile.sharedInterests.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             Text('Intérêts communs',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600)),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -431,7 +450,8 @@ class ProfileDetailPage extends StatelessWidget {
                   .map((interest) => Chip(
                         label: Text(interest,
                             style: const TextStyle(fontSize: 12)),
-                        backgroundColor: AppColors.primaryGold.withOpacity(0.15),
+                        backgroundColor:
+                            AppColors.primaryGold.withValues(alpha: 0.15),
                         side: BorderSide.none,
                       ))
                   .toList(),
@@ -442,7 +462,8 @@ class ProfileDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, String content, IconData icon) {
+  Widget _buildSection(
+      BuildContext context, String title, String content, IconData icon) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -477,14 +498,14 @@ class ProfileDetailPage extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppBorderRadius.large),
           ),
-          title: Row(
+          title: const Row(
             children: [
               Icon(
                 Icons.favorite,
                 color: AppColors.primaryGold,
               ),
-              const SizedBox(width: AppSpacing.sm),
-              const Text('Confirmer votre choix'),
+              SizedBox(width: AppSpacing.sm),
+              Text('Confirmer votre choix'),
             ],
           ),
           content: Text(
@@ -509,14 +530,16 @@ class ProfileDetailPage extends StatelessWidget {
   }
 
   void _selectProfile(BuildContext context, MatchProfile profile) {
-    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
-    
+    final matchingProvider =
+        Provider.of<MatchingProvider>(context, listen: false);
+
     // Add to selected profiles list
     matchingProvider.selectProfile(profile.id);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Vous avez choisi ${profile.name} ! Revenez demain pour votre nouvelle sélection.'),
+        content: Text(
+            'Vous avez choisi ${profile.name} ! Revenez demain pour votre nouvelle sélection.'),
         backgroundColor: AppColors.successGreen,
         action: SnackBarAction(
           label: 'OK',
@@ -527,7 +550,7 @@ class ProfileDetailPage extends StatelessWidget {
         ),
       ),
     );
-    
+
     // Navigate back to home after a delay
     Future.delayed(const Duration(seconds: 2), () {
       if (context.mounted) {

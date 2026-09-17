@@ -14,11 +14,11 @@ class ProfileProvider with ChangeNotifier {
   Map<String, dynamic> _personalityAnswers = {};
   List<PersonalityQuestion> _personalityQuestions = [];
   List<Prompt> _availablePrompts = [];
-  Map<String, String> _promptAnswers = {}; // prompt ID -> answer
+  final Map<String, String> _promptAnswers = {}; // prompt ID -> answer
   bool _isProfileComplete = false;
   bool _isLoading = false;
   String? _error;
-  
+
   // New fields for complete profile
   String? _gender;
   List<String> _interestedInGenders = [];
@@ -52,7 +52,7 @@ class ProfileProvider with ChangeNotifier {
   bool get isProfileComplete => _isProfileComplete;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  
+
   // New getters
   String? get gender => _gender;
   List<String> get interestedInGenders => _interestedInGenders;
@@ -152,14 +152,14 @@ class ProfileProvider with ChangeNotifier {
 
   void reorderPhotos(int oldIndex, int newIndex) {
     if (oldIndex >= _photos.length || newIndex > _photos.length) return;
-    
+
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    
+
     final Photo photo = _photos.removeAt(oldIndex);
     _photos.insert(newIndex, photo);
-    
+
     // Update order for all photos
     for (int i = 0; i < _photos.length; i++) {
       _photos[i] = Photo(
@@ -170,18 +170,20 @@ class ProfileProvider with ChangeNotifier {
         createdAt: _photos[i].createdAt,
       );
     }
-    
+
     notifyListeners();
   }
 
   void setPrimaryPhoto(String photoId) {
-    _photos = _photos.map((photo) => Photo(
-      id: photo.id,
-      url: photo.url,
-      order: photo.order,
-      isPrimary: photo.id == photoId,
-      createdAt: photo.createdAt,
-    )).toList();
+    _photos = _photos
+        .map((photo) => Photo(
+              id: photo.id,
+              url: photo.url,
+              order: photo.order,
+              isPrimary: photo.id == photoId,
+              createdAt: photo.createdAt,
+            ))
+        .toList();
     notifyListeners();
   }
 
@@ -240,7 +242,8 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setLocation({required String location, double? latitude, double? longitude}) {
+  void setLocation(
+      {required String location, double? latitude, double? longitude}) {
     _location = location;
     _latitude = latitude;
     _longitude = longitude;
@@ -295,21 +298,22 @@ class ProfileProvider with ChangeNotifier {
 
     try {
       final questionsData = await ApiService.getPersonalityQuestions();
-      
+
       if (questionsData.isEmpty) {
         _error = 'Aucune question de personnalité disponible';
-        print('WARNING: API returned empty personality questions list');
+        debugPrint('WARNING: API returned empty personality questions list');
       } else {
         _personalityQuestions = questionsData
             .map((questionJson) => PersonalityQuestion.fromJson(questionJson))
             .toList();
-        print('Successfully loaded ${_personalityQuestions.length} personality questions');
+        debugPrint(
+            'Successfully loaded ${_personalityQuestions.length} personality questions');
       }
 
       _error = null;
     } catch (e) {
       _error = 'Failed to load personality questions: $e';
-      print('Error loading personality questions: $e');
+      debugPrint('Error loading personality questions: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -323,14 +327,13 @@ class ProfileProvider with ChangeNotifier {
 
     try {
       final promptsData = await ApiService.getPrompts();
-      _availablePrompts = promptsData
-          .map((promptJson) => Prompt.fromJson(promptJson))
-          .toList();
+      _availablePrompts =
+          promptsData.map((promptJson) => Prompt.fromJson(promptJson)).toList();
 
       _error = null;
     } catch (e) {
       _error = 'Failed to load prompts: $e';
-      print('Error loading prompts: $e');
+      debugPrint('Error loading prompts: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -374,21 +377,22 @@ class ProfileProvider with ChangeNotifier {
         return answerData;
       }).toList();
 
-      print('ProfileProvider: Submitting ${answersData.length} personality answers');
-      print('ProfileProvider: Answers data: $answersData');
-      
+      debugPrint(
+          'ProfileProvider: Submitting ${answersData.length} personality answers');
+      debugPrint('ProfileProvider: Answers data: $answersData');
+
       await ApiService.submitPersonalityAnswers(answersData);
       _error = null;
-      print('ProfileProvider: Personality answers submitted successfully');
-      
+      debugPrint('ProfileProvider: Personality answers submitted successfully');
+
       // Track personality quiz completion
       await AnalyticsService.trackPersonalityQuizCompleted();
-      
+
       // Refresh profile data after successful submission
       await loadProfile();
     } catch (e) {
       _error = 'Failed to submit personality answers: $e';
-      print('Error submitting personality answers: $e');
+      debugPrint('Error submitting personality answers: $e');
       rethrow;
     } finally {
       _isLoading = false;
@@ -410,7 +414,7 @@ class ProfileProvider with ChangeNotifier {
         _location != null &&
         _minAge != null &&
         _maxAge != null;
-    
+
     // Note: Backend completion status (_profileCompletion) is the authoritative source
     // and should always be used for actual validation checks
   }
@@ -423,7 +427,8 @@ class ProfileProvider with ChangeNotifier {
           'birthDate': _birthDate!.toIso8601String().split('T')[0],
         if (_bio != null) 'bio': _bio,
         if (_gender != null) 'gender': _gender,
-        if (_interestedInGenders.isNotEmpty) 'interestedInGenders': _interestedInGenders,
+        if (_interestedInGenders.isNotEmpty)
+          'interestedInGenders': _interestedInGenders,
         if (_location != null) 'location': _location,
         if (_latitude != null) 'latitude': _latitude,
         if (_longitude != null) 'longitude': _longitude,
@@ -439,14 +444,14 @@ class ProfileProvider with ChangeNotifier {
         if (_favoriteSong != null) 'favoriteSong': _favoriteSong,
       };
 
-      print('Saving profile data: $profileData');
+      debugPrint('Saving profile data: $profileData');
       await ApiService.updateProfile(profileData);
-      print('Profile saved successfully');
-      
+      debugPrint('Profile saved successfully');
+
       // Refresh profile data and completion status after successful save
       await loadProfile();
     } catch (e) {
-      print('Error in saveProfile: $e');
+      debugPrint('Error in saveProfile: $e');
       // Handle error - could throw to let UI handle it
       rethrow;
     }
@@ -454,9 +459,10 @@ class ProfileProvider with ChangeNotifier {
 
   Future<void> submitPromptAnswers() async {
     try {
-      print('DEBUG: Current _promptAnswers state: $_promptAnswers');
-      print('DEBUG: _promptAnswers.entries: ${_promptAnswers.entries.toList()}');
-      
+      debugPrint('DEBUG: Current _promptAnswers state: $_promptAnswers');
+      debugPrint(
+          'DEBUG: _promptAnswers.entries: ${_promptAnswers.entries.toList()}');
+
       final promptAnswers = _promptAnswers.entries.map((entry) {
         return {
           'promptId': entry.key, // Use real prompt ID
@@ -464,20 +470,21 @@ class ProfileProvider with ChangeNotifier {
         };
       }).toList();
 
-      print('Submitting ${promptAnswers.length} prompt answers');
-      print('Prompt answers data: $promptAnswers');
+      debugPrint('Submitting ${promptAnswers.length} prompt answers');
+      debugPrint('Prompt answers data: $promptAnswers');
 
       if (promptAnswers.isEmpty) {
-        throw Exception('No prompt answers to submit. Please fill in the prompts first.');
+        throw Exception(
+            'No prompt answers to submit. Please fill in the prompts first.');
       }
 
       await ApiService.submitPromptAnswers(promptAnswers);
-      print('Prompt answers submitted successfully');
-      
+      debugPrint('Prompt answers submitted successfully');
+
       // Refresh profile data and completion status after successful submission
       await loadProfile();
     } catch (e) {
-      print('Error in submitPromptAnswers: $e');
+      debugPrint('Error in submitPromptAnswers: $e');
       rethrow;
     }
   }
@@ -491,7 +498,7 @@ class ProfileProvider with ChangeNotifier {
       final profileData = response['data'] ?? response;
 
       // Update profile data from response
-      _name = profileData['pseudo'] ?? 
+      _name = profileData['pseudo'] ??
           (profileData['firstName'] != null && profileData['lastName'] != null
               ? '${profileData['firstName']} ${profileData['lastName']}'
               : profileData['name']);
@@ -534,7 +541,8 @@ class ProfileProvider with ChangeNotifier {
       }
 
       // Load media files from profile data
-      if (profileData['mediaFiles'] != null && profileData['mediaFiles'] is List) {
+      if (profileData['mediaFiles'] != null &&
+          profileData['mediaFiles'] is List) {
         try {
           _mediaFiles = (profileData['mediaFiles'] as List)
               .map((mediaData) => MediaFile.fromJson(mediaData))
@@ -546,16 +554,16 @@ class ProfileProvider with ChangeNotifier {
       } else {
         _mediaFiles.clear();
       }
-      
+
       // Load favorite song
       _favoriteSong = profileData['favoriteSong'];
-      
+
       _prompts = List<String>.from(profileData['prompts'] ?? []);
       _personalityAnswers =
           Map<String, dynamic>.from(profileData['personalityAnswers'] ?? {});
 
       _checkProfileCompletion();
-      
+
       // Also load the detailed completion status from backend
       await loadProfileCompletion();
     } catch (e) {
@@ -580,33 +588,41 @@ class ProfileProvider with ChangeNotifier {
     try {
       final response = await ApiService.getProfileCompletion();
       final completionData = response['data'] ?? response;
-      
+
       // Debug: Print the backend response for profile completion
-      print('Profile completion raw response: $completionData');
-      print('Requirements section: ${completionData['requirements']}');
-      print('Minimum prompts section: ${completionData['requirements']?['minimumPrompts']}');
-      
+      debugPrint('Profile completion raw response: $completionData');
+      debugPrint('Requirements section: ${completionData['requirements']}');
+      debugPrint(
+          'Minimum prompts section: ${completionData['requirements']?['minimumPrompts']}');
+
       // Map backend response to frontend model
       final mappedData = {
         'isCompleted': completionData['isComplete'] ?? false,
-        'hasPhotos': completionData['requirements']?['minimumPhotos']?['satisfied'] ?? false,
-        'hasPrompts': completionData['requirements']?['minimumPrompts']?['satisfied'] ?? false,
-        'hasPersonalityAnswers': completionData['requirements']?['personalityQuestionnaire']?['satisfied'] ?? false,
+        'hasPhotos': completionData['requirements']?['minimumPhotos']
+                ?['satisfied'] ??
+            false,
+        'hasPrompts': completionData['requirements']?['minimumPrompts']
+                ?['satisfied'] ??
+            false,
+        'hasPersonalityAnswers': completionData['requirements']
+                ?['personalityQuestionnaire']?['satisfied'] ??
+            false,
         'hasRequiredProfileFields': (() {
           final basicInfo = completionData['requirements']?['basicInfo'];
-          return basicInfo == true || (basicInfo is Map && basicInfo['satisfied'] == true);
+          return basicInfo == true ||
+              (basicInfo is Map && basicInfo['satisfied'] == true);
         })(),
         'missingSteps': completionData['missingSteps'] ?? [],
       };
-      
-      print('Mapped completion data: $mappedData');
-      
+
+      debugPrint('Mapped completion data: $mappedData');
+
       _profileCompletion = ProfileCompletion.fromJson(mappedData);
       _isProfileComplete = _profileCompletion!.isCompleted;
-      
+
       notifyListeners();
     } catch (e) {
-      print('Error loading profile completion: $e');
+      debugPrint('Error loading profile completion: $e');
       _profileCompletion = null;
     }
   }
@@ -615,20 +631,21 @@ class ProfileProvider with ChangeNotifier {
     try {
       // First check if profile is complete using backend validation
       await loadProfileCompletion();
-      
+
       if (_profileCompletion?.isCompleted ?? false) {
         // Profile is complete, update status to make profile visible
         await ApiService.updateProfileStatus(isVisible: true);
         await loadProfileCompletion(); // Reload to get updated status
-        
+
         // Track profile completion
         // Note: We need userId from auth - this assumes it's available via API
         await AnalyticsService.trackProfileCompleted('current_user');
       } else {
-        throw Exception('Profile is not complete. Missing steps: ${_profileCompletion?.missingSteps.join(', ') ?? 'Unknown'}');
+        throw Exception(
+            'Profile is not complete. Missing steps: ${_profileCompletion?.missingSteps.join(', ') ?? 'Unknown'}');
       }
     } catch (e) {
-      print('Error validating profile: $e');
+      debugPrint('Error validating profile: $e');
       rethrow;
     }
   }
@@ -639,7 +656,7 @@ class ProfileProvider with ChangeNotifier {
     final completion = _profileCompletion;
     if (completion == null) return null;
     if (completion.isCompleted) return null;
-    
+
     // Check in order: basic info, photos, prompts, personality
     if (!completion.hasRequiredProfileFields) {
       return 'basic_info';
@@ -650,7 +667,7 @@ class ProfileProvider with ChangeNotifier {
     } else if (!completion.hasPersonalityAnswers) {
       return 'personality';
     }
-    
+
     return null;
   }
 

@@ -67,7 +67,7 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
         );
 
         await _videoController!.initialize();
-        
+
         _videoController!.addListener(() {
           if (mounted) {
             setState(() {
@@ -83,7 +83,7 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
         }
       } else {
         _audioPlayer = AudioPlayer();
-        
+
         _audioPlayer!.onPositionChanged.listen((position) {
           if (mounted) {
             setState(() {
@@ -163,7 +163,7 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
         await _audioPlayer!.seek(position);
       }
     } catch (e) {
-      print('Error seeking: $e');
+      debugPrint('Error seeking: $e');
     }
   }
 
@@ -188,14 +188,14 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: AppColors.accentCream.withOpacity(0.3),
+        color: AppColors.accentCream.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: AppColors.primaryGold),
+            const CircularProgressIndicator(color: AppColors.primaryGold),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Chargement...',
@@ -211,15 +211,15 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
+        color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: AppSpacing.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -274,19 +274,19 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryGold.withOpacity(0.1),
-            AppColors.accentCream.withOpacity(0.3),
+            AppColors.primaryGold.withValues(alpha: 0.1),
+            AppColors.accentCream.withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.primaryGold.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.audiotrack,
             size: 64,
             color: AppColors.primaryGold,
@@ -311,7 +311,7 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.7),
+              Colors.black.withValues(alpha: 0.7),
             ],
           ),
         ),
@@ -349,7 +349,9 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
           children: [
             IconButton(
               icon: Icon(
-                _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                _isPlaying
+                    ? Icons.pause_circle_filled
+                    : Icons.play_circle_filled,
                 color: AppColors.primaryGold,
                 size: 48,
               ),
@@ -367,17 +369,18 @@ class _MediaPlayerWidgetState extends State<MediaPlayerWidget> {
         SliderTheme(
           data: SliderThemeData(
             trackHeight: 2,
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
-            overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
             activeTrackColor: AppColors.primaryGold,
-            inactiveTrackColor: Colors.white.withOpacity(0.3),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
             thumbColor: AppColors.primaryGold,
-            overlayColor: AppColors.primaryGold.withOpacity(0.2),
+            overlayColor: AppColors.primaryGold.withValues(alpha: 0.2),
           ),
           child: Slider(
             value: _currentPosition.inSeconds.toDouble(),
             min: 0,
-            max: _totalDuration.inSeconds.toDouble().clamp(0.1, double.infinity),
+            max:
+                _totalDuration.inSeconds.toDouble().clamp(0.1, double.infinity),
             onChanged: (value) {
               _seekTo(Duration(seconds: value.toInt()));
             },

@@ -59,11 +59,11 @@ class _ChatCountdownTimerState extends State<ChatCountdownTimer> {
 
   Color get _timerColor {
     if (_isExpired) return AppColors.errorRed;
-    
-    final totalHours = 24.0;
+
+    const totalHours = 24.0;
     final remainingHours = (_remaining?.inMinutes ?? 0) / 60.0;
     final percentage = remainingHours / totalHours;
-    
+
     if (percentage > 0.5) return AppColors.primaryGold;
     if (percentage > 0.25) return AppColors.warningOrange;
     return AppColors.errorRed;
@@ -72,14 +72,14 @@ class _ChatCountdownTimerState extends State<ChatCountdownTimer> {
   String get _displayText {
     if (_isExpired) return 'Conversation expirée';
     if (_remaining == null) return '00:00:00';
-    
+
     final hours = _remaining!.inHours;
     final minutes = _remaining!.inMinutes.remainder(60);
     final seconds = _remaining!.inSeconds.remainder(60);
-    
+
     return '${hours.toString().padLeft(2, '0')}:'
-           '${minutes.toString().padLeft(2, '0')}:'
-           '${seconds.toString().padLeft(2, '0')}';
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -87,7 +87,7 @@ class _ChatCountdownTimerState extends State<ChatCountdownTimer> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: _timerColor.withOpacity(0.1),
+        color: _timerColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _timerColor, width: 1),
       ),

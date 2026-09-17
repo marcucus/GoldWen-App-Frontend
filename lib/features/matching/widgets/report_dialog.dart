@@ -67,7 +67,7 @@ class _ReportDialogState extends State<ReportDialog> {
             // Header
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.flag,
                   color: AppColors.errorRed,
                   size: 28,
@@ -77,9 +77,9 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: Text(
                     'Signaler un problème',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
                   ),
                 ),
                 IconButton(
@@ -90,13 +90,13 @@ class _ReportDialogState extends State<ReportDialog> {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             if (widget.targetUserName != null) ...[
               Text(
                 'Signaler ${widget.targetUserName}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
               ),
               const SizedBox(height: 16),
             ],
@@ -110,15 +110,23 @@ class _ReportDialogState extends State<ReportDialog> {
                   Text(
                     'Type de problème',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
                   ),
                   const SizedBox(height: 12),
-                  
-                  ..._reportTypeLabels.entries.map((entry) {
-                    return _buildReportTypeOption(entry.key, entry.value);
-                  }),
+
+                  RadioGroup<ReportType>(
+                    groupValue: _selectedType,
+                    onChanged: (value) {
+                      if (value != null) setState(() => _selectedType = value);
+                    },
+                    child: Column(
+                      children: _reportTypeLabels.entries.map((entry) {
+                        return _buildReportTypeOption(entry.key, entry.value);
+                      }).toList(),
+                    ),
+                  ),
 
                   const SizedBox(height: 20),
 
@@ -126,9 +134,9 @@ class _ReportDialogState extends State<ReportDialog> {
                   Text(
                     'Description du problème',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -142,7 +150,8 @@ class _ReportDialogState extends State<ReportDialog> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: AppColors.primaryGold),
+                        borderSide:
+                            const BorderSide(color: AppColors.primaryGold),
                       ),
                     ),
                     validator: (value) {
@@ -167,13 +176,14 @@ class _ReportDialogState extends State<ReportDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.infoBlue.withOpacity(0.1),
+                      color: AppColors.infoBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.infoBlue.withOpacity(0.3)),
+                      border: Border.all(
+                          color: AppColors.infoBlue.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
                           color: AppColors.infoBlue,
                           size: 20,
@@ -182,9 +192,10 @@ class _ReportDialogState extends State<ReportDialog> {
                         Expanded(
                           child: Text(
                             'Votre signalement sera examiné par notre équipe de modération.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.infoBlue,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.infoBlue,
+                                    ),
                           ),
                         ),
                       ],
@@ -201,7 +212,9 @@ class _ReportDialogState extends State<ReportDialog> {
               children: [
                 Expanded(
                   child: TextButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(),
                     child: const Text('Annuler'),
                   ),
                 ),
@@ -219,7 +232,8 @@ class _ReportDialogState extends State<ReportDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : const Text('Signaler'),
@@ -242,20 +256,20 @@ class _ReportDialogState extends State<ReportDialog> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(
-            color: _selectedType == type ? AppColors.primaryGold : AppColors.dividerLight,
+            color: _selectedType == type
+                ? AppColors.primaryGold
+                : AppColors.dividerLight,
             width: _selectedType == type ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          color: _selectedType == type 
-              ? AppColors.primaryGold.withOpacity(0.1) 
+          color: _selectedType == type
+              ? AppColors.primaryGold.withValues(alpha: 0.1)
               : null,
         ),
         child: Row(
           children: [
             Radio<ReportType>(
               value: type,
-              groupValue: _selectedType,
-              onChanged: (value) => setState(() => _selectedType = value!),
               activeColor: AppColors.primaryGold,
             ),
             const SizedBox(width: 8),
@@ -266,16 +280,16 @@ class _ReportDialogState extends State<ReportDialog> {
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textDark,
+                        ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _reportTypeDescriptions[type]!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -294,8 +308,9 @@ class _ReportDialogState extends State<ReportDialog> {
     setState(() => _isSubmitting = true);
 
     try {
-      final reportProvider = Provider.of<ReportProvider>(context, listen: false);
-      
+      final reportProvider =
+          Provider.of<ReportProvider>(context, listen: false);
+
       await reportProvider.submitReport(
         targetUserId: widget.targetUserId,
         type: _selectedType,
@@ -306,7 +321,7 @@ class _ReportDialogState extends State<ReportDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -329,23 +344,5 @@ class _ReportDialogState extends State<ReportDialog> {
         setState(() => _isSubmitting = false);
       }
     }
-  }
-
-  static Future<void> show(
-    BuildContext context, {
-    required String targetUserId,
-    String? targetUserName,
-    String? messageId,
-    String? chatId,
-  }) async {
-    return showDialog(
-      context: context,
-      builder: (context) => ReportDialog(
-        targetUserId: targetUserId,
-        targetUserName: targetUserName,
-        messageId: messageId,
-        chatId: chatId,
-      ),
-    );
   }
 }

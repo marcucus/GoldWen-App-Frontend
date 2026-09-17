@@ -29,7 +29,7 @@ class ReportProvider with ChangeNotifier {
     _setLoading(true);
 
     try {
-      final response = await MatchingServiceApi.submitReport(
+      await MatchingServiceApi.submitReport(
         targetUserId: targetUserId,
         type: type,
         reason: reason,
@@ -40,10 +40,9 @@ class ReportProvider with ChangeNotifier {
 
       // If successful, the report was submitted
       _error = null;
-      
+
       // Optionally, refresh the user's reports list
       await loadMyReports(refresh: true);
-      
     } catch (e) {
       _error = e.toString();
       rethrow; // Re-throw so the UI can handle it
@@ -86,7 +85,7 @@ class ReportProvider with ChangeNotifier {
       // Check if there are more reports to load
       final pagination = response['pagination'] as Map<String, dynamic>?;
       _hasMoreReports = pagination?['hasMore'] as bool? ?? false;
-      
+
       _error = null;
     } catch (e) {
       _handleError(e, 'Failed to load reports');
@@ -103,6 +102,6 @@ class ReportProvider with ChangeNotifier {
   void _handleError(dynamic error, String fallbackMessage) {
     _error = error.toString();
     notifyListeners();
-    print('ReportProvider Error: $error');
+    debugPrint('ReportProvider Error: $error');
   }
 }

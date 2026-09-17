@@ -37,17 +37,15 @@ class _AnimatedPressableState extends State<AnimatedPressable>
   late AnimationController _scaleController;
   late AnimationController _glowController;
   late AnimationController _rippleController;
-  
+
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;
   late Animation<double> _rippleAnimation;
 
-  bool _isPressed = false;
-
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize controllers with safe accessibility fallback
     Duration getAnimationDuration(Duration defaultDuration) {
       try {
@@ -57,17 +55,17 @@ class _AnimatedPressableState extends State<AnimatedPressable>
         return defaultDuration;
       }
     }
-    
+
     _scaleController = AnimationController(
       duration: getAnimationDuration(widget.duration),
       vsync: this,
     );
-    
+
     _glowController = AnimationController(
       duration: getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
-    
+
     _rippleController = AnimationController(
       duration: getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
@@ -109,9 +107,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
 
   void _onTapDown(TapDownDetails details) {
     if (widget.onPressed == null) return;
-    
-    setState(() => _isPressed = true);
-    
+
     // Safe accessibility service access
     bool reducedMotion = false;
     try {
@@ -120,11 +116,11 @@ class _AnimatedPressableState extends State<AnimatedPressable>
     } catch (e) {
       reducedMotion = false;
     }
-    
+
     if (widget.enableScaleAnimation && !reducedMotion) {
       _scaleController.forward();
     }
-    
+
     if (widget.enableGlowEffect && !reducedMotion) {
       _glowController.forward();
     }
@@ -132,14 +128,14 @@ class _AnimatedPressableState extends State<AnimatedPressable>
 
   void _onTapUp(TapUpDetails details) {
     if (widget.onPressed == null) return;
-    
+
     _resetAnimations();
-    
+
     // Add haptic feedback
     if (widget.enableHapticFeedback) {
       HapticFeedback.lightImpact();
     }
-    
+
     // Trigger ripple effect
     bool reducedMotion = false;
     try {
@@ -148,7 +144,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
     } catch (e) {
       reducedMotion = false;
     }
-    
+
     if (!reducedMotion) {
       _rippleController.reset();
       _rippleController.forward();
@@ -161,7 +157,6 @@ class _AnimatedPressableState extends State<AnimatedPressable>
   }
 
   void _resetAnimations() {
-    setState(() => _isPressed = false);
     _scaleController.reverse();
     _glowController.reverse();
   }
@@ -176,7 +171,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
     } catch (e) {
       reducedMotion = false;
     }
-    
+
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
@@ -190,7 +185,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
         ]),
         builder: (context, child) {
           Widget content = widget.child;
-          
+
           // Apply scale animation
           if (widget.enableScaleAnimation && !reducedMotion) {
             content = Transform.scale(
@@ -198,7 +193,7 @@ class _AnimatedPressableState extends State<AnimatedPressable>
               child: content,
             );
           }
-          
+
           // Apply glow effect
           if (widget.enableGlowEffect && !reducedMotion) {
             content = Container(
@@ -206,16 +201,19 @@ class _AnimatedPressableState extends State<AnimatedPressable>
                 boxShadow: [
                   BoxShadow(
                     color: (widget.glowColor ?? AppColors.primaryGold)
-                        .withOpacity(0.3 * _glowAnimation.value),
-                    blurRadius: (widget.shadowSpread ?? 4.0) * _glowAnimation.value,
-                    spreadRadius: (widget.shadowSpread ?? 4.0) * _glowAnimation.value * 0.5,
+                        .withValues(alpha: 0.3 * _glowAnimation.value),
+                    blurRadius:
+                        (widget.shadowSpread ?? 4.0) * _glowAnimation.value,
+                    spreadRadius: (widget.shadowSpread ?? 4.0) *
+                        _glowAnimation.value *
+                        0.5,
                   ),
                 ],
               ),
               child: content,
             );
           }
-          
+
           // Apply ripple effect
           if (_rippleAnimation.value > 0 && !reducedMotion) {
             content = Stack(
@@ -228,18 +226,23 @@ class _AnimatedPressableState extends State<AnimatedPressable>
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: (widget.glowColor ?? AppColors.primaryGold)
-                            .withOpacity(0.6 * (1.0 - _rippleAnimation.value)),
+                            .withValues(
+                                alpha: 0.6 * (1.0 - _rippleAnimation.value)),
                         width: 2.0,
                       ),
                     ),
                     transform: Matrix4.identity()
-                      ..scale(0.5 + (_rippleAnimation.value * 0.5)),
+                      ..scaleByDouble(
+                          0.5 + (_rippleAnimation.value * 0.5),
+                          0.5 + (_rippleAnimation.value * 0.5),
+                          0.5 + (_rippleAnimation.value * 0.5),
+                          1.0),
                   ),
                 ),
               ],
             );
           }
-          
+
           return content;
         },
       ),

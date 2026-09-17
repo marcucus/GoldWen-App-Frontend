@@ -43,12 +43,14 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
 
   void _loadData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+      final subscriptionProvider =
+          Provider.of<SubscriptionProvider>(context, listen: false);
       subscriptionProvider.loadSubscriptionUsage();
-      
+
       // Only load data if user has premium subscription
       if (subscriptionProvider.canSeeWhoLikedYou) {
-        final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+        final matchingProvider =
+            Provider.of<MatchingProvider>(context, listen: false);
         matchingProvider.loadWhoLikedMe();
       }
     });
@@ -128,12 +130,11 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                 child: Icon(
                   Icons.visibility,
                   size: 80,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            
             SlideInAnimation(
               delay: const Duration(milliseconds: 400),
               child: Text(
@@ -145,30 +146,24 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                 textAlign: TextAlign.center,
               ),
             ),
-            
             const SizedBox(height: AppSpacing.md),
-            
             SlideInAnimation(
               delay: const Duration(milliseconds: 600),
               child: Text(
                 'Découvrez qui s\'intéresse à vous ! Avec GoldWen Plus, vous pouvez voir tous les profils qui vous ont sélectionné.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       height: 1.5,
                     ),
                 textAlign: TextAlign.center,
               ),
             ),
-            
             const SizedBox(height: AppSpacing.xl),
-            
             SlideInAnimation(
               delay: const Duration(milliseconds: 800),
               child: _buildFeaturesList(),
             ),
-            
             const SizedBox(height: AppSpacing.xl),
-            
             SlideInAnimation(
               delay: const Duration(milliseconds: 1000),
               child: PremiumButton(
@@ -193,10 +188,10 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -206,7 +201,7 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle,
                         color: AppColors.primaryGold,
                         size: 20,
@@ -257,7 +252,7 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 color: AppColors.errorRed,
                 size: 64,
@@ -311,13 +306,12 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                 child: Text(
                   '${whoLikedMe.length} ${whoLikedMe.length == 1 ? 'personne vous a sélectionné' : 'personnes vous ont sélectionné'}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                 ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            
             Expanded(
               child: ListView.builder(
                 itemCount: whoLikedMe.length,
@@ -350,18 +344,17 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.favorite_border,
                     size: 64,
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              
               SlideInAnimation(
                 delay: const Duration(milliseconds: 400),
                 child: Text(
@@ -373,15 +366,13 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                   textAlign: TextAlign.center,
                 ),
               ),
-              
               const SizedBox(height: AppSpacing.md),
-              
               SlideInAnimation(
                 delay: const Duration(milliseconds: 600),
                 child: Text(
                   'Soyez patient ! Votre profil sera bientôt découvert par d\'autres utilisateurs.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         height: 1.5,
                       ),
                   textAlign: TextAlign.center,
@@ -419,20 +410,20 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                           )
                         : null,
                     color: item.user.photos.isEmpty
-                        ? Colors.white.withOpacity(0.1)
+                        ? Colors.white.withValues(alpha: 0.1)
                         : null,
                   ),
                   child: item.user.photos.isEmpty
                       ? Icon(
                           Icons.person,
                           size: 40,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                         )
                       : null,
                 ),
-                
+
                 const SizedBox(width: AppSpacing.md),
-                
+
                 // Profile Info
                 Expanded(
                   child: Column(
@@ -446,23 +437,20 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      
                       if (item.user.age != null) ...[
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           '${item.user.age} ans',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 14,
                           ),
                         ),
                       ],
-                      
                       const SizedBox(height: AppSpacing.xs),
-                      
                       Text(
                         'Vous a sélectionné ${_formatTimeAgo(item.likedAt)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primaryGold,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -471,15 +459,15 @@ class _WhoLikedMePageState extends State<WhoLikedMePage>
                     ],
                   ),
                 ),
-                
+
                 // Action Button
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.2),
+                    color: AppColors.primaryGold.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppBorderRadius.small),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_forward_ios,
                     color: AppColors.primaryGold,
                     size: 16,

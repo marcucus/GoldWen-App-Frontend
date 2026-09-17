@@ -31,12 +31,12 @@ class _LoadingAnimationState extends State<LoadingAnimation>
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -63,7 +63,7 @@ class _LoadingAnimationState extends State<LoadingAnimation>
 
   void _startAnimations() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       _controller.repeat();
       _pulseController.repeat(reverse: true);
@@ -80,7 +80,7 @@ class _LoadingAnimationState extends State<LoadingAnimation>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return Semantics(
       label: widget.semanticLabel ?? widget.message ?? 'Chargement en cours',
       liveRegion: true,
@@ -116,9 +116,10 @@ class _LoadingAnimationState extends State<LoadingAnimation>
               width: widget.size,
               height: widget.size,
               child: CircularProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                 strokeWidth: widget.size <= 30 ? 2 : 3,
-                backgroundColor: AppColors.primaryGold.withOpacity(0.2),
+                backgroundColor: AppColors.primaryGold.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -134,7 +135,7 @@ class _LoadingAnimationState extends State<LoadingAnimation>
       child: CircularProgressIndicator(
         valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
         strokeWidth: widget.size <= 30 ? 2 : 3,
-        backgroundColor: AppColors.primaryGold.withOpacity(0.2),
+        backgroundColor: AppColors.primaryGold.withValues(alpha: 0.2),
       ),
     );
   }
@@ -144,14 +145,15 @@ class _LoadingAnimationState extends State<LoadingAnimation>
       animation: _pulseAnimation,
       builder: (context, child) {
         return Transform.scale(
-          scale: accessibilityService.reducedMotion ? 1.0 : _pulseAnimation.value,
+          scale:
+              accessibilityService.reducedMotion ? 1.0 : _pulseAnimation.value,
           child: Text(
             widget.message!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textMuted,
-              fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * 
-                  accessibilityService.textScaleFactor,
-            ),
+                  color: AppColors.textMuted,
+                  fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! *
+                      accessibilityService.textScaleFactor,
+                ),
             textAlign: TextAlign.center,
           ),
         );
@@ -187,12 +189,12 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _animation = Tween<double>(
       begin: -2.0,
       end: 2.0,
@@ -206,7 +208,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   void _startAnimation() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion && widget.enabled) {
       _controller.repeat();
     }
@@ -221,7 +223,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (accessibilityService.reducedMotion || !widget.enabled) {
       return Container(
         color: widget.baseColor,
@@ -243,7 +245,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
                 widget.highlightColor,
                 widget.baseColor,
               ],
-              stops: [
+              stops: const [
                 0.0,
                 0.5,
                 1.0,

@@ -91,12 +91,13 @@ class MatchCardWidget extends StatelessWidget {
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
                               colors: [
-                                AppColors.primaryGold.withOpacity(0.3),
-                                AppColors.primaryGold.withOpacity(0.7),
+                                AppColors.primaryGold.withValues(alpha: 0.3),
+                                AppColors.primaryGold.withValues(alpha: 0.7),
                               ],
                             ),
                           ),
-                          child: (profile?.photos != null && profile!.photos.isNotEmpty)
+                          child: (profile?.photos != null &&
+                                  profile!.photos.isNotEmpty)
                               ? ClipOval(
                                   child: Image.network(
                                     profile.photos.first.url,
@@ -128,7 +129,8 @@ class MatchCardWidget extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppColors.errorRed,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
                               ),
                             ),
                           ),
@@ -146,15 +148,19 @@ class MatchCardWidget extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   profile?.firstName ?? 'Utilisateur',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textDark,
+                                      ),
                                 ),
                               ),
                               // Status badge
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(match.status),
                                   borderRadius: BorderRadius.circular(12),
@@ -173,7 +179,7 @@ class MatchCardWidget extends StatelessWidget {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.favorite,
                                 size: 14,
                                 color: AppColors.primaryGold,
@@ -181,10 +187,13 @@ class MatchCardWidget extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '${(match.compatibilityScore * 100).round()}% compatibles',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.primaryGold,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.primaryGold,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -193,7 +202,7 @@ class MatchCardWidget extends StatelessWidget {
                           if (match.hasUnreadMessages && !isExpired)
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.mark_chat_unread,
                                   size: 14,
                                   color: AppColors.errorRed,
@@ -201,26 +210,32 @@ class MatchCardWidget extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   'Nouveaux messages',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.errorRed,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.errorRed,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ],
                             )
                           else
                             Text(
                               _formatMatchDate(match.createdAt),
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                
+
                 // Timer and action button
                 if (match.expiresAt != null && !isExpired) ...[
                   const SizedBox(height: 12),
@@ -235,13 +250,15 @@ class MatchCardWidget extends StatelessWidget {
                       const SizedBox(width: 12),
                       if (isActive && match.chatId != null)
                         ElevatedButton.icon(
-                          onPressed: () => context.push('/chat/${match.chatId}'),
+                          onPressed: () =>
+                              context.push('/chat/${match.chatId}'),
                           icon: const Icon(Icons.chat_bubble, size: 16),
                           label: const Text('Discuter'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryGold,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                           ),
                         )
                       else if (isPending)
@@ -257,17 +274,17 @@ class MatchCardWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.errorRed.withOpacity(0.1),
+                      color: AppColors.errorRed.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(
                           Icons.timer_off,
                           color: AppColors.errorRed,
                           size: 20,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Ce match a expiré',

@@ -112,7 +112,9 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Mountain silhouettes
               Positioned(
-                bottom: 0, left: 0, right: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
                 child: CustomPaint(
                   size: const Size(double.infinity, 120),
                   painter: _MountainPainter(),
@@ -134,13 +136,14 @@ class _HomePageState extends State<HomePage> {
                           GestureDetector(
                             onTap: () => widget.onNavigate?.call(2),
                             child: Container(
-                              width: 44, height: 44,
+                              width: 44,
+                              height: 44,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: AppColors.premiumGradient,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.25),
+                                    color: Colors.black.withValues(alpha: 0.25),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -148,7 +151,9 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: Center(
                                 child: Text(
-                                  firstName.isNotEmpty ? firstName[0].toUpperCase() : 'G',
+                                  firstName.isNotEmpty
+                                      ? firstName[0].toUpperCase()
+                                      : 'G',
                                   style: const TextStyle(
                                     fontFamily: 'Playfair Display',
                                     color: Colors.white,
@@ -163,10 +168,11 @@ class _HomePageState extends State<HomePage> {
                           GestureDetector(
                             onTap: () => context.push('/notifications'),
                             child: Container(
-                              width: 40, height: 40,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.20),
+                                color: Colors.white.withValues(alpha: 0.20),
                               ),
                               child: const Icon(
                                 Icons.notifications_outlined,
@@ -205,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                           fontFamily: 'Playfair Display',
                           fontStyle: FontStyle.italic,
                           fontSize: 13,
-                          color: AppColors.textDark.withOpacity(0.78),
+                          color: AppColors.textDark.withValues(alpha: 0.78),
                         ),
                       ),
                     ],
@@ -228,115 +234,123 @@ class _HomePageState extends State<HomePage> {
     return Consumer<MatchingProvider>(
       builder: (context, mp, _) {
         final hasEngagedToday = mp.dailySelection != null;
-        final subtitle = hasEngagedToday
-            ? 'Actif aujourd\'hui ✓'
-            : 'Revenez chaque jour';
+        final subtitle =
+            hasEngagedToday ? 'Actif aujourd\'hui ✓' : 'Revenez chaque jour';
 
-    return Transform.translate(
-      offset: const Offset(0, -22),
-      child: Container(
-      margin: const EdgeInsets.fromLTRB(18, 0, 18, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: AppShadows.medium(),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AppColors.primaryGold.withOpacity(0.12),
-                ),
-                child: const Icon(Icons.local_fire_department_rounded,
-                    size: 22, color: AppColors.primaryGold),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Votre rituel',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontFamily: 'Playfair Display',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (i) {
-              final done = i < todayIdx && hasEngagedToday;
-              final today = i == todayIdx;
-              return Expanded(
-                child: Column(
+        return Transform.translate(
+          offset: const Offset(0, -22),
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(18, 0, 18, 0),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: AppShadows.medium(),
+            ),
+            child: Column(
+              children: [
+                Row(
                   children: [
                     Container(
-                      width: 28, height: 28,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: done ? AppColors.primaryGold : Colors.transparent,
-                        border: Border.all(
-                          color: today
-                              ? AppColors.primaryGold
-                              : done
-                                  ? Colors.transparent
-                                  : AppColors.dividerLight,
-                          width: today ? 2 : 1.5,
-                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.primaryGold.withValues(alpha: 0.12),
                       ),
-                      child: Center(
-                        child: done
-                            ? const Icon(Icons.check, size: 13, color: Colors.white)
-                            : today
-                                ? Container(
-                                    width: 8, height: 8,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: AppColors.primaryGold,
-                                    ),
-                                  )
-                                : null,
-                      ),
+                      child: const Icon(Icons.local_fire_department_rounded,
+                          size: 22, color: AppColors.primaryGold),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      days[i],
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: today ? AppColors.primaryGold : AppColors.textTertiary,
-                        fontWeight: today ? FontWeight.w700 : FontWeight.w500,
-                      ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Votre rituel',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontFamily: 'Playfair Display',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              );
-            }),
-          ),
-        ],
-      ),
-    ),   // end Container
-    );   // end Transform.translate
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(7, (i) {
+                    final done = i < todayIdx && hasEngagedToday;
+                    final today = i == todayIdx;
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: done
+                                  ? AppColors.primaryGold
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: today
+                                    ? AppColors.primaryGold
+                                    : done
+                                        ? Colors.transparent
+                                        : AppColors.dividerLight,
+                                width: today ? 2 : 1.5,
+                              ),
+                            ),
+                            child: Center(
+                              child: done
+                                  ? const Icon(Icons.check,
+                                      size: 13, color: Colors.white)
+                                  : today
+                                      ? Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.primaryGold,
+                                          ),
+                                        )
+                                      : null,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            days[i],
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: today
+                                  ? AppColors.primaryGold
+                                  : AppColors.textTertiary,
+                              fontWeight:
+                                  today ? FontWeight.w700 : FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ), // end Container
+        ); // end Transform.translate
       }, // end Consumer builder
     ); // end Consumer
   }
@@ -426,16 +440,28 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildProfileCard(Profile profile, {bool dimmed = false}) {
     final score = ((profile.compatibilityScore ?? 0.88) * 100).round();
-    final firstPhoto = profile.photos.isNotEmpty ? profile.photos.first.url : null;
-    final firstPrompt = profile.promptAnswers.isNotEmpty
-        ? profile.promptAnswers.first
-        : null;
+    final firstPhoto =
+        profile.photos.isNotEmpty ? profile.photos.first.url : null;
+    final firstPrompt =
+        profile.promptAnswers.isNotEmpty ? profile.promptAnswers.first : null;
 
     // Gradient colors for the card header when no photo
     final cardGradients = [
-      [const Color(0xFFF5E6B8), const Color(0xFFD4AF37), const Color(0xFF8B6914)],
-      [const Color(0xFFFFE5D1), const Color(0xFFE8C547), const Color(0xFFB8941F)],
-      [const Color(0xFFFAF0E6), const Color(0xFFF5E6B8), const Color(0xFFD4AF37)],
+      [
+        const Color(0xFFF5E6B8),
+        const Color(0xFFD4AF37),
+        const Color(0xFF8B6914)
+      ],
+      [
+        const Color(0xFFFFE5D1),
+        const Color(0xFFE8C547),
+        const Color(0xFFB8941F)
+      ],
+      [
+        const Color(0xFFFAF0E6),
+        const Color(0xFFF5E6B8),
+        const Color(0xFFD4AF37)
+      ],
     ];
     final gradIdx = profile.id.hashCode.abs() % cardGradients.length;
     final grad = cardGradients[gradIdx];
@@ -452,7 +478,7 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: AppShadows.soft(),
             border: Border.all(
-              color: AppColors.primaryGold.withOpacity(0.20),
+              color: AppColors.primaryGold.withValues(alpha: 0.20),
               width: 1,
             ),
           ),
@@ -461,7 +487,8 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Photo / gradient area (240px)
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(23)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(23)),
                 child: SizedBox(
                   height: 240,
                   width: double.infinity,
@@ -482,12 +509,13 @@ class _HomePageState extends State<HomePage> {
                             ),
                       // Compatibility badge
                       Positioned(
-                        top: 14, right: 14,
+                        top: 14,
+                        right: 14,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.90),
+                            color: Colors.white.withValues(alpha: 0.90),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Row(
@@ -511,7 +539,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                       // Name / city overlay bottom
                       Positioned(
-                        bottom: 18, left: 18,
+                        bottom: 18,
+                        left: 18,
                         child: DefaultTextStyle(
                           style: const TextStyle(
                             color: Colors.white,
@@ -608,10 +637,11 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             Container(
-              width: 56, height: 56,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryGold.withOpacity(0.12),
+                color: AppColors.primaryGold.withValues(alpha: 0.12),
               ),
               child: const Icon(Icons.favorite_outline_rounded,
                   size: 28, color: AppColors.primaryGold),
@@ -695,14 +725,16 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       // Avatar
                       Container(
-                        width: 48, height: 48,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: AppColors.premiumGradient,
                         ),
                         child: Center(
                           child: Text(
-                            (chat.otherParticipant?.pseudo ?? 'M')[0].toUpperCase(),
+                            (chat.otherParticipant?.pseudo ?? 'M')[0]
+                                .toUpperCase(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontFamily: 'Playfair Display',
@@ -735,7 +767,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              chat.lastMessage?.content ?? 'Commencez la conversation',
+                              chat.lastMessage?.content ??
+                                  'Commencez la conversation',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -785,22 +818,22 @@ class _HomePageState extends State<HomePage> {
       margin: const EdgeInsets.fromLTRB(20, 22, 20, 0),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.08),
+        color: AppColors.primaryGold.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.25),
+          color: AppColors.primaryGold.withValues(alpha: 0.25),
           width: 1,
         ),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded,
+              Icon(Icons.auto_awesome_rounded,
                   size: 12, color: AppColors.primaryGold),
-              const SizedBox(width: 6),
-              const Text(
+              SizedBox(width: 6),
+              Text(
                 'CONSEIL DU JOUR',
                 style: TextStyle(
                   fontSize: 11,
@@ -811,8 +844,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             '« Une question ouverte vaut mille messages. Demandez ce qui les fait vibrer. »',
             style: TextStyle(
               fontFamily: 'Playfair Display',
@@ -895,11 +928,11 @@ class _MountainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = AppColors.goldDeep.withOpacity(0.20)
+      ..color = AppColors.goldDeep.withValues(alpha: 0.20)
       ..style = PaintingStyle.fill;
 
     final paint2 = Paint()
-      ..color = AppColors.primaryGoldDark.withOpacity(0.14)
+      ..color = AppColors.primaryGoldDark.withValues(alpha: 0.14)
       ..style = PaintingStyle.fill;
 
     final path1 = Path()

@@ -14,7 +14,9 @@ class MatchReasonsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: matchReasons.map((reason) => _buildReasonCard(context, reason)).toList(),
+      children: matchReasons
+          .map((reason) => _buildReasonCard(context, reason))
+          .toList(),
     );
   }
 
@@ -23,10 +25,10 @@ class MatchReasonsWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _getCategoryColor(reason.category).withOpacity(0.1),
+        color: _getCategoryColor(reason.category).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getCategoryColor(reason.category).withOpacity(0.3),
+          color: _getCategoryColor(reason.category).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -47,7 +49,7 @@ class MatchReasonsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // Description
           Expanded(
             child: Column(
@@ -71,7 +73,7 @@ class MatchReasonsWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Impact indicator
           _buildImpactIndicator(context, reason.impact),
         ],
@@ -83,14 +85,14 @@ class MatchReasonsWidget extends StatelessWidget {
     final isPositive = impact >= 0;
     final color = isPositive ? AppColors.successGreen : AppColors.errorRed;
     final percentage = (impact.abs() * 100).round();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

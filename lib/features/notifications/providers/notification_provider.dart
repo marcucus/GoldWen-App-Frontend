@@ -71,10 +71,10 @@ class NotificationProvider with ChangeNotifier {
   Future<void> loadNotificationSettings() async {
     try {
       final response = await ApiService.getNotificationSettings();
-      
+
       // The response should have a 'settings' key based on backend API
       final settingsData = response['settings'] as Map<String, dynamic>?;
-      
+
       if (settingsData != null) {
         _settings = NotificationSettings.fromJson(settingsData);
       } else {
@@ -102,7 +102,7 @@ class NotificationProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // If API fails, use default settings
-      print('Failed to load notification settings from API: $e');
+      debugPrint('Failed to load notification settings from API: $e');
       _settings = NotificationSettings(
         dailySelection: true,
         newMatches: true,
@@ -118,10 +118,10 @@ class NotificationProvider with ChangeNotifier {
         quietHoursStart: '22:00',
         quietHoursEnd: '08:00',
       );
-      
+
       // Still sync local notifications even with default settings
       await _syncLocalNotifications();
-      
+
       notifyListeners();
     }
   }
@@ -210,10 +210,10 @@ class NotificationProvider with ChangeNotifier {
       });
 
       _settings = newSettings;
-      
+
       // Sync local notification scheduling with settings
       await _syncLocalNotifications();
-      
+
       _error = null;
       _setLoaded();
       return true;
@@ -394,15 +394,17 @@ class NotificationProvider with ChangeNotifier {
   // Sync local notification scheduling based on settings
   Future<void> _syncLocalNotifications() async {
     final localNotificationService = LocalNotificationService();
-    
-    if (_settings != null && _settings!.pushEnabled && _settings!.dailySelection) {
+
+    if (_settings != null &&
+        _settings!.pushEnabled &&
+        _settings!.dailySelection) {
       // Schedule daily selection notification at noon
       await localNotificationService.scheduleDailySelectionNotification();
-      print('Daily selection notification scheduled');
+      debugPrint('Daily selection notification scheduled');
     } else {
       // Cancel daily selection notification if disabled
       await localNotificationService.cancelDailySelectionNotification();
-      print('Daily selection notification cancelled');
+      debugPrint('Daily selection notification cancelled');
     }
   }
 }

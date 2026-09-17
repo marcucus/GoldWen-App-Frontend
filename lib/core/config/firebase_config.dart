@@ -2,16 +2,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 class FirebaseConfig {
-  static const String _androidApiKey = "AIzaSyBvOiuDOTuFmGK2z9JdEeQhCxXLJ4M5S6R";
-  static const String _androidAppId = "1:1234567890:android:abcdef123456789";
-  static const String _androidMessagingSenderId = "1234567890";
-  static const String _androidProjectId = "goldwen-app";
+  static const String _androidApiKey = 'AIzaSyBvOiuDOTuFmGK2z9JdEeQhCxXLJ4M5S6R';
+  static const String _androidAppId = '1:1234567890:android:abcdef123456789';
+  static const String _androidMessagingSenderId = '1234567890';
+  static const String _androidProjectId = 'goldwen-app';
   
-  static const String _iosApiKey = "AIzaSyBvOiuDOTuFmGK2z9JdEeQhCxXLJ4M5S6R";
-  static const String _iosAppId = "1:1234567890:ios:fedcba987654321";
-  static const String _iosMessagingSenderId = "1234567890";
-  static const String _iosProjectId = "goldwen-app";
-  static const String _iosBundleId = "com.goldwen.app";
+  static const String _iosApiKey = 'AIzaSyBvOiuDOTuFmGK2z9JdEeQhCxXLJ4M5S6R';
+  static const String _iosAppId = '1:1234567890:ios:fedcba987654321';
+  static const String _iosMessagingSenderId = '1234567890';
+  static const String _iosProjectId = 'goldwen-app';
+  static const String _iosBundleId = 'com.goldwen.app';
   
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {

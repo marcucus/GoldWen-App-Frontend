@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/revenue_cat_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/models/models.dart';
-import '../../../core/config/app_config.dart';
 
 class SubscriptionProvider with ChangeNotifier {
   List<SubscriptionPlan> _plans = [];
@@ -59,7 +57,7 @@ class SubscriptionProvider with ChangeNotifier {
       _customerInfo = await RevenueCatService.getCurrentCustomerInfo();
       notifyListeners();
     } catch (e) {
-      print('Error initializing RevenueCat with user: $e');
+      debugPrint('Error initializing RevenueCat with user: $e');
     }
   }
 
@@ -71,7 +69,7 @@ class SubscriptionProvider with ChangeNotifier {
       _usage = null;
       notifyListeners();
     } catch (e) {
-      print('Error logging out of RevenueCat: $e');
+      debugPrint('Error logging out of RevenueCat: $e');
     }
   }
 
@@ -81,13 +79,14 @@ class SubscriptionProvider with ChangeNotifier {
     try {
       // Track subscription page viewed
       await AnalyticsService.trackSubscriptionPageViewed();
-      
+
       // Initialize RevenueCat — failures (invalid key, no network) are non-fatal
       try {
         await RevenueCatService.initialize();
         _revenueCatPackages = await RevenueCatService.getAvailablePackages();
         _plans = _revenueCatPackages
-            .map((package) => RevenueCatService.packageToSubscriptionPlan(package))
+            .map((package) =>
+                RevenueCatService.packageToSubscriptionPlan(package))
             .toList();
       } catch (rcError) {
         // RevenueCat unavailable in dev (no key configured) — fall through to API
@@ -98,7 +97,7 @@ class SubscriptionProvider with ChangeNotifier {
       // Also try to load plans from API as fallback
       try {
         final response = await ApiService.getSubscriptionPlans();
-        
+
         // Handle different response structures
         dynamic plansData;
         if (response.containsKey('data')) {
@@ -123,13 +122,14 @@ class SubscriptionProvider with ChangeNotifier {
           _plans = apiPlans;
         }
       } catch (apiError) {
-        print('API plans loading failed, using RevenueCat only: $apiError');
-        
+        debugPrint(
+            'API plans loading failed, using RevenueCat only: $apiError');
+
         // Only create mock plans in debug mode when API fails
         if (kDebugMode &&
             (apiError.toString().contains('NetworkException') ||
-             apiError.toString().contains('ECONNREFUSED') ||
-             apiError.toString().contains('Failed to connect'))) {
+                apiError.toString().contains('ECONNREFUSED') ||
+                apiError.toString().contains('Failed to connect'))) {
           if (_plans.isEmpty) {
             _createMockPlans();
           }
@@ -295,7 +295,8 @@ class SubscriptionProvider with ChangeNotifier {
 
           if (verified) {
             // Track subscription started
-            final productId = RevenueCatService.getProductIdentifier(_customerInfo!);
+            final productId =
+                RevenueCatService.getProductIdentifier(_customerInfo!);
             if (productId != null) {
               // Extract tier and period from product ID (e.g., "goldwen_plus_monthly")
               final parts = productId.split('_');
@@ -303,7 +304,7 @@ class SubscriptionProvider with ChangeNotifier {
               final period = parts.length > 2 ? parts[2] : 'unknown';
               await AnalyticsService.trackSubscriptionStarted(tier, period);
             }
-            
+
             // Reload data
             await loadCurrentSubscription();
             await loadSubscriptionUsage();
@@ -332,7 +333,7 @@ class SubscriptionProvider with ChangeNotifier {
 
       final subscriptionData = response['data'] ?? response;
       _currentSubscription = Subscription.fromJson(subscriptionData);
-      
+
       // Track subscription started
       if (_currentSubscription != null) {
         await AnalyticsService.trackSubscriptionStarted(
@@ -386,7 +387,8 @@ class SubscriptionProvider with ChangeNotifier {
 
       // Track subscription cancelled
       if (_currentSubscription != null) {
-        await AnalyticsService.trackSubscriptionCancelled(_currentSubscription!.tier);
+        await AnalyticsService.trackSubscriptionCancelled(
+            _currentSubscription!.tier);
       }
 
       // Reload current subscription to get updated status
@@ -416,13 +418,14 @@ class SubscriptionProvider with ChangeNotifier {
 
         if (verified) {
           // Track subscription restored
-          final productId = RevenueCatService.getProductIdentifier(_customerInfo!);
+          final productId =
+              RevenueCatService.getProductIdentifier(_customerInfo!);
           if (productId != null) {
             final parts = productId.split('_');
             final tier = parts.length > 1 ? parts[1] : 'unknown';
             await AnalyticsService.trackSubscriptionRestored(tier);
           }
-          
+
           await loadCurrentSubscription();
           await loadSubscriptionUsage();
           _error = null;
@@ -437,12 +440,13 @@ class SubscriptionProvider with ChangeNotifier {
       final subscriptionData = response['data'] ?? response;
       if (subscriptionData != null) {
         _currentSubscription = Subscription.fromJson(subscriptionData);
-        
+
         // Track subscription restored
         if (_currentSubscription != null) {
-          await AnalyticsService.trackSubscriptionRestored(_currentSubscription!.tier);
+          await AnalyticsService.trackSubscriptionRestored(
+              _currentSubscription!.tier);
         }
-        
+
         await loadSubscriptionUsage();
       }
 

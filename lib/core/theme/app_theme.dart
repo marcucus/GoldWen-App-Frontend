@@ -7,12 +7,12 @@ class AppColors {
   static const Color primary = primaryGold; // Alias for primaryGold
   static const Color primaryGoldDark = Color(0xFFB8941F);
   static const Color primaryGoldLight = Color(0xFFE8C547);
-  
+
   // Secondary Palette
   static const Color secondaryBeige = Color(0xFFF5F5DC);
   static const Color accentCream = Color(0xFFFAF0E6);
   static const Color accentPeach = Color(0xFFFFE5D1);
-  
+
   // Neutral Palette
   static const Color textDark = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF6B6B6B);
@@ -20,38 +20,41 @@ class AppColors {
   static const Color textMuted = Color(0xFF9E9E9E); // Alias for textTertiary
   static const Color backgroundWhite = Color(0xFFFFFFF8);
   static const Color backgroundGrey = Color(0xFFF8F9FA);
-  static const Color backgroundLight = Color(0xFFFFFFF8); // Alias for backgroundWhite
-  static const Color backgroundCream = Color(0xFFFAF0E6); // Cream background for history page
+  static const Color backgroundLight =
+      Color(0xFFFFFFF8); // Alias for backgroundWhite
+  static const Color backgroundCream =
+      Color(0xFFFAF0E6); // Cream background for history page
   static const Color dividerLight = Color(0xFFE8E8E8);
   static const Color border = Color(0xFFE8E8E8); // Alias for dividerLight
   static const Color cardBackground = Color(0xFFFFFFFF);
   static const Color textLight = Color(0xFFFFFFFF);
-  
+
   // Semantic Colors
   static const Color errorRed = Color(0xFFE57373);
   static const Color error = errorRed; // Alias for errorRed
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color success = successGreen; // Alias for successGreen
   static const Color warningAmber = Color(0xFFFFC107);
-  static const Color warningOrange = Color(0xFFF57C00); // Additional warning color
+  static const Color warningOrange =
+      Color(0xFFF57C00); // Additional warning color
   static const Color infoBlue = Color(0xFF2196F3);
-  
+
   // Modern Gradient Colors
   static const Color gradientStart = Color(0xFF8B6914);
   static const Color gradientMiddle = Color(0xFFD4AF37);
   static const Color gradientEnd = Color(0xFFF5E6B8);
   static const Color cardOverlay = Color(0xFFFFFFFF);
-  
+
   // Glass Morphism Colors
   static const Color glassBackground = Color(0x40FFFFFF);
   static const Color glassBorder = Color(0x80FFFFFF);
-  
+
   // Shadow Colors
   static const Color shadowLight = Color(0x10000000);
   static const Color shadowMedium = Color(0x20000000);
   static const Color shadowDark = Color(0x30000000);
   static const Color shadowColor = Color(0x20000000); // General shadow color
-  
+
   // Border Colors
   static const Color borderColor = Color(0xFFE8E8E8);
   static const Color borderLight = Color(0xFFF0F0F0);
@@ -80,97 +83,100 @@ class AppColors {
   static const Color highContrastBackground = Color(0xFFFFFFFF);
   static const Color highContrastSecondary = Color(0xFF4A4A4A);
   static const Color highContrastBorder = Color(0xFF000000);
-  
+
   // Premium Gradients
   static LinearGradient get primaryGradient => const LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [gradientStart, gradientMiddle, gradientEnd],
-    stops: [0.0, 0.5, 1.0],
-  );
-  
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [gradientStart, gradientMiddle, gradientEnd],
+        stops: [0.0, 0.5, 1.0],
+      );
+
   static LinearGradient get cardGradient => LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      cardOverlay.withOpacity(0.95),
-      cardOverlay.withOpacity(0.85),
-    ],
-  );
-  
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          cardOverlay.withValues(alpha: 0.95),
+          cardOverlay.withValues(alpha: 0.85),
+        ],
+      );
+
   static LinearGradient get premiumGradient => const LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [gradientStart, gradientMiddle, gradientEnd],
-    stops: [0.0, 0.5, 1.0],
-  );
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [gradientStart, gradientMiddle, gradientEnd],
+        stops: [0.0, 0.5, 1.0],
+      );
 
   static LinearGradient get welcomeGradient => LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      backgroundWhite,
-      accentCream.withOpacity(0.4),
-      primaryGold.withOpacity(0.10),
-      backgroundWhite,
-    ],
-    stops: const [0.0, 0.30, 0.70, 1.0],
-  );
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          backgroundWhite,
+          accentCream.withValues(alpha: 0.4),
+          primaryGold.withValues(alpha: 0.10),
+          backgroundWhite,
+        ],
+        stops: const [0.0, 0.30, 0.70, 1.0],
+      );
 
   static LinearGradient get heroGradient => const LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFFFE5D1),
-      Color(0xFFF5E6B8),
-      Color(0xFFE8C547),
-      Color(0xFFD4AF37),
-    ],
-    stops: [0.0, 0.30, 0.70, 1.0],
-  );
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFFFE5D1),
+          Color(0xFFF5E6B8),
+          Color(0xFFE8C547),
+          Color(0xFFD4AF37),
+        ],
+        stops: [0.0, 0.30, 0.70, 1.0],
+      );
 
   static LinearGradient get heroGradientDark => const LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF2a1f08),
-      Color(0xFF5e4408),
-      Color(0xFFB8941F),
-      Color(0xFFE8C547),
-    ],
-    stops: [0.0, 0.35, 0.75, 1.0],
-  );
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFF2a1f08),
+          Color(0xFF5e4408),
+          Color(0xFFB8941F),
+          Color(0xFFE8C547),
+        ],
+        stops: [0.0, 0.35, 0.75, 1.0],
+      );
 
   static LinearGradient get subtleGradient => LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      backgroundWhite,
-      backgroundGrey.withOpacity(0.5),
-    ],
-  );
-  
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          backgroundWhite,
+          backgroundGrey.withValues(alpha: 0.5),
+        ],
+      );
+
   // Glass Morphism Effect
   static BoxDecoration get glassDecoration => BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        glassBackground,
-        glassBackground.withOpacity(0.3),
-      ],
-    ),
-    border: Border.all(
-      color: glassBorder,
-      width: 1,
-    ),
-    borderRadius: BorderRadius.circular(20),
-  );
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            glassBackground,
+            glassBackground.withValues(alpha: 0.3),
+          ],
+        ),
+        border: Border.all(
+          color: glassBorder,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      );
 
   /// Get color with proper contrast ratio for accessibility
-  static Color getAccessibleColor(Color backgroundColor, {bool highContrast = false}) {
+  static Color getAccessibleColor(Color backgroundColor,
+      {bool highContrast = false}) {
     if (highContrast) {
-      return _isLight(backgroundColor) ? highContrastText : highContrastBackground;
+      return _isLight(backgroundColor)
+          ? highContrastText
+          : highContrastBackground;
     }
     return _isLight(backgroundColor) ? textDark : textLight;
   }
@@ -205,7 +211,7 @@ class AppTheme {
     final primaryColor = AppColors.getHighContrastPrimary(highContrast);
     final textColor = AppColors.getHighContrastText(highContrast);
     final backgroundColor = AppColors.getHighContrastBackground(highContrast);
-    
+
     return ThemeData(
       useMaterial3: true,
       primaryColor: primaryColor,
@@ -214,7 +220,9 @@ class AppTheme {
         seedColor: primaryColor,
         brightness: Brightness.light,
         primary: primaryColor,
-        secondary: highContrast ? AppColors.highContrastSecondary : AppColors.secondaryBeige,
+        secondary: highContrast
+            ? AppColors.highContrastSecondary
+            : AppColors.secondaryBeige,
         surface: backgroundColor,
         onSurface: textColor,
       ),
@@ -239,7 +247,8 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: AppColors.getAccessibleColor(primaryColor, highContrast: highContrast),
+          foregroundColor: AppColors.getAccessibleColor(primaryColor,
+              highContrast: highContrast),
           textStyle: GoogleFonts.lato(
             fontSize: 16 * textScaleFactor,
             fontWeight: FontWeight.w600,
@@ -247,7 +256,10 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: highContrast ? const BorderSide(color: AppColors.highContrastBorder, width: 2) : BorderSide.none,
+            side: highContrast
+                ? const BorderSide(
+                    color: AppColors.highContrastBorder, width: 2)
+                : BorderSide.none,
           ),
           elevation: 2,
         ),
@@ -268,17 +280,21 @@ class AppTheme {
       // Input Decoration Theme with enhanced contrast
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: highContrast ? AppColors.highContrastBackground : AppColors.accentCream,
+        fillColor: highContrast
+            ? AppColors.highContrastBackground
+            : AppColors.accentCream,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: highContrast ? 
-              const BorderSide(color: AppColors.highContrastBorder, width: 2) : 
-              BorderSide.none,
+          borderSide: highContrast
+              ? const BorderSide(color: AppColors.highContrastBorder, width: 2)
+              : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: highContrast ? AppColors.highContrastBorder : AppColors.dividerLight,
+            color: highContrast
+                ? AppColors.highContrastBorder
+                : AppColors.dividerLight,
             width: highContrast ? 2 : 1,
           ),
         ),
@@ -290,14 +306,19 @@ class AppTheme {
           ),
         ),
         labelStyle: GoogleFonts.lato(
-          color: highContrast ? AppColors.highContrastText : AppColors.textSecondary,
+          color: highContrast
+              ? AppColors.highContrastText
+              : AppColors.textSecondary,
           fontSize: 14 * textScaleFactor,
         ),
         hintStyle: GoogleFonts.lato(
-          color: highContrast ? AppColors.highContrastSecondary : AppColors.textSecondary,
+          color: highContrast
+              ? AppColors.highContrastSecondary
+              : AppColors.textSecondary,
           fontSize: 14 * textScaleFactor,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
 
       // Card Theme with enhanced borders for high contrast
@@ -306,25 +327,30 @@ class AppTheme {
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: highContrast ? 
-              const BorderSide(color: AppColors.highContrastBorder, width: 1) : 
-              BorderSide.none,
+          side: highContrast
+              ? const BorderSide(color: AppColors.highContrastBorder, width: 1)
+              : BorderSide.none,
         ),
         margin: const EdgeInsets.all(8),
       ),
 
       // Divider Theme with enhanced visibility
       dividerTheme: DividerThemeData(
-        color: highContrast ? AppColors.highContrastBorder : AppColors.dividerLight,
+        color: highContrast
+            ? AppColors.highContrastBorder
+            : AppColors.dividerLight,
         thickness: highContrast ? 2 : 1,
         space: 20,
       ),
     );
   }
 
-  static TextTheme _buildTextTheme(bool highContrast, double textScaleFactor, Color textColor) {
-    final secondaryColor = highContrast ? AppColors.highContrastSecondary : AppColors.textSecondary;
-    
+  static TextTheme _buildTextTheme(
+      bool highContrast, double textScaleFactor, Color textColor) {
+    final secondaryColor = highContrast
+        ? AppColors.highContrastSecondary
+        : AppColors.textSecondary;
+
     return TextTheme(
       // Headlines use Playfair Display (Serif)
       headlineLarge: GoogleFonts.playfairDisplay(
@@ -414,7 +440,7 @@ class AppAnimations {
   static const Duration medium = Duration(milliseconds: 300);
   static const Duration slow = Duration(milliseconds: 500);
   static const Duration verySlow = Duration(milliseconds: 800);
-  
+
   // Curve constants
   static const Curve easeIn = Curves.easeIn;
   static const Curve easeOut = Curves.easeOut;
@@ -423,12 +449,12 @@ class AppAnimations {
   static const Curve bounceOut = Curves.bounceOut;
   static const Curve elasticOut = Curves.elasticOut;
   static const Curve decelerate = Curves.decelerate;
-  
+
   // Common animation values
   static const double scaleSmall = 0.95;
   static const double scaleMedium = 0.9;
   static const double scaleLarge = 0.8;
-  
+
   // Slide animation offsets
   static const Offset slideInFromBottom = Offset(0, 1);
   static const Offset slideInFromTop = Offset(0, -1);
@@ -436,7 +462,8 @@ class AppAnimations {
   static const Offset slideInFromRight = Offset(1, 0);
 
   /// Get duration based on accessibility settings
-  static Duration getDuration(Duration defaultDuration, {bool reducedMotion = false}) {
+  static Duration getDuration(Duration defaultDuration,
+      {bool reducedMotion = false}) {
     return reducedMotion ? Duration.zero : defaultDuration;
   }
 
@@ -448,96 +475,111 @@ class AppAnimations {
 
 class AppShadows {
   static List<BoxShadow> soft({bool highContrast = false}) => [
-    BoxShadow(
-      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.3) : AppColors.shadowLight,
-      blurRadius: highContrast ? 2 : 8,
-      offset: const Offset(0, 2),
-    ),
-  ];
-  
+        BoxShadow(
+          color: highContrast
+              ? AppColors.highContrastBorder.withValues(alpha: 0.3)
+              : AppColors.shadowLight,
+          blurRadius: highContrast ? 2 : 8,
+          offset: const Offset(0, 2),
+        ),
+      ];
+
   static List<BoxShadow> medium({bool highContrast = false}) => [
-    BoxShadow(
-      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.5) : AppColors.shadowMedium,
-      blurRadius: highContrast ? 4 : 12,
-      offset: const Offset(0, 4),
-    ),
-  ];
-  
+        BoxShadow(
+          color: highContrast
+              ? AppColors.highContrastBorder.withValues(alpha: 0.5)
+              : AppColors.shadowMedium,
+          blurRadius: highContrast ? 4 : 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
   static List<BoxShadow> strong({bool highContrast = false}) => [
-    BoxShadow(
-      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.7) : AppColors.shadowDark,
-      blurRadius: highContrast ? 6 : 16,
-      offset: const Offset(0, 6),
-    ),
-  ];
-  
+        BoxShadow(
+          color: highContrast
+              ? AppColors.highContrastBorder.withValues(alpha: 0.7)
+              : AppColors.shadowDark,
+          blurRadius: highContrast ? 6 : 16,
+          offset: const Offset(0, 6),
+        ),
+      ];
+
   static List<BoxShadow> floating({bool highContrast = false}) => [
-    BoxShadow(
-      color: highContrast ? AppColors.highContrastBorder.withOpacity(0.5) : AppColors.shadowMedium,
-      blurRadius: highContrast ? 8 : 20,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: highContrast
+              ? AppColors.highContrastBorder.withValues(alpha: 0.5)
+              : AppColors.shadowMedium,
+          blurRadius: highContrast ? 8 : 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
 
   static List<BoxShadow> gold() => [
-    BoxShadow(
-      color: AppColors.primaryGold.withOpacity(0.30),
-      blurRadius: 16,
-      offset: const Offset(0, 6),
-    ),
-  ];
+        BoxShadow(
+          color: AppColors.primaryGold.withValues(alpha: 0.30),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
+        ),
+      ];
 
   static List<BoxShadow> darkNav() => [
-    BoxShadow(
-      color: const Color(0x4D000000),
-      blurRadius: 30,
-      offset: const Offset(0, 10),
-    ),
-  ];
+        const BoxShadow(
+          color: Color(0x4D000000),
+          blurRadius: 30,
+          offset: Offset(0, 10),
+        ),
+      ];
 }
 
 class AppDecorations {
   static BoxDecoration modernCard({bool highContrast = false}) => BoxDecoration(
-    color: highContrast ? AppColors.highContrastBackground : AppColors.cardOverlay,
-    borderRadius: BorderRadius.circular(AppBorderRadius.large),
-    boxShadow: AppShadows.soft(highContrast: highContrast),
-    border: highContrast ? 
-        Border.all(color: AppColors.highContrastBorder, width: 1) : 
-        null,
-  );
-  
-  static BoxDecoration premiumCard({bool highContrast = false}) => BoxDecoration(
-    gradient: highContrast ? null : AppColors.cardGradient,
-    color: highContrast ? AppColors.highContrastBackground : null,
-    borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
-    boxShadow: AppShadows.medium(highContrast: highContrast),
-    border: Border.all(
-      color: highContrast ? 
-          AppColors.highContrastBorder : 
-          AppColors.primaryGold.withOpacity(0.3),
-      width: highContrast ? 2 : 1,
-    ),
-  );
-  
-  static BoxDecoration floatingCard({bool highContrast = false}) => BoxDecoration(
-    color: highContrast ? AppColors.highContrastBackground : AppColors.cardOverlay,
-    borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
-    boxShadow: AppShadows.floating(highContrast: highContrast),
-    border: highContrast ? 
-        Border.all(color: AppColors.highContrastBorder, width: 1) : 
-        null,
-  );
+        color: highContrast
+            ? AppColors.highContrastBackground
+            : AppColors.cardOverlay,
+        borderRadius: BorderRadius.circular(AppBorderRadius.large),
+        boxShadow: AppShadows.soft(highContrast: highContrast),
+        border: highContrast
+            ? Border.all(color: AppColors.highContrastBorder, width: 1)
+            : null,
+      );
+
+  static BoxDecoration premiumCard({bool highContrast = false}) =>
+      BoxDecoration(
+        gradient: highContrast ? null : AppColors.cardGradient,
+        color: highContrast ? AppColors.highContrastBackground : null,
+        borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
+        boxShadow: AppShadows.medium(highContrast: highContrast),
+        border: Border.all(
+          color: highContrast
+              ? AppColors.highContrastBorder
+              : AppColors.primaryGold.withValues(alpha: 0.3),
+          width: highContrast ? 2 : 1,
+        ),
+      );
+
+  static BoxDecoration floatingCard({bool highContrast = false}) =>
+      BoxDecoration(
+        color: highContrast
+            ? AppColors.highContrastBackground
+            : AppColors.cardOverlay,
+        borderRadius: BorderRadius.circular(AppBorderRadius.xLarge),
+        boxShadow: AppShadows.floating(highContrast: highContrast),
+        border: highContrast
+            ? Border.all(color: AppColors.highContrastBorder, width: 1)
+            : null,
+      );
 }
 
 /// Extension for accessibility-aware theming
 extension AccessibleTheme on ThemeData {
   /// Check if high contrast is enabled
-  bool get isHighContrast => 
+  bool get isHighContrast =>
       colorScheme.primary == AppColors.highContrastPrimary;
 
   /// Get accessible text color for background
   Color getAccessibleTextColor(Color backgroundColor) =>
-      AppColors.getAccessibleColor(backgroundColor, highContrast: isHighContrast);
+      AppColors.getAccessibleColor(backgroundColor,
+          highContrast: isHighContrast);
 
   /// Get focus color with proper contrast
   Color get accessibleFocusColor =>

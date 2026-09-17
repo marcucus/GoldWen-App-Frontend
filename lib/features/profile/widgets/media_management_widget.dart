@@ -55,10 +55,8 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
     _mediaFiles = List.from(widget.mediaFiles);
   }
 
-  int get _audioCount =>
-      _mediaFiles.where((m) => m.type == 'audio').length;
-  int get _videoCount =>
-      _mediaFiles.where((m) => m.type == 'video').length;
+  int get _audioCount => _mediaFiles.where((m) => m.type == 'audio').length;
+  int get _videoCount => _mediaFiles.where((m) => m.type == 'video').length;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +97,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
         ),
         if (widget.showAddButton)
           PopupMenuButton<String>(
-            icon: Icon(
+            icon: const Icon(
               Icons.add_circle_outline,
               color: AppColors.primaryGold,
             ),
@@ -112,7 +110,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
             },
             itemBuilder: (context) => [
               if (_audioCount < widget.maxAudioFiles)
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'audio',
                   child: Row(
                     children: [
@@ -123,7 +121,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
                   ),
                 ),
               if (_videoCount < widget.maxVideoFiles)
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'video',
                   child: Row(
                     children: [
@@ -143,22 +141,22 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
+        color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppColors.error),
+          const Icon(Icons.error_outline, color: AppColors.error),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               _errorMessage!,
-              style: TextStyle(color: AppColors.error),
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: 20),
             onPressed: () {
               setState(() {
                 _errorMessage = null;
@@ -175,10 +173,10 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
       return Container(
         padding: const EdgeInsets.all(AppSpacing.xl),
         decoration: BoxDecoration(
-          color: AppColors.accentCream.withOpacity(0.3),
+          color: AppColors.accentCream.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.3),
+            color: AppColors.primaryGold.withValues(alpha: 0.3),
             style: BorderStyle.solid,
             width: 2,
           ),
@@ -186,7 +184,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
         child: Center(
           child: Column(
             children: [
-              Icon(
+              const Icon(
                 Icons.perm_media,
                 size: 48,
                 color: AppColors.textSecondary,
@@ -230,7 +228,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.1),
+          backgroundColor: color.withValues(alpha: 0.1),
           child: Icon(icon, color: color),
         ),
         title: Text(
@@ -247,12 +245,12 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.play_circle_outline),
+              icon: const Icon(Icons.play_circle_outline),
               onPressed: () => _previewMedia(mediaFile),
               tooltip: 'Prévisualiser',
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: AppColors.error),
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
               onPressed: () => _deleteMedia(mediaFile.id),
               tooltip: 'Supprimer',
             ),
@@ -265,7 +263,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
-    return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   Future<void> _addMedia(String type) async {
@@ -289,7 +287,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
       }
 
       String? filePath;
-      
+
       // For videos, use ImagePicker to access gallery
       if (type == 'video') {
         final ImageSource? source = await _showVideoSourceDialog();
@@ -302,16 +300,16 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
 
         final picker = ImagePicker();
         final XFile? pickedFile = await picker.pickVideo(source: source);
-        
+
         if (pickedFile == null) {
           setState(() {
             _isLoading = false;
           });
           return;
         }
-        
+
         filePath = pickedFile.path;
-        
+
         // Validate file size
         final fileSize = await File(filePath).length();
         if (fileSize > maxFileSizeMB * 1024 * 1024) {
@@ -359,7 +357,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
           });
           return;
         }
-        
+
         filePath = file.path;
       }
 
@@ -407,17 +405,17 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Confirmer la suppression'),
-        content: Text('Voulez-vous vraiment supprimer ce média ?'),
+        title: const Text('Confirmer la suppression'),
+        content: const Text('Voulez-vous vraiment supprimer ce média ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Annuler'),
+            child: const Text('Annuler'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text('Supprimer'),
+            child: const Text('Supprimer'),
           ),
         ],
       ),
@@ -442,7 +440,7 @@ class _MediaManagementWidgetState extends State<MediaManagementWidget> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Média supprimé avec succès'),
             backgroundColor: AppColors.successGreen,
           ),
@@ -512,7 +510,7 @@ class MediaPreviewDialog extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 IconButton(
-                  icon: Icon(Icons.close),
+                  icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -546,6 +544,6 @@ class MediaPreviewDialog extends StatelessWidget {
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
-    return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }

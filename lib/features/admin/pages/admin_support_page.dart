@@ -8,7 +8,8 @@ class AdminSupportPage extends StatefulWidget {
   State<AdminSupportPage> createState() => _AdminSupportPageState();
 }
 
-class _AdminSupportPageState extends State<AdminSupportPage> with TickerProviderStateMixin {
+class _AdminSupportPageState extends State<AdminSupportPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final List<SupportTicket> _tickets = _generateMockTickets();
 
@@ -54,7 +55,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -85,7 +86,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
               ],
             ),
           ),
-          
+
           // Tickets List
           Expanded(
             child: TabBarView(
@@ -127,7 +128,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
+            const Text(
               'Aucun ticket dans cette catégorie',
               style: TextStyle(color: AppColors.textSecondary),
             ),
@@ -139,13 +140,15 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.md),
       itemCount: tickets.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         final ticket = tickets[index];
         return _SupportTicketCard(
           ticket: ticket,
           onTap: () => _showTicketDetails(ticket),
-          onStatusChanged: (newStatus) => _updateTicketStatus(ticket, newStatus),
+          onStatusChanged: (newStatus) =>
+              _updateTicketStatus(ticket, newStatus),
         );
       },
     );
@@ -199,7 +202,8 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: _getPriorityColor(ticket.priority).withOpacity(0.1),
+                      color: _getPriorityColor(ticket.priority)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -214,15 +218,17 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                       children: [
                         Text(
                           ticket.subject,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           '${ticket.userEmail} • ${_formatDate(ticket.createdAt)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -233,9 +239,9 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: AppSpacing.lg),
-              
+
               // Ticket Info
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -258,15 +264,15 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.lg),
-              
+
               // Message
               Text(
                 'Message:',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Expanded(
@@ -285,9 +291,9 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.lg),
-              
+
               // Actions
               Row(
                 children: [
@@ -305,7 +311,8 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
                         ),
                       ),
                     ),
-                  if (ticket.status == 'open') const SizedBox(width: AppSpacing.md),
+                  if (ticket.status == 'open')
+                    const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _showResponseDialog(ticket),
@@ -327,7 +334,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
 
   void _showResponseDialog(SupportTicket ticket) {
     final responseController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -370,7 +377,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
   void _showBroadcastDialog() {
     final titleController = TextEditingController();
     final messageController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -406,7 +413,8 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
           ),
           ElevatedButton(
             onPressed: () {
-              if (titleController.text.isNotEmpty && messageController.text.isNotEmpty) {
+              if (titleController.text.isNotEmpty &&
+                  messageController.text.isNotEmpty) {
                 Navigator.pop(context);
                 _sendBroadcast(titleController.text, messageController.text);
               }
@@ -425,7 +433,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
     setState(() {
       ticket.status = newStatus;
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Statut du ticket mis à jour: $newStatus'),
@@ -437,7 +445,7 @@ class _AdminSupportPageState extends State<AdminSupportPage> with TickerProvider
   void _sendResponse(SupportTicket ticket, String response) {
     // In a real app, this would send the response via API
     _updateTicketStatus(ticket, 'closed');
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Réponse envoyée avec succès'),
@@ -520,7 +528,8 @@ List<SupportTicket> _generateMockTickets() {
       id: '1',
       userEmail: 'sophie.martin@email.com',
       subject: 'Problème de connexion',
-      message: 'Je n\'arrive plus à me connecter avec Google depuis hier. L\'application se ferme à chaque fois.',
+      message:
+          'Je n\'arrive plus à me connecter avec Google depuis hier. L\'application se ferme à chaque fois.',
       category: 'technical',
       priority: 'high',
       status: 'open',
@@ -530,7 +539,8 @@ List<SupportTicket> _generateMockTickets() {
       id: '2',
       userEmail: 'marc.dupont@email.com',
       subject: 'Question sur l\'abonnement',
-      message: 'J\'aimerais savoir comment annuler mon abonnement Premium. Je ne trouve pas l\'option dans les paramètres.',
+      message:
+          'J\'aimerais savoir comment annuler mon abonnement Premium. Je ne trouve pas l\'option dans les paramètres.',
       category: 'payment',
       priority: 'medium',
       status: 'in_progress',
@@ -540,7 +550,8 @@ List<SupportTicket> _generateMockTickets() {
       id: '3',
       userEmail: 'claire.dubois@email.com',
       subject: 'Suggestion d\'amélioration',
-      message: 'Il serait bien d\'avoir plus de filtres pour les préférences de matching.',
+      message:
+          'Il serait bien d\'avoir plus de filtres pour les préférences de matching.',
       category: 'feature',
       priority: 'low',
       status: 'closed',
@@ -568,7 +579,7 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -578,15 +589,15 @@ class _StatCard extends StatelessWidget {
             Text(
               count.toString(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: color,
-              ),
+                    color: color,
+                  ),
             ),
           ],
         ),
@@ -623,7 +634,8 @@ class _SupportTicketCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: _getPriorityColor(ticket.priority).withOpacity(0.1),
+                      color: _getPriorityColor(ticket.priority)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -639,15 +651,17 @@ class _SupportTicketCard extends StatelessWidget {
                       children: [
                         Text(
                           ticket.subject,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         Text(
                           ticket.userEmail,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -659,8 +673,8 @@ class _SupportTicketCard extends StatelessWidget {
               Text(
                 ticket.message,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -736,15 +750,15 @@ class _StatusChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
       ),
     );
   }
@@ -764,15 +778,15 @@ class _InfoChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.1),
+        color: AppColors.primaryGold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         '$label: $value',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.primaryGold,
-          fontWeight: FontWeight.w500,
-        ),
+              color: AppColors.primaryGold,
+              fontWeight: FontWeight.w500,
+            ),
       ),
     );
   }

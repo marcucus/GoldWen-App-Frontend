@@ -125,7 +125,7 @@ class _AdvancedRecommendationsPageState extends State<AdvancedRecommendationsPag
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
               color: AppColors.errorRed,
@@ -165,7 +165,7 @@ class _AdvancedRecommendationsPageState extends State<AdvancedRecommendationsPag
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.search_off,
               size: 64,
               color: AppColors.textSecondary,

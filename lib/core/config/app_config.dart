@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'dart:io' show Platform;
 
 class AppConfig {
@@ -29,7 +31,7 @@ class AppConfig {
   static void debugPrintApiUrl() {
     final url = isDevelopment ? devMainApiBaseUrl : mainApiBaseUrl;
     // ignore: avoid_print
-    print('[DEBUG] API URL utilisée: $url');
+    debugPrint('[DEBUG] API URL utilisée: $url');
   }
 
   // Helper method to get the correct development URL based on platform

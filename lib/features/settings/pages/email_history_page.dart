@@ -61,7 +61,7 @@ class _EmailHistoryPageState extends State<EmailHistoryPage>
   Future<void> _handleRetry(String emailId) async {
     final provider = context.read<EmailNotificationProvider>();
     final success = await provider.retryEmail(emailId);
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -70,7 +70,8 @@ class _EmailHistoryPageState extends State<EmailHistoryPage>
                 ? 'Email retry initiated successfully'
                 : 'Failed to retry email. Please try again.',
           ),
-          backgroundColor: success ? AppColors.successGreen : AppColors.errorRed,
+          backgroundColor:
+              success ? AppColors.successGreen : AppColors.errorRed,
         ),
       );
     }
@@ -199,11 +200,11 @@ class _EmailDetailsSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textMuted.withOpacity(0.3),
+                  color: AppColors.textMuted.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
+
               // Content
               Expanded(
                 child: ListView(
@@ -216,7 +217,7 @@ class _EmailDetailsSheet extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: email.statusColor.withOpacity(0.1),
+                            color: email.statusColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           child: Icon(
@@ -232,7 +233,10 @@ class _EmailDetailsSheet extends StatelessWidget {
                             children: [
                               Text(
                                 email.typeName,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.textDark,
                                     ),
@@ -244,38 +248,42 @@ class _EmailDetailsSheet extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: AppSpacing.lg),
                     const Divider(),
                     const SizedBox(height: AppSpacing.lg),
-                    
+
                     // Details
                     _buildDetailRow(context, 'Subject', email.subject),
                     const SizedBox(height: AppSpacing.md),
                     _buildDetailRow(context, 'Recipient', email.recipient),
                     const SizedBox(height: AppSpacing.md),
-                    _buildDetailRow(context, 'Created', _formatDateTime(email.createdAt)),
-                    
+                    _buildDetailRow(
+                        context, 'Created', _formatDateTime(email.createdAt)),
+
                     if (email.sentAt != null) ...[
                       const SizedBox(height: AppSpacing.md),
-                      _buildDetailRow(context, 'Sent', _formatDateTime(email.sentAt!)),
+                      _buildDetailRow(
+                          context, 'Sent', _formatDateTime(email.sentAt!)),
                     ],
-                    
+
                     if (email.deliveredAt != null) ...[
                       const SizedBox(height: AppSpacing.md),
-                      _buildDetailRow(context, 'Delivered', _formatDateTime(email.deliveredAt!)),
+                      _buildDetailRow(context, 'Delivered',
+                          _formatDateTime(email.deliveredAt!)),
                     ],
-                    
+
                     if (email.hasError && email.errorMessage != null) ...[
                       const SizedBox(height: AppSpacing.lg),
                       const Divider(),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         'Error Details',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.errorRed,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.errorRed,
+                                ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Container(
@@ -286,9 +294,10 @@ class _EmailDetailsSheet extends StatelessWidget {
                         ),
                         child: Text(
                           email.errorMessage!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.errorRed,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.errorRed,
+                                  ),
                         ),
                       ),
                     ],
@@ -309,7 +318,7 @@ class _EmailDetailsSheet extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: email.statusColor.withOpacity(0.1),
+        color: email.statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(

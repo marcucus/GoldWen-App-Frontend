@@ -3,7 +3,7 @@ import '../shared/widgets/keyboard_dismissible.dart';
 import '../core/theme/app_theme.dart';
 
 /// Demo page to showcase keyboard dismissal functionality.
-/// 
+///
 /// This page demonstrates how the KeyboardDismissible widget allows users
 /// to dismiss the keyboard by tapping outside of input fields on mobile devices.
 class KeyboardDismissalDemo extends StatefulWidget {
@@ -43,10 +43,10 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryGold.withOpacity(0.1),
+                  color: AppColors.primaryGold.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                   border: Border.all(
-                    color: AppColors.primaryGold.withOpacity(0.3),
+                    color: AppColors.primaryGold.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -54,7 +54,7 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
                           color: AppColors.primaryGold,
                           size: 20,
@@ -62,10 +62,11 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           'Comment utiliser',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.primaryGold,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.primaryGold,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -86,8 +87,8 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
               Text(
                 'Formulaire de test',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: AppSpacing.md),
 
@@ -149,7 +150,7 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
                 ),
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.touch_app,
                       size: 48,
                       color: AppColors.textSecondary,
@@ -158,16 +159,16 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
                     Text(
                       'Zone de tap',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Tapez ici pour fermer le clavier',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -180,15 +181,15 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: AppColors.successGreen.withOpacity(0.1),
+                  color: AppColors.successGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                   border: Border.all(
-                    color: AppColors.successGreen.withOpacity(0.3),
+                    color: AppColors.successGreen.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: AppColors.successGreen,
                       size: 20,
@@ -198,8 +199,8 @@ class _KeyboardDismissalDemoState extends State<KeyboardDismissalDemo> {
                       child: Text(
                         'Cette fonctionnalité est maintenant active sur toutes les pages de l\'application !',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.successGreen,
-                        ),
+                              color: AppColors.successGreen,
+                            ),
                       ),
                     ),
                   ],

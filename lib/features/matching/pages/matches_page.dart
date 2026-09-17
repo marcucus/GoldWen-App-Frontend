@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/modern_cards.dart';
-import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
-import '../../subscription/providers/subscription_provider.dart';
 import '../widgets/match_card_widget.dart';
 
 enum MatchFilter { active, expiringSoon, archived }
@@ -18,7 +15,8 @@ class MatchesPage extends StatefulWidget {
   State<MatchesPage> createState() => _MatchesPageState();
 }
 
-class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin {
+class _MatchesPageState extends State<MatchesPage>
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   MatchFilter _selectedFilter = MatchFilter.active;
@@ -46,7 +44,8 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
 
   void _loadMatches() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      final matchingProvider =
+          Provider.of<MatchingProvider>(context, listen: false);
       matchingProvider.loadMatches();
     });
   }
@@ -65,14 +64,14 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
         title: Text(
           'Mes Matches',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
         ),
         backgroundColor: AppColors.backgroundCream,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => context.pop(),
         ),
         bottom: PreferredSize(
@@ -135,7 +134,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
     required IconData icon,
   }) {
     final isSelected = _selectedFilter == filter;
-    
+
     return Expanded(
       child: FilterChip(
         selected: isSelected,
@@ -172,7 +171,9 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: isSelected ? AppColors.primaryGold : AppColors.primaryGold.withOpacity(0.3),
+            color: isSelected
+                ? AppColors.primaryGold
+                : AppColors.primaryGold.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -190,7 +191,8 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
       case MatchFilter.expiringSoon:
         return matches.where((match) {
           if (match.expiresAt == null || match.isExpired) return false;
-          final hoursRemaining = match.expiresAt!.difference(DateTime.now()).inHours;
+          final hoursRemaining =
+              match.expiresAt!.difference(DateTime.now()).inHours;
           return hoursRemaining <= 3 && match.status == 'active';
         }).toList();
       case MatchFilter.archived:
@@ -228,7 +230,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 80,
               color: AppColors.errorRed,
@@ -237,8 +239,8 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
             Text(
               'Oups !',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -270,11 +272,12 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
     String title;
     String message;
     IconData icon;
-    
+
     switch (_selectedFilter) {
       case MatchFilter.active:
         title = 'Aucun match actif';
-        message = 'Continuez à faire des sélections quotidiennes pour trouver vos matches !';
+        message =
+            'Continuez à faire des sélections quotidiennes pour trouver vos matches !';
         icon = Icons.favorite_outline;
         break;
       case MatchFilter.expiringSoon:
@@ -288,7 +291,7 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
         icon = Icons.archive_outlined;
         break;
     }
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Center(
@@ -300,23 +303,23 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
               Icon(
                 icon,
                 size: 100,
-                color: AppColors.primaryGold.withOpacity(0.5),
+                color: AppColors.primaryGold.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
                 textAlign: TextAlign.center,
               ),
               if (_selectedFilter == MatchFilter.active) ...[
@@ -346,7 +349,8 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
       opacity: _fadeAnimation,
       child: RefreshIndicator(
         onRefresh: () async {
-          final provider = Provider.of<MatchingProvider>(context, listen: false);
+          final provider =
+              Provider.of<MatchingProvider>(context, listen: false);
           await provider.loadMatches();
         },
         child: ListView.builder(
@@ -357,7 +361,8 @@ class _MatchesPageState extends State<MatchesPage> with TickerProviderStateMixin
             return MatchCardWidget(
               match: match,
               onArchive: () {
-                final provider = Provider.of<MatchingProvider>(context, listen: false);
+                final provider =
+                    Provider.of<MatchingProvider>(context, listen: false);
                 provider.deleteMatch(match.id);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

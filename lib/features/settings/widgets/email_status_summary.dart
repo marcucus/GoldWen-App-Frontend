@@ -34,9 +34,9 @@ class EmailStatusSummary extends StatelessWidget {
               color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
-                color: failedCount > 0 
+                color: failedCount > 0
                     ? AppColors.errorRed
-                    : AppColors.warningAmber.withOpacity(0.15),
+                    : AppColors.warningAmber.withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -44,7 +44,9 @@ class EmailStatusSummary extends StatelessWidget {
               children: [
                 Icon(
                   Icons.email,
-                  color: failedCount > 0 ? AppColors.errorRed : AppColors.warningAmber,
+                  color: failedCount > 0
+                      ? AppColors.errorRed
+                      : AppColors.warningAmber,
                   size: 24,
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -82,7 +84,7 @@ class EmailStatusSummary extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right,
                   color: AppColors.textMuted,
                 ),
@@ -101,7 +103,7 @@ class EmailStatusSummary extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Text(

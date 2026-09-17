@@ -150,7 +150,7 @@ class DailyMatchesWithAdvancedScoring extends StatelessWidget {
                   tooltip: 'View Advanced Score',
                   onPressed: () {
                     // Get current user ID from auth provider or profile
-                    final currentUserId = 'current-user-id'; // Replace with actual user ID
+                    const currentUserId = 'current-user-id'; // Replace with actual user ID
                     
                     context.go(
                       '/advanced-recommendations?userId=$currentUserId&candidateIds=${profile.id}',

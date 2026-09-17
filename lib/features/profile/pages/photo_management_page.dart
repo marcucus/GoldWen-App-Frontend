@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/models/profile.dart';
 import '../widgets/photo_management_widget.dart';
 import '../providers/profile_provider.dart';
 
@@ -64,7 +63,7 @@ class _PhotoManagementPageState extends State<PhotoManagementPage> {
                         children: [
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.info_outline,
                                 color: AppColors.primaryGold,
                               ),
@@ -117,8 +116,8 @@ class _PhotoManagementPageState extends State<PhotoManagementPage> {
 
                       return Card(
                         color: hasMinPhotos
-                            ? AppColors.successGreen.withOpacity(0.1)
-                            : AppColors.warningAmber.withOpacity(0.1),
+                            ? AppColors.successGreen.withValues(alpha: 0.1)
+                            : AppColors.warningAmber.withValues(alpha: 0.1),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           child: Row(
@@ -157,7 +156,7 @@ class _PhotoManagementPageState extends State<PhotoManagementPage> {
       floatingActionButton: Consumer<ProfileProvider>(
         builder: (context, profileProvider, child) {
           if (profileProvider.photos.length >= 6) return Container();
-          
+
           return FloatingActionButton(
             onPressed: () {
               // Trigger photo addition through the widget

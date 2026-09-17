@@ -40,16 +40,17 @@ class _UserReportsPageState extends State<UserReportsPage> {
       status: _selectedStatus,
       refresh: refresh,
     );
-    
+
     if (refresh) {
       _currentPage = 1;
     }
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent * 0.8) {
-      final reportProvider = Provider.of<ReportProvider>(context, listen: false);
+      final reportProvider =
+          Provider.of<ReportProvider>(context, listen: false);
       if (reportProvider.hasMoreReports && !reportProvider.isLoading) {
         setState(() {
           _currentPage++;
@@ -85,7 +86,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withOpacity(0.2),
+                        color: AppColors.cardOverlay.withValues(alpha: 0.2),
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
@@ -99,10 +100,11 @@ class _UserReportsPageState extends State<UserReportsPage> {
                     Expanded(
                       child: Text(
                         'Mes signalements',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppColors.textLight,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
@@ -112,9 +114,9 @@ class _UserReportsPageState extends State<UserReportsPage> {
               // Content container
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.backgroundWhite,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(AppBorderRadius.xLarge),
                       topRight: Radius.circular(AppBorderRadius.xLarge),
                     ),
@@ -123,15 +125,17 @@ class _UserReportsPageState extends State<UserReportsPage> {
                     children: [
                       // Filter section
                       _buildFilterSection(),
-                      
+
                       // Reports list
                       Expanded(
                         child: Consumer<ReportProvider>(
                           builder: (context, reportProvider, child) {
-                            if (reportProvider.isLoading && reportProvider.myReports.isEmpty) {
+                            if (reportProvider.isLoading &&
+                                reportProvider.myReports.isEmpty) {
                               return const Center(
                                 child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primaryGold),
                                 ),
                               );
                             }
@@ -162,7 +166,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
   Widget _buildFilterSection() {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.backgroundWhite,
         border: Border(
           bottom: BorderSide(
@@ -177,9 +181,9 @@ class _UserReportsPageState extends State<UserReportsPage> {
           Text(
             'Filtrer par statut',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                ),
           ),
           const SizedBox(height: AppSpacing.sm),
           SingleChildScrollView(
@@ -205,13 +209,13 @@ class _UserReportsPageState extends State<UserReportsPage> {
 
   Widget _buildStatusChip(String label, ReportStatus? status) {
     final isSelected = _selectedStatus == status;
-    
+
     return FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => _onStatusFilterChanged(status),
       backgroundColor: AppColors.backgroundLight,
-      selectedColor: AppColors.primaryGold.withOpacity(0.2),
+      selectedColor: AppColors.primaryGold.withValues(alpha: 0.2),
       labelStyle: TextStyle(
         color: isSelected ? AppColors.primaryGold : AppColors.textSecondary,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -230,16 +234,18 @@ class _UserReportsPageState extends State<UserReportsPage> {
       child: ListView.separated(
         controller: _scrollController,
         padding: const EdgeInsets.all(AppSpacing.lg),
-        itemCount: reportProvider.myReports.length + 
-                  (reportProvider.hasMoreReports ? 1 : 0),
-        separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
+        itemCount: reportProvider.myReports.length +
+            (reportProvider.hasMoreReports ? 1 : 0),
+        separatorBuilder: (context, index) =>
+            const SizedBox(height: AppSpacing.md),
         itemBuilder: (context, index) {
           if (index >= reportProvider.myReports.length) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.lg),
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                 ),
               ),
             );
@@ -271,9 +277,9 @@ class _UserReportsPageState extends State<UserReportsPage> {
                   child: Text(
                     _getReportTypeLabel(report.type),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
                   ),
                 ),
                 _buildStatusBadge(report.status),
@@ -285,8 +291,8 @@ class _UserReportsPageState extends State<UserReportsPage> {
             Text(
               report.reason,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -295,7 +301,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
             // Date and additional info
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.access_time,
                   size: 16,
                   color: AppColors.textSecondary,
@@ -304,8 +310,8 @@ class _UserReportsPageState extends State<UserReportsPage> {
                 Text(
                   'Signalé le ${DateFormat('dd/MM/yyyy à HH:mm').format(report.createdAt)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -322,22 +328,22 @@ class _UserReportsPageState extends State<UserReportsPage> {
 
     switch (status) {
       case ReportStatus.pending:
-        backgroundColor = AppColors.warningAmber.withOpacity(0.1);
+        backgroundColor = AppColors.warningAmber.withValues(alpha: 0.1);
         textColor = AppColors.warningAmber;
         label = 'En attente';
         break;
       case ReportStatus.reviewed:
-        backgroundColor = AppColors.infoBlue.withOpacity(0.1);
+        backgroundColor = AppColors.infoBlue.withValues(alpha: 0.1);
         textColor = AppColors.infoBlue;
         label = 'Examiné';
         break;
       case ReportStatus.resolved:
-        backgroundColor = AppColors.successGreen.withOpacity(0.1);
+        backgroundColor = AppColors.successGreen.withValues(alpha: 0.1);
         textColor = AppColors.successGreen;
         label = 'Résolu';
         break;
       case ReportStatus.dismissed:
-        backgroundColor = AppColors.textSecondary.withOpacity(0.1);
+        backgroundColor = AppColors.textSecondary.withValues(alpha: 0.1);
         textColor = AppColors.backgroundDark;
         label = 'Rejeté';
         break;
@@ -355,9 +361,9 @@ class _UserReportsPageState extends State<UserReportsPage> {
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }
@@ -387,22 +393,22 @@ class _UserReportsPageState extends State<UserReportsPage> {
             Icon(
               Icons.report_off,
               size: 64,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Aucun signalement',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Vous n\'avez encore soumis aucun signalement.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -418,7 +424,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
               color: AppColors.errorRed,
@@ -427,16 +433,16 @@ class _UserReportsPageState extends State<UserReportsPage> {
             Text(
               'Erreur de chargement',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               reportProvider.error ?? 'Une erreur est survenue',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),

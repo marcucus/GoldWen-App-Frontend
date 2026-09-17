@@ -67,23 +67,23 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
           children: [
             // Target info card
             if (widget.targetUserName != null) _buildTargetInfoCard(),
-            
+
             const SizedBox(height: AppSpacing.lg),
 
             // Report type section
             Text(
               'Motif du signalement',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Sélectionnez la catégorie qui correspond le mieux au problème',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -98,9 +98,9 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
             Text(
               'Description du problème (optionnel)',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
@@ -153,7 +153,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
                     color: AppColors.infoBlue,
                     size: 20,
@@ -163,8 +163,8 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                     child: Text(
                       'Votre signalement sera examiné par notre équipe de modération. Vous ne pouvez signaler le même contenu qu\'une seule fois.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.infoBlue,
-                      ),
+                            color: AppColors.infoBlue,
+                          ),
                     ),
                   ),
                 ],
@@ -204,7 +204,8 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text(
@@ -224,7 +225,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
 
   Widget _buildTargetInfoCard() {
     final isMessageReport = widget.messageId != null;
-    
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -250,17 +251,17 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                 Text(
                   'Signalement de ${isMessageReport ? 'message' : 'profil'}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   widget.targetUserName!,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: AppColors.textDark,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -272,7 +273,7 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
 
   Widget _buildReportTypeOption(ReportType type, String label) {
     final isSelected = _selectedType == type;
-    
+
     return GestureDetector(
       onTap: widget.isSubmitting
           ? null
@@ -281,14 +282,12 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primaryGold.withOpacity(0.1) 
+          color: isSelected
+              ? AppColors.primaryGold.withValues(alpha: 0.1)
               : AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           border: Border.all(
-            color: isSelected 
-                ? AppColors.primaryGold 
-                : AppColors.borderLight,
+            color: isSelected ? AppColors.primaryGold : AppColors.borderLight,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -297,8 +296,8 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.primaryGold 
+                color: isSelected
+                    ? AppColors.primaryGold
                     : AppColors.backgroundLight,
                 shape: BoxShape.circle,
               ),
@@ -316,18 +315,18 @@ class _ReportFormWidgetState extends State<ReportFormWidget> {
                   Text(
                     label,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isSelected 
-                          ? AppColors.primaryGold 
-                          : AppColors.textDark,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: isSelected
+                              ? AppColors.primaryGold
+                              : AppColors.textDark,
+                        ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _reportTypeDescriptions[type]!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),

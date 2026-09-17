@@ -57,7 +57,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withOpacity(0.2),
+                        color: AppColors.cardOverlay.withValues(alpha: 0.2),
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
@@ -71,10 +71,11 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                     Expanded(
                       child: Text(
                         'Suppression de compte',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppColors.textLight,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
@@ -84,9 +85,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               // Content
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.backgroundWhite,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(AppBorderRadius.xLarge),
                       topRight: Radius.circular(AppBorderRadius.xLarge),
                     ),
@@ -96,7 +97,8 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                       final deletionStatus = gdprService.accountDeletionStatus;
 
                       // If account is scheduled for deletion, show status
-                      if (deletionStatus != null && deletionStatus.isScheduledForDeletion) {
+                      if (deletionStatus != null &&
+                          deletionStatus.isScheduledForDeletion) {
                         return _buildScheduledDeletionView(deletionStatus);
                       }
 
@@ -125,13 +127,14 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: AppColors.errorRed.withOpacity(0.1),
+              color: AppColors.errorRed.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppBorderRadius.large),
-              border: Border.all(color: AppColors.errorRed.withOpacity(0.3)),
+              border:
+                  Border.all(color: AppColors.errorRed.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.warning_amber_rounded,
                   size: 64,
                   color: AppColors.errorRed,
@@ -140,9 +143,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 Text(
                   'Suppression programmée',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.errorRed,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.errorRed,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -155,9 +158,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 Text(
                   '$daysLeft jours',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.errorRed,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.errorRed,
+                      ),
                 ),
               ],
             ),
@@ -185,7 +188,8 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.textSecondary),
+                  const Icon(Icons.info_outline,
+                      color: AppColors.textSecondary),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
@@ -218,11 +222,13 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.textLight),
                         ),
                       )
                     : const Icon(Icons.cancel),
-                label: Text(_isLoading ? 'Annulation...' : 'Annuler la suppression'),
+                label: Text(
+                    _isLoading ? 'Annulation...' : 'Annuler la suppression'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.successGreen,
                   foregroundColor: AppColors.textLight,
@@ -247,14 +253,15 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.errorRed.withOpacity(0.1),
+                color: AppColors.errorRed.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppBorderRadius.large),
-                border: Border.all(color: AppColors.errorRed.withOpacity(0.3)),
+                border: Border.all(
+                    color: AppColors.errorRed.withValues(alpha: 0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber_rounded,
                     color: AppColors.errorRed,
                     size: 32,
@@ -266,10 +273,11 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                       children: [
                         Text(
                           'Attention',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.errorRed,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.errorRed,
+                                  ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
@@ -366,22 +374,24 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                       Expanded(
                         child: Text(
                           'Supprimer immédiatement',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.xl + AppSpacing.sm),
+                    padding: const EdgeInsets.only(
+                        left: AppSpacing.xl + AppSpacing.sm),
                     child: Text(
                       _immediateDelete
                           ? 'Votre compte sera supprimé immédiatement et de façon irréversible.'
                           : 'Délai de grâce de 30 jours : vous pourrez annuler la suppression pendant cette période.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   ),
                 ],
@@ -401,11 +411,13 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.textLight),
                         ),
                       )
                     : const Icon(Icons.delete_forever),
-                label: Text(_isLoading ? 'Suppression...' : 'Supprimer mon compte'),
+                label: Text(
+                    _isLoading ? 'Suppression...' : 'Supprimer mon compte'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.errorRed,
                   foregroundColor: AppColors.textLight,
@@ -421,10 +433,10 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Annuler'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 ),
+                child: const Text('Annuler'),
               ),
             ),
           ],
@@ -437,9 +449,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: AppColors.primaryGold,
-      ),
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryGold,
+          ),
     );
   }
 
@@ -465,7 +477,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.close,
                   color: AppColors.errorRed,
                   size: 20,
@@ -503,15 +515,15 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -552,7 +564,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (!mounted || confirmed != true) return;
 
     setState(() {
       _isLoading = true;
@@ -567,11 +579,11 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       immediateDelete: _immediateDelete,
     );
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
-
-    if (!mounted) return;
 
     if (success) {
       if (_immediateDelete) {
@@ -583,8 +595,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       } else {
         // Show success message and refresh status
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Suppression programmée. Vous avez 30 jours pour annuler.'),
+          const SnackBar(
+            content: Text(
+                'Suppression programmée. Vous avez 30 jours pour annuler.'),
             backgroundColor: AppColors.successGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -610,16 +623,16 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
     final gdprService = Provider.of<GdprService>(context, listen: false);
     final success = await gdprService.cancelAccountDeletion();
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
 
-    if (!mounted) return;
-
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Suppression annulée avec succès'),
+        const SnackBar(
+          content: Text('Suppression annulée avec succès'),
           backgroundColor: AppColors.successGreen,
           behavior: SnackBarBehavior.floating,
         ),

@@ -83,7 +83,7 @@ class _ChatListPageState extends State<ChatListPage>
                 AppColors.gradientStart,
                 AppColors.gradientMiddle,
                 AppColors.gradientEnd
-                    .withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
+                    .withValues(alpha: 0.8 + 0.2 * _backgroundAnimation.value),
               ],
               stops: const [0.0, 0.4, 1.0],
             ),
@@ -149,7 +149,8 @@ class _ChatListPageState extends State<ChatListPage>
               // Archived chats button
               Consumer<ChatProvider>(
                 builder: (context, chatProvider, child) {
-                  final archivedCount = chatProvider.archivedConversations.length;
+                  final archivedCount =
+                      chatProvider.archivedConversations.length;
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -161,7 +162,8 @@ class _ChatListPageState extends State<ChatListPage>
                           padding: const EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: AppColors.backgroundGrey,
-                            borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.small),
                           ),
                           child: const Icon(
                             Icons.archive_outlined,
@@ -291,7 +293,7 @@ class _ChatListPageState extends State<ChatListPage>
   Widget _buildConversationItem(Conversation conversation, int index) {
     final isExpired = conversation.isExpired;
     final remainingTime = isExpired ? null : _formatRemainingTime(conversation);
-    
+
     return AnimatedPressable(
       onPressed: () => _openConversation(conversation),
       child: Container(
@@ -309,7 +311,7 @@ class _ChatListPageState extends State<ChatListPage>
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryGold.withOpacity(0.8),
+                      AppColors.primaryGold.withValues(alpha: 0.8),
                       AppColors.primaryGold,
                     ],
                   ),
@@ -333,7 +335,8 @@ class _ChatListPageState extends State<ChatListPage>
                       children: [
                         Expanded(
                           child: Text(
-                            conversation.otherParticipant?.firstName ?? 'Utilisateur',
+                            conversation.otherParticipant?.firstName ??
+                                'Utilisateur',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -346,18 +349,20 @@ class _ChatListPageState extends State<ChatListPage>
                         if (remainingTime != null)
                           Text(
                             remainingTime,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.primaryGold,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.primaryGold,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                         if (isExpired)
                           Text(
                             'Expiré',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.errorRed,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.errorRed,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                       ],
                     ),
@@ -366,8 +371,10 @@ class _ChatListPageState extends State<ChatListPage>
                       children: [
                         Expanded(
                           child: Text(
-                            conversation.lastMessage?.content ?? 
-                            (isExpired ? 'Conversation expirée' : 'Félicitations! Vous avez un match'),
+                            conversation.lastMessage?.content ??
+                                (isExpired
+                                    ? 'Conversation expirée'
+                                    : 'Félicitations! Vous avez un match'),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -378,7 +385,8 @@ class _ChatListPageState extends State<ChatListPage>
                                   fontWeight: conversation.hasUnreadMessages
                                       ? FontWeight.w500
                                       : FontWeight.normal,
-                                  fontStyle: isExpired ? FontStyle.italic : null,
+                                  fontStyle:
+                                      isExpired ? FontStyle.italic : null,
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -429,60 +437,14 @@ class _ChatListPageState extends State<ChatListPage>
 
   String _formatRemainingTime(Conversation conversation) {
     if (conversation.expiresAt == null) return '';
-    
+
     final remaining = conversation.expiresAt!.difference(DateTime.now());
     if (remaining.isNegative) return '';
-    
+
     final hours = remaining.inHours;
     final minutes = remaining.inMinutes % 60;
-    
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-  }
 
-  Widget _buildTypingIndicator() {
-    return Row(
-      children: [
-        Text(
-          'En train d\'écrire',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.primaryGold,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-        const SizedBox(width: 4),
-        SizedBox(
-          width: 20,
-          height: 20,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(3, (index) {
-              return AnimatedBuilder(
-                animation: _contentController,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(
-                      0,
-                      4 *
-                          (0.5 - (_contentController.value + index * 0.3) % 1.0)
-                              .abs(),
-                    ),
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGold,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
-          ),
-        ),
-      ],
-    );
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   Widget _buildLoadingState() {
@@ -526,10 +488,10 @@ class _ChatListPageState extends State<ChatListPage>
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.search_off_rounded,
                 size: 48,
                 color: AppColors.primaryGold,
@@ -547,7 +509,7 @@ class _ChatListPageState extends State<ChatListPage>
             Text(
               'Aucune conversation ne correspond à\n"$_searchQuery"',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textLight.withOpacity(0.7),
+                    color: AppColors.textLight.withValues(alpha: 0.7),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -589,7 +551,7 @@ class _ChatListPageState extends State<ChatListPage>
             Text(
               'Commencez à matcher pour recevoir vos premiers messages !',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textLight.withOpacity(0.8),
+                    color: AppColors.textLight.withValues(alpha: 0.8),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -601,7 +563,7 @@ class _ChatListPageState extends State<ChatListPage>
               },
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.9),
+                  Colors.white.withValues(alpha: 0.9),
                   Colors.white,
                 ],
               ),
@@ -617,16 +579,15 @@ class _ChatListPageState extends State<ChatListPage>
     if (conversation.isExpired) {
       // Show expired conversation message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Cette conversation a expiré'),
           backgroundColor: AppColors.errorRed,
         ),
       );
       return;
     }
-    
+
     // Navigate to chat detail page
     context.push('/chat/${conversation.id}');
   }
-
 }

@@ -58,7 +58,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _navController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _navController, curve: Curves.easeOutCubic));
 
     _pages = [
       HomePage(onNavigate: _navigateToTab),
@@ -134,25 +135,26 @@ class _MainNavigationPageState extends State<MainNavigationPage>
   Widget _buildNav() {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      margin: EdgeInsets.fromLTRB(20, 0, 20, (bottomPadding > 0 ? bottomPadding : 16)),
+      margin: EdgeInsets.fromLTRB(
+          20, 0, 20, (bottomPadding > 0 ? bottomPadding : 16)),
       child: Container(
         height: 68,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.18),
+            color: AppColors.primaryGold.withValues(alpha: 0.18),
             width: 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryGold.withOpacity(0.10),
+              color: AppColors.primaryGold.withValues(alpha: 0.10),
               blurRadius: 20,
               spreadRadius: 0,
               offset: const Offset(0, 6),
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -187,7 +189,7 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               height: 38,
               decoration: BoxDecoration(
                 color: isActive
-                    ? AppColors.primaryGold.withOpacity(0.10)
+                    ? AppColors.primaryGold.withValues(alpha: 0.10)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -195,9 +197,8 @@ class _MainNavigationPageState extends State<MainNavigationPage>
                 child: Icon(
                   isActive ? item.activeIcon : item.icon,
                   size: 22,
-                  color: isActive
-                      ? AppColors.primaryGold
-                      : AppColors.textTertiary,
+                  color:
+                      isActive ? AppColors.primaryGold : AppColors.textTertiary,
                 ),
               ),
             ),
@@ -207,11 +208,9 @@ class _MainNavigationPageState extends State<MainNavigationPage>
               style: TextStyle(
                 fontFamily: 'Lato',
                 fontSize: 10,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w400,
-                color: isActive
-                    ? AppColors.primaryGold
-                    : AppColors.textTertiary,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                color:
+                    isActive ? AppColors.primaryGold : AppColors.textTertiary,
                 letterSpacing: isActive ? 0.2 : 0,
                 height: 1.0,
               ),

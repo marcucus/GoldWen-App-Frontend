@@ -6,16 +6,17 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'gender_selection_page.dart';
 
 class PersonalityQuestionnairePage extends StatefulWidget {
   const PersonalityQuestionnairePage({super.key});
 
   @override
-  State<PersonalityQuestionnairePage> createState() => _PersonalityQuestionnairePageState();
+  State<PersonalityQuestionnairePage> createState() =>
+      _PersonalityQuestionnairePageState();
 }
 
-class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnairePage> {
+class _PersonalityQuestionnairePageState
+    extends State<PersonalityQuestionnairePage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final Map<String, dynamic> _answers = {};
@@ -25,108 +26,6 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
   List<PersonalityQuestion> _questions = [];
 
   // Hardcoded fallback questions in case API fails
-  final List<Map<String, dynamic>> _fallbackQuestions = [
-    {
-      'question': 'Qu\'est-ce qui vous motive le plus dans la vie ?',
-      'options': [
-        'L\'épanouissement personnel',
-        'Les relations humaines',
-        'La réussite professionnelle',
-        'L\'aventure et la découverte'
-      ],
-      'key': 'motivation'
-    },
-    {
-      'question': 'Comment préférez-vous passer votre temps libre ?',
-      'options': [
-        'Lire un bon livre',
-        'Sortir avec des amis',
-        'Faire du sport',
-        'Découvrir de nouveaux endroits'
-      ],
-      'key': 'free_time'
-    },
-    {
-      'question': 'Quelle est votre approche face aux conflits ?',
-      'options': [
-        'J\'évite autant que possible',
-        'Je préfère discuter calmement',
-        'Je fais face directement',
-        'J\'essaie de trouver un compromis'
-      ],
-      'key': 'conflict_style'
-    },
-    {
-      'question': 'Qu\'attendez-vous d\'une relation amoureuse ?',
-      'options': [
-        'Complicité et soutien mutuel',
-        'Passion et romance',
-        'Stabilité et sécurité',
-        'Croissance et évolution commune'
-      ],
-      'key': 'relationship_expectation'
-    },
-    {
-      'question': 'Comment décririez-vous votre style de communication ?',
-      'options': [
-        'Direct et honnête',
-        'Empathique et à l\'écoute',
-        'Drôle et léger',
-        'Réfléchi et posé'
-      ],
-      'key': 'communication_style'
-    },
-    {
-      'question': 'Quelle importance accordez-vous à la famille ?',
-      'options': [
-        'C\'est ma priorité absolue',
-        'Très importante mais pas unique',
-        'Importante mais j\'ai d\'autres priorités',
-        'Je privilégie mon indépendance'
-      ],
-      'key': 'family_importance'
-    },
-    {
-      'question': 'Comment gérez-vous le stress ?',
-      'options': [
-        'Méditation ou relaxation',
-        'Sport ou activité physique',
-        'Discussion avec des proches',
-        'Isolement pour réfléchir'
-      ],
-      'key': 'stress_management'
-    },
-    {
-      'question': 'Quelle est votre vision de l\'avenir ?',
-      'options': [
-        'Optimiste et confiante',
-        'Réaliste mais positive',
-        'Prudente et préparée',
-        'Spontanée et ouverte'
-      ],
-      'key': 'future_vision'
-    },
-    {
-      'question': 'Qu\'est-ce qui vous fait le plus rire ?',
-      'options': [
-        'L\'humour intelligent',
-        'Les situations absurdes',
-        'L\'autodérision',
-        'L\'humour subtil'
-      ],
-      'key': 'humor_style'
-    },
-    {
-      'question': 'Quelle valeur est la plus importante pour vous ?',
-      'options': [
-        'L\'authenticité',
-        'La bienveillance',
-        'L\'ambition',
-        'La liberté'
-      ],
-      'key': 'core_value'
-    },
-  ];
 
   @override
   void initState() {
@@ -136,9 +35,10 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
 
   Future<void> _loadPersonalityQuestions() async {
     try {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
       await profileProvider.loadPersonalityQuestions();
-      
+
       if (profileProvider.error != null) {
         setState(() {
           _error = profileProvider.error;
@@ -150,9 +50,10 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       // Use dynamic questions from API
       final backendQuestions = profileProvider.personalityQuestions;
       if (backendQuestions.isEmpty) {
-        print('WARNING: No personality questions found on server');
+        debugPrint('WARNING: No personality questions found on server');
         setState(() {
-          _error = 'Aucune question de personnalité trouvée sur le serveur. Veuillez contacter le support.';
+          _error =
+              'Aucune question de personnalité trouvée sur le serveur. Veuillez contacter le support.';
           _isLoading = false;
         });
         return;
@@ -162,14 +63,15 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       final sortedQuestions = List<PersonalityQuestion>.from(backendQuestions)
         ..sort((a, b) => a.order.compareTo(b.order));
 
-      print('Loaded ${sortedQuestions.length} personality questions successfully');
-      
+      debugPrint(
+          'Loaded ${sortedQuestions.length} personality questions successfully');
+
       setState(() {
         _questions = sortedQuestions;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading personality questions: $e');
+      debugPrint('Error loading personality questions: $e');
       setState(() {
         _error = 'Erreur lors du chargement des questions: $e';
         _isLoading = false;
@@ -203,7 +105,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 64,
                 color: AppColors.errorRed,
@@ -297,7 +199,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
             end: Alignment.bottomCenter,
             colors: [
               AppColors.backgroundWhite,
-              AppColors.accentCream.withOpacity(0.2),
+              AppColors.accentCream.withValues(alpha: 0.2),
               AppColors.backgroundWhite,
             ],
             stops: const [0.0, 0.5, 1.0],
@@ -310,7 +212,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryGold.withOpacity(0.1),
+                    color: AppColors.primaryGold.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -319,15 +221,17 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
               child: LinearProgressIndicator(
                 value: (_currentPage + 1) / _questions.length,
                 backgroundColor: AppColors.dividerLight,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                 minHeight: 4,
               ),
             ),
-            
+
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
+                physics:
+                    const NeverScrollableScrollPhysics(), // Disable horizontal swiping
                 onPageChanged: (page) {
                   setState(() {
                     _currentPage = page;
@@ -349,44 +253,45 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     final selectedAnswer = _answers[question.id];
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xl),
-          
+
           // Icon representing the question
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
+              color: AppColors.primaryGold.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.psychology_outlined,
               size: 32,
               color: AppColors.primaryGold,
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
-          
+
           // Question
           Text(
             question.question,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppColors.primaryGold,
-              fontSize: 24,
-            ),
+                  color: AppColors.primaryGold,
+                  fontSize: 24,
+                ),
             textAlign: TextAlign.center,
           ),
-          
+
           const SizedBox(height: AppSpacing.xxl),
-          
+
           // Options - render based on question type
           _buildQuestionOptions(question, selectedAnswer),
-          
+
           const SizedBox(height: AppSpacing.xl),
-          
+
           // Navigation buttons
           Row(
             children: [
@@ -406,49 +311,59 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                    boxShadow: (selectedAnswer != null && !_isSubmitting) ? [
-                      BoxShadow(
-                        color: AppColors.primaryGold.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ] : [],
+                    boxShadow: (selectedAnswer != null && !_isSubmitting)
+                        ? [
+                            BoxShadow(
+                              color:
+                                  AppColors.primaryGold.withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: ElevatedButton(
-                    onPressed: (selectedAnswer != null && !_isSubmitting) ? _nextQuestion : null,
+                    onPressed: (selectedAnswer != null && !_isSubmitting)
+                        ? _nextQuestion
+                        : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       elevation: 0,
                     ),
-                    child: _isSubmitting && _currentPage == _questions.length - 1
+                    child: _isSubmitting &&
+                            _currentPage == _questions.length - 1
                         ? const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                      : Text(
-                          _currentPage == _questions.length - 1 ? 'Terminer' : 'Suivant',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        : Text(
+                            _currentPage == _questions.length - 1
+                                ? 'Terminer'
+                                : 'Suivant',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
                   ),
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionOptions(PersonalityQuestion question, dynamic selectedAnswer) {
+  Widget _buildQuestionOptions(
+      PersonalityQuestion question, dynamic selectedAnswer) {
     if (question.type == 'multiple_choice') {
       final options = question.options;
       if (options == null || options.isEmpty) {
@@ -456,17 +371,17 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
           child: Text('Aucune option disponible pour cette question'),
         );
       }
-      
+
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: options.length,
         itemBuilder: (context, index) {
           if (index >= options.length) return Container();
-          
+
           final option = options[index];
           final isSelected = selectedAnswer == option;
-          
+
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: GestureDetector(
@@ -479,33 +394,39 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
-                  gradient: isSelected ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primaryGold.withOpacity(0.15),
-                      AppColors.primaryGold.withOpacity(0.08),
-                    ],
-                  ) : null,
+                  gradient: isSelected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.primaryGold.withValues(alpha: 0.15),
+                            AppColors.primaryGold.withValues(alpha: 0.08),
+                          ],
+                        )
+                      : null,
                   color: isSelected ? null : AppColors.backgroundWhite,
                   borderRadius: BorderRadius.circular(AppBorderRadius.large),
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryGold : AppColors.dividerLight,
+                    color: isSelected
+                        ? AppColors.primaryGold
+                        : AppColors.dividerLight,
                     width: isSelected ? 2 : 1,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: AppColors.primaryGold.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ] : [
-                    BoxShadow(
-                      color: AppColors.shadowLight,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primaryGold.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [
+                          const BoxShadow(
+                            color: AppColors.shadowLight,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: Row(
                   children: [
@@ -513,15 +434,19 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                       child: Text(
                         option,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: isSelected ? AppColors.primaryGold : AppColors.textDark,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                        ),
+                              color: isSelected
+                                  ? AppColors.primaryGold
+                                  : AppColors.textDark,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
                       ),
                     ),
                     if (isSelected)
                       Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.primaryGold,
                           shape: BoxShape.circle,
                         ),
@@ -543,7 +468,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
       final minValue = question.minValue ?? 1;
       final maxValue = question.maxValue ?? 5;
       final scaleRange = maxValue - minValue + 1;
-      
+
       return Column(
         children: [
           Text(
@@ -558,7 +483,7 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
             children: List.generate(scaleRange, (index) {
               final value = minValue + index;
               final isSelected = selectedAnswer == value;
-              
+
               return GestureDetector(
                 onTap: () => _selectAnswer(question.id, value),
                 child: Container(
@@ -566,9 +491,12 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
                   height: scaleRange <= 5 ? 50 : 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? AppColors.primaryGold : Colors.transparent,
+                    color:
+                        isSelected ? AppColors.primaryGold : Colors.transparent,
                     border: Border.all(
-                      color: isSelected ? AppColors.primaryGold : AppColors.textSecondary,
+                      color: isSelected
+                          ? AppColors.primaryGold
+                          : AppColors.textSecondary,
                       width: 2,
                     ),
                   ),
@@ -610,12 +538,13 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     }
   }
 
-  Widget _buildBooleanOption(String questionId, bool value, String label, dynamic selectedAnswer) {
+  Widget _buildBooleanOption(
+      String questionId, bool value, String label, dynamic selectedAnswer) {
     final isSelected = selectedAnswer == value;
-    
+
     return Card(
       elevation: isSelected ? 4 : 1,
-      color: isSelected ? AppColors.primaryGold.withOpacity(0.1) : null,
+      color: isSelected ? AppColors.primaryGold.withValues(alpha: 0.1) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
         side: BorderSide(
@@ -628,12 +557,12 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         title: Text(
           label,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: isSelected ? AppColors.primaryGold : null,
-            fontWeight: isSelected ? FontWeight.w600 : null,
-          ),
+                color: isSelected ? AppColors.primaryGold : null,
+                fontWeight: isSelected ? FontWeight.w600 : null,
+              ),
         ),
         trailing: isSelected
-            ? Icon(
+            ? const Icon(
                 Icons.check_circle,
                 color: AppColors.primaryGold,
               )
@@ -678,50 +607,52 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
     });
 
     try {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       // Verify we have all answers
       if (_answers.length < _questions.length) {
         throw Exception('Veuillez répondre à toutes les questions');
       }
-      
+
       // Convert answers to API format using actual question IDs
-      final List<Map<String, dynamic>> apiAnswers = _answers.entries.map((entry) {
+      final List<Map<String, dynamic>> apiAnswers =
+          _answers.entries.map((entry) {
         final questionId = entry.key;
         final answerValue = entry.value;
-        
+
         // Find the question to determine correct answer format
-        final question = _questions.firstWhere(
-          (q) => q.id == questionId, 
-          orElse: () => throw Exception('Question not found: $questionId')
-        );
-        
+        final question = _questions.firstWhere((q) => q.id == questionId,
+            orElse: () => throw Exception('Question not found: $questionId'));
+
         Map<String, dynamic> answerData = {
           'questionId': questionId,
         };
-        
+
         // Set the appropriate answer field based on question type
         if (question.type == 'multiple_choice') {
           answerData['textAnswer'] = answerValue.toString();
         } else if (question.type == 'scale') {
-          answerData['numericAnswer'] = answerValue is int ? answerValue : int.tryParse(answerValue.toString()) ?? 0;
+          answerData['numericAnswer'] = answerValue is int
+              ? answerValue
+              : int.tryParse(answerValue.toString()) ?? 0;
         } else if (question.type == 'boolean') {
-          answerData['booleanAnswer'] = answerValue is bool ? answerValue : answerValue.toString().toLowerCase() == 'true';
+          answerData['booleanAnswer'] = answerValue is bool
+              ? answerValue
+              : answerValue.toString().toLowerCase() == 'true';
         } else {
           answerData['textAnswer'] = answerValue.toString();
         }
-        
+
         return answerData;
       }).toList();
 
-      print('Submitting ${apiAnswers.length} personality answers');
-      print('API Answers format: $apiAnswers');
+      debugPrint('Submitting ${apiAnswers.length} personality answers');
+      debugPrint('API Answers format: $apiAnswers');
 
       // Submit to backend and refresh user to get updated status
       await ApiService.submitPersonalityAnswers(apiAnswers);
       await authProvider.refreshUser();
-      
+
       if (mounted) {
         // Navigate to gender selection to start the full onboarding flow
         // Navigator.of(context).pushReplacement(
@@ -732,22 +663,24 @@ class _PersonalityQuestionnairePageState extends State<PersonalityQuestionnaireP
         context.go('/gender-selection');
       }
     } catch (e) {
-      print('Error submitting personality answers: $e');
+      debugPrint('Error submitting personality answers: $e');
       if (mounted) {
         String errorMessage = 'Erreur lors de la sauvegarde: ${e.toString()}';
-        
+
         // Provide more specific error messages
         if (e.toString().contains('not found')) {
-          errorMessage = 'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
+          errorMessage =
+              'Erreur de configuration des questions. Veuillez redémarrer l\'application.';
         } else if (e.toString().contains('Validation failed')) {
-          errorMessage = 'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
+          errorMessage =
+              'Erreur de validation des réponses. Veuillez vérifier vos réponses.';
         }
-        
+
         setState(() {
           _error = errorMessage;
           _isSubmitting = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),

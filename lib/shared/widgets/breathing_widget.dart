@@ -35,9 +35,9 @@ class _BreathingWidgetState extends State<BreathingWidget>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -56,7 +56,7 @@ class _BreathingWidgetState extends State<BreathingWidget>
 
   void _startBreathing() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (widget.enabled && !accessibilityService.reducedMotion) {
       _controller.repeat(reverse: true);
     }
@@ -71,7 +71,7 @@ class _BreathingWidgetState extends State<BreathingWidget>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (!widget.enabled || accessibilityService.reducedMotion) {
       return widget.child;
     }
@@ -117,9 +117,9 @@ class _PulsingGlowState extends State<PulsingGlow>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -138,7 +138,7 @@ class _PulsingGlowState extends State<PulsingGlow>
 
   void _startPulsing() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (widget.enabled && !accessibilityService.reducedMotion) {
       _controller.repeat(reverse: true);
     }
@@ -153,7 +153,7 @@ class _PulsingGlowState extends State<PulsingGlow>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (!widget.enabled || accessibilityService.reducedMotion) {
       return widget.child;
     }
@@ -165,9 +165,11 @@ class _PulsingGlowState extends State<PulsingGlow>
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: widget.glowColor.withOpacity(0.3 * _glowAnimation.value),
+                color: widget.glowColor
+                    .withValues(alpha: 0.3 * _glowAnimation.value),
                 blurRadius: widget.maxGlowRadius * _glowAnimation.value,
-                spreadRadius: (widget.maxGlowRadius * 0.5) * _glowAnimation.value,
+                spreadRadius:
+                    (widget.maxGlowRadius * 0.5) * _glowAnimation.value,
               ),
             ],
           ),
@@ -207,9 +209,9 @@ class _FloatingWidgetState extends State<FloatingWidget>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -228,7 +230,7 @@ class _FloatingWidgetState extends State<FloatingWidget>
 
   void _startFloating() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (widget.enabled && !accessibilityService.reducedMotion) {
       _controller.repeat(reverse: true);
     }
@@ -243,7 +245,7 @@ class _FloatingWidgetState extends State<FloatingWidget>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (!widget.enabled || accessibilityService.reducedMotion) {
       return widget.child;
     }
@@ -291,9 +293,9 @@ class _GentleRotationState extends State<GentleRotation>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -312,7 +314,7 @@ class _GentleRotationState extends State<GentleRotation>
 
   void _startRotation() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (widget.enabled && !accessibilityService.reducedMotion) {
       if (widget.continuous) {
         _controller.repeat();
@@ -331,7 +333,7 @@ class _GentleRotationState extends State<GentleRotation>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (!widget.enabled || accessibilityService.reducedMotion) {
       return widget.child;
     }
@@ -340,7 +342,7 @@ class _GentleRotationState extends State<GentleRotation>
       animation: _rotationAnimation,
       builder: (context, child) {
         return Transform.rotate(
-          angle: widget.continuous 
+          angle: widget.continuous
               ? _rotationAnimation.value * 2 * 3.14159
               : _rotationAnimation.value,
           child: widget.child,
@@ -378,9 +380,9 @@ class _SuccessRippleState extends State<SuccessRipple>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -406,7 +408,7 @@ class _SuccessRippleState extends State<SuccessRipple>
   @override
   void didUpdateWidget(SuccessRipple oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (widget.trigger && !oldWidget.trigger) {
       final accessibilityService = context.read<AccessibilityService>();
       if (!accessibilityService.reducedMotion) {
@@ -439,7 +441,8 @@ class _SuccessRippleState extends State<SuccessRipple>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: widget.rippleColor.withOpacity(_opacityAnimation.value),
+                    color: widget.rippleColor
+                        .withValues(alpha: _opacityAnimation.value),
                     width: 2,
                   ),
                 ),

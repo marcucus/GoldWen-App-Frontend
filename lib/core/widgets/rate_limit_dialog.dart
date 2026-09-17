@@ -97,7 +97,7 @@ class _RateLimitDialogState extends State<RateLimitDialog> {
 
   String _getMessage() {
     final rateLimitInfo = widget.exception.rateLimitInfo;
-    
+
     // Check for brute force login attempts
     if (widget.exception.code == 'BRUTE_FORCE_DETECTED' ||
         (widget.exception.message.toLowerCase().contains('login') &&
@@ -109,11 +109,12 @@ class _RateLimitDialogState extends State<RateLimitDialog> {
     String message = widget.exception.message;
     if (rateLimitInfo != null) {
       if (rateLimitInfo.limit != null && rateLimitInfo.remaining != null) {
-        message += '\n\nVous avez dépassé la limite de ${rateLimitInfo.limit} requêtes.';
+        message +=
+            '\n\nVous avez dépassé la limite de ${rateLimitInfo.limit} requêtes.';
       }
       message += '\n\n${rateLimitInfo.getRetryMessage()}';
     }
-    
+
     return message;
   }
 
@@ -141,7 +142,7 @@ class _RateLimitDialogState extends State<RateLimitDialog> {
       ),
       title: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.timer_outlined,
             color: AppColors.primaryGold,
             size: 28,
@@ -174,16 +175,16 @@ class _RateLimitDialogState extends State<RateLimitDialog> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                 border: Border.all(
-                  color: AppColors.primaryGold.withOpacity(0.3),
+                  color: AppColors.primaryGold.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.hourglass_empty,
                     color: AppColors.primaryGold,
                     size: 20,
@@ -191,7 +192,7 @@ class _RateLimitDialogState extends State<RateLimitDialog> {
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     _getCountdownText(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryGold,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

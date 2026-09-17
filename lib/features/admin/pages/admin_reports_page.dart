@@ -12,7 +12,8 @@ class AdminReportsPage extends StatefulWidget {
   State<AdminReportsPage> createState() => _AdminReportsPageState();
 }
 
-class _AdminReportsPageState extends State<AdminReportsPage> with TickerProviderStateMixin {
+class _AdminReportsPageState extends State<AdminReportsPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final _scrollController = ScrollController();
   String? _selectedTypeFilter;
@@ -22,9 +23,11 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminProvider>().loadReports(refresh: true, status: 'pending');
+      context
+          .read<AdminProvider>()
+          .loadReports(refresh: true, status: 'pending');
     });
-    
+
     _scrollController.addListener(_onScroll);
     _tabController.addListener(_onTabChanged);
   }
@@ -37,7 +40,8 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       final adminProvider = context.read<AdminProvider>();
       if (adminProvider.hasMoreReports && !adminProvider.isLoading) {
         adminProvider.loadReports(
@@ -51,10 +55,10 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
   void _onTabChanged() {
     final status = _getStatusFromTab();
     context.read<AdminProvider>().loadReports(
-      refresh: true,
-      status: status,
-      type: _selectedTypeFilter,
-    );
+          refresh: true,
+          status: status,
+          type: _selectedTypeFilter,
+        );
   }
 
   String? _getStatusFromTab() {
@@ -72,10 +76,10 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
 
   void _performFilter() {
     context.read<AdminProvider>().loadReports(
-      refresh: true,
-      status: _getStatusFromTab(),
-      type: _selectedTypeFilter,
-    );
+          refresh: true,
+          status: _getStatusFromTab(),
+          type: _selectedTypeFilter,
+        );
   }
 
   @override
@@ -108,7 +112,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -118,7 +122,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedTypeFilter,
+                    initialValue: _selectedTypeFilter,
                     decoration: InputDecoration(
                       labelText: 'Type de signalement',
                       border: OutlineInputBorder(
@@ -128,10 +132,15 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                       fillColor: AppColors.backgroundGrey,
                     ),
                     items: const [
-                      DropdownMenuItem(value: null, child: Text('Tous les types')),
-                      DropdownMenuItem(value: 'inappropriate_content', child: Text('Contenu inapproprié')),
-                      DropdownMenuItem(value: 'fake_profile', child: Text('Faux profil')),
-                      DropdownMenuItem(value: 'harassment', child: Text('Harcèlement')),
+                      DropdownMenuItem(
+                          value: null, child: Text('Tous les types')),
+                      DropdownMenuItem(
+                          value: 'inappropriate_content',
+                          child: Text('Contenu inapproprié')),
+                      DropdownMenuItem(
+                          value: 'fake_profile', child: Text('Faux profil')),
+                      DropdownMenuItem(
+                          value: 'harassment', child: Text('Harcèlement')),
                       DropdownMenuItem(value: 'spam', child: Text('Spam')),
                       DropdownMenuItem(value: 'other', child: Text('Autre')),
                     ],
@@ -147,7 +156,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
+                    color: AppColors.primaryGold.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Consumer<AdminProvider>(
@@ -157,7 +166,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                           .length;
                       return Column(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.flag,
                             color: AppColors.primaryGold,
                             size: 20,
@@ -165,13 +174,13 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                           const SizedBox(height: 4),
                           Text(
                             '$pendingCount',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primaryGold,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-                          Text(
+                          const Text(
                             'En attente',
                             style: TextStyle(
                               color: AppColors.primaryGold,
@@ -186,7 +195,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
               ],
             ),
           ),
-          
+
           // Reports List
           Expanded(
             child: TabBarView(
@@ -223,7 +232,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.error_outline,
                   size: 64,
                   color: AppColors.errorRed,
@@ -237,7 +246,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                 Text(
                   adminProvider.error!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
@@ -268,7 +277,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Text(
+                const Text(
                   'Aucun signalement trouvé dans cette catégorie',
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
@@ -286,9 +295,12 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
           child: ListView.separated(
             controller: _scrollController,
             padding: const EdgeInsets.all(AppSpacing.md),
-            itemCount: filteredReports.length + 
-                (adminProvider.hasMoreReports && adminProvider.isLoading ? 1 : 0),
-            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+            itemCount: filteredReports.length +
+                (adminProvider.hasMoreReports && adminProvider.isLoading
+                    ? 1
+                    : 0),
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: AppSpacing.sm),
             itemBuilder: (context, index) {
               if (index == filteredReports.length) {
                 // Loading indicator for pagination
@@ -296,7 +308,8 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                   padding: EdgeInsets.all(AppSpacing.lg),
                   child: Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                     ),
                   ),
                 );
@@ -306,7 +319,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
               return ReportListItem(
                 report: report,
                 onTap: () => _showReportDetails(context, report),
-                onActionTaken: (action, resolution) => 
+                onActionTaken: (action, resolution) =>
                     _handleReportAction(report, action, resolution),
               );
             },
@@ -353,17 +366,23 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _DetailRow(label: 'ID', value: report.id),
-              _DetailRow(label: 'Type', value: _getTypeLabel(report.reportType)),
+              _DetailRow(
+                  label: 'Type', value: _getTypeLabel(report.reportType)),
               _DetailRow(label: 'Raison', value: report.reason),
               if (report.description != null)
                 _DetailRow(label: 'Description', value: report.description!),
-              _DetailRow(label: 'Utilisateur signalé', value: report.reportedUserId),
+              _DetailRow(
+                  label: 'Utilisateur signalé', value: report.reportedUserId),
               if (report.reporterUserId != null)
                 _DetailRow(label: 'Signalé par', value: report.reporterUserId!),
-              _DetailRow(label: 'Statut', value: _getStatusLabel(report.status)),
-              _DetailRow(label: 'Créé le', value: _formatDateTime(report.createdAt)),
+              _DetailRow(
+                  label: 'Statut', value: _getStatusLabel(report.status)),
+              _DetailRow(
+                  label: 'Créé le', value: _formatDateTime(report.createdAt)),
               if (report.resolvedAt != null)
-                _DetailRow(label: 'Résolu le', value: _formatDateTime(report.resolvedAt!)),
+                _DetailRow(
+                    label: 'Résolu le',
+                    value: _formatDateTime(report.resolvedAt!)),
               if (report.resolution != null)
                 _DetailRow(label: 'Résolution', value: report.resolution!),
             ],
@@ -408,12 +427,20 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: 'warning_sent', child: Text('Avertissement envoyé')),
-                DropdownMenuItem(value: 'content_removed', child: Text('Contenu supprimé')),
-                DropdownMenuItem(value: 'user_suspended', child: Text('Utilisateur suspendu')),
-                DropdownMenuItem(value: 'user_banned', child: Text('Utilisateur banni')),
-                DropdownMenuItem(value: 'no_action', child: Text('Aucune action nécessaire')),
-                DropdownMenuItem(value: 'false_report', child: Text('Faux signalement')),
+                DropdownMenuItem(
+                    value: 'warning_sent', child: Text('Avertissement envoyé')),
+                DropdownMenuItem(
+                    value: 'content_removed', child: Text('Contenu supprimé')),
+                DropdownMenuItem(
+                    value: 'user_suspended',
+                    child: Text('Utilisateur suspendu')),
+                DropdownMenuItem(
+                    value: 'user_banned', child: Text('Utilisateur banni')),
+                DropdownMenuItem(
+                    value: 'no_action',
+                    child: Text('Aucune action nécessaire')),
+                DropdownMenuItem(
+                    value: 'false_report', child: Text('Faux signalement')),
               ],
               onChanged: (value) => selectedAction = value,
             ),
@@ -436,9 +463,11 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
           ),
           ElevatedButton(
             onPressed: () {
-              if (selectedAction != null && resolutionController.text.isNotEmpty) {
+              if (selectedAction != null &&
+                  resolutionController.text.isNotEmpty) {
                 Navigator.pop(context);
-                _handleReportAction(report, selectedAction!, resolutionController.text);
+                _handleReportAction(
+                    report, selectedAction!, resolutionController.text);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -452,20 +481,22 @@ class _AdminReportsPageState extends State<AdminReportsPage> with TickerProvider
     );
   }
 
-  void _handleReportAction(AdminReport report, String action, String resolution) async {
+  void _handleReportAction(
+      AdminReport report, String action, String resolution) async {
     final success = await context.read<AdminProvider>().updateReportStatus(
-      report.id,
-      'resolved',
-      resolution,
-    );
-    
+          report.id,
+          'resolved',
+          resolution,
+        );
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success 
-              ? 'Signalement traité avec succès' 
+          content: Text(success
+              ? 'Signalement traité avec succès'
               : 'Erreur lors du traitement'),
-          backgroundColor: success ? AppColors.successGreen : AppColors.errorRed,
+          backgroundColor:
+              success ? AppColors.successGreen : AppColors.errorRed,
         ),
       );
     }
@@ -523,7 +554,7 @@ class _DetailRow extends StatelessWidget {
             width: 120,
             child: Text(
               '$label:',
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),

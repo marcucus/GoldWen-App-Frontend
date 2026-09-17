@@ -85,7 +85,7 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-        side: BorderSide(
+        side: const BorderSide(
           color: AppColors.dividerLight,
           width: 1,
         ),
@@ -97,7 +97,7 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.music_note,
                   color: AppColors.primaryGold,
                   size: 24,
@@ -125,10 +125,12 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
               controller: _songController,
               decoration: InputDecoration(
                 hintText: 'Ex: Bohemian Rhapsody - Queen',
-                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+                prefixIcon:
+                    const Icon(Icons.search, color: AppColors.textSecondary),
                 suffixIcon: _songController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear, color: AppColors.textSecondary),
+                        icon: const Icon(Icons.clear,
+                            color: AppColors.textSecondary),
                         onPressed: () {
                           setState(() {
                             _songController.clear();
@@ -139,15 +141,16 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                  borderSide: BorderSide(color: AppColors.dividerLight),
+                  borderSide: const BorderSide(color: AppColors.dividerLight),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                  borderSide: BorderSide(color: AppColors.dividerLight),
+                  borderSide: const BorderSide(color: AppColors.dividerLight),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                  borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+                  borderSide:
+                      const BorderSide(color: AppColors.primaryGold, width: 2),
                 ),
               ),
               onChanged: (value) {
@@ -184,7 +187,7 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
                     });
                   },
                   selectedColor: AppColors.primaryGold,
-                  backgroundColor: AppColors.accentCream.withOpacity(0.3),
+                  backgroundColor: AppColors.accentCream.withValues(alpha: 0.3),
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : AppColors.textDark,
                     fontWeight:
@@ -198,12 +201,12 @@ class _FavoriteSongWidgetState extends State<FavoriteSongWidget> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.accentCream.withOpacity(0.3),
+                  color: AppColors.accentCream.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(AppBorderRadius.small),
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: AppColors.success,
                       size: 20,

@@ -12,28 +12,31 @@ class NotificationManager {
   factory NotificationManager() => _instance;
   NotificationManager._internal();
 
-  final LocalNotificationService _localNotificationService = LocalNotificationService();
-  final FirebaseMessagingService _firebaseMessagingService = FirebaseMessagingService();
+  final LocalNotificationService _localNotificationService =
+      LocalNotificationService();
+  final FirebaseMessagingService _firebaseMessagingService =
+      FirebaseMessagingService();
   bool _initialized = false;
 
   Future<void> initialize(BuildContext context) async {
     if (_initialized) return;
 
+    final notificationProvider =
+        Provider.of<NotificationProvider>(context, listen: false);
     try {
       // Initialize Firebase Messaging
       await _firebaseMessagingService.initialize();
-      
+
       // Initialize Local Notifications
       await _localNotificationService.initialize();
-      
+
       // Load notification settings
-      final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
       await notificationProvider.loadNotificationSettings();
-      
+
       _initialized = true;
-      print('NotificationManager initialized successfully');
+      debugPrint('NotificationManager initialized successfully');
     } catch (e) {
-      print('Error initializing NotificationManager: $e');
+      debugPrint('Error initializing NotificationManager: $e');
       rethrow;
     }
   }
@@ -47,17 +50,17 @@ class NotificationManager {
     String? payload,
     Map<String, dynamic>? data,
   }) async {
-    final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
-    
+    final notificationProvider =
+        Provider.of<NotificationProvider>(context, listen: false);
+
     // Check if notification should be shown based on settings
     if (!notificationProvider.shouldShowNotification(type)) {
-      print('Notification blocked by settings: $type');
+      debugPrint('Notification blocked by settings: $type');
       return;
     }
 
     // Get notification style preferences
-    final style = notificationProvider.getNotificationStyle();
-    
+
     try {
       await _localNotificationService.showTypedNotification(
         type: type,
@@ -65,9 +68,9 @@ class NotificationManager {
         body: body,
         payload: payload,
       );
-      print('Notification shown: $type - $title');
+      debugPrint('Notification shown: $type - $title');
     } catch (e) {
-      print('Failed to show notification: $e');
+      debugPrint('Failed to show notification: $e');
     }
   }
 
@@ -83,7 +86,8 @@ class NotificationManager {
   }
 
   /// Show a new match notification
-  Future<void> showNewMatchNotification(BuildContext context, String matchedUserName) async {
+  Future<void> showNewMatchNotification(
+      BuildContext context, String matchedUserName) async {
     await showNotificationIfAllowed(
       context: context,
       type: 'new_match',
@@ -95,7 +99,8 @@ class NotificationManager {
   }
 
   /// Show a new message notification
-  Future<void> showNewMessageNotification(BuildContext context, String senderName) async {
+  Future<void> showNewMessageNotification(
+      BuildContext context, String senderName) async {
     await showNotificationIfAllowed(
       context: context,
       type: 'new_message',
@@ -108,10 +113,7 @@ class NotificationManager {
 
   /// Show a chat expiring notification
   Future<void> showChatExpiringNotification(
-    BuildContext context, 
-    String partnerName, 
-    int hoursLeft
-  ) async {
+      BuildContext context, String partnerName, int hoursLeft) async {
     await showNotificationIfAllowed(
       context: context,
       type: 'chat_expiring',
@@ -124,17 +126,18 @@ class NotificationManager {
 
   /// Schedule daily selection notifications
   Future<void> scheduleDailySelectionNotifications(BuildContext context) async {
-    final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
-    
+    final notificationProvider =
+        Provider.of<NotificationProvider>(context, listen: false);
+
     if (notificationProvider.shouldShowNotification('daily_selection')) {
       try {
         await _localNotificationService.scheduleDailySelectionNotification();
-        print('Daily selection notifications scheduled');
+        debugPrint('Daily selection notifications scheduled');
       } catch (e) {
-        print('Failed to schedule daily selection notifications: $e');
+        debugPrint('Failed to schedule daily selection notifications: $e');
       }
     } else {
-      print('Daily selection notifications disabled by user settings');
+      debugPrint('Daily selection notifications disabled by user settings');
     }
   }
 
@@ -142,9 +145,9 @@ class NotificationManager {
   Future<void> cancelAllNotifications() async {
     try {
       await _localNotificationService.cancelAll();
-      print('All notifications cancelled');
+      debugPrint('All notifications cancelled');
     } catch (e) {
-      print('Failed to cancel notifications: $e');
+      debugPrint('Failed to cancel notifications: $e');
     }
   }
 
@@ -162,12 +165,14 @@ class NotificationManager {
     }
 
     // Handle push token registration/removal based on pushEnabled setting
-    if (newSettings.pushEnabled && _firebaseMessagingService.deviceToken != null) {
+    if (newSettings.pushEnabled &&
+        _firebaseMessagingService.deviceToken != null) {
       // Ensure token is registered with backend
       try {
-        await _firebaseMessagingService.initialize(); // This will re-register if needed
+        await _firebaseMessagingService
+            .initialize(); // This will re-register if needed
       } catch (e) {
-        print('Failed to re-register push token: $e');
+        debugPrint('Failed to re-register push token: $e');
       }
     }
   }
@@ -175,12 +180,14 @@ class NotificationManager {
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     try {
-      final firebasePermission = await _firebaseMessagingService.requestPermissions();
-      final localPermission = await _localNotificationService.requestPermissions();
-      
+      final firebasePermission =
+          await _firebaseMessagingService.requestPermissions();
+      final localPermission =
+          await _localNotificationService.requestPermissions();
+
       return firebasePermission && localPermission;
     } catch (e) {
-      print('Failed to request notification permissions: $e');
+      debugPrint('Failed to request notification permissions: $e');
       return false;
     }
   }
@@ -188,7 +195,7 @@ class NotificationManager {
   /// Get current notification permission status
   bool get isInitialized => _initialized;
   String? get deviceToken => _firebaseMessagingService.deviceToken;
-  
+
   /// Cleanup resources
   void dispose() {
     _firebaseMessagingService.dispose();

@@ -39,7 +39,7 @@ class AdminStatsCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -49,7 +49,7 @@ class AdminStatsCard extends StatelessWidget {
                     ),
                   ),
                   if (onTap != null)
-                    Icon(
+                    const Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
                       color: AppColors.textTertiary,
@@ -60,16 +60,16 @@ class AdminStatsCard extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

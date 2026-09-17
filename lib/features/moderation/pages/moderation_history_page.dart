@@ -34,7 +34,7 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent * 0.8) {
       if (!_isLoading && _hasMore) {
         _loadMore();
@@ -112,9 +112,9 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
         title: Text(
           'Historique de Modération',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
         ),
         backgroundColor: AppColors.backgroundCream,
         elevation: 0,
@@ -153,8 +153,8 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.errorRed,
-              ),
+                    color: AppColors.errorRed,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -181,23 +181,23 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
               Icon(
                 Icons.verified_user,
                 size: 80,
-                color: AppColors.primaryGold.withOpacity(0.5),
+                color: AppColors.primaryGold.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
               Text(
                 'Aucune action de modération',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Tout votre contenu est conforme à nos règles de communauté.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -216,7 +216,8 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
             padding: EdgeInsets.all(16.0),
             child: Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
               ),
             ),
           );
@@ -337,7 +338,7 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(icon, color: color, size: 24),
@@ -434,7 +435,8 @@ class _ModerationHistoryPageState extends State<ModerationHistoryPage> {
                           ? 'Votre appel a été soumis avec succès'
                           : 'Erreur lors de la soumission de l\'appel',
                     ),
-                    backgroundColor: success ? AppColors.successGreen : AppColors.errorRed,
+                    backgroundColor:
+                        success ? AppColors.successGreen : AppColors.errorRed,
                   ),
                 );
               }

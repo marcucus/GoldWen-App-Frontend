@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class User {
   final String id;
   final String email;
@@ -53,61 +55,110 @@ class User {
 
   // Add missing getters that are expected by admin and user list components
   int? get age => null; // Age should come from profile, not user
-  String? get bio => null; // Bio should come from profile, not user  
+  String? get bio => null; // Bio should come from profile, not user
   DateTime? get lastActive => updatedAt; // Use updatedAt as lastActive
   String? get profilePicture => photoUrl; // Alias for photoUrl
 
   factory User.fromJson(Map<String, dynamic> json) {
     try {
       return User(
-        id: (json['id'] is String ? json['id'] as String : json['id']?.toString()) ?? 
-            (json['_id'] is String ? json['_id'] as String : json['_id']?.toString()) ?? '',
-        email: (json['email'] is String ? json['email'] as String : json['email']?.toString()) ?? '',
-        firstName: json['firstName'] is String ? json['firstName'] as String : 
-                   json['first_name'] is String ? json['first_name'] as String : 
-                   json['firstName']?.toString(),
-        lastName: json['lastName'] is String ? json['lastName'] as String : 
-                  json['last_name'] is String ? json['last_name'] as String :
-                  json['lastName']?.toString(),
-        photoUrl: json['photoUrl'] is String ? json['photoUrl'] as String : 
-                  json['photo_url'] is String ? json['photo_url'] as String : 
-                  json['avatar'] is String ? json['avatar'] as String :
-                  json['photoUrl']?.toString(),
-        fcmToken: json['fcmToken'] is String ? json['fcmToken'] as String : json['fcmToken']?.toString(),
-        notificationsEnabled: json['notificationsEnabled'] is bool ? json['notificationsEnabled'] as bool : 
-                             (json['notificationsEnabled']?.toString().toLowerCase() == 'true') ? true : 
-                             json['notificationsEnabled'] == null ? null : false,
-        emailNotifications: json['emailNotifications'] is bool ? json['emailNotifications'] as bool : 
-                           (json['emailNotifications']?.toString().toLowerCase() == 'true') ? true : 
-                           json['emailNotifications'] == null ? null : false,
-        pushNotifications: json['pushNotifications'] is bool ? json['pushNotifications'] as bool : 
-                          (json['pushNotifications']?.toString().toLowerCase() == 'true') ? true : 
-                          json['pushNotifications'] == null ? null : false,
-        createdAt: json['createdAt'] != null || json['created_at'] != null 
-                  ? _parseDateTime(json['createdAt'] ?? json['created_at']) 
-                  : null,
-        updatedAt: json['updatedAt'] != null || json['updated_at'] != null 
-                  ? _parseDateTime(json['updatedAt'] ?? json['updated_at']) 
-                  : null,
-        status: json['status'] is String ? json['status'] as String : json['status']?.toString(),
-        onboardingStep: json['onboardingStep'] is String ? json['onboardingStep'] as String : json['onboardingStep']?.toString(),
-        isOnboardingCompleted: json['isOnboardingCompleted'] is bool ? json['isOnboardingCompleted'] as bool :
-                              (json['isOnboardingCompleted']?.toString().toLowerCase() == 'true') ? true :
-                              json['isOnboardingCompleted'] == null ? null : false,
-        isProfileCompleted: json['isProfileCompleted'] is bool ? json['isProfileCompleted'] as bool :
-                           (json['isProfileCompleted']?.toString().toLowerCase() == 'true') ? true :
-                           json['isProfileCompleted'] == null ? null : false,
-        hasActiveSubscription: json['hasActiveSubscription'] is bool ? json['hasActiveSubscription'] as bool :
-                              (json['hasActiveSubscription']?.toString().toLowerCase() == 'true') ? true :
-                              json['hasActiveSubscription'] == null ? null : false,
-        subscriptionPlan: json['subscriptionPlan'] is String ? json['subscriptionPlan'] as String : json['subscriptionPlan']?.toString(),
-        subscriptionExpiresAt: json['subscriptionExpiresAt'] != null 
-                  ? _parseDateTime(json['subscriptionExpiresAt']) 
-                  : null,
+        id: (json['id'] is String
+                ? json['id'] as String
+                : json['id']?.toString()) ??
+            (json['_id'] is String
+                ? json['_id'] as String
+                : json['_id']?.toString()) ??
+            '',
+        email: (json['email'] is String
+                ? json['email'] as String
+                : json['email']?.toString()) ??
+            '',
+        firstName: json['firstName'] is String
+            ? json['firstName'] as String
+            : json['first_name'] is String
+                ? json['first_name'] as String
+                : json['firstName']?.toString(),
+        lastName: json['lastName'] is String
+            ? json['lastName'] as String
+            : json['last_name'] is String
+                ? json['last_name'] as String
+                : json['lastName']?.toString(),
+        photoUrl: json['photoUrl'] is String
+            ? json['photoUrl'] as String
+            : json['photo_url'] is String
+                ? json['photo_url'] as String
+                : json['avatar'] is String
+                    ? json['avatar'] as String
+                    : json['photoUrl']?.toString(),
+        fcmToken: json['fcmToken'] is String
+            ? json['fcmToken'] as String
+            : json['fcmToken']?.toString(),
+        notificationsEnabled: json['notificationsEnabled'] is bool
+            ? json['notificationsEnabled'] as bool
+            : (json['notificationsEnabled']?.toString().toLowerCase() == 'true')
+                ? true
+                : json['notificationsEnabled'] == null
+                    ? null
+                    : false,
+        emailNotifications: json['emailNotifications'] is bool
+            ? json['emailNotifications'] as bool
+            : (json['emailNotifications']?.toString().toLowerCase() == 'true')
+                ? true
+                : json['emailNotifications'] == null
+                    ? null
+                    : false,
+        pushNotifications: json['pushNotifications'] is bool
+            ? json['pushNotifications'] as bool
+            : (json['pushNotifications']?.toString().toLowerCase() == 'true')
+                ? true
+                : json['pushNotifications'] == null
+                    ? null
+                    : false,
+        createdAt: json['createdAt'] != null || json['created_at'] != null
+            ? _parseDateTime(json['createdAt'] ?? json['created_at'])
+            : null,
+        updatedAt: json['updatedAt'] != null || json['updated_at'] != null
+            ? _parseDateTime(json['updatedAt'] ?? json['updated_at'])
+            : null,
+        status: json['status'] is String
+            ? json['status'] as String
+            : json['status']?.toString(),
+        onboardingStep: json['onboardingStep'] is String
+            ? json['onboardingStep'] as String
+            : json['onboardingStep']?.toString(),
+        isOnboardingCompleted: json['isOnboardingCompleted'] is bool
+            ? json['isOnboardingCompleted'] as bool
+            : (json['isOnboardingCompleted']?.toString().toLowerCase() ==
+                    'true')
+                ? true
+                : json['isOnboardingCompleted'] == null
+                    ? null
+                    : false,
+        isProfileCompleted: json['isProfileCompleted'] is bool
+            ? json['isProfileCompleted'] as bool
+            : (json['isProfileCompleted']?.toString().toLowerCase() == 'true')
+                ? true
+                : json['isProfileCompleted'] == null
+                    ? null
+                    : false,
+        hasActiveSubscription: json['hasActiveSubscription'] is bool
+            ? json['hasActiveSubscription'] as bool
+            : (json['hasActiveSubscription']?.toString().toLowerCase() ==
+                    'true')
+                ? true
+                : json['hasActiveSubscription'] == null
+                    ? null
+                    : false,
+        subscriptionPlan: json['subscriptionPlan'] is String
+            ? json['subscriptionPlan'] as String
+            : json['subscriptionPlan']?.toString(),
+        subscriptionExpiresAt: json['subscriptionExpiresAt'] != null
+            ? _parseDateTime(json['subscriptionExpiresAt'])
+            : null,
       );
     } catch (e) {
-      print('Error parsing User from JSON: $e');
-      print('JSON data: $json');
+      debugPrint('Error parsing User from JSON: $e');
+      debugPrint('JSON data: $json');
       rethrow;
     }
   }
@@ -120,7 +171,7 @@ class User {
       try {
         return DateTime.parse(dateValue);
       } catch (e) {
-        print('Error parsing date: $dateValue');
+        debugPrint('Error parsing date: $dateValue');
         return null;
       }
     }
@@ -142,18 +193,22 @@ class User {
       if (lastName != null) 'lastName': lastName,
       if (photoUrl != null) 'photoUrl': photoUrl,
       if (fcmToken != null) 'fcmToken': fcmToken,
-      if (notificationsEnabled != null) 'notificationsEnabled': notificationsEnabled,
+      if (notificationsEnabled != null)
+        'notificationsEnabled': notificationsEnabled,
       if (emailNotifications != null) 'emailNotifications': emailNotifications,
       if (pushNotifications != null) 'pushNotifications': pushNotifications,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
       if (status != null) 'status': status,
       if (onboardingStep != null) 'onboardingStep': onboardingStep,
-      if (isOnboardingCompleted != null) 'isOnboardingCompleted': isOnboardingCompleted,
+      if (isOnboardingCompleted != null)
+        'isOnboardingCompleted': isOnboardingCompleted,
       if (isProfileCompleted != null) 'isProfileCompleted': isProfileCompleted,
-      if (hasActiveSubscription != null) 'hasActiveSubscription': hasActiveSubscription,
+      if (hasActiveSubscription != null)
+        'hasActiveSubscription': hasActiveSubscription,
       if (subscriptionPlan != null) 'subscriptionPlan': subscriptionPlan,
-      if (subscriptionExpiresAt != null) 'subscriptionExpiresAt': subscriptionExpiresAt!.toIso8601String(),
+      if (subscriptionExpiresAt != null)
+        'subscriptionExpiresAt': subscriptionExpiresAt!.toIso8601String(),
     };
   }
 
@@ -191,11 +246,14 @@ class User {
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
       onboardingStep: onboardingStep ?? this.onboardingStep,
-      isOnboardingCompleted: isOnboardingCompleted ?? this.isOnboardingCompleted,
+      isOnboardingCompleted:
+          isOnboardingCompleted ?? this.isOnboardingCompleted,
       isProfileCompleted: isProfileCompleted ?? this.isProfileCompleted,
-      hasActiveSubscription: hasActiveSubscription ?? this.hasActiveSubscription,
+      hasActiveSubscription:
+          hasActiveSubscription ?? this.hasActiveSubscription,
       subscriptionPlan: subscriptionPlan ?? this.subscriptionPlan,
-      subscriptionExpiresAt: subscriptionExpiresAt ?? this.subscriptionExpiresAt,
+      subscriptionExpiresAt:
+          subscriptionExpiresAt ?? this.subscriptionExpiresAt,
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/modern_cards.dart';
-import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/models/models.dart';
 import '../providers/matching_provider.dart';
 
@@ -14,7 +13,8 @@ class HistoryPage extends StatefulWidget {
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin {
+class _HistoryPageState extends State<HistoryPage>
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late ScrollController _scrollController;
@@ -50,22 +50,26 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       _loadMoreHistory();
     }
   }
 
   void _loadHistory() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      final matchingProvider =
+          Provider.of<MatchingProvider>(context, listen: false);
       matchingProvider.loadHistory(page: 1, limit: _itemsPerPage);
     });
   }
 
   void _loadMoreHistory() {
-    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+    final matchingProvider =
+        Provider.of<MatchingProvider>(context, listen: false);
     if (!matchingProvider.isLoading && matchingProvider.hasMoreHistory) {
-      matchingProvider.loadHistory(page: _currentPage + 1, limit: _itemsPerPage);
+      matchingProvider.loadHistory(
+          page: _currentPage + 1, limit: _itemsPerPage);
       _currentPage++;
     }
   }
@@ -85,24 +89,26 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
         title: Text(
           'Historique',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
         ),
         backgroundColor: AppColors.backgroundCream,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => context.pop(),
         ),
       ),
       body: Consumer<MatchingProvider>(
         builder: (context, matchingProvider, child) {
-          if (matchingProvider.isLoading && matchingProvider.historyItems.isEmpty) {
+          if (matchingProvider.isLoading &&
+              matchingProvider.historyItems.isEmpty) {
             return _buildLoadingState();
           }
 
-          if (matchingProvider.error != null && matchingProvider.historyItems.isEmpty) {
+          if (matchingProvider.error != null &&
+              matchingProvider.historyItems.isEmpty) {
             return _buildErrorState(matchingProvider.error!, matchingProvider);
           }
 
@@ -144,7 +150,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 80,
               color: AppColors.errorRed,
@@ -153,8 +159,8 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             Text(
               'Oups !',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -165,7 +171,8 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => provider.loadHistory(page: 1, limit: _itemsPerPage),
+              onPressed: () =>
+                  provider.loadHistory(page: 1, limit: _itemsPerPage),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGold,
                 foregroundColor: Colors.white,
@@ -194,23 +201,23 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
               Icon(
                 Icons.history,
                 size: 100,
-                color: AppColors.primaryGold.withOpacity(0.5),
+                color: AppColors.primaryGold.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
               Text(
                 'Aucun historique',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Votre historique de sélections apparaîtra ici une fois que vous aurez commencé à faire des choix.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                      color: AppColors.textSecondary,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -239,12 +246,14 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
       child: RefreshIndicator(
         onRefresh: () async {
           _currentPage = 1;
-          await provider.loadHistory(page: 1, limit: _itemsPerPage, refresh: true);
+          await provider.loadHistory(
+              page: 1, limit: _itemsPerPage, refresh: true);
         },
         child: ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.all(16),
-          itemCount: provider.historyItems.length + (provider.hasMoreHistory ? 1 : 0),
+          itemCount:
+              provider.historyItems.length + (provider.hasMoreHistory ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == provider.historyItems.length) {
               // Loading indicator for pagination
@@ -252,7 +261,8 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 padding: EdgeInsets.all(16),
                 child: Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                   ),
                 ),
               );
@@ -277,7 +287,7 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
             // Date header
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.calendar_today,
                   color: AppColors.primaryGold,
                   size: 20,
@@ -286,20 +296,21 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 Text(
                   _formatDate(historyItem.date),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
+                    color: AppColors.primaryGold.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${historyItem.choices.length} choix',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryGold,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -321,15 +332,16 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
   Widget _buildChoiceItem(HistoryChoice choice) {
     final isLike = choice.choice == 'like';
     final targetUser = choice.targetUser;
-    
+
     // Handle different formats of targetUser data
     String userName = 'Utilisateur';
     String? userPhoto;
-    
+
     if (targetUser is Map<String, dynamic>) {
       userName = targetUser['name'] as String? ?? 'Utilisateur';
       final photos = targetUser['photos'] as List<dynamic>?;
-      userPhoto = (photos != null && photos.isNotEmpty) ? photos.first as String : null;
+      userPhoto =
+          (photos != null && photos.isNotEmpty) ? photos.first as String : null;
     }
 
     return Padding(
@@ -344,8 +356,8 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryGold.withOpacity(0.3),
-                  AppColors.primaryGold.withOpacity(0.7),
+                  AppColors.primaryGold.withValues(alpha: 0.3),
+                  AppColors.primaryGold.withValues(alpha: 0.7),
                 ],
               ),
             ),
@@ -381,16 +393,16 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
                 Text(
                   userName,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textDark,
-                  ),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textDark,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   _formatTime(choice.chosenAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -407,7 +419,8 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
               const SizedBox(width: 8),
               if (choice.isMatch) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.successGreen,
                     borderRadius: BorderRadius.circular(8),
@@ -438,11 +451,21 @@ class _HistoryPageState extends State<HistoryPage> with TickerProviderStateMixin
       if (difference == 0) {
         return "Aujourd'hui";
       } else if (difference == 1) {
-        return "Hier";
+        return 'Hier';
       } else {
         final months = [
-          'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-          'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+          'janvier',
+          'février',
+          'mars',
+          'avril',
+          'mai',
+          'juin',
+          'juillet',
+          'août',
+          'septembre',
+          'octobre',
+          'novembre',
+          'décembre'
         ];
         return '${date.day} ${months[date.month - 1]} ${date.year}';
       }

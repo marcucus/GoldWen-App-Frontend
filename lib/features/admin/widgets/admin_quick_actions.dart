@@ -95,16 +95,18 @@ class AdminQuickActions extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Type de notification',
                   border: OutlineInputBorder(),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'general', child: Text('Générale')),
-                  DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
+                  DropdownMenuItem(
+                      value: 'maintenance', child: Text('Maintenance')),
                   DropdownMenuItem(value: 'update', child: Text('Mise à jour')),
-                  DropdownMenuItem(value: 'announcement', child: Text('Annonce')),
+                  DropdownMenuItem(
+                      value: 'announcement', child: Text('Annonce')),
                 ],
                 onChanged: (value) => selectedType = value ?? 'general',
               ),
@@ -118,7 +120,8 @@ class AdminQuickActions extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (titleController.text.isNotEmpty && bodyController.text.isNotEmpty) {
+              if (titleController.text.isNotEmpty &&
+                  bodyController.text.isNotEmpty) {
                 // Here you would call the broadcast notification method
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +173,7 @@ class _QuickActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -183,17 +186,17 @@ class _QuickActionCard extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.3,
-                ),
+                      color: AppColors.textSecondary,
+                      height: 1.3,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

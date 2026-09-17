@@ -23,8 +23,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _loadProfile() {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    final subscriptionProvider =
+        Provider.of<SubscriptionProvider>(context, listen: false);
     profileProvider.loadProfile();
     subscriptionProvider.loadCurrentSubscription();
     subscriptionProvider.loadSubscriptionUsage();
@@ -48,7 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withOpacity(0.2),
+                        color: AppColors.cardOverlay.withValues(alpha: 0.2),
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
@@ -62,22 +64,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     Expanded(
                       child: Text(
                         'Profil & Paramètres',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppColors.textLight,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Content container
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.backgroundWhite,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(AppBorderRadius.xLarge),
                       topRight: Radius.circular(AppBorderRadius.xLarge),
                     ),
@@ -87,7 +90,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       if (profileProvider.isLoading) {
                         return const Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primaryGold),
                           ),
                         );
                       }
@@ -99,31 +103,32 @@ class _SettingsPageState extends State<SettingsPage> {
                             // Profile Header Section
                             _buildProfileHeader(profileProvider),
                             const SizedBox(height: AppSpacing.xl),
-                            
+
                             // Profile Management Section
                             _buildSectionTitle('Mon Profil'),
                             const SizedBox(height: AppSpacing.md),
-                            _buildProfileManagementSection(context, profileProvider),
+                            _buildProfileManagementSection(
+                                context, profileProvider),
                             const SizedBox(height: AppSpacing.xl),
-                            
+
                             // Subscription Section
                             _buildSectionTitle('Abonnement'),
                             const SizedBox(height: AppSpacing.md),
                             _buildSubscriptionSection(context),
                             const SizedBox(height: AppSpacing.xl),
-                            
+
                             // Settings Section
                             _buildSectionTitle('Paramètres'),
                             const SizedBox(height: AppSpacing.md),
                             _buildSettingsSection(context),
                             const SizedBox(height: AppSpacing.xl),
-                            
+
                             // Help & Legal Section
                             _buildSectionTitle('Aide & Confidentialité'),
                             const SizedBox(height: AppSpacing.md),
                             _buildHelpSection(context),
                             const SizedBox(height: AppSpacing.xl),
-                            
+
                             // Logout Section
                             _buildLogoutSection(context),
                             const SizedBox(height: AppSpacing.xl),
@@ -149,7 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGold.withOpacity(0.1),
+            color: AppColors.primaryGold.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -162,7 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.3),
+              color: AppColors.primaryGold.withValues(alpha: 0.3),
               shape: BoxShape.circle,
               border: Border.all(
                 color: AppColors.primaryGold,
@@ -172,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: profileProvider.photos.isNotEmpty
                 ? ClipOval(
                     child: Container(
-                      color: AppColors.primaryGold.withOpacity(0.6),
+                      color: AppColors.primaryGold.withValues(alpha: 0.6),
                       child: const Icon(
                         Icons.person,
                         size: 50,
@@ -186,32 +191,32 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: AppColors.primaryGold,
                   ),
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
-          
+
           // Name and age
           Text(
             '${profileProvider.name}, ${profileProvider.age}',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.primaryGold,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: AppColors.primaryGold,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          
+
           const SizedBox(height: AppSpacing.sm),
-          
+
           // Bio
           if (profileProvider.bio != null && profileProvider.bio!.isNotEmpty)
             Text(
               profileProvider.bio!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-          
+
           // Stats row
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -233,16 +238,16 @@ class _SettingsPageState extends State<SettingsPage> {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppColors.primaryGold,
-            fontWeight: FontWeight.bold,
-          ),
+                color: AppColors.primaryGold,
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+                color: AppColors.textSecondary,
+              ),
         ),
       ],
     );
@@ -254,14 +259,15 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
+              color: AppColors.textDark,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
 
-  Widget _buildProfileManagementSection(BuildContext context, ProfileProvider profileProvider) {
+  Widget _buildProfileManagementSection(
+      BuildContext context, ProfileProvider profileProvider) {
     return Column(
       children: [
         _buildSettingItem(
@@ -274,7 +280,9 @@ class _SettingsPageState extends State<SettingsPage> {
         _buildSettingItem(
           context,
           'Mes prompts',
-          profileProvider.promptAnswers.isEmpty ? 'Non complété' : '${profileProvider.promptAnswers.length} prompt(s)',
+          profileProvider.promptAnswers.isEmpty
+              ? 'Non complété'
+              : '${profileProvider.promptAnswers.length} prompt(s)',
           Icons.chat_bubble_outline,
           () => _navigateToPromptsEditing(context),
         ),
@@ -292,7 +300,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildSubscriptionSection(BuildContext context) {
     return Consumer<SubscriptionProvider>(
       builder: (context, subscriptionProvider, child) {
-        final hasActiveSubscription = subscriptionProvider.hasActiveSubscription;
+        final hasActiveSubscription =
+            subscriptionProvider.hasActiveSubscription;
         final currentPlanName = subscriptionProvider.currentPlanName;
         final nextRenewalDate = subscriptionProvider.nextRenewalDate;
         final daysUntilExpiry = subscriptionProvider.daysUntilExpiry;
@@ -304,11 +313,12 @@ class _SettingsPageState extends State<SettingsPage> {
               _buildSettingItem(
                 context,
                 'Abonnement GoldWen Plus',
-                currentPlanName != null 
-                  ? 'Plan actuel: $currentPlanName'
-                  : 'Abonnement actif',
+                currentPlanName != null
+                    ? 'Plan actuel: $currentPlanName'
+                    : 'Abonnement actif',
                 Icons.star,
-                () => _showSubscriptionManagementDialog(context, subscriptionProvider),
+                () => _showSubscriptionManagementDialog(
+                    context, subscriptionProvider),
                 highlight: true,
               ),
               if (nextRenewalDate != null && daysUntilExpiry != null)
@@ -329,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               _buildUpgradePromotionCard(),
             ],
-            
+
             // Restore purchases option
             _buildSettingItem(
               context,
@@ -353,24 +363,24 @@ class _SettingsPageState extends State<SettingsPage> {
       margin: const EdgeInsets.only(top: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        gradient: willRenew 
-          ? LinearGradient(
-              colors: [
-                AppColors.successGreen.withOpacity(0.1),
-                AppColors.successGreen.withOpacity(0.05),
-              ],
-            )
-          : LinearGradient(
-              colors: [
-                AppColors.warningOrange.withOpacity(0.1),
-                AppColors.warningOrange.withOpacity(0.05),
-              ],
-            ),
+        gradient: willRenew
+            ? LinearGradient(
+                colors: [
+                  AppColors.successGreen.withValues(alpha: 0.1),
+                  AppColors.successGreen.withValues(alpha: 0.05),
+                ],
+              )
+            : LinearGradient(
+                colors: [
+                  AppColors.warningOrange.withValues(alpha: 0.1),
+                  AppColors.warningOrange.withValues(alpha: 0.05),
+                ],
+              ),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
         border: Border.all(
-          color: willRenew 
-            ? AppColors.successGreen.withOpacity(0.3)
-            : AppColors.warningOrange.withOpacity(0.3),
+          color: willRenew
+              ? AppColors.successGreen.withValues(alpha: 0.3)
+              : AppColors.warningOrange.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -385,16 +395,20 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  willRenew ? 'Renouvellement automatique' : 'Abonnement expire bientôt',
+                  willRenew
+                      ? 'Renouvellement automatique'
+                      : 'Abonnement expire bientôt',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: willRenew ? AppColors.successGreen : AppColors.warningOrange,
+                    color: willRenew
+                        ? AppColors.successGreen
+                        : AppColors.warningOrange,
                   ),
                 ),
                 Text(
-                  daysUntilExpiry > 0 
-                    ? '$daysUntilExpiry jours restants'
-                    : 'Expiré',
+                  daysUntilExpiry > 0
+                      ? '$daysUntilExpiry jours restants'
+                      : 'Expiré',
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                   ),
@@ -414,16 +428,16 @@ class _SettingsPageState extends State<SettingsPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryGold.withOpacity(0.1),
-            AppColors.primaryGold.withOpacity(0.05),
+            AppColors.primaryGold.withValues(alpha: 0.1),
+            AppColors.primaryGold.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.primaryGold.withValues(alpha: 0.3),
         ),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -432,7 +446,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Icons.star,
                 color: AppColors.primaryGold,
               ),
-              const SizedBox(width: AppSpacing.sm),
+              SizedBox(width: AppSpacing.sm),
               Text(
                 'Fonctionnalités Premium',
                 style: TextStyle(
@@ -442,10 +456,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           Text(
             '• 3 sélections par jour au lieu d\'1\n• Chat illimité avec vos matches\n• Voir qui vous a sélectionné\n• Profil prioritaire dans les recommandations',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
             ),
@@ -590,18 +604,18 @@ class _SettingsPageState extends State<SettingsPage> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isDestructive 
-                  ? AppColors.errorRed.withOpacity(0.1)
-                  : highlight 
-                      ? AppColors.primaryGold.withOpacity(0.1)
-                      : AppColors.primaryGold.withOpacity(0.1),
+              color: isDestructive
+                  ? AppColors.errorRed.withValues(alpha: 0.1)
+                  : highlight
+                      ? AppColors.primaryGold.withValues(alpha: 0.1)
+                      : AppColors.primaryGold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
             ),
             child: Icon(
               icon,
-              color: isDestructive 
+              color: isDestructive
                   ? AppColors.errorRed
-                  : highlight 
+                  : highlight
                       ? AppColors.primaryGold
                       : AppColors.primaryGold,
             ),
@@ -616,11 +630,13 @@ class _SettingsPageState extends State<SettingsPage> {
           subtitle: Text(
             subtitle,
             style: TextStyle(
-              color: isDestructive ? AppColors.errorRed.withOpacity(0.7) : AppColors.textSecondary,
+              color: isDestructive
+                  ? AppColors.errorRed.withValues(alpha: 0.7)
+                  : AppColors.textSecondary,
             ),
           ),
           trailing: Icon(
-            Icons.arrow_forward_ios, 
+            Icons.arrow_forward_ios,
             size: 16,
             color: isDestructive ? AppColors.errorRed : AppColors.textSecondary,
           ),
@@ -634,11 +650,11 @@ class _SettingsPageState extends State<SettingsPage> {
   void _navigateToPhotoManagement(BuildContext context) {
     context.go('/profile-setup');
   }
-  
+
   void _navigateToPromptsEditing(BuildContext context) {
     context.go('/prompts-management');
   }
-  
+
   void _navigateToPreferences(BuildContext context) {
     _showPreferencesDialog(context);
   }
@@ -658,7 +674,8 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Préférences'),
-          content: const Text('Fonctionnalité de préférences en cours de développement. '
+          content: const Text(
+              'Fonctionnalité de préférences en cours de développement. '
               'Vous pourrez bientôt personnaliser vos critères de recherche ici.'),
           actions: [
             TextButton(
@@ -672,15 +689,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showNotificationSettings(BuildContext context) {
-    final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
-    
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Consumer<NotificationProvider>(
           builder: (context, provider, child) {
             final settings = provider.settings;
-            
+
             if (settings == null) {
               return AlertDialog(
                 title: const Text('Notifications'),
@@ -693,7 +708,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               );
             }
-            
+
             return AlertDialog(
               title: const Text('Paramètres de Notifications'),
               content: SingleChildScrollView(
@@ -703,7 +718,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     SwitchListTile(
                       title: const Text('Notifications Push'),
-                      subtitle: const Text('Activer toutes les notifications push'),
+                      subtitle:
+                          const Text('Activer toutes les notifications push'),
                       value: settings.pushEnabled,
                       onChanged: (value) {
                         provider.togglePushNotifications();
@@ -714,75 +730,97 @@ class _SettingsPageState extends State<SettingsPage> {
                       title: const Text('Sélection Quotidienne'),
                       subtitle: const Text('Votre sélection du jour à midi'),
                       value: settings.dailySelection,
-                      onChanged: settings.pushEnabled ? (value) {
-                        provider.toggleDailySelectionNotifications();
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              provider.toggleDailySelectionNotifications();
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Nouveaux Matches'),
                       subtitle: const Text('Alertes pour nouveaux matches'),
                       value: settings.newMatches,
-                      onChanged: settings.pushEnabled ? (value) {
-                        provider.toggleNewMatchNotifications();
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              provider.toggleNewMatchNotifications();
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Nouveaux Messages'),
                       subtitle: const Text('Alertes pour nouveaux messages'),
                       value: settings.newMessages,
-                      onChanged: settings.pushEnabled ? (value) {
-                        provider.toggleNewMessageNotifications();
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              provider.toggleNewMessageNotifications();
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Chat expirant'),
-                      subtitle: const Text('Rappel avant expiration du chat 24h'),
+                      subtitle:
+                          const Text('Rappel avant expiration du chat 24h'),
                       value: settings.chatExpiring,
-                      onChanged: settings.pushEnabled ? (value) {
-                        final s = settings.copyWith(chatExpiring: value);
-                        provider.updateNotificationSettings(s);
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              final s = settings.copyWith(chatExpiring: value);
+                              provider.updateNotificationSettings(s);
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Promotions'),
                       subtitle: const Text('Offres et actualités GoldWen Plus'),
                       value: settings.promotions,
-                      onChanged: settings.pushEnabled ? (value) {
-                        final s = settings.copyWith(promotions: value);
-                        provider.updateNotificationSettings(s);
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              final s = settings.copyWith(promotions: value);
+                              provider.updateNotificationSettings(s);
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Mises à jour système'),
-                      subtitle: const Text('Informations importantes sur le service'),
+                      subtitle:
+                          const Text('Informations importantes sur le service'),
                       value: settings.systemUpdates,
-                      onChanged: settings.pushEnabled ? (value) {
-                        final s = settings.copyWith(systemUpdates: value);
-                        provider.updateNotificationSettings(s);
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              final s = settings.copyWith(systemUpdates: value);
+                              provider.updateNotificationSettings(s);
+                            }
+                          : null,
                     ),
                     const Divider(),
                     SwitchListTile(
                       title: const Text('Son'),
-                      subtitle: const Text('Jouer un son lors des notifications'),
+                      subtitle:
+                          const Text('Jouer un son lors des notifications'),
                       value: settings.soundEnabled,
-                      onChanged: settings.pushEnabled ? (value) {
-                        final newSettings = settings.copyWith(soundEnabled: value);
-                        provider.updateNotificationSettings(newSettings);
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              final newSettings =
+                                  settings.copyWith(soundEnabled: value);
+                              provider.updateNotificationSettings(newSettings);
+                            }
+                          : null,
                     ),
                     SwitchListTile(
                       title: const Text('Vibration'),
                       subtitle: const Text('Vibrer lors des notifications'),
                       value: settings.vibrationEnabled,
-                      onChanged: settings.pushEnabled ? (value) {
-                        final newSettings = settings.copyWith(vibrationEnabled: value);
-                        provider.updateNotificationSettings(newSettings);
-                      } : null,
+                      onChanged: settings.pushEnabled
+                          ? (value) {
+                              final newSettings =
+                                  settings.copyWith(vibrationEnabled: value);
+                              provider.updateNotificationSettings(newSettings);
+                            }
+                          : null,
                     ),
                     const Divider(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -791,7 +829,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           const SizedBox(height: 4),
                           Text(
                             '${settings.quietHoursStart} – ${settings.quietHoursEnd}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 13),
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 13),
                           ),
                         ],
                       ),
@@ -818,7 +857,8 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Localisation'),
-          content: const Text('Paramètres de géolocalisation en cours de développement.'),
+          content: const Text(
+              'Paramètres de géolocalisation en cours de développement.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -836,7 +876,8 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Sécurité'),
-          content: const Text('Paramètres de sécurité en cours de développement.'),
+          content:
+              const Text('Paramètres de sécurité en cours de développement.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -847,22 +888,22 @@ class _SettingsPageState extends State<SettingsPage> {
       },
     );
   }
-  
+
   void _showSupportDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Aide et Support'),
-          content: Column(
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Pour toute question ou problème:'),
-              const SizedBox(height: 12),
-              const Text('📧 Email: support@goldwen.app'),
-              const Text('💬 Chat: Disponible dans l\'app'),
-              const Text('📱 Téléphone: +33 1 23 45 67 89'),
+              Text('Pour toute question ou problème:'),
+              SizedBox(height: 12),
+              Text('📧 Email: support@goldwen.app'),
+              Text('💬 Chat: Disponible dans l\'app'),
+              Text('📱 Téléphone: +33 1 23 45 67 89'),
             ],
           ),
           actions: [
@@ -901,7 +942,8 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 // Clear subscription data on logout
-                final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+                final subscriptionProvider =
+                    Provider.of<SubscriptionProvider>(context, listen: false);
                 await subscriptionProvider.logout();
                 await authProvider.signOut();
                 if (context.mounted) {
@@ -919,16 +961,17 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showSubscriptionManagementDialog(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  void _showSubscriptionManagementDialog(
+      BuildContext context, SubscriptionProvider subscriptionProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.star, color: AppColors.primaryGold),
-              const SizedBox(width: AppSpacing.sm),
-              const Text('Gestion d\'abonnement'),
+              SizedBox(width: AppSpacing.sm),
+              Text('Gestion d\'abonnement'),
             ],
           ),
           content: Column(
@@ -940,17 +983,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: AppSpacing.sm),
               ],
               if (subscriptionProvider.nextRenewalDate != null) ...[
-                Text('Prochain renouvellement: ${_formatDate(subscriptionProvider.nextRenewalDate!)}'),
+                Text(
+                    'Prochain renouvellement: ${_formatDate(subscriptionProvider.nextRenewalDate!)}'),
                 const SizedBox(height: AppSpacing.sm),
               ],
               Text(
-                subscriptionProvider.willRenew 
-                  ? 'Renouvellement automatique activé'
-                  : 'Renouvellement automatique désactivé',
+                subscriptionProvider.willRenew
+                    ? 'Renouvellement automatique activé'
+                    : 'Renouvellement automatique désactivé',
                 style: TextStyle(
-                  color: subscriptionProvider.willRenew 
-                    ? AppColors.successGreen 
-                    : AppColors.warningOrange,
+                  color: subscriptionProvider.willRenew
+                      ? AppColors.successGreen
+                      : AppColors.warningOrange,
                 ),
               ),
             ],
@@ -965,7 +1009,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.of(context).pop();
                 _showCancelSubscriptionDialog(context, subscriptionProvider);
               },
-              child: Text(
+              child: const Text(
                 'Annuler l\'abonnement',
                 style: TextStyle(color: AppColors.errorRed),
               ),
@@ -983,7 +1027,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showCancelSubscriptionDialog(BuildContext context, SubscriptionProvider subscriptionProvider) {
+  void _showCancelSubscriptionDialog(
+      BuildContext context, SubscriptionProvider subscriptionProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1003,7 +1048,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.of(context).pop();
                 _cancelSubscription(context, subscriptionProvider);
               },
-              child: Text(
+              child: const Text(
                 'Annuler l\'abonnement',
                 style: TextStyle(color: AppColors.errorRed),
               ),
@@ -1014,15 +1059,16 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _cancelSubscription(BuildContext context, SubscriptionProvider subscriptionProvider) async {
+  void _cancelSubscription(
+      BuildContext context, SubscriptionProvider subscriptionProvider) async {
     _showLoadingDialog(context, 'Annulation en cours...');
 
     try {
       final success = await subscriptionProvider.cancelSubscription();
-      
+
       if (context.mounted) {
         Navigator.of(context).pop(); // Close loading dialog
-        
+
         if (success) {
           _showSuccessDialog(
             context,
@@ -1033,7 +1079,8 @@ class _SettingsPageState extends State<SettingsPage> {
           _showErrorDialog(
             context,
             'Erreur',
-            subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'annulation',
+            subscriptionProvider.error ??
+                'Une erreur est survenue lors de l\'annulation',
           );
         }
       }
@@ -1049,15 +1096,16 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void _restorePurchases(BuildContext context, SubscriptionProvider subscriptionProvider) async {
+  void _restorePurchases(
+      BuildContext context, SubscriptionProvider subscriptionProvider) async {
     _showLoadingDialog(context, 'Restauration en cours...');
 
     try {
       final success = await subscriptionProvider.restoreSubscription();
-      
+
       if (context.mounted) {
         Navigator.of(context).pop(); // Close loading dialog
-        
+
         if (success) {
           _showSuccessDialog(
             context,
@@ -1109,7 +1157,7 @@ class _SettingsPageState extends State<SettingsPage> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.check_circle, color: AppColors.successGreen),
+              const Icon(Icons.check_circle, color: AppColors.successGreen),
               const SizedBox(width: AppSpacing.sm),
               Text(title),
             ],
@@ -1133,7 +1181,7 @@ class _SettingsPageState extends State<SettingsPage> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.error, color: AppColors.errorRed),
+              const Icon(Icons.error, color: AppColors.errorRed),
               const SizedBox(width: AppSpacing.sm),
               Text(title),
             ],

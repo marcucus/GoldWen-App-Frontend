@@ -59,10 +59,11 @@ class _NotificationsPageState extends State<NotificationsPage>
             builder: (context, provider, _) {
               if (provider.unreadCount > 0) {
                 return IconButton(
-                  icon: const Icon(Icons.done_all, color: AppColors.primaryGold),
+                  icon:
+                      const Icon(Icons.done_all, color: AppColors.primaryGold),
                   onPressed: () async {
                     await provider.markAllAsRead();
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('All notifications marked as read'),
@@ -86,8 +87,8 @@ class _NotificationsPageState extends State<NotificationsPage>
             Consumer<NotificationProvider>(
               builder: (context, provider, _) {
                 return Tab(
-                  text: provider.unreadCount > 0 
-                      ? 'Non lues (${provider.unreadCount})' 
+                  text: provider.unreadCount > 0
+                      ? 'Non lues (${provider.unreadCount})'
                       : 'Non lues',
                 );
               },
@@ -106,11 +107,14 @@ class _NotificationsPageState extends State<NotificationsPage>
         ],
       ),
       // Add test page FAB in debug mode only
-      floatingActionButton: kDebugMode ? FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/notifications/test'),
-        backgroundColor: AppColors.primaryGold,
-        child: const Icon(Icons.bug_report, color: Colors.white),
-      ) : null,
+      floatingActionButton: kDebugMode
+          ? FloatingActionButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/notifications/test'),
+              backgroundColor: AppColors.primaryGold,
+              child: const Icon(Icons.bug_report, color: Colors.white),
+            )
+          : null,
     );
   }
 
@@ -134,7 +138,8 @@ class _NotificationsPageState extends State<NotificationsPage>
           return const EmptyStateWidget(
             icon: Icons.notifications_none,
             title: 'Aucune nouvelle notification',
-            message: 'Vous êtes à jour ! Toutes vos notifications ont été lues.',
+            message:
+                'Vous êtes à jour ! Toutes vos notifications ont été lues.',
           );
         }
 
@@ -314,7 +319,7 @@ class _NotificationsPageState extends State<NotificationsPage>
         ),
         value: value,
         onChanged: (_) => onChanged(),
-        activeColor: AppColors.primaryGold,
+        activeThumbColor: AppColors.primaryGold,
       ),
     );
   }
@@ -373,7 +378,7 @@ class _NotificationsPageState extends State<NotificationsPage>
 
   void _handleNotificationTap(AppNotification notification) {
     final provider = context.read<NotificationProvider>();
-    
+
     // Mark as read if not already
     if (!notification.isRead) {
       provider.markAsRead(notification.id);
@@ -419,7 +424,8 @@ class _NotificationsPageState extends State<NotificationsPage>
         newSettings = settings.copyWith(soundEnabled: !settings.soundEnabled);
         break;
       case 'vibrationEnabled':
-        newSettings = settings.copyWith(vibrationEnabled: !settings.vibrationEnabled);
+        newSettings =
+            settings.copyWith(vibrationEnabled: !settings.vibrationEnabled);
         break;
       default:
         return;
@@ -433,7 +439,7 @@ class _NotificationsPageState extends State<NotificationsPage>
     final settings = provider.settings;
     if (settings == null) return;
 
-    final currentTime = isStart 
+    final currentTime = isStart
         ? TimeOfDay(
             hour: int.parse(settings.quietHoursStart.split(':')[0]),
             minute: int.parse(settings.quietHoursStart.split(':')[1]),
@@ -449,12 +455,13 @@ class _NotificationsPageState extends State<NotificationsPage>
     );
 
     if (selectedTime != null) {
-      final timeString = '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
-      
+      final timeString =
+          '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
+
       final newSettings = isStart
           ? settings.copyWith(quietHoursStart: timeString)
           : settings.copyWith(quietHoursEnd: timeString);
-      
+
       await provider.updateNotificationSettings(newSettings);
     }
   }

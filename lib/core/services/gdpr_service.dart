@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,7 +30,7 @@ class GdprService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final consentGiven = prefs.getBool('gdpr_consent_given') ?? false;
     final consentDate = prefs.getString('gdpr_consent_date');
-    
+
     if (consentGiven && consentDate != null) {
       try {
         final date = DateTime.parse(consentDate);
@@ -44,10 +43,10 @@ class GdprService extends ChangeNotifier {
         notifyListeners();
         return true;
       } catch (e) {
-        print('Error parsing consent date: $e');
+        debugPrint('Error parsing consent date: $e');
       }
     }
-    
+
     return false;
   }
 
@@ -61,7 +60,7 @@ class GdprService extends ChangeNotifier {
     _error = null;
 
     try {
-      final response = await ApiService.submitGdprConsent(
+      await ApiService.submitGdprConsent(
         dataProcessing: dataProcessing,
         marketing: marketing,
         analytics: analytics,
@@ -70,7 +69,8 @@ class GdprService extends ChangeNotifier {
       // Store consent locally
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('gdpr_consent_given', dataProcessing);
-      await prefs.setString('gdpr_consent_date', DateTime.now().toIso8601String());
+      await prefs.setString(
+          'gdpr_consent_date', DateTime.now().toIso8601String());
       if (marketing != null) {
         await prefs.setBool('gdpr_marketing_consent', marketing);
       }
@@ -99,7 +99,8 @@ class GdprService extends ChangeNotifier {
   }
 
   // Load privacy policy
-  Future<bool> loadPrivacyPolicy({String? version, String format = 'json'}) async {
+  Future<bool> loadPrivacyPolicy(
+      {String? version, String format = 'json'}) async {
     _setLoading(true);
     _error = null;
 
@@ -136,7 +137,7 @@ class GdprService extends ChangeNotifier {
       _error = e.toString();
       _setLoading(false);
       notifyListeners();
-      throw e;
+      rethrow;
     }
   }
 
@@ -217,9 +218,10 @@ class GdprService extends ChangeNotifier {
 
       // Parse deletion status from response
       if (response['data'] != null) {
-        _accountDeletionStatus = AccountDeletionStatus.fromJson(response['data']);
+        _accountDeletionStatus =
+            AccountDeletionStatus.fromJson(response['data']);
       }
-      
+
       // If immediate deletion, clear all local consent data
       if (immediateDelete) {
         await clearLocalConsentData();
@@ -307,7 +309,7 @@ class GdprService extends ChangeNotifier {
 
     try {
       await ApiService.cancelAccountDeletion();
-      
+
       // Reset deletion status to active
       _accountDeletionStatus = AccountDeletionStatus(status: 'active');
 
@@ -331,7 +333,8 @@ class GdprService extends ChangeNotifier {
       final response = await ApiService.getAccountDeletionStatus();
 
       if (response['data'] != null) {
-        _accountDeletionStatus = AccountDeletionStatus.fromJson(response['data']);
+        _accountDeletionStatus =
+            AccountDeletionStatus.fromJson(response['data']);
       }
 
       _setLoading(false);
@@ -373,7 +376,7 @@ class GdprService extends ChangeNotifier {
   // Validate if consent is still valid (not older than 1 year)
   bool isConsentStillValid() {
     if (_currentConsent == null) return false;
-    
+
     final consentAge = DateTime.now().difference(_currentConsent!.consentedAt);
     return consentAge.inDays < 365; // Valid for 1 year
   }
@@ -381,7 +384,7 @@ class GdprService extends ChangeNotifier {
   // Check if consent needs to be renewed
   bool needsConsentRenewal() {
     if (_currentConsent == null) return true;
-    
+
     final consentAge = DateTime.now().difference(_currentConsent!.consentedAt);
     return consentAge.inDays >= 300; // Remind to renew after 10 months
   }

@@ -36,7 +36,8 @@ class ReportListItem extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: _getTypeColor(report.reportType).withOpacity(0.1),
+                      color: _getTypeColor(report.reportType)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -45,9 +46,9 @@ class ReportListItem extends StatelessWidget {
                       size: 20,
                     ),
                   ),
-                  
+
                   const SizedBox(width: AppSpacing.md),
-                  
+
                   // Report Info
                   Expanded(
                     child: Column(
@@ -55,35 +56,37 @@ class ReportListItem extends StatelessWidget {
                       children: [
                         Text(
                           _getTypeLabel(report.reportType),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark,
+                                  ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           report.reason,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Status Chip
                   _StatusChip(status: report.status),
                 ],
               ),
-              
+
               const SizedBox(height: AppSpacing.md),
-              
+
               // Details Row
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.person_outlined,
                     size: 14,
                     color: AppColors.textTertiary,
@@ -92,11 +95,11 @@ class ReportListItem extends StatelessWidget {
                   Text(
                     'Utilisateur: ${report.reportedUserId.substring(0, 8)}...',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
+                          color: AppColors.textTertiary,
+                        ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  Icon(
+                  const Icon(
                     Icons.access_time,
                     size: 14,
                     color: AppColors.textTertiary,
@@ -105,14 +108,15 @@ class ReportListItem extends StatelessWidget {
                   Text(
                     _formatCreatedAt(report.createdAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
+                          color: AppColors.textTertiary,
+                        ),
                   ),
                 ],
               ),
-              
+
               // Description if available
-              if (report.description != null && report.description!.isNotEmpty) ...[
+              if (report.description != null &&
+                  report.description!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
@@ -123,15 +127,15 @@ class ReportListItem extends StatelessWidget {
                   child: Text(
                     report.description!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
-              
+
               // Action Buttons for pending/in-progress reports
               if (report.isPending || report.isInProgress) ...[
                 const SizedBox(height: AppSpacing.md),
@@ -140,7 +144,8 @@ class ReportListItem extends StatelessWidget {
                   children: [
                     if (report.isPending)
                       OutlinedButton.icon(
-                        onPressed: () => _showQuickAction(context, 'take_action'),
+                        onPressed: () =>
+                            _showQuickAction(context, 'take_action'),
                         icon: const Icon(Icons.play_arrow, size: 16),
                         label: const Text('Prendre en charge'),
                         style: OutlinedButton.styleFrom(
@@ -165,22 +170,22 @@ class ReportListItem extends StatelessWidget {
                   ],
                 ),
               ],
-              
+
               // Resolution info for resolved reports
               if (report.isResolved && report.resolution != null) ...[
                 const SizedBox(height: AppSpacing.md),
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: AppColors.successGreen.withOpacity(0.1),
+                    color: AppColors.successGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.successGreen.withOpacity(0.3),
+                      color: AppColors.successGreen.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle,
                         color: AppColors.successGreen,
                         size: 16,
@@ -189,9 +194,10 @@ class ReportListItem extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Résolution: ${report.resolution}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.successGreen,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.successGreen,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -232,12 +238,20 @@ class ReportListItem extends StatelessWidget {
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: 'warning_sent', child: Text('Avertissement envoyé')),
-                DropdownMenuItem(value: 'content_removed', child: Text('Contenu supprimé')),
-                DropdownMenuItem(value: 'user_suspended', child: Text('Utilisateur suspendu')),
-                DropdownMenuItem(value: 'user_banned', child: Text('Utilisateur banni')),
-                DropdownMenuItem(value: 'no_action', child: Text('Aucune action nécessaire')),
-                DropdownMenuItem(value: 'false_report', child: Text('Faux signalement')),
+                DropdownMenuItem(
+                    value: 'warning_sent', child: Text('Avertissement envoyé')),
+                DropdownMenuItem(
+                    value: 'content_removed', child: Text('Contenu supprimé')),
+                DropdownMenuItem(
+                    value: 'user_suspended',
+                    child: Text('Utilisateur suspendu')),
+                DropdownMenuItem(
+                    value: 'user_banned', child: Text('Utilisateur banni')),
+                DropdownMenuItem(
+                    value: 'no_action',
+                    child: Text('Aucune action nécessaire')),
+                DropdownMenuItem(
+                    value: 'false_report', child: Text('Faux signalement')),
               ],
               onChanged: (value) => selectedAction = value,
             ),
@@ -260,7 +274,8 @@ class ReportListItem extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (selectedAction != null && resolutionController.text.isNotEmpty) {
+              if (selectedAction != null &&
+                  resolutionController.text.isNotEmpty) {
                 Navigator.pop(context);
                 onActionTaken(selectedAction!, resolutionController.text);
               }
@@ -330,7 +345,7 @@ class ReportListItem extends StatelessWidget {
   String _formatCreatedAt(DateTime createdAt) {
     final now = DateTime.now();
     final difference = now.difference(createdAt);
-    
+
     if (difference.inDays > 0) {
       return 'Il y a ${difference.inDays} jour${difference.inDays > 1 ? 's' : ''}';
     } else if (difference.inHours > 0) {
@@ -357,25 +372,25 @@ class _StatusChip extends StatelessWidget {
 
     switch (status) {
       case 'pending':
-        backgroundColor = AppColors.warningAmber.withOpacity(0.1);
+        backgroundColor = AppColors.warningAmber.withValues(alpha: 0.1);
         textColor = AppColors.warningAmber;
         label = 'En attente';
         icon = Icons.pending;
         break;
       case 'in_progress':
-        backgroundColor = AppColors.infoBlue.withOpacity(0.1);
+        backgroundColor = AppColors.infoBlue.withValues(alpha: 0.1);
         textColor = AppColors.infoBlue;
         label = 'En cours';
         icon = Icons.work;
         break;
       case 'resolved':
-        backgroundColor = AppColors.successGreen.withOpacity(0.1);
+        backgroundColor = AppColors.successGreen.withValues(alpha: 0.1);
         textColor = AppColors.successGreen;
         label = 'Résolu';
         icon = Icons.check_circle;
         break;
       default:
-        backgroundColor = AppColors.textTertiary.withOpacity(0.1);
+        backgroundColor = AppColors.textTertiary.withValues(alpha: 0.1);
         textColor = AppColors.textTertiary;
         label = 'Inconnu';
         icon = Icons.help;
@@ -402,9 +417,9 @@ class _StatusChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: textColor,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),

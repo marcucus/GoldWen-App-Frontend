@@ -73,7 +73,7 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
             Icon(
               Icons.archive_outlined,
               size: 80,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
@@ -116,7 +116,7 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppBorderRadius.medium),
             border: Border.all(
-              color: AppColors.errorRed.withOpacity(0.2),
+              color: AppColors.errorRed.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -128,11 +128,12 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppColors.backgroundGrey,
-                    backgroundImage: otherUser?.photos?.isNotEmpty == true
-                        ? NetworkImage(otherUser!.photos!.first as String)
+                    backgroundImage: otherUser?.photos.isNotEmpty == true
+                        ? NetworkImage(otherUser!.photos.first as String)
                         : null,
-                    child: otherUser?.photos?.isEmpty ?? true
-                        ? const Icon(Icons.person, color: AppColors.textSecondary)
+                    child: otherUser?.photos.isEmpty ?? true
+                        ? const Icon(Icons.person,
+                            color: AppColors.textSecondary)
                         : null,
                   ),
                   Positioned(
@@ -164,7 +165,10 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                         Expanded(
                           child: Text(
                             otherUser?.firstName ?? 'Utilisateur',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                             overflow: TextOverflow.ellipsis,
@@ -176,12 +180,16 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                             vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.errorRed.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                            color: AppColors.errorRed.withValues(alpha: 0.1),
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.small),
                           ),
                           child: Text(
                             'Archivé',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
                                   color: AppColors.errorRed,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -203,7 +211,7 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.schedule,
                           size: 14,
                           color: AppColors.textSecondary,
@@ -211,10 +219,11 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           'Expiré le ${_formatDate(conversation.expiresAt)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
                         ),
                       ],
                     ),
@@ -223,7 +232,7 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
               ),
               const SizedBox(width: AppSpacing.sm),
               // Arrow icon
-              Icon(
+              const Icon(
                 Icons.chevron_right,
                 color: AppColors.textSecondary,
               ),
@@ -236,10 +245,10 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'Date inconnue';
-    
+
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'Aujourd\'hui';
     } else if (difference.inDays == 1) {

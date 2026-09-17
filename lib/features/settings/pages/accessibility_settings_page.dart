@@ -9,7 +9,8 @@ class AccessibilitySettingsPage extends StatefulWidget {
   const AccessibilitySettingsPage({super.key});
 
   @override
-  State<AccessibilitySettingsPage> createState() => _AccessibilitySettingsPageState();
+  State<AccessibilitySettingsPage> createState() =>
+      _AccessibilitySettingsPageState();
 }
 
 class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
@@ -31,7 +32,8 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           if (_isLoading) {
             return const LoadingAnimation(
               message: 'Sauvegarde des paramètres...',
-              semanticLabel: 'Sauvegarde des paramètres d\'accessibilité en cours',
+              semanticLabel:
+                  'Sauvegarde des paramètres d\'accessibilité en cours',
             );
           }
 
@@ -67,7 +69,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.accessibility_new,
                   color: AppColors.primaryGold,
                   size: 28,
@@ -97,67 +99,75 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: RadioGroup<AccessibilityFontSize>(
+            groupValue: service.fontSize,
+            onChanged: (value) async {
+              if (value == null) return;
+              setState(() => _isLoading = true);
+              await service.setFontSize(value);
+              if (!mounted) return;
+              setState(() => _isLoading = false);
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.text_fields,
-                  color: AppColors.primaryGold,
-                  semanticLabel: 'Icône taille du texte',
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.text_fields,
+                      color: AppColors.primaryGold,
+                      semanticLabel: 'Icône taille du texte',
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      'Taille du texte',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Taille du texte',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  'Ajustez la taille du texte pour une meilleure lisibilité.',
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Font size options
+                ...AccessibilityFontSize.values.map((fontSize) {
+                  final isSelected = service.fontSize == fontSize;
+                  return Semantics(
+                    label:
+                        'Taille de police ${fontSize.displayName}${isSelected ? ', sélectionné' : ''}',
+                    button: true,
+                    selected: isSelected,
+                    child: RadioListTile<AccessibilityFontSize>(
+                      title: Text(
+                        fontSize.displayName,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontSize: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .fontSize! *
+                                  _getFontSizeMultiplier(fontSize),
+                            ),
+                      ),
+                      subtitle: Text(
+                        'Exemple de texte avec cette taille',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .fontSize! *
+                                  _getFontSizeMultiplier(fontSize),
+                            ),
+                      ),
+                      value: fontSize,
+                      activeColor: AppColors.primaryGold,
+                    ),
+                  );
+                }),
               ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Ajustez la taille du texte pour une meilleure lisibilité.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Font size options
-            ...AccessibilityFontSize.values.map((fontSize) {
-              final isSelected = service.fontSize == fontSize;
-              return Semantics(
-                label: 'Taille de police ${fontSize.displayName}${isSelected ? ', sélectionné' : ''}',
-                button: true,
-                selected: isSelected,
-                child: RadioListTile<AccessibilityFontSize>(
-                  title: Text(
-                    fontSize.displayName,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize! * 
-                          _getFontSizeMultiplier(fontSize),
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Exemple de texte avec cette taille',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * 
-                          _getFontSizeMultiplier(fontSize),
-                    ),
-                  ),
-                  value: fontSize,
-                  groupValue: service.fontSize,
-                  onChanged: (value) async {
-                    if (value != null) {
-                      setState(() => _isLoading = true);
-                      await service.setFontSize(value);
-                      setState(() => _isLoading = false);
-                    }
-                  },
-                  activeColor: AppColors.primaryGold,
-                ),
-              );
-            }).toList(),
-          ],
-        ),
+            )),
       ),
     );
   }
@@ -171,7 +181,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.contrast,
                   color: AppColors.primaryGold,
                   semanticLabel: 'Icône contraste',
@@ -184,29 +194,32 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // High contrast toggle
             Semantics(
-              label: 'Contraste élevé${service.highContrast ? ', activé' : ', désactivé'}',
+              label:
+                  'Contraste élevé${service.highContrast ? ', activé' : ', désactivé'}',
               hint: 'Améliore la lisibilité pour les malvoyants',
               child: SwitchListTile(
                 title: const Text('Contraste élevé'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Améliore la lisibilité avec des couleurs plus contrastées'),
+                    const Text(
+                        'Améliore la lisibilité avec des couleurs plus contrastées'),
                     if (service.highContrast) ...[
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.successGreen.withOpacity(0.2),
+                          color: AppColors.successGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.check_circle,
                               size: 16,
                               color: AppColors.successGreen,
@@ -214,10 +227,13 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
                             const SizedBox(width: 4),
                             Text(
                               'Conforme WCAG AAA',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.successGreen,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.successGreen,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                           ],
                         ),
@@ -231,7 +247,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
                   await service.setHighContrast(value);
                   setState(() => _isLoading = false);
                 },
-                activeColor: AppColors.primaryGold,
+                activeThumbColor: AppColors.primaryGold,
               ),
             ),
           ],
@@ -249,7 +265,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.animation,
                   color: AppColors.primaryGold,
                   semanticLabel: 'Icône animations',
@@ -262,21 +278,23 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // Reduced motion toggle
             Semantics(
-              label: 'Mouvement réduit${service.reducedMotion ? ', activé' : ', désactivé'}',
+              label:
+                  'Mouvement réduit${service.reducedMotion ? ', activé' : ', désactivé'}',
               hint: 'Réduit les animations pour éviter les vertiges ou nausées',
               child: SwitchListTile(
                 title: const Text('Mouvement réduit'),
-                subtitle: const Text('Désactive les animations qui peuvent causer des vertiges'),
+                subtitle: const Text(
+                    'Désactive les animations qui peuvent causer des vertiges'),
                 value: service.reducedMotion,
                 onChanged: (value) async {
                   setState(() => _isLoading = true);
                   await service.setReducedMotion(value);
                   setState(() => _isLoading = false);
                 },
-                activeColor: AppColors.primaryGold,
+                activeThumbColor: AppColors.primaryGold,
               ),
             ),
           ],
@@ -294,7 +312,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.record_voice_over,
                   color: AppColors.primaryGold,
                   semanticLabel: 'Icône lecteur d\'écran',
@@ -307,39 +325,42 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // Screen reader toggle
             Semantics(
-              label: 'Support lecteur d\'écran${service.screenReaderEnabled ? ', activé' : ', désactivé'}',
+              label:
+                  'Support lecteur d\'écran${service.screenReaderEnabled ? ', activé' : ', désactivé'}',
               hint: 'Active les descriptions vocales pour les malvoyants',
               child: SwitchListTile(
                 title: const Text('Support lecteur d\'écran'),
-                subtitle: const Text('Active les descriptions audio et les annonces'),
+                subtitle:
+                    const Text('Active les descriptions audio et les annonces'),
                 value: service.screenReaderEnabled,
                 onChanged: (value) async {
                   setState(() => _isLoading = true);
                   await service.setScreenReaderEnabled(value);
                   setState(() => _isLoading = false);
                 },
-                activeColor: AppColors.primaryGold,
+                activeThumbColor: AppColors.primaryGold,
               ),
             ),
-            
+
             if (service.screenReaderEnabled) ...[
               const SizedBox(height: AppSpacing.md),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: AppColors.infoBlue.withOpacity(0.1),
+                  color: AppColors.infoBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-                  border: Border.all(color: AppColors.infoBlue.withOpacity(0.3)),
+                  border: Border.all(
+                      color: AppColors.infoBlue.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
                           color: AppColors.infoBlue,
                           size: 20,
@@ -347,9 +368,10 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           'Conseils d\'utilisation',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.infoBlue,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.infoBlue,
+                                  ),
                         ),
                       ],
                     ),
@@ -359,8 +381,8 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
                       '• Double-tap pour activer les boutons\n'
                       '• Les changements seront annoncés automatiquement',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.infoBlue,
-                      ),
+                            color: AppColors.infoBlue,
+                          ),
                     ),
                   ],
                 ),
@@ -381,7 +403,7 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.system_update,
                   color: AppColors.primaryGold,
                   semanticLabel: 'Icône paramètres système',
@@ -399,17 +421,19 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             // System settings status
             _buildSystemSettingStatus(
               'Contraste élevé système',
-              service.highContrast != service.highContrast, // This is system-only high contrast
+              service.highContrast !=
+                  service.highContrast, // This is system-only high contrast
               'Détecté depuis les paramètres de votre appareil',
               Icons.contrast,
             ),
             _buildSystemSettingStatus(
               'Mouvement réduit système',
-              service.reducedMotion != service.reducedMotion, // This is system-only reduced motion
+              service.reducedMotion !=
+                  service.reducedMotion, // This is system-only reduced motion
               'Respecte les préférences de votre appareil',
               Icons.animation,
             ),
@@ -425,7 +449,8 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
     );
   }
 
-  Widget _buildSystemSettingStatus(String title, bool isActive, String description, IconData icon) {
+  Widget _buildSystemSettingStatus(
+      String title, bool isActive, String description, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -443,8 +468,8 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 Text(
                   description,
@@ -456,15 +481,17 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: (isActive ? AppColors.successGreen : AppColors.textMuted).withOpacity(0.2),
+              color: (isActive ? AppColors.successGreen : AppColors.textMuted)
+                  .withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               isActive ? 'Actif' : 'Inactif',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: isActive ? AppColors.successGreen : AppColors.textMuted,
-                fontWeight: FontWeight.w500,
-              ),
+                    color:
+                        isActive ? AppColors.successGreen : AppColors.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         ],
@@ -479,41 +506,42 @@ class _AccessibilitySettingsPageState extends State<AccessibilitySettingsPage> {
       button: true,
       child: Center(
         child: TextButton.icon(
-          onPressed: service.isAccessibilityEnabled ? () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Réinitialiser les paramètres'),
-                content: const Text(
-                  'Voulez-vous vraiment remettre tous les paramètres d\'accessibilité aux valeurs par défaut ?'
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Annuler'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Réinitialiser'),
-                  ),
-                ],
-              ),
-            );
+          onPressed: service.isAccessibilityEnabled
+              ? () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Réinitialiser les paramètres'),
+                      content: const Text(
+                          'Voulez-vous vraiment remettre tous les paramètres d\'accessibilité aux valeurs par défaut ?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Annuler'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Réinitialiser'),
+                        ),
+                      ],
+                    ),
+                  );
 
-            if (confirm == true && mounted) {
-              setState(() => _isLoading = true);
-              await service.setFontSize(AccessibilityFontSize.medium);
-              await service.setHighContrast(false);
-              await service.setReducedMotion(false);
-              await service.setScreenReaderEnabled(false);
-              setState(() => _isLoading = false);
-              
-              if (mounted && service.screenReaderEnabled) {
-                // service._announceChange('Paramètres d\'accessibilité réinitialisés');
-                // Note: _announceChange is private, we should create a public announceChange method
-              }
-            }
-          } : null,
+                  if (confirm == true && mounted) {
+                    setState(() => _isLoading = true);
+                    await service.setFontSize(AccessibilityFontSize.medium);
+                    await service.setHighContrast(false);
+                    await service.setReducedMotion(false);
+                    await service.setScreenReaderEnabled(false);
+                    setState(() => _isLoading = false);
+
+                    if (mounted && service.screenReaderEnabled) {
+                      // service._announceChange('Paramètres d\'accessibilité réinitialisés');
+                      // Note: _announceChange is private, we should create a public announceChange method
+                    }
+                  }
+                }
+              : null,
           icon: const Icon(Icons.refresh),
           label: const Text('Réinitialiser les paramètres'),
         ),

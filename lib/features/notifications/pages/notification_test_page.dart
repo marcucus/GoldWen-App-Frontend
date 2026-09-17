@@ -13,13 +13,15 @@ class NotificationTestPage extends StatefulWidget {
 }
 
 class _NotificationTestPageState extends State<NotificationTestPage> {
-  final LocalNotificationService _localNotificationService = LocalNotificationService();
-  final FirebaseMessagingService _firebaseMessagingService = FirebaseMessagingService();
-  
+  final LocalNotificationService _localNotificationService =
+      LocalNotificationService();
+  final FirebaseMessagingService _firebaseMessagingService =
+      FirebaseMessagingService();
+
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
   String _selectedType = 'daily_selection';
-  
+
   final List<String> _notificationTypes = [
     'daily_selection',
     'new_match',
@@ -62,19 +64,19 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
           children: [
             // System Status
             _buildSystemStatus(),
-            
+
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Test Notification Form
             _buildTestForm(),
-            
+
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Quick Test Buttons
             _buildQuickTests(),
-            
+
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Scheduled Notifications
             _buildScheduledNotifications(),
           ],
@@ -178,10 +180,10 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // Notification Type Dropdown
             DropdownButtonFormField<String>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: const InputDecoration(
                 labelText: 'Notification Type',
                 border: OutlineInputBorder(),
@@ -199,9 +201,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 });
               },
             ),
-            
+
             const SizedBox(height: AppSpacing.md),
-            
+
             // Title Field
             TextField(
               controller: _titleController,
@@ -210,9 +212,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            
+
             const SizedBox(height: AppSpacing.md),
-            
+
             // Body Field
             TextField(
               controller: _bodyController,
@@ -222,9 +224,9 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
               ),
               maxLines: 3,
             ),
-            
+
             const SizedBox(height: AppSpacing.md),
-            
+
             // Send Button
             SizedBox(
               width: double.infinity,
@@ -261,7 +263,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
@@ -298,11 +299,12 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     );
   }
 
-  Widget _buildQuickTestButton(String label, String type, String title, String body) {
+  Widget _buildQuickTestButton(
+      String label, String type, String title, String body) {
     return ElevatedButton(
       onPressed: () => _sendQuickTest(type, title, body),
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryGold.withOpacity(0.1),
+        backgroundColor: AppColors.primaryGold.withValues(alpha: 0.1),
         foregroundColor: AppColors.primaryGold,
         elevation: 0,
       ),
@@ -327,7 +329,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                   ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
             Row(
               children: [
                 Expanded(
@@ -409,16 +410,19 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
         title: _titleController.text,
         body: _bodyController.text,
       );
-      
+
+      if (!mounted) return;
       // Also test sending through backend API (if authenticated)
-      final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+      final notificationProvider =
+          Provider.of<NotificationProvider>(context, listen: false);
       await notificationProvider.sendTestNotification(
         title: _titleController.text,
         body: _bodyController.text,
         type: _selectedType,
       );
-      
-      _showSnackBar('Test notification sent successfully (local + backend)', AppColors.successGreen);
+
+      _showSnackBar('Test notification sent successfully (local + backend)',
+          AppColors.successGreen);
     } catch (e) {
       // Fallback to local only if backend fails
       try {
@@ -427,7 +431,8 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
           title: _titleController.text,
           body: _bodyController.text,
         );
-        _showSnackBar('Local test notification sent (backend failed: $e)', AppColors.warningAmber);
+        _showSnackBar('Local test notification sent (backend failed: $e)',
+            AppColors.warningAmber);
       } catch (e2) {
         _showSnackBar('Failed to send notification: $e2', AppColors.errorRed);
       }
@@ -441,7 +446,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
         title: title,
         body: body,
       );
-      
+
       _showSnackBar('$type notification sent', AppColors.successGreen);
     } catch (e) {
       _showSnackBar('Failed to send notification: $e', AppColors.errorRed);
@@ -451,7 +456,8 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Future<void> _scheduleDailySelection() async {
     try {
       await _localNotificationService.scheduleDailySelectionNotification();
-      _showSnackBar('Daily selection notification scheduled', AppColors.successGreen);
+      _showSnackBar(
+          'Daily selection notification scheduled', AppColors.successGreen);
     } catch (e) {
       _showSnackBar('Failed to schedule notification: $e', AppColors.errorRed);
     }

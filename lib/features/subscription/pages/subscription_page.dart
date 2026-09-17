@@ -6,8 +6,6 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/widgets/modern_cards.dart';
 import '../../../core/models/models.dart';
 import '../providers/subscription_provider.dart';
-import '../../legal/pages/terms_page.dart';
-import '../../legal/pages/privacy_page.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -36,7 +34,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
   void _loadSubscriptionData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+      final subscriptionProvider =
+          Provider.of<SubscriptionProvider>(context, listen: false);
       subscriptionProvider.loadSubscriptionPlans();
       subscriptionProvider.loadCurrentSubscription();
     });
@@ -46,7 +45,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     {
       'icon': Icons.favorite,
       'title': '3 sélections par jour',
-      'description': 'Choisissez jusqu\'à 3 profils dans votre sélection quotidienne',
+      'description':
+          'Choisissez jusqu\'à 3 profils dans votre sélection quotidienne',
     },
     {
       'icon': Icons.chat_bubble,
@@ -122,8 +122,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                     colors: [
                       AppColors.primaryGoldDark,
                       AppColors.primaryGold,
-                      AppColors.primaryGoldLight
-                          .withOpacity(0.8 + 0.2 * _backgroundAnimation.value),
+                      AppColors.primaryGoldLight.withValues(
+                          alpha: 0.8 + 0.2 * _backgroundAnimation.value),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -158,7 +158,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
       margin: const EdgeInsets.all(AppSpacing.lg),
       child: GlassCard(
         borderRadius: AppBorderRadius.xLarge,
-        backgroundColor: Colors.white.withOpacity(0.15),
+        backgroundColor: Colors.white.withValues(alpha: 0.15),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
@@ -171,7 +171,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                 ),
                 child: const Icon(
                   Icons.arrow_back,
@@ -195,7 +195,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                     Text(
                       'Débloquez votre potentiel',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                     ),
                   ],
@@ -215,15 +215,15 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               'Chargement des plans...',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white,
-              ),
+                    color: Colors.white,
+                  ),
             ),
           ],
         ),
@@ -235,28 +235,28 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: Colors.white,
               size: 48,
             ),
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               'Erreur lors du chargement',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               subscriptionProvider.error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.8),
-              ),
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xl),
             ElevatedButton(
               onPressed: () {
                 subscriptionProvider.clearError();
@@ -266,7 +266,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primaryGold,
               ),
-              child: Text('Réessayer'),
+              child: const Text('Réessayer'),
             ),
           ],
         ),
@@ -348,8 +348,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     required String description,
   }) {
     return GlassCard(
-      backgroundColor: Colors.white.withOpacity(0.1),
-      borderColor: Colors.white.withOpacity(0.3),
+      backgroundColor: Colors.white.withValues(alpha: 0.1),
+      borderColor: Colors.white.withValues(alpha: 0.3),
       child: Row(
         children: [
           Container(
@@ -357,8 +357,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.3),
-                  Colors.white.withOpacity(0.1),
+                  Colors.white.withValues(alpha: 0.3),
+                  Colors.white.withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
@@ -385,7 +385,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                 ),
               ],
@@ -398,7 +398,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
   Widget _buildPricingSection(SubscriptionProvider subscriptionProvider) {
     final plans = subscriptionProvider.activePlans;
-    
+
     if (plans.isEmpty) {
       return SlideInAnimation(
         delay: const Duration(milliseconds: 600),
@@ -416,17 +416,17 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppBorderRadius.large),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                 ),
               ),
               child: Text(
                 'Aucun plan disponible pour le moment',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.8),
-                ),
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -473,7 +473,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   Widget _buildPlanCard(int index, SubscriptionPlan plan) {
     final isSelected = _selectedPlanIndex == index;
     final isPopular = plan.metadata['popular'] == true;
-    
+
     // Calculate monthly price for display
     double monthlyPrice = plan.price;
     if (plan.interval == 'month' && plan.intervalCount > 1) {
@@ -481,16 +481,18 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     } else if (plan.interval == 'year') {
       monthlyPrice = plan.price / (12 * plan.intervalCount);
     }
-    
+
     String durationText = plan.name;
     String priceText = '${plan.price.toStringAsFixed(2)} ${plan.currency}';
-    String monthlyPriceText = '${monthlyPrice.toStringAsFixed(2)} ${plan.currency}/mois';
-    
+    String monthlyPriceText =
+        '${monthlyPrice.toStringAsFixed(2)} ${plan.currency}/mois';
+
     // Calculate savings percentage
     String? savingsText;
     if (plan.interval != 'month' || plan.intervalCount > 1) {
       double regularMonthlyPrice = 19.99; // Base monthly price
-      double savingsPercent = ((regularMonthlyPrice - monthlyPrice) / regularMonthlyPrice * 100);
+      double savingsPercent =
+          ((regularMonthlyPrice - monthlyPrice) / regularMonthlyPrice * 100);
       if (savingsPercent > 0) {
         savingsText = 'Économisez ${savingsPercent.round()}%';
       }
@@ -512,16 +514,17 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 gradient: isSelected
                     ? LinearGradient(
                         colors: [
-                          Colors.white.withOpacity(0.25),
-                          Colors.white.withOpacity(0.15),
+                          Colors.white.withValues(alpha: 0.25),
+                          Colors.white.withValues(alpha: 0.15),
                         ],
                       )
                     : null,
-                color: isSelected ? null : Colors.white.withOpacity(0.1),
+                color: isSelected ? null : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppBorderRadius.large),
                 border: Border.all(
-                  color:
-                      isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: isSelected ? AppShadows.medium() : null,
@@ -577,7 +580,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                           monthlyPriceText,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                   ),
                         ),
                         if (savingsText != null) ...[
@@ -670,7 +673,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   Widget _buildSubscribeButton(SubscriptionProvider subscriptionProvider) {
     final plans = subscriptionProvider.activePlans;
     final isLoading = _isLoading || subscriptionProvider.isLoading;
-    
+
     return SlideInAnimation(
       delay: const Duration(milliseconds: 900),
       child: PremiumButton(
@@ -679,11 +682,13 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         gradient: LinearGradient(
           colors: [
             Colors.white,
-            Colors.white.withOpacity(0.9),
+            Colors.white.withValues(alpha: 0.9),
           ],
         ),
         textColor: AppColors.primaryGold,
-        onPressed: (isLoading || plans.isEmpty) ? null : () => _handleSubscription(subscriptionProvider),
+        onPressed: (isLoading || plans.isEmpty)
+            ? null
+            : () => _handleSubscription(subscriptionProvider),
       ),
     );
   }
@@ -696,7 +701,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
           Text(
             'En vous abonnant, vous acceptez nos',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -718,7 +723,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
               Text(
                 ' et ',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
               ),
               GestureDetector(
@@ -738,7 +743,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
           Text(
             'Annulez à tout moment depuis les paramètres de votre compte',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -752,7 +757,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
     if (plans.isEmpty || _selectedPlanIndex >= plans.length) return;
 
     final selectedPlan = plans[_selectedPlanIndex];
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -761,7 +766,9 @@ class _SubscriptionPageState extends State<SubscriptionPage>
       // Use the SubscriptionProvider's purchase method which integrates with RevenueCat
       final success = await subscriptionProvider.purchaseSubscription(
         planId: selectedPlan.id,
-        platform: Theme.of(context).platform == TargetPlatform.iOS ? 'ios' : 'android',
+        platform: Theme.of(context).platform == TargetPlatform.iOS
+            ? 'ios'
+            : 'android',
         receiptData: '', // RevenueCat handles receipt data internally
       );
 
@@ -773,7 +780,8 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         if (success) {
           _showSuccessDialog();
         } else {
-          final errorMessage = subscriptionProvider.error ?? 'Une erreur est survenue lors de l\'abonnement';
+          final errorMessage = subscriptionProvider.error ??
+              'Une erreur est survenue lors de l\'abonnement';
           _showErrorDialog(errorMessage);
         }
       }
@@ -782,10 +790,11 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         setState(() {
           _isLoading = false;
         });
-        
+
         // Don't show error for user cancellations
         final errorMessage = e.toString();
-        if (!errorMessage.contains('cancelled') && !errorMessage.contains('canceled')) {
+        if (!errorMessage.contains('cancelled') &&
+            !errorMessage.contains('canceled')) {
           _showErrorDialog('Une erreur est survenue lors de l\'abonnement: $e');
         }
       }
@@ -833,7 +842,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
               Text(
                 'Vous êtes maintenant membre GoldWen Plus\nVous pouvez désormais choisir jusqu\'à 3 profils par jour !',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -843,7 +852,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 gradient: LinearGradient(
                   colors: [
                     Colors.white,
-                    Colors.white.withOpacity(0.9),
+                    Colors.white.withValues(alpha: 0.9),
                   ],
                 ),
                 textColor: AppColors.primaryGold,
@@ -866,7 +875,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.large),
         ),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.error_outline, color: AppColors.errorRed),
             SizedBox(width: AppSpacing.sm),
@@ -877,7 +886,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),

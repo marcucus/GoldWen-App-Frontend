@@ -89,7 +89,7 @@ class _SuccessOverlayState extends State<SuccessOverlay>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late AnimationController _pulseController;
-  
+
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _pulseAnimation;
@@ -97,20 +97,18 @@ class _SuccessOverlayState extends State<SuccessOverlay>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 800)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 800)),
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 400)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
     );
 
@@ -143,19 +141,19 @@ class _SuccessOverlayState extends State<SuccessOverlay>
 
   void _startAnimations() async {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       await _controller.forward();
       _pulseController.repeat(reverse: true);
-      
+
       await Future.delayed(widget.duration);
-      
+
       _pulseController.stop();
       await _controller.reverse();
     } else {
       await Future.delayed(widget.duration);
     }
-    
+
     widget.onComplete();
   }
 
@@ -170,7 +168,7 @@ class _SuccessOverlayState extends State<SuccessOverlay>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return Material(
       color: Colors.transparent,
       child: Center(
@@ -182,12 +180,12 @@ class _SuccessOverlayState extends State<SuccessOverlay>
           ]),
           builder: (context, child) {
             return Transform.scale(
-              scale: accessibilityService.reducedMotion 
-                  ? 1.0 
+              scale: accessibilityService.reducedMotion
+                  ? 1.0
                   : _scaleAnimation.value * _pulseAnimation.value,
               child: Opacity(
-                opacity: accessibilityService.reducedMotion 
-                    ? 1.0 
+                opacity: accessibilityService.reducedMotion
+                    ? 1.0
                     : _fadeAnimation.value,
                 child: Container(
                   padding: const EdgeInsets.all(24),
@@ -196,7 +194,7 @@ class _SuccessOverlayState extends State<SuccessOverlay>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.color.withOpacity(0.3),
+                        color: widget.color.withValues(alpha: 0.3),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -213,7 +211,7 @@ class _SuccessOverlayState extends State<SuccessOverlay>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: widget.color.withOpacity(0.1),
+                          color: widget.color.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -261,11 +259,12 @@ class FloatingSuccessNotification extends StatefulWidget {
   });
 
   @override
-  State<FloatingSuccessNotification> createState() => _FloatingSuccessNotificationState();
+  State<FloatingSuccessNotification> createState() =>
+      _FloatingSuccessNotificationState();
 }
 
-class _FloatingSuccessNotificationState extends State<FloatingSuccessNotification>
-    with TickerProviderStateMixin {
+class _FloatingSuccessNotificationState
+    extends State<FloatingSuccessNotification> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
@@ -273,13 +272,12 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 600)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 600)),
       vsync: this,
     );
 
@@ -304,7 +302,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
 
   void _startAnimation() async {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       await _controller.forward();
       await Future.delayed(widget.duration);
@@ -312,7 +310,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
     } else {
       await Future.delayed(widget.duration);
     }
-    
+
     widget.onComplete();
   }
 
@@ -326,7 +324,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return Positioned(
       top: 80,
       left: 16,
@@ -335,11 +333,11 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
         animation: Listenable.merge([_slideAnimation, _fadeAnimation]),
         builder: (context, child) {
           return SlideTransition(
-            position: accessibilityService.reducedMotion 
+            position: accessibilityService.reducedMotion
                 ? const AlwaysStoppedAnimation(Offset.zero)
                 : _slideAnimation,
             child: FadeTransition(
-              opacity: accessibilityService.reducedMotion 
+              opacity: accessibilityService.reducedMotion
                   ? const AlwaysStoppedAnimation(1.0)
                   : _fadeAnimation,
               child: Container(
@@ -352,7 +350,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.2),
+                      color: widget.color.withValues(alpha: 0.2),
                       blurRadius: 15,
                       spreadRadius: 2,
                     ),
@@ -363,7 +361,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
                     ),
                   ],
                   border: Border.all(
-                    color: widget.color.withOpacity(0.3),
+                    color: widget.color.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -373,7 +371,7 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: widget.color.withOpacity(0.1),
+                        color: widget.color.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -406,14 +404,13 @@ class _FloatingSuccessNotificationState extends State<FloatingSuccessNotificatio
 /// Enhanced snackbar with animations
 class EnhancedSnackBar extends SnackBar {
   EnhancedSnackBar({
-    Key? key,
+    super.key,
     required String message,
     IconData? icon,
     Color? backgroundColor,
-    Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
+    super.duration = const Duration(seconds: 3),
+    super.action,
   }) : super(
-          key: key,
           content: Row(
             children: [
               if (icon != null) ...[
@@ -436,13 +433,11 @@ class EnhancedSnackBar extends SnackBar {
             ],
           ),
           backgroundColor: backgroundColor ?? AppColors.primaryGold,
-          duration: duration,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           margin: const EdgeInsets.all(16),
-          action: action,
         );
 
   /// Success snackbar variant

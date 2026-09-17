@@ -39,11 +39,11 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Initialize translated lists
     _availableInterests = TranslationsHelper.getAvailableInterests(context);
     _availableLanguages = TranslationsHelper.getAvailableLanguages(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.additionalInfoTitle),
@@ -61,7 +61,7 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
             end: Alignment.bottomCenter,
             colors: [
               AppColors.backgroundWhite,
-              AppColors.accentCream.withOpacity(0.3),
+              AppColors.accentCream.withValues(alpha: 0.3),
               AppColors.backgroundWhite,
             ],
             stops: const [0.0, 0.5, 1.0],
@@ -72,36 +72,40 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: AppSpacing.lg),
-                      
+
                       // Icon header
                       Center(
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryGold.withOpacity(0.1),
+                            color: AppColors.primaryGold.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.info_outline_rounded,
                             size: 32,
                             color: AppColors.primaryGold,
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: AppSpacing.lg),
 
                       // Title and subtitle
                       Text(
                         l10n.shareMoreTitle,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppColors.primaryGold,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              color: AppColors.primaryGold,
+                            ),
                         textAlign: TextAlign.center,
                       ),
 
@@ -110,277 +114,279 @@ class _AdditionalInfoPageState extends State<AdditionalInfoPage> {
                       Text(
                         l10n.shareMoreSubtitle,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.6,
-                        ),
+                              color: AppColors.textSecondary,
+                              height: 1.6,
+                            ),
                         textAlign: TextAlign.center,
                       ),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                      const SizedBox(height: AppSpacing.xxl),
 
-                    // Professional info section
-                    _buildSectionTitle(l10n.professionalInfoSection),
-                    const SizedBox(height: AppSpacing.md),
+                      // Professional info section
+                      _buildSectionTitle(l10n.professionalInfoSection),
+                      const SizedBox(height: AppSpacing.md),
 
-                    TextFormField(
-                      controller: _jobTitleController,
-                      decoration: InputDecoration(
-                        labelText: l10n.jobTitleLabel,
-                        hintText: l10n.jobTitleHint,
-                        prefixIcon: const Icon(Icons.work_outline),
-                      ),
-                      textCapitalization: TextCapitalization.words,
-                      validator: (value) => TextValidator.validateText(
-                        value,
-                        checkForbiddenWords: true,
-                        checkContactInfo: false,
-                        checkSpamPatterns: false,
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
-                    TextFormField(
-                      controller: _companyController,
-                      decoration: const InputDecoration(
-                        labelText: 'Entreprise',
-                        hintText: 'Nom de votre entreprise',
-                        prefixIcon: Icon(Icons.business_center),
-                      ),
-                      textCapitalization: TextCapitalization.words,
-                      validator: (value) => TextValidator.validateText(
-                        value,
-                        checkForbiddenWords: true,
-                        checkContactInfo: false,
-                        checkSpamPatterns: false,
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
-                    TextFormField(
-                      controller: _educationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Formation',
-                        hintText: 'École, université, diplôme...',
-                        prefixIcon: Icon(Icons.school_outlined),
-                      ),
-                      textCapitalization: TextCapitalization.words,
-                      validator: (value) => TextValidator.validateText(
-                        value,
-                        checkForbiddenWords: true,
-                        checkContactInfo: false,
-                        checkSpamPatterns: false,
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.xxl),
-
-                    // Physical info section
-                    _buildSectionTitle('Informations physiques'),
-                    const SizedBox(height: AppSpacing.md),
-
-                    TextFormField(
-                      controller: _heightController,
-                      decoration: const InputDecoration(
-                        labelText: 'Taille (cm)',
-                        hintText: '175',
-                        prefixIcon: Icon(Icons.height),
-                        suffixText: 'cm',
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-
-                    const SizedBox(height: AppSpacing.xxl),
-
-                    // Interests section
-                    _buildSectionTitle('Centres d\'intérêt'),
-                    const SizedBox(height: AppSpacing.md),
-
-                    Text(
-                      'Sélectionnez vos passions (maximum 8)',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.md),
-
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: _availableInterests.map((interest) {
-                        final isSelected =
-                            _selectedInterests.contains(interest);
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedInterests.remove(interest);
-                              } else if (_selectedInterests.length < 8) {
-                                _selectedInterests.add(interest);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryGold.withOpacity(0.1)
-                                  : AppColors.accentCream,
-                              borderRadius:
-                                  BorderRadius.circular(AppBorderRadius.large),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primaryGold
-                                    : AppColors.dividerLight,
-                              ),
-                            ),
-                            child: Text(
-                              interest,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: isSelected
-                                        ? AppColors.primaryGold
-                                        : AppColors.textDark,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
-                                  ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    if (_selectedInterests.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.md),
-                        child: Text(
-                          '${_selectedInterests.length}/8 sélectionnés',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                      TextFormField(
+                        controller: _jobTitleController,
+                        decoration: InputDecoration(
+                          labelText: l10n.jobTitleLabel,
+                          hintText: l10n.jobTitleHint,
+                          prefixIcon: const Icon(Icons.work_outline),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) => TextValidator.validateText(
+                          value,
+                          checkForbiddenWords: true,
+                          checkContactInfo: false,
+                          checkSpamPatterns: false,
                         ),
                       ),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                      const SizedBox(height: AppSpacing.lg),
 
-                    // Languages section
-                    _buildSectionTitle('Langues parlées'),
-                    const SizedBox(height: AppSpacing.md),
-
-                    Text(
-                      'Quelles langues parlez-vous ? (maximum 5)',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.md),
-
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: _availableLanguages.map((language) {
-                        final isSelected =
-                            _selectedLanguages.contains(language);
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedLanguages.remove(language);
-                              } else if (_selectedLanguages.length < 5) {
-                                _selectedLanguages.add(language);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryGold.withOpacity(0.1)
-                                  : AppColors.accentCream,
-                              borderRadius:
-                                  BorderRadius.circular(AppBorderRadius.large),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primaryGold
-                                    : AppColors.dividerLight,
-                              ),
-                            ),
-                            child: Text(
-                              language,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: isSelected
-                                        ? AppColors.primaryGold
-                                        : AppColors.textDark,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
-                                  ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                    if (_selectedLanguages.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.md),
-                        child: Text(
-                          '${_selectedLanguages.length}/5 sélectionnées',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                      TextFormField(
+                        controller: _companyController,
+                        decoration: const InputDecoration(
+                          labelText: 'Entreprise',
+                          hintText: 'Nom de votre entreprise',
+                          prefixIcon: Icon(Icons.business_center),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) => TextValidator.validateText(
+                          value,
+                          checkForbiddenWords: true,
+                          checkContactInfo: false,
+                          checkSpamPatterns: false,
                         ),
                       ),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      TextFormField(
+                        controller: _educationController,
+                        decoration: const InputDecoration(
+                          labelText: 'Formation',
+                          hintText: 'École, université, diplôme...',
+                          prefixIcon: Icon(Icons.school_outlined),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) => TextValidator.validateText(
+                          value,
+                          checkForbiddenWords: true,
+                          checkContactInfo: false,
+                          checkSpamPatterns: false,
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.xxl),
+
+                      // Physical info section
+                      _buildSectionTitle('Informations physiques'),
+                      const SizedBox(height: AppSpacing.md),
+
+                      TextFormField(
+                        controller: _heightController,
+                        decoration: const InputDecoration(
+                          labelText: 'Taille (cm)',
+                          hintText: '175',
+                          prefixIcon: Icon(Icons.height),
+                          suffixText: 'cm',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+
+                      const SizedBox(height: AppSpacing.xxl),
+
+                      // Interests section
+                      _buildSectionTitle('Centres d\'intérêt'),
+                      const SizedBox(height: AppSpacing.md),
+
+                      Text(
+                        'Sélectionnez vos passions (maximum 8)',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: _availableInterests.map((interest) {
+                          final isSelected =
+                              _selectedInterests.contains(interest);
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedInterests.remove(interest);
+                                } else if (_selectedInterests.length < 8) {
+                                  _selectedInterests.add(interest);
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primaryGold
+                                        .withValues(alpha: 0.1)
+                                    : AppColors.accentCream,
+                                borderRadius: BorderRadius.circular(
+                                    AppBorderRadius.large),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primaryGold
+                                      : AppColors.dividerLight,
+                                ),
+                              ),
+                              child: Text(
+                                interest,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? AppColors.primaryGold
+                                          : AppColors.textDark,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                    ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      if (_selectedInterests.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.md),
+                          child: Text(
+                            '${_selectedInterests.length}/8 sélectionnés',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                          ),
+                        ),
+
+                      const SizedBox(height: AppSpacing.xxl),
+
+                      // Languages section
+                      _buildSectionTitle('Langues parlées'),
+                      const SizedBox(height: AppSpacing.md),
+
+                      Text(
+                        'Quelles langues parlez-vous ? (maximum 5)',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: _availableLanguages.map((language) {
+                          final isSelected =
+                              _selectedLanguages.contains(language);
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedLanguages.remove(language);
+                                } else if (_selectedLanguages.length < 5) {
+                                  _selectedLanguages.add(language);
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primaryGold
+                                        .withValues(alpha: 0.1)
+                                    : AppColors.accentCream,
+                                borderRadius: BorderRadius.circular(
+                                    AppBorderRadius.large),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primaryGold
+                                      : AppColors.dividerLight,
+                                ),
+                              ),
+                              child: Text(
+                                language,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? AppColors.primaryGold
+                                          : AppColors.textDark,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                    ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      if (_selectedLanguages.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.md),
+                          child: Text(
+                            '${_selectedLanguages.length}/5 sélectionnées',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                          ),
+                        ),
+
+                      const SizedBox(height: AppSpacing.xxl),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Bottom buttons
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _continue,
+                        child: const Text('Continuer'),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: _skip,
+                        child: const Text('Passer cette étape'),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-
-            // Bottom buttons
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _continue,
-                      child: const Text('Continuer'),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: _skip,
-                      child: const Text('Passer cette étape'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

@@ -30,7 +30,7 @@ class ModerationStatusBadge extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(color: color, width: 1),
         ),
@@ -45,7 +45,7 @@ class ModerationStatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color, width: 1),
       ),
@@ -135,14 +135,14 @@ class ModerationFlagsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.errorRed.withOpacity(0.1),
+        color: AppColors.errorRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.errorRed.withOpacity(0.3)),
+        border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.warning_amber_rounded,
             size: 14,
             color: AppColors.errorRed,
@@ -150,7 +150,7 @@ class ModerationFlagsWidget extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             _formatFlagName(flag.name),
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.errorRed,
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -161,7 +161,7 @@ class ModerationFlagsWidget extends StatelessWidget {
             Text(
               '(${flag.confidence.toStringAsFixed(0)}%)',
               style: TextStyle(
-                color: AppColors.errorRed.withOpacity(0.7),
+                color: AppColors.errorRed.withValues(alpha: 0.7),
                 fontSize: 10,
               ),
             ),
@@ -181,8 +181,8 @@ class ModerationFlagsWidget extends StatelessWidget {
         )
         .trim()
         .split(' ')
-        .map((word) => word.isNotEmpty 
-            ? word[0].toUpperCase() + word.substring(1).toLowerCase() 
+        .map((word) => word.isNotEmpty
+            ? word[0].toUpperCase() + word.substring(1).toLowerCase()
             : '')
         .join(' ');
   }
@@ -206,9 +206,9 @@ class ModerationBlockedContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorRed.withOpacity(0.05),
+        color: AppColors.errorRed.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.errorRed.withOpacity(0.2)),
+        border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +216,7 @@ class ModerationBlockedContent extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.block,
                 color: AppColors.errorRed,
                 size: 24,
@@ -225,7 +225,7 @@ class ModerationBlockedContent extends StatelessWidget {
               Expanded(
                 child: Text(
                   _getBlockedMessage(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.errorRed,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -236,7 +236,7 @@ class ModerationBlockedContent extends StatelessWidget {
           ),
           if (moderationResult.hasFlags) ...[
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'Raisons:',
               style: TextStyle(
                 color: AppColors.textSecondary,

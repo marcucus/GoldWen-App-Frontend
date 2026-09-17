@@ -64,7 +64,7 @@ class AuthProvider with ChangeNotifier {
     try {
       // Track signup started
       await AnalyticsService.trackSignupStarted('email');
-      
+
       final response = await ApiService.register(
         email: email,
         password: password,
@@ -85,7 +85,7 @@ class AuthProvider with ChangeNotifier {
     try {
       // Track signup started
       await AnalyticsService.trackSignupStarted('google');
-      
+
       // Initialize Google Sign In
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
@@ -117,9 +117,10 @@ class AuthProvider with ChangeNotifier {
         idToken: googleAuth.idToken!,
       );
 
-      await _handleAuthSuccess(response, isSignup: true, signupMethod: 'google');
+      await _handleAuthSuccess(response,
+          isSignup: true, signupMethod: 'google');
     } catch (e) {
-      print('Google Sign-In Error: $e');
+      debugPrint('Google Sign-In Error: $e');
       _handleAuthError(e);
     }
   }
@@ -130,7 +131,7 @@ class AuthProvider with ChangeNotifier {
     try {
       // Track signup started
       await AnalyticsService.trackSignupStarted('apple');
-      
+
       // Check if Apple Sign In is available on this device
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
@@ -168,7 +169,7 @@ class AuthProvider with ChangeNotifier {
 
       await _handleAuthSuccess(response, isSignup: true, signupMethod: 'apple');
     } catch (e) {
-      print('Apple Sign-In Error: $e');
+      debugPrint('Apple Sign-In Error: $e');
       _handleAuthError(e);
     }
   }
@@ -245,31 +246,32 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _handleAuthSuccess(Map<String, dynamic> response, {bool isSignup = false, String? signupMethod}) async {
+  Future<void> _handleAuthSuccess(Map<String, dynamic> response,
+      {bool isSignup = false, String? signupMethod}) async {
     try {
       // Debug: Print the full response to understand its structure
-      print('Auth response received: $response');
+      debugPrint('Auth response received: $response');
 
       // The backend returns: { "success": true, "message": "...", "data": { "user": {...}, "accessToken": "..." } }
       final data = response['data'] as Map<String, dynamic>?;
       if (data == null) {
         throw Exception('Response data is null');
       }
-      print('Extracted data: $data');
+      debugPrint('Extracted data: $data');
 
       // Extract user data
       final userData = data['user'] as Map<String, dynamic>?;
       if (userData == null) {
         throw Exception('User data not found in response');
       }
-      print('User data: $userData');
+      debugPrint('User data: $userData');
 
       // Extract token - backend returns it as 'accessToken'
       final token = data['accessToken'] as String?;
       if (token == null || token.isEmpty) {
         throw Exception('Access token not found in response');
       }
-      print('Token: ${token.substring(0, 10)}...');
+      debugPrint('Token: ${token.substring(0, 10)}...');
 
       _user = User.fromJson(userData);
       _token = token;
@@ -290,13 +292,14 @@ class AuthProvider with ChangeNotifier {
       // Initialize Firebase Messaging after successful authentication
       await _initializeFirebaseMessaging();
 
-      print(
+      debugPrint(
           'Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
-      print('User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
+      debugPrint(
+          'User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
       notifyListeners();
     } catch (e) {
-      print('Error in _handleAuthSuccess: $e');
-      print('Stack trace: ${StackTrace.current}');
+      debugPrint('Error in _handleAuthSuccess: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
       _handleAuthError(e);
     }
   }
@@ -329,7 +332,7 @@ class AuthProvider with ChangeNotifier {
           await ApiService.logout();
         } catch (e) {
           // If logout API call fails, still proceed with local cleanup
-          print('Logout API call failed: $e');
+          debugPrint('Logout API call failed: $e');
         }
       }
 
@@ -343,12 +346,12 @@ class AuthProvider with ChangeNotifier {
 
       // Clear stored auth data
       await _clearAuthData();
-      
+
       // Reset analytics data
       try {
         await AnalyticsService.reset();
       } catch (e) {
-        print('Failed to reset analytics: $e');
+        debugPrint('Failed to reset analytics: $e');
       }
     } catch (e) {
       // Even if logout fails, clear local state
@@ -358,12 +361,12 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       ApiService.clearToken();
       await _clearAuthData();
-      
+
       // Try to reset analytics even if logout failed
       try {
         await AnalyticsService.reset();
       } catch (e) {
-        print('Failed to reset analytics: $e');
+        debugPrint('Failed to reset analytics: $e');
       }
     }
 
@@ -380,7 +383,7 @@ class AuthProvider with ChangeNotifier {
       final storedUserData = prefs.getString('user_data');
 
       if (storedToken != null && storedUserData != null) {
-        print('Found stored auth data, attempting to restore session...');
+        debugPrint('Found stored auth data, attempting to restore session...');
 
         // Set the token for API calls
         ApiService.setToken(storedToken);
@@ -399,11 +402,11 @@ class AuthProvider with ChangeNotifier {
           // Initialize Firebase Messaging for restored session
           await _initializeFirebaseMessaging();
 
-          print('Session restored successfully for user: ${_user?.email}');
+          debugPrint('Session restored successfully for user: ${_user?.email}');
           notifyListeners();
           return;
         } catch (e) {
-          print('Stored token is invalid, clearing auth data: $e');
+          debugPrint('Stored token is invalid, clearing auth data: $e');
           await _clearAuthData();
         }
       }
@@ -411,7 +414,7 @@ class AuthProvider with ChangeNotifier {
       // No valid stored data, user needs to authenticate
       _status = AuthStatus.unauthenticated;
     } catch (e) {
-      print('Error checking auth status: $e');
+      debugPrint('Error checking auth status: $e');
       _status = AuthStatus.unauthenticated;
     }
 
@@ -487,7 +490,7 @@ class AuthProvider with ChangeNotifier {
         await prefs.setString('user_data', jsonEncode(_user!.toJson()));
       }
     } catch (e) {
-      print('Error storing auth data: $e');
+      debugPrint('Error storing auth data: $e');
     }
   }
 
@@ -497,7 +500,7 @@ class AuthProvider with ChangeNotifier {
       await prefs.remove('auth_token');
       await prefs.remove('user_data');
     } catch (e) {
-      print('Error clearing auth data: $e');
+      debugPrint('Error clearing auth data: $e');
     }
   }
 
@@ -505,21 +508,22 @@ class AuthProvider with ChangeNotifier {
   Future<void> _initializeFirebaseMessaging() async {
     try {
       final firebaseMessagingService = FirebaseMessagingService();
-      
+
       // Initialize if not already initialized
       if (!firebaseMessagingService.isInitialized) {
         await firebaseMessagingService.initialize();
-        print('Firebase Messaging initialized after authentication');
+        debugPrint('Firebase Messaging initialized after authentication');
       } else {
         // If already initialized, just re-register the token
         // This ensures the token is associated with the current user
         final token = firebaseMessagingService.deviceToken;
         if (token != null) {
-          print('Re-registering FCM token with backend for authenticated user');
+          debugPrint(
+              'Re-registering FCM token with backend for authenticated user');
         }
       }
     } catch (e) {
-      print('Error initializing Firebase Messaging: $e');
+      debugPrint('Error initializing Firebase Messaging: $e');
       // Don't rethrow - messaging initialization failure shouldn't block authentication
     }
   }

@@ -42,7 +42,6 @@ class _EnhancedCardState extends State<EnhancedCard>
   late AnimationController _parallaxController;
   late Animation<double> _elevationAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<Offset> _parallaxAnimation;
 
   bool _isHovered = false;
   Offset _pointerPosition = Offset.zero;
@@ -50,20 +49,18 @@ class _EnhancedCardState extends State<EnhancedCard>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _hoverController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 200)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 200)),
       vsync: this,
     );
-    
+
     _parallaxController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 100)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 100)),
       vsync: this,
     );
 
@@ -82,14 +79,6 @@ class _EnhancedCardState extends State<EnhancedCard>
       parent: _hoverController,
       curve: Curves.easeOut,
     ));
-
-    _parallaxAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.02, 0.02),
-    ).animate(CurvedAnimation(
-      parent: _parallaxController,
-      curve: Curves.easeOut,
-    ));
   }
 
   @override
@@ -101,7 +90,7 @@ class _EnhancedCardState extends State<EnhancedCard>
 
   void _onHover(bool isHovered) {
     setState(() => _isHovered = isHovered);
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (!accessibilityService.reducedMotion && widget.enableHoverEffect) {
       if (isHovered) {
@@ -114,7 +103,7 @@ class _EnhancedCardState extends State<EnhancedCard>
 
   void _onPointerMove(PointerEvent details, Size size) {
     if (!widget.enableParallax) return;
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (accessibilityService.reducedMotion) return;
 
@@ -124,13 +113,13 @@ class _EnhancedCardState extends State<EnhancedCard>
         (details.localPosition.dy - size.height / 2) / size.height,
       );
     });
-    
+
     _parallaxController.forward();
   }
 
   void _onPointerExit() {
     if (!widget.enableParallax) return;
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (accessibilityService.reducedMotion) return;
 
@@ -141,7 +130,7 @@ class _EnhancedCardState extends State<EnhancedCard>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return AnimatedBuilder(
       animation: Listenable.merge([
         _hoverController,
@@ -151,23 +140,24 @@ class _EnhancedCardState extends State<EnhancedCard>
         return Container(
           margin: widget.margin,
           child: Transform.scale(
-            scale: accessibilityService.reducedMotion 
-                ? 1.0 
+            scale: accessibilityService.reducedMotion
+                ? 1.0
                 : _scaleAnimation.value,
             child: Transform.translate(
-              offset: widget.enableParallax && !accessibilityService.reducedMotion
-                  ? Offset(
-                      _pointerPosition.dx * 10,
-                      _pointerPosition.dy * 10,
-                    )
-                  : Offset.zero,
+              offset:
+                  widget.enableParallax && !accessibilityService.reducedMotion
+                      ? Offset(
+                          _pointerPosition.dx * 10,
+                          _pointerPosition.dy * 10,
+                        )
+                      : Offset.zero,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(widget.borderRadius),
                   boxShadow: [
                     if (widget.enableGlow && _isHovered)
                       BoxShadow(
-                        color: AppColors.primaryGold.withOpacity(0.2),
+                        color: AppColors.primaryGold.withValues(alpha: 0.2),
                         blurRadius: 15.0,
                         spreadRadius: 2.0,
                       ),
@@ -186,7 +176,8 @@ class _EnhancedCardState extends State<EnhancedCard>
                   },
                   child: Listener(
                     onPointerMove: (event) {
-                      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+                      final RenderBox renderBox =
+                          context.findRenderObject() as RenderBox;
                       _onPointerMove(event, renderBox.size);
                     },
                     child: AnimatedContainer(
@@ -194,14 +185,18 @@ class _EnhancedCardState extends State<EnhancedCard>
                       curve: Curves.easeOut,
                       padding: widget.padding,
                       decoration: BoxDecoration(
-                        color: widget.backgroundColor ?? AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(widget.borderRadius),
-                        border: _isHovered && !accessibilityService.reducedMotion
-                            ? Border.all(
-                                color: AppColors.primaryGold.withOpacity(0.3),
-                                width: 1.5,
-                              )
-                            : null,
+                        color:
+                            widget.backgroundColor ?? AppColors.cardBackground,
+                        borderRadius:
+                            BorderRadius.circular(widget.borderRadius),
+                        border:
+                            _isHovered && !accessibilityService.reducedMotion
+                                ? Border.all(
+                                    color: AppColors.primaryGold
+                                        .withValues(alpha: 0.3),
+                                    width: 1.5,
+                                  )
+                                : null,
                       ),
                       child: widget.onTap != null
                           ? AnimatedPressable(
@@ -265,20 +260,18 @@ class _ProfileCardState extends State<ProfileCard>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _revealController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 400)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
     );
-    
+
     _heartController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 600)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 600)),
       vsync: this,
     );
 
@@ -305,7 +298,7 @@ class _ProfileCardState extends State<ProfileCard>
 
   void _toggleDetails() {
     setState(() => _showDetails = !_showDetails);
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (!accessibilityService.reducedMotion) {
       if (_showDetails) {
@@ -318,13 +311,13 @@ class _ProfileCardState extends State<ProfileCard>
 
   void _onLike() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       _heartController.forward().then((_) {
         _heartController.reverse();
       });
     }
-    
+
     HapticFeedback.mediumImpact();
     widget.onLike?.call();
   }
@@ -332,8 +325,7 @@ class _ProfileCardState extends State<ProfileCard>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return EnhancedCard(
       onTap: widget.onTap ?? _toggleDetails,
       enableHoverEffect: true,
@@ -362,7 +354,7 @@ class _ProfileCardState extends State<ProfileCard>
                   },
                 ),
               ),
-              
+
               // Gradient Overlay
               Positioned.fill(
                 child: Container(
@@ -372,14 +364,14 @@ class _ProfileCardState extends State<ProfileCard>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                       ],
                       stops: const [0.4, 1.0],
                     ),
                   ),
                 ),
               ),
-              
+
               // Basic Info
               Positioned(
                 bottom: 16,
@@ -400,14 +392,14 @@ class _ProfileCardState extends State<ProfileCard>
                       Text(
                         widget.subtitle!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textLight.withOpacity(0.9),
+                          color: AppColors.textLight.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
                   ],
                 ),
               ),
-              
+
               // Action Buttons
               if (widget.showActions)
                 Positioned(
@@ -447,7 +439,7 @@ class _ProfileCardState extends State<ProfileCard>
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -460,7 +452,7 @@ class _ProfileCardState extends State<ProfileCard>
                     ],
                   ),
                 ),
-              
+
               // Progressive Disclosure Overlay
               if (_showDetails)
                 AnimatedBuilder(
@@ -469,9 +461,8 @@ class _ProfileCardState extends State<ProfileCard>
                     return Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(
-                            0.8 * _revealAnimation.value
-                          ),
+                          color: Colors.black
+                              .withValues(alpha: 0.8 * _revealAnimation.value),
                         ),
                         child: Opacity(
                           opacity: _revealAnimation.value,
@@ -481,11 +472,13 @@ class _ProfileCardState extends State<ProfileCard>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'À propos',
-                                      style: theme.textTheme.headlineSmall?.copyWith(
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
                                         color: AppColors.textLight,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -500,7 +493,8 @@ class _ProfileCardState extends State<ProfileCard>
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                if (widget.tags != null && widget.tags!.isNotEmpty) ...[
+                                if (widget.tags != null &&
+                                    widget.tags!.isNotEmpty) ...[
                                   Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
@@ -511,15 +505,19 @@ class _ProfileCardState extends State<ProfileCard>
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primaryGold.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(16),
+                                          color: AppColors.primaryGold
+                                              .withValues(alpha: 0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           border: Border.all(
-                                            color: AppColors.primaryGold.withOpacity(0.5),
+                                            color: AppColors.primaryGold
+                                                .withValues(alpha: 0.5),
                                           ),
                                         ),
                                         child: Text(
                                           tag,
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             color: AppColors.textLight,
                                           ),
                                         ),

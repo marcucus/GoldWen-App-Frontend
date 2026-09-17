@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -11,12 +10,12 @@ class PerformanceCacheService extends ChangeNotifier {
   static const String _cacheBoxName = 'performance_cache';
   static const String _imageBoxName = 'image_cache';
   static const String _profileBoxName = 'profile_cache';
-  
+
   static const Duration _defaultCacheExpiry = Duration(hours: 24);
   static const Duration _imageCacheExpiry = Duration(days: 7);
   static const Duration _profileCacheExpiry = Duration(hours: 6);
-  
-  static const int _maxCacheSize = 100 * 1024 * 1024; // 100MB
+
+  // 100MB
   static const int _maxImageCacheEntries = 500;
   static const int _maxProfileCacheEntries = 1000;
 
@@ -39,13 +38,13 @@ class PerformanceCacheService extends ChangeNotifier {
       _cacheBox = await Hive.openBox(_cacheBoxName);
       _imageBox = await Hive.openBox(_imageBoxName);
       _profileBox = await Hive.openBox(_profileBoxName);
-      
+
       // Clean expired cache entries on startup
       await _cleanExpiredEntries();
-      
+
       // Set up periodic cleanup
       _setupPeriodicCleanup();
-      
+
       _initialized = true;
       notifyListeners();
     } catch (e) {
@@ -68,7 +67,7 @@ class PerformanceCacheService extends ChangeNotifier {
         _cleanBox(_imageBox, _imageCacheExpiry),
         _cleanBox(_profileBox, _profileCacheExpiry),
       ]);
-      
+
       // Enforce cache size limits
       await _enforceCacheLimits();
     } catch (e) {
@@ -80,26 +79,26 @@ class PerformanceCacheService extends ChangeNotifier {
   Future<void> _cleanBox(Box box, Duration maxAge) async {
     final now = DateTime.now();
     final keysToDelete = <String>[];
-    
+
     for (final key in box.keys) {
       final entry = box.get(key) as Map<dynamic, dynamic>?;
       if (entry == null) {
         keysToDelete.add(key.toString());
         continue;
       }
-      
+
       final timestampStr = entry['timestamp'] as String?;
       if (timestampStr == null) {
         keysToDelete.add(key.toString());
         continue;
       }
-      
+
       final timestamp = DateTime.tryParse(timestampStr);
       if (timestamp == null || now.difference(timestamp) > maxAge) {
         keysToDelete.add(key.toString());
       }
     }
-    
+
     for (final key in keysToDelete) {
       await box.delete(key);
     }
@@ -113,34 +112,38 @@ class PerformanceCacheService extends ChangeNotifier {
           .map((key) => MapEntry(key, _imageBox.get(key)))
           .where((entry) => entry.value != null)
           .toList();
-      
+
       // Sort by timestamp (oldest first)
       entries.sort((a, b) {
-        final aTime = DateTime.tryParse(a.value['timestamp'] ?? '') ?? DateTime(1970);
-        final bTime = DateTime.tryParse(b.value['timestamp'] ?? '') ?? DateTime(1970);
+        final aTime =
+            DateTime.tryParse(a.value['timestamp'] ?? '') ?? DateTime(1970);
+        final bTime =
+            DateTime.tryParse(b.value['timestamp'] ?? '') ?? DateTime(1970);
         return aTime.compareTo(bTime);
       });
-      
+
       // Remove oldest entries
       final toRemove = entries.take(entries.length - _maxImageCacheEntries);
       for (final entry in toRemove) {
         await _imageBox.delete(entry.key);
       }
     }
-    
+
     // Limit profile cache entries
     if (_profileBox.keys.length > _maxProfileCacheEntries) {
       final entries = _profileBox.keys
           .map((key) => MapEntry(key, _profileBox.get(key)))
           .where((entry) => entry.value != null)
           .toList();
-      
+
       entries.sort((a, b) {
-        final aTime = DateTime.tryParse(a.value['timestamp'] ?? '') ?? DateTime(1970);
-        final bTime = DateTime.tryParse(b.value['timestamp'] ?? '') ?? DateTime(1970);
+        final aTime =
+            DateTime.tryParse(a.value['timestamp'] ?? '') ?? DateTime(1970);
+        final bTime =
+            DateTime.tryParse(b.value['timestamp'] ?? '') ?? DateTime(1970);
         return aTime.compareTo(bTime);
       });
-      
+
       final toRemove = entries.take(entries.length - _maxProfileCacheEntries);
       for (final entry in toRemove) {
         await _profileBox.delete(entry.key);
@@ -151,14 +154,14 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Cache generic data
   Future<void> cacheData(String key, dynamic data, {Duration? expiry}) async {
     if (!_initialized) await initialize();
-    
+
     try {
       final entry = {
         'data': data,
         'timestamp': DateTime.now().toIso8601String(),
         'expiry': (expiry ?? _defaultCacheExpiry).inMilliseconds,
       };
-      
+
       await _cacheBox.put(key, entry);
     } catch (e) {
       debugPrint('Error caching data for key $key: $e');
@@ -168,30 +171,30 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Get cached data
   T? getCachedData<T>(String key) {
     if (!_initialized) return null;
-    
+
     try {
       final entry = _cacheBox.get(key) as Map<dynamic, dynamic>?;
       if (entry == null) return null;
-      
+
       final timestampStr = entry['timestamp'] as String?;
       final expiryMs = entry['expiry'] as int?;
-      
+
       if (timestampStr == null || expiryMs == null) {
         _cacheBox.delete(key);
         return null;
       }
-      
+
       final timestamp = DateTime.tryParse(timestampStr);
       if (timestamp == null) {
         _cacheBox.delete(key);
         return null;
       }
-      
+
       if (DateTime.now().difference(timestamp).inMilliseconds > expiryMs) {
         _cacheBox.delete(key);
         return null;
       }
-      
+
       return entry['data'] as T?;
     } catch (e) {
       debugPrint('Error getting cached data for key $key: $e');
@@ -202,7 +205,7 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Cache image data
   Future<void> cacheImage(String url, Uint8List imageData) async {
     if (!_initialized) await initialize();
-    
+
     try {
       final key = _generateImageKey(url);
       final entry = {
@@ -211,7 +214,7 @@ class PerformanceCacheService extends ChangeNotifier {
         'timestamp': DateTime.now().toIso8601String(),
         'size': imageData.length,
       };
-      
+
       await _imageBox.put(key, entry);
     } catch (e) {
       debugPrint('Error caching image for URL $url: $e');
@@ -221,26 +224,26 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Get cached image data
   Uint8List? getCachedImage(String url) {
     if (!_initialized) return null;
-    
+
     try {
       final key = _generateImageKey(url);
       final entry = _imageBox.get(key) as Map<dynamic, dynamic>?;
-      
+
       if (entry == null) return null;
-      
+
       final timestampStr = entry['timestamp'] as String?;
       if (timestampStr == null) {
         _imageBox.delete(key);
         return null;
       }
-      
+
       final timestamp = DateTime.tryParse(timestampStr);
-      if (timestamp == null || 
+      if (timestamp == null ||
           DateTime.now().difference(timestamp) > _imageCacheExpiry) {
         _imageBox.delete(key);
         return null;
       }
-      
+
       return entry['data'] as Uint8List?;
     } catch (e) {
       debugPrint('Error getting cached image for URL $url: $e');
@@ -249,27 +252,29 @@ class PerformanceCacheService extends ChangeNotifier {
   }
 
   /// Load image with caching and deduplication
-  Future<Uint8List?> loadImageWithCache(String url, {
+  Future<Uint8List?> loadImageWithCache(
+    String url, {
     Map<String, String>? headers,
     Function(int, int)? onProgress,
   }) async {
     if (!_initialized) await initialize();
-    
+
     // Check cache first
     final cached = getCachedImage(url);
     if (cached != null) {
       return cached;
     }
-    
+
     // Check if already loading
     if (_pendingImageLoads.containsKey(url)) {
       return await _pendingImageLoads[url]!;
     }
-    
+
     // Start loading
-    final future = _loadImageFromNetwork(url, headers: headers, onProgress: onProgress);
+    final future =
+        _loadImageFromNetwork(url, headers: headers, onProgress: onProgress);
     _pendingImageLoads[url] = future;
-    
+
     try {
       final result = await future;
       if (result != null) {
@@ -282,7 +287,8 @@ class PerformanceCacheService extends ChangeNotifier {
   }
 
   /// Load image from network
-  Future<Uint8List?> _loadImageFromNetwork(String url, {
+  Future<Uint8List?> _loadImageFromNetwork(
+    String url, {
     Map<String, String>? headers,
     Function(int, int)? onProgress,
   }) async {
@@ -295,7 +301,7 @@ class PerformanceCacheService extends ChangeNotifier {
         ),
         onReceiveProgress: onProgress,
       );
-      
+
       if (response.statusCode == 200 && response.data != null) {
         return Uint8List.fromList(response.data);
       }
@@ -306,15 +312,16 @@ class PerformanceCacheService extends ChangeNotifier {
   }
 
   /// Cache profile data
-  Future<void> cacheProfile(String profileId, Map<String, dynamic> profileData) async {
+  Future<void> cacheProfile(
+      String profileId, Map<String, dynamic> profileData) async {
     if (!_initialized) await initialize();
-    
+
     try {
       final entry = {
         'data': profileData,
         'timestamp': DateTime.now().toIso8601String(),
       };
-      
+
       await _profileBox.put(profileId, entry);
     } catch (e) {
       debugPrint('Error caching profile $profileId: $e');
@@ -324,24 +331,24 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Get cached profile data
   Map<String, dynamic>? getCachedProfile(String profileId) {
     if (!_initialized) return null;
-    
+
     try {
       final entry = _profileBox.get(profileId) as Map<dynamic, dynamic>?;
       if (entry == null) return null;
-      
+
       final timestampStr = entry['timestamp'] as String?;
       if (timestampStr == null) {
         _profileBox.delete(profileId);
         return null;
       }
-      
+
       final timestamp = DateTime.tryParse(timestampStr);
-      if (timestamp == null || 
+      if (timestamp == null ||
           DateTime.now().difference(timestamp) > _profileCacheExpiry) {
         _profileBox.delete(profileId);
         return null;
       }
-      
+
       return Map<String, dynamic>.from(entry['data'] as Map);
     } catch (e) {
       debugPrint('Error getting cached profile $profileId: $e');
@@ -350,20 +357,23 @@ class PerformanceCacheService extends ChangeNotifier {
   }
 
   /// Preload profiles in background
-  Future<void> preloadProfiles(List<String> profileIds, {
+  Future<void> preloadProfiles(
+    List<String> profileIds, {
     required Future<Map<String, dynamic>?> Function(String) loadFunction,
   }) async {
     if (!_initialized) await initialize();
-    
+
     // Load profiles that aren't cached
     final uncachedIds = profileIds
-        .where((id) => getCachedProfile(id) == null && !_pendingProfileLoads.containsKey(id))
+        .where((id) =>
+            getCachedProfile(id) == null &&
+            !_pendingProfileLoads.containsKey(id))
         .toList();
-    
+
     for (final profileId in uncachedIds) {
       final future = loadFunction(profileId);
       _pendingProfileLoads[profileId] = future;
-      
+
       // Cache the result when it completes
       future.then((profileData) {
         if (profileData != null) {
@@ -385,7 +395,7 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Clear all caches
   Future<void> clearAllCaches() async {
     if (!_initialized) await initialize();
-    
+
     try {
       await Future.wait([
         _cacheBox.clear(),
@@ -401,7 +411,7 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Get cache statistics
   Map<String, dynamic> getCacheStats() {
     if (!_initialized) return {};
-    
+
     try {
       int imageCacheSize = 0;
       for (final entry in _imageBox.values) {
@@ -409,7 +419,7 @@ class PerformanceCacheService extends ChangeNotifier {
           imageCacheSize += entry['size'] as int;
         }
       }
-      
+
       return {
         'initialized': _initialized,
         'cacheEntries': _cacheBox.keys.length,

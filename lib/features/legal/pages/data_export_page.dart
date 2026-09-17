@@ -24,7 +24,7 @@ class _DataExportPageState extends State<DataExportPage> {
   Future<void> _checkExistingRequest() async {
     final gdprService = Provider.of<GdprService>(context, listen: false);
     final currentRequest = gdprService.currentExportRequest;
-    
+
     if (currentRequest != null && !currentRequest.isExpired) {
       await gdprService.getExportStatus(currentRequest.requestId);
     }
@@ -48,7 +48,7 @@ class _DataExportPageState extends State<DataExportPage> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withOpacity(0.2),
+                        color: AppColors.cardOverlay.withValues(alpha: 0.2),
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
@@ -62,10 +62,11 @@ class _DataExportPageState extends State<DataExportPage> {
                     Expanded(
                       child: Text(
                         'Export de mes données',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppColors.textLight,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ],
@@ -75,9 +76,9 @@ class _DataExportPageState extends State<DataExportPage> {
               // Content
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.backgroundWhite,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(AppBorderRadius.xLarge),
                       topRight: Radius.circular(AppBorderRadius.xLarge),
                     ),
@@ -97,19 +98,23 @@ class _DataExportPageState extends State<DataExportPage> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    AppColors.primaryGold.withOpacity(0.1),
-                                    AppColors.primaryGold.withOpacity(0.05),
+                                    AppColors.primaryGold
+                                        .withValues(alpha: 0.1),
+                                    AppColors.primaryGold
+                                        .withValues(alpha: 0.05),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(AppBorderRadius.large),
+                                borderRadius: BorderRadius.circular(
+                                    AppBorderRadius.large),
                                 border: Border.all(
-                                  color: AppColors.primaryGold.withOpacity(0.3),
+                                  color: AppColors.primaryGold
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.info_outline,
                                     color: AppColors.primaryGold,
                                     size: 32,
@@ -117,19 +122,25 @@ class _DataExportPageState extends State<DataExportPage> {
                                   const SizedBox(width: AppSpacing.md),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Droit d\'accès RGPD',
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.primaryGold,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.primaryGold,
+                                              ),
                                         ),
                                         const SizedBox(height: AppSpacing.sm),
                                         Text(
                                           'Conformément à l\'article 20 du RGPD, vous avez le droit d\'obtenir une copie de toutes vos données personnelles dans un format structuré et lisible.',
-                                          style: Theme.of(context).textTheme.bodyMedium,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
                                         ),
                                       ],
                                     ),
@@ -141,14 +152,16 @@ class _DataExportPageState extends State<DataExportPage> {
                             const SizedBox(height: AppSpacing.xl),
 
                             // What's included
-                            _buildSectionTitle('Données incluses dans l\'export'),
+                            _buildSectionTitle(
+                                'Données incluses dans l\'export'),
                             const SizedBox(height: AppSpacing.md),
                             _buildIncludedDataList(),
 
                             const SizedBox(height: AppSpacing.xl),
 
                             // Current request status or request button
-                            if (exportRequest != null && !exportRequest.isExpired)
+                            if (exportRequest != null &&
+                                !exportRequest.isExpired)
                               _buildExportStatusCard(exportRequest, gdprService)
                             else
                               _buildRequestExportButton(gdprService),
@@ -160,14 +173,15 @@ class _DataExportPageState extends State<DataExportPage> {
                               padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
                                 color: AppColors.backgroundGrey,
-                                borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                                borderRadius: BorderRadius.circular(
+                                    AppBorderRadius.medium),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.schedule,
                                         size: 20,
                                         color: AppColors.textSecondary,
@@ -175,18 +189,24 @@ class _DataExportPageState extends State<DataExportPage> {
                                       const SizedBox(width: AppSpacing.sm),
                                       Text(
                                         'Temps de traitement',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
                                   Text(
                                     'La préparation de vos données peut prendre jusqu\'à 24 heures. Vous recevrez un email avec un lien de téléchargement.',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -209,17 +229,23 @@ class _DataExportPageState extends State<DataExportPage> {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: AppColors.primaryGold,
-      ),
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryGold,
+          ),
     );
   }
 
   Widget _buildIncludedDataList() {
     final items = [
-      {'icon': Icons.person, 'text': 'Informations de profil (nom, email, etc.)'},
+      {
+        'icon': Icons.person,
+        'text': 'Informations de profil (nom, email, etc.)'
+      },
       {'icon': Icons.photo, 'text': 'Photos et média uploadés'},
-      {'icon': Icons.psychology, 'text': 'Réponses au questionnaire de personnalité'},
+      {
+        'icon': Icons.psychology,
+        'text': 'Réponses au questionnaire de personnalité'
+      },
       {'icon': Icons.chat, 'text': 'Historique de conversations'},
       {'icon': Icons.favorite, 'text': 'Matches et préférences'},
       {'icon': Icons.settings, 'text': 'Paramètres et consentements'},
@@ -258,7 +284,8 @@ class _DataExportPageState extends State<DataExportPage> {
     );
   }
 
-  Widget _buildExportStatusCard(DataExportRequest request, GdprService gdprService) {
+  Widget _buildExportStatusCard(
+      DataExportRequest request, GdprService gdprService) {
     IconData statusIcon;
     Color statusColor;
     String statusText;
@@ -307,9 +334,9 @@ class _DataExportPageState extends State<DataExportPage> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -324,17 +351,17 @@ class _DataExportPageState extends State<DataExportPage> {
                     Text(
                       statusText,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
                     ),
                     if (request.estimatedTime != null) ...[
                       const SizedBox(height: 4),
                       Text(
                         'Temps estimé : ${request.estimatedTime}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ],
                   ],
@@ -342,7 +369,7 @@ class _DataExportPageState extends State<DataExportPage> {
               ),
             ],
           ),
-          if (actionButton != null) ...[
+          ...[
             const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
@@ -354,8 +381,8 @@ class _DataExportPageState extends State<DataExportPage> {
             Text(
               'Expire le ${_formatDate(request.expiresAt!)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ],
@@ -369,18 +396,23 @@ class _DataExportPageState extends State<DataExportPage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: gdprService.isLoading ? null : () => _requestNewExport(gdprService),
+            onPressed: gdprService.isLoading
+                ? null
+                : () => _requestNewExport(gdprService),
             icon: gdprService.isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.textLight),
                     ),
                   )
                 : const Icon(Icons.file_download),
-            label: Text(gdprService.isLoading ? 'Demande en cours...' : 'Demander un export'),
+            label: Text(gdprService.isLoading
+                ? 'Demande en cours...'
+                : 'Demander un export'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGold,
               foregroundColor: AppColors.textLight,
@@ -399,8 +431,8 @@ class _DataExportPageState extends State<DataExportPage> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Export demandé avec succès. Vous recevrez un email.'),
+        const SnackBar(
+          content: Text('Export demandé avec succès. Vous recevrez un email.'),
           backgroundColor: AppColors.successGreen,
           behavior: SnackBarBehavior.floating,
         ),
@@ -420,7 +452,8 @@ class _DataExportPageState extends State<DataExportPage> {
     await gdprService.getExportStatus(requestId);
   }
 
-  Future<void> _downloadExport(String requestId, GdprService gdprService) async {
+  Future<void> _downloadExport(
+      String requestId, GdprService gdprService) async {
     try {
       // Show loading
       showDialog(
@@ -441,7 +474,8 @@ class _DataExportPageState extends State<DataExportPage> {
       if (data != null) {
         // Save file
         final directory = await getApplicationDocumentsDirectory();
-        final file = File('${directory.path}/goldwen_data_export_${DateTime.now().millisecondsSinceEpoch}.json');
+        final file = File(
+            '${directory.path}/goldwen_data_export_${DateTime.now().millisecondsSinceEpoch}.json');
         await file.writeAsBytes(data);
 
         // Share file
@@ -452,8 +486,8 @@ class _DataExportPageState extends State<DataExportPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Export téléchargé avec succès'),
+            const SnackBar(
+              content: Text('Export téléchargé avec succès'),
               backgroundColor: AppColors.successGreen,
               behavior: SnackBarBehavior.floating,
             ),

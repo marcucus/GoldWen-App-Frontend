@@ -33,7 +33,7 @@ class ScoreBreakdownCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          
+
           // Base scores
           _buildScoreRow(
             context,
@@ -50,9 +50,9 @@ class ScoreBreakdownCard extends StatelessWidget {
             Icons.favorite,
             AppColors.primaryGold,
           ),
-          
+
           const Divider(height: 24),
-          
+
           // Bonus/Malus section
           Text(
             'Bonus',
@@ -62,7 +62,7 @@ class ScoreBreakdownCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 12),
-          
+
           _buildBonusRow(
             context,
             'Activité',
@@ -83,9 +83,9 @@ class ScoreBreakdownCard extends StatelessWidget {
             breakdown.reciprocityBonus,
             Icons.favorite_border,
           ),
-          
+
           const Divider(height: 24),
-          
+
           // Summary
           _buildSummaryRow(
             context,
@@ -117,7 +117,7 @@ class ScoreBreakdownCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -144,7 +144,7 @@ class ScoreBreakdownCard extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          '${score.toStringAsFixed(1)}',
+          score.toStringAsFixed(1),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
@@ -162,7 +162,7 @@ class ScoreBreakdownCard extends StatelessWidget {
   ) {
     final isPositive = value >= 0;
     final color = isPositive ? AppColors.successGreen : AppColors.errorRed;
-    
+
     return Row(
       children: [
         Icon(
@@ -183,10 +183,10 @@ class ScoreBreakdownCard extends StatelessWidget {
             vertical: 4,
           ),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -244,7 +244,7 @@ class ScoreBreakdownCard extends StatelessWidget {
   Widget _buildProgressBar(double value, Color color) {
     // Normalize to 0-100 range (assuming max score per category is around 60)
     final percentage = (value / 60).clamp(0.0, 1.0);
-    
+
     return Container(
       height: 6,
       decoration: BoxDecoration(

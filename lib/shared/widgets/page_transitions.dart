@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/accessibility_service.dart';
-import '../../core/theme/app_theme.dart';
 
 /// Custom page transitions that respect accessibility settings
 class EnhancedPageTransitions {
@@ -16,7 +15,7 @@ class EnhancedPageTransitions {
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final accessibilityService = context.read<AccessibilityService>();
-        
+
         if (accessibilityService.reducedMotion) {
           return child;
         }
@@ -49,7 +48,7 @@ class EnhancedPageTransitions {
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final accessibilityService = context.read<AccessibilityService>();
-        
+
         if (accessibilityService.reducedMotion) {
           return child;
         }
@@ -79,7 +78,7 @@ class EnhancedPageTransitions {
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final accessibilityService = context.read<AccessibilityService>();
-        
+
         if (accessibilityService.reducedMotion) {
           return child;
         }
@@ -108,7 +107,7 @@ class EnhancedPageTransitions {
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final accessibilityService = context.read<AccessibilityService>();
-        
+
         if (accessibilityService.reducedMotion) {
           return child;
         }
@@ -118,7 +117,11 @@ class EnhancedPageTransitions {
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001)
             ..rotateX(0.3 * (1 - animation.value))
-            ..scale(0.8 + (0.2 * animation.value)),
+            ..scaleByDouble(
+                0.8 + (0.2 * animation.value),
+                0.8 + (0.2 * animation.value),
+                0.8 + (0.2 * animation.value),
+                1.0),
           child: FadeTransition(
             opacity: animation,
             child: child,
@@ -139,7 +142,7 @@ class EnhancedPageTransitions {
       transitionDuration: duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final accessibilityService = context.read<AccessibilityService>();
-        
+
         if (accessibilityService.reducedMotion) {
           return child;
         }
@@ -200,9 +203,9 @@ class _EnhancedPageWrapperState extends State<EnhancedPageWrapper>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -251,7 +254,7 @@ class _EnhancedPageWrapperState extends State<EnhancedPageWrapper>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (accessibilityService.reducedMotion) {
       return widget.child;
     }
@@ -304,12 +307,13 @@ class _StaggeredPageElementsState extends State<StaggeredPageElements>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controllers = widget.children.map((child) {
       return AnimationController(
-        duration: accessibilityService.getAnimationDuration(widget.itemDuration),
+        duration:
+            accessibilityService.getAnimationDuration(widget.itemDuration),
         vsync: this,
       );
     }).toList();
@@ -339,7 +343,7 @@ class _StaggeredPageElementsState extends State<StaggeredPageElements>
 
   void _startStaggeredAnimations() async {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (accessibilityService.reducedMotion) {
       // Skip stagger for reduced motion
       for (final controller in _controllers) {
@@ -400,7 +404,8 @@ class SharedElementTransition extends StatefulWidget {
   });
 
   @override
-  State<SharedElementTransition> createState() => _SharedElementTransitionState();
+  State<SharedElementTransition> createState() =>
+      _SharedElementTransitionState();
 }
 
 class _SharedElementTransitionState extends State<SharedElementTransition>
@@ -411,9 +416,9 @@ class _SharedElementTransitionState extends State<SharedElementTransition>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -478,9 +483,9 @@ class _LoadingTransitionState extends State<LoadingTransition>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _controller = AnimationController(
       duration: accessibilityService.getAnimationDuration(widget.duration),
       vsync: this,
@@ -499,7 +504,7 @@ class _LoadingTransitionState extends State<LoadingTransition>
   @override
   void didUpdateWidget(LoadingTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (oldWidget.isLoading && !widget.isLoading) {
       _controller.forward();
     } else if (!oldWidget.isLoading && widget.isLoading) {

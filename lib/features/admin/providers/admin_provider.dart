@@ -7,23 +7,19 @@ import '../models/admin_analytics.dart';
 class AdminProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
-  
+
   // Analytics
   AdminAnalytics? _analytics;
-  
+
   // Users Management
   List<User> _users = [];
   int _currentUsersPage = 1;
   bool _hasMoreUsers = true;
-  String? _usersSearchQuery;
-  String? _usersStatusFilter;
-  
+
   // Reports Management
   List<AdminReport> _reports = [];
   int _currentReportsPage = 1;
   bool _hasMoreReports = true;
-  String? _reportsStatusFilter;
-  String? _reportsTypeFilter;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -60,8 +56,6 @@ class AdminProvider extends ChangeNotifier {
         _hasMoreUsers = true;
       }
 
-      _usersSearchQuery = search;
-      _usersStatusFilter = status;
       _setLoading(true);
 
       final response = await ApiService.getAdminUsers(
@@ -107,7 +101,7 @@ class AdminProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       await ApiService.updateUserStatus(userId, status);
-      
+
       // Update local user status
       final userIndex = _users.indexWhere((user) => user.id == userId);
       if (userIndex != -1) {
@@ -115,7 +109,7 @@ class AdminProvider extends ChangeNotifier {
         // This would depend on the User model implementation
         notifyListeners();
       }
-      
+
       return true;
     } catch (e) {
       _setError(e.toString());
@@ -138,8 +132,6 @@ class AdminProvider extends ChangeNotifier {
         _hasMoreReports = true;
       }
 
-      _reportsStatusFilter = status;
-      _reportsTypeFilter = type;
       _setLoading(true);
 
       final response = await ApiService.getAdminReports(
@@ -168,13 +160,15 @@ class AdminProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateReportStatus(String reportId, String status, String resolution) async {
+  Future<bool> updateReportStatus(
+      String reportId, String status, String resolution) async {
     try {
       _setLoading(true);
       await ApiService.updateReportStatus(reportId, status, resolution);
-      
+
       // Update local report status
-      final reportIndex = _reports.indexWhere((report) => report.id == reportId);
+      final reportIndex =
+          _reports.indexWhere((report) => report.id == reportId);
       if (reportIndex != -1) {
         _reports[reportIndex] = AdminReport.fromJson({
           ..._reports[reportIndex].toJson(),
@@ -184,7 +178,7 @@ class AdminProvider extends ChangeNotifier {
         });
         notifyListeners();
       }
-      
+
       return true;
     } catch (e) {
       _setError(e.toString());
@@ -195,7 +189,8 @@ class AdminProvider extends ChangeNotifier {
   }
 
   // Notification Methods
-  Future<bool> broadcastNotification(String title, String body, String type) async {
+  Future<bool> broadcastNotification(
+      String title, String body, String type) async {
     try {
       _setLoading(true);
       await ApiService.broadcastNotification(

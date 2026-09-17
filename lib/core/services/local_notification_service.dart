@@ -1,28 +1,33 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'navigation_service.dart';
 
 class LocalNotificationService {
-  static final LocalNotificationService _instance = LocalNotificationService._internal();
+  static final LocalNotificationService _instance =
+      LocalNotificationService._internal();
   factory LocalNotificationService() => _instance;
   LocalNotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
-  
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
+
   static const int _dailySelectionNotificationId = 1;
 
   Future<void> initialize() async {
     // Initialize timezone
     tz.initializeTimeZones();
-    
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-    
+
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
@@ -35,8 +40,10 @@ class LocalNotificationService {
   }
 
   Future<bool> requestPermissions() async {
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    final iosPlugin = _notifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    final iosPlugin = _notifications.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
 
     bool? androidGranted;
     bool? iosGranted;
@@ -82,7 +89,7 @@ class LocalNotificationService {
     // Schedule for 12:00 PM today, or tomorrow if it's already past 12:00 PM
     final now = DateTime.now();
     var scheduledDate = DateTime(now.year, now.month, now.day, 12, 0);
-    
+
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
@@ -96,7 +103,8 @@ class LocalNotificationService {
       scheduledTZ,
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily at same time
+      matchDateTimeComponents:
+          DateTimeComponents.time, // Repeat daily at same time
       payload: 'daily_selection',
     );
   }
@@ -180,7 +188,7 @@ class LocalNotificationService {
 
   void _onNotificationTapped(NotificationResponse response) {
     final payload = response.payload;
-    
+
     if (payload == null) return;
 
     // Handle different notification types
@@ -207,22 +215,25 @@ class LocalNotificationService {
 
   void _handleDailySelectionTap() {
     NavigationService.navigateToDiscoverTab();
-    print('Daily selection notification tapped - navigating to discover');
+    debugPrint('Daily selection notification tapped - navigating to discover');
   }
 
   void _handleNewMatchTap() {
     NavigationService.navigateToMatches();
-    print('New match notification tapped - navigating to matches');
+    debugPrint('New match notification tapped - navigating to matches');
   }
 
   void _handleNewMessageTap() {
-    NavigationService.navigateToNotifications(); // Could be improved to go to specific chat
-    print('New message notification tapped - navigating to notifications');  
+    NavigationService
+        .navigateToNotifications(); // Could be improved to go to specific chat
+    debugPrint('New message notification tapped - navigating to notifications');
   }
 
   void _handleChatExpiringTap() {
-    NavigationService.navigateToNotifications(); // Could be improved to go to specific chat
-    print('Chat expiring notification tapped - navigating to notifications');
+    NavigationService
+        .navigateToNotifications(); // Could be improved to go to specific chat
+    debugPrint(
+        'Chat expiring notification tapped - navigating to notifications');
   }
 
   // Method to show immediate notifications (for foreground FCM messages)
@@ -292,7 +303,7 @@ class LocalNotificationService {
           presentSound: true,
         );
         break;
-        
+
       case 'new_match':
         notificationId = 2;
         androidDetails = const AndroidNotificationDetails(
@@ -309,7 +320,7 @@ class LocalNotificationService {
           presentSound: true,
         );
         break;
-        
+
       case 'new_message':
         notificationId = 3;
         androidDetails = const AndroidNotificationDetails(
@@ -326,7 +337,7 @@ class LocalNotificationService {
           presentSound: true,
         );
         break;
-        
+
       case 'chat_expiring':
         notificationId = 4;
         androidDetails = const AndroidNotificationDetails(
@@ -343,7 +354,7 @@ class LocalNotificationService {
           presentSound: true,
         );
         break;
-        
+
       default:
         notificationId = 999;
         androidDetails = const AndroidNotificationDetails(

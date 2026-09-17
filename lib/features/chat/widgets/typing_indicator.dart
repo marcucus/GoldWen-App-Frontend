@@ -4,7 +4,7 @@ import '../../../core/theme/app_theme.dart';
 /// Widget that displays a typing indicator with animated dots
 class TypingIndicator extends StatefulWidget {
   final String userName;
-  
+
   const TypingIndicator({
     super.key,
     required this.userName,
@@ -41,7 +41,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.accentCream.withOpacity(0.5),
+        color: AppColors.accentCream.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
       ),
       child: Row(
@@ -63,8 +63,9 @@ class _TypingIndicatorState extends State<TypingIndicator>
                 children: List.generate(3, (index) {
                   final delay = index * 0.3;
                   final value = (_controller.value - delay).clamp(0.0, 1.0);
-                  final opacity = (Curves.easeInOut.transform(value) * 2 - 1).abs();
-                  
+                  final opacity =
+                      (Curves.easeInOut.transform(value) * 2 - 1).abs();
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 1),
                     child: Opacity(
@@ -72,7 +73,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
                       child: Container(
                         width: 4,
                         height: 4,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.textSecondary,
                           shape: BoxShape.circle,
                         ),

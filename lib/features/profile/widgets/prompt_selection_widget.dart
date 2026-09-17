@@ -54,8 +54,8 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
 
   List<Prompt> get _filteredPrompts {
     return widget.availablePrompts.where((prompt) {
-      final matchesSearch =
-          _searchQuery.isEmpty || prompt.text.toLowerCase().contains(_searchQuery);
+      final matchesSearch = _searchQuery.isEmpty ||
+          prompt.text.toLowerCase().contains(_searchQuery);
       final matchesCategory =
           _selectedCategory == 'Tous' || prompt.category == _selectedCategory;
       return matchesSearch && matchesCategory && prompt.active;
@@ -64,7 +64,7 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
 
   void _togglePromptSelection(String promptId) {
     final List<String> newSelection = List.from(widget.selectedPromptIds);
-    
+
     if (newSelection.contains(promptId)) {
       newSelection.remove(promptId);
     } else {
@@ -73,7 +73,8 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Vous ne pouvez sélectionner que ${widget.maxSelection} prompts maximum'),
+            content: Text(
+                'Vous ne pouvez sélectionner que ${widget.maxSelection} prompts maximum'),
             backgroundColor: AppColors.warningOrange,
             duration: const Duration(seconds: 2),
           ),
@@ -81,7 +82,7 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
         return;
       }
     }
-    
+
     widget.onSelectionChanged(newSelection);
   }
 
@@ -111,7 +112,8 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryGold, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.primaryGold, width: 2),
               ),
             ),
           ),
@@ -127,7 +129,7 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
             itemBuilder: (context, index) {
               final category = _categories[index];
               final isSelected = _selectedCategory == category;
-              
+
               return Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: FilterChip(
@@ -138,11 +140,14 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                       _selectedCategory = category;
                     });
                   },
-                  selectedColor: AppColors.primaryGold.withOpacity(0.2),
+                  selectedColor: AppColors.primaryGold.withValues(alpha: 0.2),
                   checkmarkColor: AppColors.primaryGold,
                   labelStyle: TextStyle(
-                    color: isSelected ? AppColors.primaryGold : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? AppColors.primaryGold
+                        : AppColors.textSecondary,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               );
@@ -171,16 +176,17 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                 ),
                 decoration: BoxDecoration(
                   color: widget.selectedPromptIds.length == widget.maxSelection
-                      ? AppColors.successGreen.withOpacity(0.2)
-                      : AppColors.primaryGold.withOpacity(0.2),
+                      ? AppColors.successGreen.withValues(alpha: 0.2)
+                      : AppColors.primaryGold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${widget.selectedPromptIds.length}/${widget.maxSelection}',
                   style: TextStyle(
-                    color: widget.selectedPromptIds.length == widget.maxSelection
-                        ? AppColors.successGreen
-                        : AppColors.primaryGold,
+                    color:
+                        widget.selectedPromptIds.length == widget.maxSelection
+                            ? AppColors.successGreen
+                            : AppColors.primaryGold,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -198,7 +204,7 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.search_off,
                         size: 64,
                         color: AppColors.textTertiary,
@@ -206,19 +212,22 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                       const SizedBox(height: AppSpacing.md),
                       Text(
                         'Aucun prompt trouvé',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                       ),
                     ],
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: _filteredPrompts.length,
                   itemBuilder: (context, index) {
                     final prompt = _filteredPrompts[index];
-                    final isSelected = widget.selectedPromptIds.contains(prompt.id);
+                    final isSelected =
+                        widget.selectedPromptIds.contains(prompt.id);
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -244,7 +253,10 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                                   children: [
                                     Text(
                                       prompt.text,
-                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.copyWith(
                                             fontWeight: FontWeight.w500,
                                           ),
                                     ),
@@ -260,7 +272,10 @@ class _PromptSelectionWidgetState extends State<PromptSelectionWidget> {
                                       ),
                                       child: Text(
                                         prompt.category,
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
                                               color: AppColors.textSecondary,
                                             ),
                                       ),

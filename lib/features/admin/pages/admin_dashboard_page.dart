@@ -45,10 +45,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   }
                 },
                 itemBuilder: (context) => [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'profile',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.person, size: 20),
                         SizedBox(width: 8),
                         Text('Profil'),
@@ -56,13 +56,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ),
                   ),
                   const PopupMenuDivider(),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'logout',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.logout, size: 20, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('Déconnexion', style: TextStyle(color: Colors.red)),
+                        Text('Déconnexion',
+                            style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),
@@ -76,15 +77,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         radius: 16,
                         backgroundColor: Colors.white,
                         child: Text(
-                          authProvider.currentAdmin?.email.substring(0, 1).toUpperCase() ?? 'A',
-                          style: TextStyle(
+                          authProvider.currentAdmin?.email
+                                  .substring(0, 1)
+                                  .toUpperCase() ??
+                              'A',
+                          style: const TextStyle(
                             color: AppColors.primaryGold,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(Icons.arrow_drop_down, color: Colors.white),
+                      const Icon(Icons.arrow_drop_down, color: Colors.white),
                     ],
                   ),
                 ),
@@ -98,7 +102,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           if (adminProvider.isLoading && adminProvider.analytics == null) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
               ),
             );
           }
@@ -108,7 +113,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.error_outline,
                     size: 64,
                     color: AppColors.errorRed,
@@ -122,7 +127,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   Text(
                     adminProvider.error!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary),
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   ElevatedButton(
@@ -156,10 +161,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.md),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGold.withOpacity(0.1),
+                              color:
+                                  AppColors.primaryGold.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.dashboard,
                               size: 32,
                               color: AppColors.primaryGold,
@@ -172,16 +178,22 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               children: [
                                 Text(
                                   'Bienvenue sur le tableau de bord',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Vue d\'ensemble de la plateforme GoldWen',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
                                 ),
                               ],
                             ),
@@ -190,18 +202,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xl),
-                  
+
                   // Statistics Cards
                   Text(
                     'Statistiques générales',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
@@ -236,16 +248,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xl),
-                  
+
                   // Additional Stats
                   Row(
                     children: [
                       Expanded(
                         child: AdminStatsCard(
                           title: 'Taux d\'abonnement',
-                          value: '${analytics.subscriptionRate.toStringAsFixed(1)}%',
+                          value:
+                              '${analytics.subscriptionRate.toStringAsFixed(1)}%',
                           icon: Icons.trending_up,
                           color: AppColors.warningAmber,
                         ),
@@ -256,23 +269,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           title: 'Signalements en attente',
                           value: analytics.pendingReports.toString(),
                           icon: Icons.warning,
-                          color: analytics.pendingReports > 0 ? AppColors.errorRed : AppColors.successGreen,
+                          color: analytics.pendingReports > 0
+                              ? AppColors.errorRed
+                              : AppColors.successGreen,
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: AppSpacing.xl),
-                  
+
                   // Quick Actions
                   Text(
                     'Actions rapides',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   const AdminQuickActions(),
                 ],
               ),
@@ -302,7 +317,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.admin_panel_settings, size: 20, color: Colors.grey),
+                const Icon(Icons.admin_panel_settings,
+                    size: 20, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(adminUser.role.toUpperCase()),
               ],

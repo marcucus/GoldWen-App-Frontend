@@ -19,7 +19,6 @@ class AccessibilityService extends ChangeNotifier {
   // System settings (detected from device)
   bool _systemHighContrast = false;
   bool _systemReducedMotion = false;
-  double _systemTextScaleFactor = 1.0;
 
   // Getters
   AccessibilityFontSize get fontSize => _fontSize;
@@ -27,7 +26,11 @@ class AccessibilityService extends ChangeNotifier {
   bool get reducedMotion => _reducedMotion || _systemReducedMotion;
   bool get screenReaderEnabled => _screenReaderEnabled;
   double get textScaleFactor => _getScaleFactorForFontSize(_fontSize);
-  bool get isAccessibilityEnabled => highContrast || reducedMotion || screenReaderEnabled || _fontSize != AccessibilityFontSize.medium;
+  bool get isAccessibilityEnabled =>
+      highContrast ||
+      reducedMotion ||
+      screenReaderEnabled ||
+      _fontSize != AccessibilityFontSize.medium;
 
   /// Initialize accessibility settings
   Future<void> initialize() async {
@@ -40,10 +43,11 @@ class AccessibilityService extends ChangeNotifier {
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      final fontSizeIndex = prefs.getInt(_fontSizeKey) ?? AccessibilityFontSize.medium.index;
+
+      final fontSizeIndex =
+          prefs.getInt(_fontSizeKey) ?? AccessibilityFontSize.medium.index;
       _fontSize = AccessibilityFontSize.values[fontSizeIndex];
-      
+
       _highContrast = prefs.getBool(_highContrastKey) ?? false;
       _reducedMotion = prefs.getBool(_reducedMotionKey) ?? false;
       _screenReaderEnabled = prefs.getBool(_screenReaderKey) ?? false;
@@ -57,13 +61,13 @@ class AccessibilityService extends ChangeNotifier {
     try {
       // Get system accessibility settings via platform channels
       final platformData = await _getSystemAccessibilityData();
-      
+
       _systemHighContrast = platformData['highContrast'] ?? false;
       _systemReducedMotion = platformData['reducedMotion'] ?? false;
-      _systemTextScaleFactor = (platformData['textScaleFactor'] ?? 1.0).toDouble();
-      
+
       // Auto-enable screen reader detection if possible
-      _screenReaderEnabled = _screenReaderEnabled || (platformData['screenReader'] ?? false);
+      _screenReaderEnabled =
+          _screenReaderEnabled || (platformData['screenReader'] ?? false);
     } catch (e) {
       debugPrint('Error detecting system accessibility settings: $e');
     }
@@ -84,11 +88,11 @@ class AccessibilityService extends ChangeNotifier {
   /// Update font size setting
   Future<void> setFontSize(AccessibilityFontSize fontSize) async {
     if (_fontSize == fontSize) return;
-    
+
     _fontSize = fontSize;
     await _saveSettings();
     notifyListeners();
-    
+
     // Announce change for screen readers
     if (screenReaderEnabled) {
       _announceChange('Font size changed to ${fontSize.name}');
@@ -98,33 +102,35 @@ class AccessibilityService extends ChangeNotifier {
   /// Update high contrast setting
   Future<void> setHighContrast(bool enabled) async {
     if (_highContrast == enabled) return;
-    
+
     _highContrast = enabled;
     await _saveSettings();
     notifyListeners();
-    
+
     if (screenReaderEnabled) {
-      _announceChange(enabled ? 'High contrast enabled' : 'High contrast disabled');
+      _announceChange(
+          enabled ? 'High contrast enabled' : 'High contrast disabled');
     }
   }
 
   /// Update reduced motion setting
   Future<void> setReducedMotion(bool enabled) async {
     if (_reducedMotion == enabled) return;
-    
+
     _reducedMotion = enabled;
     await _saveSettings();
     notifyListeners();
-    
+
     if (screenReaderEnabled) {
-      _announceChange(enabled ? 'Reduced motion enabled' : 'Reduced motion disabled');
+      _announceChange(
+          enabled ? 'Reduced motion enabled' : 'Reduced motion disabled');
     }
   }
 
   /// Update screen reader setting
   Future<void> setScreenReaderEnabled(bool enabled) async {
     if (_screenReaderEnabled == enabled) return;
-    
+
     _screenReaderEnabled = enabled;
     await _saveSettings();
     notifyListeners();
@@ -134,7 +140,7 @@ class AccessibilityService extends ChangeNotifier {
   Future<void> _saveSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       await prefs.setInt(_fontSizeKey, _fontSize.index);
       await prefs.setBool(_highContrastKey, _highContrast);
       await prefs.setBool(_reducedMotionKey, _reducedMotion);
@@ -164,7 +170,7 @@ class AccessibilityService extends ChangeNotifier {
       SemanticsService.announce(message, TextDirection.ltr);
     } catch (e) {
       // SemanticsService might not be available on all Flutter versions
-      print('Failed to announce accessibility change: $e');
+      debugPrint('Failed to announce accessibility change: $e');
     }
   }
 
@@ -205,15 +211,15 @@ class AccessibilityService extends ChangeNotifier {
         );
         await setFontSize(fontSize);
       }
-      
+
       if (settings.containsKey('highContrast')) {
         await setHighContrast(settings['highContrast'] as bool);
       }
-      
+
       if (settings.containsKey('reducedMotion')) {
         await setReducedMotion(settings['reducedMotion'] as bool);
       }
-      
+
       if (settings.containsKey('screenReader')) {
         await setScreenReaderEnabled(settings['screenReader'] as bool);
       }

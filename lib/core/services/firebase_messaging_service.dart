@@ -1,21 +1,23 @@
+import 'package:flutter/foundation.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/material.dart';
 import 'local_notification_service.dart';
 import 'api_service.dart';
 import 'navigation_service.dart';
 
 class FirebaseMessagingService {
-  static final FirebaseMessagingService _instance = FirebaseMessagingService._internal();
+  static final FirebaseMessagingService _instance =
+      FirebaseMessagingService._internal();
   factory FirebaseMessagingService() => _instance;
   FirebaseMessagingService._internal();
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final LocalNotificationService _localNotificationService = LocalNotificationService();
-  
+  final LocalNotificationService _localNotificationService =
+      LocalNotificationService();
+
   String? _deviceToken;
   bool _initialized = false;
   StreamSubscription<String>? _tokenRefreshSubscription;
@@ -32,9 +34,9 @@ class FirebaseMessagingService {
 
       // Request permissions for iOS
       final permissionGranted = await requestPermissions();
-      
+
       if (!permissionGranted) {
-        print('Notification permissions not granted');
+        debugPrint('Notification permissions not granted');
         // Continue initialization even if permissions not granted
         // User can grant permissions later
       }
@@ -49,9 +51,9 @@ class FirebaseMessagingService {
       _listenForTokenRefresh();
 
       _initialized = true;
-      print('Firebase Messaging Service initialized successfully');
+      debugPrint('Firebase Messaging Service initialized successfully');
     } catch (e) {
-      print('Error initializing Firebase Messaging Service: $e');
+      debugPrint('Error initializing Firebase Messaging Service: $e');
       rethrow;
     }
   }
@@ -59,7 +61,8 @@ class FirebaseMessagingService {
   Future<bool> requestPermissions() async {
     try {
       // Request FCM permissions
-      final NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      final NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
         alert: true,
         announcement: false,
         badge: true,
@@ -70,17 +73,19 @@ class FirebaseMessagingService {
       );
 
       // Also request local notification permissions
-      final bool localPermission = await _localNotificationService.requestPermissions();
+      final bool localPermission =
+          await _localNotificationService.requestPermissions();
 
-      final bool fcmPermissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional;
+      final bool fcmPermissionGranted =
+          settings.authorizationStatus == AuthorizationStatus.authorized ||
+              settings.authorizationStatus == AuthorizationStatus.provisional;
 
-      print('FCM Permission status: ${settings.authorizationStatus}');
-      print('Local notification permission: $localPermission');
+      debugPrint('FCM Permission status: ${settings.authorizationStatus}');
+      debugPrint('Local notification permission: $localPermission');
 
       return fcmPermissionGranted && localPermission;
     } catch (e) {
-      print('Error requesting notification permissions: $e');
+      debugPrint('Error requesting notification permissions: $e');
       return false;
     }
   }
@@ -88,15 +93,15 @@ class FirebaseMessagingService {
   Future<String?> _getDeviceToken() async {
     try {
       _deviceToken = await _firebaseMessaging.getToken();
-      print('FCM Device Token: ${_deviceToken?.substring(0, 20)}...');
-      
+      debugPrint('FCM Device Token: ${_deviceToken?.substring(0, 20)}...');
+
       if (_deviceToken != null) {
         await _registerDeviceWithBackend(_deviceToken!);
       }
-      
+
       return _deviceToken;
     } catch (e) {
-      print('Error getting device token: $e');
+      debugPrint('Error getting device token: $e');
       return null;
     }
   }
@@ -105,16 +110,16 @@ class FirebaseMessagingService {
     try {
       // Determine platform
       final platform = Platform.isIOS ? 'ios' : 'android';
-      
+
       // Register device token with backend using the correct API endpoint
       await ApiService.registerPushToken(
         token: token,
         platform: platform,
         appVersion: '1.0.0', // This should come from package info
       );
-      print('Device token registered with backend successfully');
+      debugPrint('Device token registered with backend successfully');
     } catch (e) {
-      print('Error registering device token with backend: $e');
+      debugPrint('Error registering device token with backend: $e');
       // Don't rethrow - this is not critical for initialization
     }
   }
@@ -131,22 +136,23 @@ class FirebaseMessagingService {
   }
 
   Future<void> _handleInitialMessage() async {
-    final RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+    final RemoteMessage? initialMessage =
+        await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
       _handleMessageOpenedApp(initialMessage);
     }
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    print('Received foreground message: ${message.messageId}');
-    
+    debugPrint('Received foreground message: ${message.messageId}');
+
     // Show local notification when app is in foreground
     await _showLocalNotification(message);
   }
 
   Future<void> _handleMessageOpenedApp(RemoteMessage message) async {
-    print('Message opened app: ${message.messageId}');
-    
+    debugPrint('Message opened app: ${message.messageId}');
+
     // Handle navigation based on notification type
     _handleNotificationNavigation(message);
   }
@@ -198,9 +204,10 @@ class FirebaseMessagingService {
   }
 
   void _listenForTokenRefresh() {
-    _tokenRefreshSubscription = _firebaseMessaging.onTokenRefresh.listen((String token) {
+    _tokenRefreshSubscription =
+        _firebaseMessaging.onTokenRefresh.listen((String token) {
       _deviceToken = token;
-      print('FCM Token refreshed: ${token.substring(0, 20)}...');
+      debugPrint('FCM Token refreshed: ${token.substring(0, 20)}...');
       _registerDeviceWithBackend(token);
     });
   }
@@ -208,18 +215,18 @@ class FirebaseMessagingService {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
-      print('Subscribed to topic: $topic');
+      debugPrint('Subscribed to topic: $topic');
     } catch (e) {
-      print('Error subscribing to topic $topic: $e');
+      debugPrint('Error subscribing to topic $topic: $e');
     }
   }
 
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(topic);
-      print('Unsubscribed from topic: $topic');
+      debugPrint('Unsubscribed from topic: $topic');
     } catch (e) {
-      print('Error unsubscribing from topic $topic: $e');
+      debugPrint('Error unsubscribing from topic $topic: $e');
     }
   }
 
@@ -229,13 +236,13 @@ class FirebaseMessagingService {
       if (_deviceToken != null) {
         await ApiService.removePushToken(token: _deviceToken!);
       }
-      
+
       // Then delete from Firebase
       await _firebaseMessaging.deleteToken();
       _deviceToken = null;
-      print('FCM token deleted');
+      debugPrint('FCM token deleted');
     } catch (e) {
-      print('Error deleting FCM token: $e');
+      debugPrint('Error deleting FCM token: $e');
     }
   }
 
@@ -248,12 +255,12 @@ class FirebaseMessagingService {
         // Badge count is managed through notification payload
         // The backend should include badge count in notification payload
       }
-      
+
       // For Android, badge is managed through notification channels
       // This is handled in local notification service
-      print('Badge count updated to: $count');
+      debugPrint('Badge count updated to: $count');
     } catch (e) {
-      print('Error updating badge count: $e');
+      debugPrint('Error updating badge count: $e');
     }
   }
 
@@ -270,8 +277,8 @@ class FirebaseMessagingService {
 // Top-level function to handle background messages
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Handling a background message: ${message.messageId}');
-  
+  debugPrint('Handling a background message: ${message.messageId}');
+
   // Handle background notification data processing here if needed
   // Note: UI operations cannot be performed in background handler
 }

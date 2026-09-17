@@ -9,9 +9,9 @@ import '../../../core/config/app_config.dart';
 
 class ChatProvider with ChangeNotifier {
   List<Conversation> _conversations = [];
-  Map<String, List<ChatMessage>> _chatMessages = {};
-  Map<String, TypingStatus> _typingStatuses = {};
-  Map<String, OnlineStatus> _onlineStatuses = {};
+  final Map<String, List<ChatMessage>> _chatMessages = {};
+  final Map<String, TypingStatus> _typingStatuses = {};
+  final Map<String, OnlineStatus> _onlineStatuses = {};
   bool _isLoading = false;
   String? _error;
   WebSocketService? _webSocketService;
@@ -20,7 +20,8 @@ class ChatProvider with ChangeNotifier {
   Timer? _typingTimer;
   String? _currentTypingChatId;
   final Map<String, Timer?> _expirationCheckTimers = {};
-  final LocalNotificationService _notificationService = LocalNotificationService();
+  final LocalNotificationService _notificationService =
+      LocalNotificationService();
 
   List<Conversation> get conversations => _conversations;
   Map<String, List<ChatMessage>> get chatMessages => _chatMessages;
@@ -29,12 +30,12 @@ class ChatProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isWebSocketConnected => _isWebSocketConnected;
-  
+
   /// Get only active (non-expired) conversations
   List<Conversation> get activeConversations {
     return _conversations.where((conv) => !conv.isExpired).toList();
   }
-  
+
   /// Get only archived (expired) conversations
   List<Conversation> get archivedConversations {
     return _conversations.where((conv) => conv.isExpired).toList();
@@ -73,10 +74,10 @@ class ChatProvider with ChangeNotifier {
   Duration? getRemainingTime(String chatId) {
     final conversation = getConversation(chatId);
     if (conversation?.expiresAt == null) return null;
-    
+
     final now = DateTime.now();
     if (now.isAfter(conversation!.expiresAt!)) return Duration.zero;
-    
+
     return conversation.expiresAt!.difference(now);
   }
 
@@ -92,7 +93,9 @@ class ChatProvider with ChangeNotifier {
 
   bool isUserTyping(String chatId, String userId) {
     final status = getTypingStatus(chatId);
-    return status?.userId == userId && status?.isTyping == true && status!.isRecent;
+    return status?.userId == userId &&
+        status?.isTyping == true &&
+        status!.isRecent;
   }
 
   bool isUserOnline(String userId) {
@@ -104,7 +107,7 @@ class ChatProvider with ChangeNotifier {
     try {
       _webSocketService = WebSocketService();
       _webSocketService!.setToken(token);
-      
+
       // Listen to WebSocket events
       _webSocketService!.messageStream.listen(_handleNewMessage);
       _webSocketService!.typingStream.listen(_handleTypingUpdate);
@@ -112,7 +115,7 @@ class ChatProvider with ChangeNotifier {
       _webSocketService!.chatExpiredStream.listen(_handleChatExpired);
       _webSocketService!.onlineStatusStream.listen(_handleOnlineStatusUpdate);
       _webSocketService!.connectionStream.listen(_handleConnectionUpdate);
-      
+
       await _webSocketService!.connect();
     } catch (e) {
       _error = 'Failed to connect to chat service';
@@ -130,45 +133,49 @@ class ChatProvider with ChangeNotifier {
 
     try {
       if (AppConfig.isDevelopment) {
-        print('ChatProvider: Starting to load conversations...');
+        debugPrint('ChatProvider: Starting to load conversations...');
       }
-      
+
       final response = await ApiService.getConversations();
-      
+
       if (AppConfig.isDevelopment) {
-        print('ChatProvider: Received response: $response');
+        debugPrint('ChatProvider: Received response: $response');
       }
-      
-      final conversationsData = response['data'] ?? response['conversations'] ?? [];
-      
+
+      final conversationsData =
+          response['data'] ?? response['conversations'] ?? [];
+
       if (AppConfig.isDevelopment) {
-        print('ChatProvider: Processing ${(conversationsData as List).length} conversations');
+        debugPrint(
+            'ChatProvider: Processing ${(conversationsData as List).length} conversations');
       }
-      
+
       _conversations = [];
-      
+
       // Parse conversations one by one to handle individual parsing errors
       for (final conversationJson in (conversationsData as List)) {
         try {
-          final conversation = Conversation.fromJson(conversationJson as Map<String, dynamic>);
+          final conversation =
+              Conversation.fromJson(conversationJson as Map<String, dynamic>);
           _conversations.add(conversation);
         } catch (e) {
           // Log parsing error but continue with other conversations
           if (AppConfig.isDevelopment) {
-            print('Error parsing conversation: $e');
-            print('Conversation data: $conversationJson');
+            debugPrint('Error parsing conversation: $e');
+            debugPrint('Conversation data: $conversationJson');
           }
           // Skip this conversation and continue with others
         }
       }
-      
+
       if (AppConfig.isDevelopment) {
-        print('ChatProvider: Successfully parsed ${_conversations.length} conversations');
+        debugPrint(
+            'ChatProvider: Successfully parsed ${_conversations.length} conversations');
       }
-      
+
       // Schedule expiration notifications for all active conversations
       scheduleAllExpirationNotifications();
-      
+
       _error = null;
     } catch (e) {
       _handleError(e, 'Failed to load conversations');
@@ -181,23 +188,24 @@ class ChatProvider with ChangeNotifier {
     try {
       final response = await ApiService.getConversationDetails(chatId);
       final conversationData = response['data'] ?? response;
-      
+
       final conversation = Conversation.fromJson(conversationData);
       final index = _conversations.indexWhere((c) => c.id == chatId);
-      
+
       if (index != -1) {
         _conversations[index] = conversation;
       } else {
         _conversations.add(conversation);
       }
-      
+
       notifyListeners();
     } catch (e) {
       _handleError(e, 'Failed to load conversation details');
     }
   }
 
-  Future<void> loadChatMessages(String chatId, {int page = 1, int limit = 50}) async {
+  Future<void> loadChatMessages(String chatId,
+      {int page = 1, int limit = 50}) async {
     if (page == 1) _setLoading();
 
     try {
@@ -206,20 +214,21 @@ class ChatProvider with ChangeNotifier {
         page: page,
         limit: limit,
       );
-      
+
       final messagesData = response['data'] ?? response['messages'] ?? [];
       final newMessages = <ChatMessage>[];
-      
+
       // Parse messages one by one to handle individual parsing errors
       for (final messageJson in (messagesData as List)) {
         try {
-          final message = ChatMessage.fromJson(messageJson as Map<String, dynamic>);
+          final message =
+              ChatMessage.fromJson(messageJson as Map<String, dynamic>);
           newMessages.add(message);
         } catch (e) {
           // Log parsing error but continue with other messages
           if (AppConfig.isDevelopment) {
-            print('Error parsing message: $e');
-            print('Message data: $messageJson');
+            debugPrint('Error parsing message: $e');
+            debugPrint('Message data: $messageJson');
           }
           // Skip this message and continue with others
         }
@@ -228,15 +237,18 @@ class ChatProvider with ChangeNotifier {
       if (page == 1) {
         _chatMessages[chatId] = newMessages;
       } else {
-        _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), ...newMessages];
+        _chatMessages[chatId] = [
+          ...(_chatMessages[chatId] ?? []),
+          ...newMessages
+        ];
       }
-      
+
       // Join the chat room for real-time updates
       _webSocketService?.joinChat(chatId);
-      
+
       // Schedule expiration notification for this chat
       _scheduleExpirationNotification(chatId);
-      
+
       _error = null;
       notifyListeners();
     } catch (e) {
@@ -246,7 +258,8 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String chatId, String message, {String type = 'text'}) async {
+  Future<void> sendMessage(String chatId, String message,
+      {String type = 'text'}) async {
     if (isChatExpired(chatId)) {
       _error = 'Cannot send message to expired chat';
       notifyListeners();
@@ -256,12 +269,13 @@ class ChatProvider with ChangeNotifier {
     try {
       // Check if this is the first message in the conversation
       final isFirstMessage = (_chatMessages[chatId]?.isEmpty ?? true);
-      
+
       // Optimistically add message to UI
       final tempMessage = ChatMessage(
         id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
         conversationId: chatId,
-        senderId: _currentUserId ?? 'current_user', // Use set user ID or fallback
+        senderId:
+            _currentUserId ?? 'current_user', // Use set user ID or fallback
         type: type,
         content: message,
         isRead: false,
@@ -277,7 +291,8 @@ class ChatProvider with ChangeNotifier {
       }
 
       // Also send via REST API for persistence
-      final response = await ApiService.sendMessage(chatId, type: type, content: message);
+      final response =
+          await ApiService.sendMessage(chatId, type: type, content: message);
       final sentMessageData = response['data'] ?? response;
       final sentMessage = ChatMessage.fromJson(sentMessageData);
 
@@ -285,7 +300,8 @@ class ChatProvider with ChangeNotifier {
       if (isFirstMessage) {
         await AnalyticsService.trackFirstMessageSent(chatId);
       }
-      await AnalyticsService.trackMessageSent(chatId, messageLength: message.length);
+      await AnalyticsService.trackMessageSent(chatId,
+          messageLength: message.length);
 
       // Replace temp message with real message
       final messages = _chatMessages[chatId] ?? [];
@@ -311,7 +327,7 @@ class ChatProvider with ChangeNotifier {
       final messages = _chatMessages[chatId] ?? [];
       messages.removeWhere((m) => m.id.startsWith('temp_'));
       _chatMessages[chatId] = messages;
-      
+
       _handleError(e, 'Failed to send message');
     }
   }
@@ -319,7 +335,7 @@ class ChatProvider with ChangeNotifier {
   Future<void> markMessagesAsRead(String chatId) async {
     try {
       await ApiService.markMessagesAsRead(chatId);
-      
+
       // Update local message status
       final messages = _chatMessages[chatId] ?? [];
       final updatedMessages = messages.map((message) {
@@ -331,7 +347,7 @@ class ChatProvider with ChangeNotifier {
         }
         return message;
       }).toList();
-      
+
       _chatMessages[chatId] = updatedMessages;
       notifyListeners();
 
@@ -347,7 +363,7 @@ class ChatProvider with ChangeNotifier {
     try {
       final response = await ApiService.getChatByMatchId(matchId);
       final chatData = response['data'] ?? response;
-      
+
       if (chatData != null && chatData['id'] != null) {
         return chatData['id'] as String;
       }
@@ -361,14 +377,14 @@ class ChatProvider with ChangeNotifier {
   Future<void> deleteMessage(String messageId) async {
     try {
       await ApiService.deleteMessage(messageId);
-      
+
       // Remove message from all chats (since we only have the messageId)
       for (final chatId in _chatMessages.keys) {
         final messages = _chatMessages[chatId] ?? [];
         messages.removeWhere((m) => m.id == messageId);
         _chatMessages[chatId] = messages;
       }
-      
+
       notifyListeners();
     } catch (e) {
       _handleError(e, 'Failed to delete message');
@@ -378,13 +394,13 @@ class ChatProvider with ChangeNotifier {
   void startTyping(String chatId) {
     // Cancel existing timer if user is typing again
     _typingTimer?.cancel();
-    
+
     // Send typing start event only if this is a new chat or different from current
     if (_currentTypingChatId != chatId) {
       _webSocketService?.sendTyping(chatId);
       _currentTypingChatId = chatId;
     }
-    
+
     // Set timeout to auto-stop typing after 3 seconds
     _typingTimer = Timer(const Duration(seconds: 3), () {
       stopTyping(chatId);
@@ -406,11 +422,11 @@ class ChatProvider with ChangeNotifier {
     try {
       final message = ChatMessage.fromJson(data['message']);
       final chatId = message.conversationId;
-      
+
       final messages = _chatMessages[chatId] ?? [];
       messages.add(message);
       _chatMessages[chatId] = messages;
-      
+
       // Update conversation's last message
       final convIndex = _conversations.indexWhere((c) => c.id == chatId);
       if (convIndex != -1) {
@@ -420,7 +436,7 @@ class ChatProvider with ChangeNotifier {
           updatedAt: DateTime.now(),
         );
       }
-      
+
       notifyListeners();
     } catch (e) {
       // Handle error silently
@@ -451,7 +467,7 @@ class ChatProvider with ChangeNotifier {
     try {
       final chatId = data['chatId'] as String;
       final messageId = data['messageId'] as String;
-      
+
       final messages = _chatMessages[chatId] ?? [];
       final messageIndex = messages.indexWhere((m) => m.id == messageId);
       if (messageIndex != -1) {
@@ -470,23 +486,24 @@ class ChatProvider with ChangeNotifier {
   void _handleChatExpired(Map<String, dynamic> data) {
     try {
       final chatId = data['chatId'] as String;
-      
+
       // Track chat expiration
       final messageCount = _chatMessages[chatId]?.length ?? 0;
       AnalyticsService.trackChatExpired(chatId, messageCount);
-      
+
       // Add system message before marking as expired
       _addSystemMessage(chatId, 'Cette conversation a expiré');
-      
+
       // Mark conversation as expired instead of removing
-      final conversationIndex = _conversations.indexWhere((c) => c.id == chatId);
+      final conversationIndex =
+          _conversations.indexWhere((c) => c.id == chatId);
       if (conversationIndex != -1) {
         // Keep the conversation but mark it as expired through the model
         // The Conversation model already has isExpired getter
       }
-      
+
       _typingStatuses.remove(chatId);
-      
+
       notifyListeners();
     } catch (e) {
       // Handle error silently
@@ -524,14 +541,14 @@ class ChatProvider with ChangeNotifier {
     for (final conversation in expiredConversations) {
       // Add system message before marking as expired
       _addSystemMessage(conversation.id, 'Cette conversation a expiré');
-      
+
       // Remove typing status but keep messages for reference
       _typingStatuses.remove(conversation.id);
-      
+
       // Cancel any pending expiration notifications
       _cancelExpirationNotification(conversation.id);
     }
-    
+
     if (expiredConversations.isNotEmpty) {
       notifyListeners();
     }
@@ -541,24 +558,25 @@ class ChatProvider with ChangeNotifier {
   void _scheduleExpirationNotification(String chatId) {
     final conversation = getConversation(chatId);
     if (conversation?.expiresAt == null) return;
-    
+
     final now = DateTime.now();
     final expiresAt = conversation!.expiresAt!;
     final notificationTime = expiresAt.subtract(const Duration(hours: 2));
-    
+
     // Don't schedule if notification time has already passed
     if (notificationTime.isBefore(now)) return;
-    
+
     // Don't schedule if less than 2 hours remain
     if (expiresAt.difference(now).inHours < 2) return;
-    
+
     // Cancel any existing timer for this chat
     _cancelExpirationNotification(chatId);
-    
+
     // Schedule the notification
     final delay = notificationTime.difference(now);
     _expirationCheckTimers[chatId] = Timer(delay, () {
-      final partnerName = conversation.otherParticipant?.firstName ?? 'votre contact';
+      final partnerName =
+          conversation.otherParticipant?.firstName ?? 'votre contact';
       _notificationService.showChatExpiringNotification(
         partnerName: partnerName,
         hoursLeft: 2,
@@ -586,7 +604,7 @@ class ChatProvider with ChangeNotifier {
     _isLoading = true;
     _error = null;
     if (AppConfig.isDevelopment) {
-      print('ChatProvider: Setting loading state to true');
+      debugPrint('ChatProvider: Setting loading state to true');
     }
     notifyListeners();
   }
@@ -594,25 +612,25 @@ class ChatProvider with ChangeNotifier {
   void _setLoaded() {
     _isLoading = false;
     if (AppConfig.isDevelopment) {
-      print('ChatProvider: Setting loading state to false');
+      debugPrint('ChatProvider: Setting loading state to false');
     }
     notifyListeners();
   }
 
   void _handleError(dynamic error, String fallbackMessage) {
     _isLoading = false;
-    
+
     if (error is ApiException) {
       _error = error.message;
     } else {
       _error = fallbackMessage;
     }
-    
+
     if (AppConfig.isDevelopment) {
-      print('ChatProvider: Error occurred - $_error');
-      print('Original error: $error');
+      debugPrint('ChatProvider: Error occurred - $_error');
+      debugPrint('Original error: $error');
     }
-    
+
     notifyListeners();
   }
 

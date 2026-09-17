@@ -3,12 +3,9 @@ import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/profile.dart';
-import '../../../core/utils/text_validator.dart';
 import '../../../shared/widgets/enhanced_input.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/photo_management_widget.dart';
@@ -17,7 +14,6 @@ import '../widgets/favorite_song_widget.dart';
 import '../widgets/profile_completion_widget.dart';
 import '../widgets/prompt_selection_widget.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../main/pages/main_navigation_page.dart';
 import '../../../shared/widgets/keyboard_dismissible.dart';
 
 class ProfileSetupPage extends StatefulWidget {
@@ -30,19 +26,17 @@ class ProfileSetupPage extends StatefulWidget {
 class _ProfileSetupPageState extends State<ProfileSetupPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  final ImagePicker _picker = ImagePicker();
 
   final _nameController = TextEditingController();
   DateTime? _birthDate;
   final _bioController = TextEditingController();
-  final List<TextEditingController> _promptControllers = List.generate(
-      3,
-      (index) =>
-          TextEditingController());
+  final List<TextEditingController> _promptControllers =
+      List.generate(3, (index) => TextEditingController());
 
   List<String> _selectedPromptIds = []; // Track selected prompt IDs
   List<String> _promptQuestions = []; // Display texts for selected prompts
-  bool _isInPromptSelectionMode = true; // Track if user is selecting or answering prompts
+  bool _isInPromptSelectionMode =
+      true; // Track if user is selecting or answering prompts
 
   @override
   void initState() {
@@ -75,7 +69,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         // Determine which page to show first based on missing steps
         // Use the helper method from ProfileProvider for consistency
         final nextStep = profileProvider.getNextIncompleteStep();
-        
+
         switch (nextStep) {
           case 'basic_info':
             targetPage = 0; // Basic info page
@@ -119,7 +113,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           if (profileProvider.promptAnswers.isNotEmpty) {
             _selectedPromptIds = profileProvider.promptAnswers.keys.toList();
             _isInPromptSelectionMode = false;
-            
+
             // Initialize controllers with existing answers
             for (int i = 0; i < _selectedPromptIds.length && i < 3; i++) {
               final promptId = _selectedPromptIds[i];
@@ -128,7 +122,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 _promptControllers[i].text = answer;
               }
             }
-            
+
             // Load prompt questions
             _promptQuestions = _selectedPromptIds.map((id) {
               final prompt = profileProvider.availablePrompts.firstWhere(
@@ -146,7 +140,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         });
       }
     } catch (e) {
-      print('Error loading prompts: $e');
+      debugPrint('Error loading prompts: $e');
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -179,7 +173,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         return AlertDialog(
           title: Row(
             children: [
-              const Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber),
+              const Icon(Icons.warning_amber_rounded,
+                  color: AppColors.warningAmber),
               const SizedBox(width: AppSpacing.sm),
               Text(l10n.photosMissing),
             ],
@@ -202,7 +197,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -227,7 +222,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           Expanded(
             child: PageView(
               controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disable horizontal swiping
+              physics:
+                  const NeverScrollableScrollPhysics(), // Disable horizontal swiping
               onPageChanged: (page) {
                 setState(() {
                   _currentPage = page;
@@ -250,7 +246,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildBasicInfoPage() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return KeyboardDismissible(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -276,25 +272,25 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
             const SizedBox(height: AppSpacing.xxl),
 
-          // Name field
-          EnhancedTextField(
-            controller: _nameController,
-            labelText: l10n.pseudoLabel,
-            hintText: l10n.pseudoHint,
-            textInputAction: TextInputAction.next,
-            validateForbiddenWords: true,
-            validateContactInfo: false,
-            validateSpamPatterns: false,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return l10n.pseudoRequired;
-              }
-              if (value.trim().length < 2) {
-                return l10n.pseudoMinLength;
-              }
-              return null;
-            },
-          ),
+            // Name field
+            EnhancedTextField(
+              controller: _nameController,
+              labelText: l10n.pseudoLabel,
+              hintText: l10n.pseudoHint,
+              textInputAction: TextInputAction.next,
+              validateForbiddenWords: true,
+              validateContactInfo: false,
+              validateSpamPatterns: false,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.pseudoRequired;
+                }
+                if (value.trim().length < 2) {
+                  return l10n.pseudoMinLength;
+                }
+                return null;
+              },
+            ),
 
             const SizedBox(height: AppSpacing.lg),
 
@@ -312,7 +308,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_today,
                       color: AppColors.textSecondary,
                       size: 20,
@@ -330,7 +326,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                             ),
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.arrow_drop_down,
                       color: AppColors.textSecondary,
                     ),
@@ -341,18 +337,18 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
             const SizedBox(height: AppSpacing.lg),
 
-          // Bio field
-          EnhancedTextField(
-            controller: _bioController,
-            labelText: l10n.bioLabel,
-            hintText: l10n.bioHint,
-            maxLines: 10,
-            maxLength: 600,
-            enableCounter: true,
-            validateForbiddenWords: true,
-            validateContactInfo: true,
-            validateSpamPatterns: true,
-          ),
+            // Bio field
+            EnhancedTextField(
+              controller: _bioController,
+              labelText: l10n.bioLabel,
+              hintText: l10n.bioHint,
+              maxLines: 10,
+              maxLength: 600,
+              enableCounter: true,
+              validateForbiddenWords: true,
+              validateContactInfo: true,
+              validateSpamPatterns: true,
+            ),
 
             const SizedBox(height: AppSpacing.xxl),
 
@@ -373,7 +369,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildPhotosPage() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -419,17 +415,24 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          hasMinPhotos ? Icons.check_circle : Icons.info_outline,
-                          color: hasMinPhotos ? AppColors.success : AppColors.warningAmber,
+                          hasMinPhotos
+                              ? Icons.check_circle
+                              : Icons.info_outline,
+                          color: hasMinPhotos
+                              ? AppColors.success
+                              : AppColors.warningAmber,
                           size: 20,
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           l10n.photosAddedCount(profileProvider.photos.length),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: hasMinPhotos ? AppColors.success : AppColors.warningAmber,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: hasMinPhotos
+                                        ? AppColors.success
+                                        : AppColors.warningAmber,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ],
                     ),
@@ -445,8 +448,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                       ),
                       child: Text(
                         hasMinPhotos
-                            ? l10n.continueWithPhotos(profileProvider.photos.length)
-                            : l10n.continueMinPhotos(profileProvider.photos.length),
+                            ? l10n.continueWithPhotos(
+                                profileProvider.photos.length)
+                            : l10n.continueMinPhotos(
+                                profileProvider.photos.length),
                       ),
                     ),
                   ),
@@ -462,7 +467,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildMediaPage() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -524,7 +529,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildPromptsPage() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
         if (profileProvider.isLoading) {
@@ -585,7 +590,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   onSelectionChanged: (newSelection) {
                     setState(() {
                       _selectedPromptIds = newSelection;
-                      
+
                       // Update prompt questions for display
                       _promptQuestions = newSelection.map((id) {
                         final prompt = profileProvider.availablePrompts
@@ -599,13 +604,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               ),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.shadowMedium,
                       blurRadius: 8,
-                      offset: const Offset(0, -2),
+                      offset: Offset(0, -2),
                     ),
                   ],
                 ),
@@ -660,9 +665,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                         ),
                         Text(
                           'Cela aide les autres à mieux vous connaître',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -787,14 +793,14 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               return Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: isComplete 
-                      ? AppColors.successGreen.withOpacity(0.1)
-                      : AppColors.warningAmber.withOpacity(0.1),
+                  color: isComplete
+                      ? AppColors.successGreen.withValues(alpha: 0.1)
+                      : AppColors.warningAmber.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                   border: Border.all(
                     color: isComplete
-                        ? AppColors.successGreen.withOpacity(0.3)
-                        : AppColors.warningAmber.withOpacity(0.3),
+                        ? AppColors.successGreen.withValues(alpha: 0.3)
+                        : AppColors.warningAmber.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -802,8 +808,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   children: [
                     Icon(
                       isComplete ? Icons.check_circle : Icons.visibility_off,
-                      color: isComplete 
-                          ? AppColors.successGreen 
+                      color: isComplete
+                          ? AppColors.successGreen
                           : AppColors.warningAmber,
                       size: 24,
                     ),
@@ -862,14 +868,14 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _handleMissingStepTap() {
     // Navigate to the appropriate page based on missing steps
-    final profileProvider = 
+    final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     final completion = profileProvider.profileCompletion;
     if (completion == null) return;
 
     // Use helper method for consistency
     final nextStep = profileProvider.getNextIncompleteStep();
-    
+
     switch (nextStep) {
       case 'basic_info':
         _goToPage(0); // Basic info page
@@ -907,7 +913,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildReviewPage() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -935,7 +941,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.schedule,
                   size: 48,
                   color: AppColors.primaryGold,
@@ -1041,7 +1047,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _nextPage() async {
-    if (_currentPage < 5) { // Changed from 4 to 5 since we have 6 pages (0-5)
+    if (_currentPage < 5) {
+      // Changed from 4 to 5 since we have 6 pages (0-5)
       final profileProvider =
           Provider.of<ProfileProvider>(context, listen: false);
 
@@ -1074,7 +1081,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       }
 
       // Save prompt answers when leaving prompts page
-      if (_currentPage == 3) { // Changed from 2 to 3 (prompts is now page 3)
+      if (_currentPage == 3) {
+        // Changed from 2 to 3 (prompts is now page 3)
         // Moving from prompts to validation
         try {
           // Show loading indicator
@@ -1121,7 +1129,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           // Hide loading indicator
           if (mounted) Navigator.of(context).pop();
 
-          print('Error saving profile data: $e');
+          debugPrint('Error saving profile data: $e');
           if (mounted) {
             // Get better error message from ApiException if available
             String errorMessage = 'Erreur lors de la sauvegarde';
@@ -1135,7 +1143,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             } else {
               errorMessage = e.toString();
             }
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(errorMessage),
@@ -1272,7 +1280,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         i < _promptControllers.length && i < _selectedPromptIds.length;
         i++) {
       if (_promptControllers[i].text.isNotEmpty) {
-        print(
+        debugPrint(
             'Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
         profileProvider.setPromptAnswer(
             _selectedPromptIds[i], _promptControllers[i].text.trim());
@@ -1286,7 +1294,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   Future<void> _saveProfileToBackend(
       ProfileProvider profileProvider, AuthProvider authProvider) async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Show loading dialog
     showDialog(
       context: context,
@@ -1295,8 +1303,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
             Text(l10n.savingInProgress),
           ],
         ),
@@ -1304,12 +1312,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     );
 
     try {
-      print('Starting profile save process...');
+      debugPrint('Starting profile save process...');
       await profileProvider.saveProfile();
-      print('Profile basic data saved successfully');
+      debugPrint('Profile basic data saved successfully');
 
       await profileProvider.submitPromptAnswers();
-      print('Prompt answers submitted successfully');
+      debugPrint('Prompt answers submitted successfully');
 
       // Check if profile is complete and validate for activation
       await profileProvider.loadProfileCompletion();
@@ -1317,11 +1325,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       if (profileProvider.profileCompletion?.isCompleted ?? false) {
         // Profile is complete, can activate
         await profileProvider.validateAndActivateProfile();
-        print('Profile validated and activated successfully');
+        debugPrint('Profile validated and activated successfully');
 
         // Refresh user data to get updated completion status from backend
         await authProvider.refreshUser();
-        print('User data refreshed successfully');
+        debugPrint('User data refreshed successfully');
 
         // Close loading dialog and navigate using GoRouter
         if (mounted) {
@@ -1350,8 +1358,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(l10n.errorSavingProfile(e.toString())),
+            content: Text(l10n.errorSavingProfile(e.toString())),
             backgroundColor: AppColors.errorRed,
             action: SnackBarAction(
               label: l10n.retry,
@@ -1368,7 +1375,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   void _showProfileIncompleteDialog(ProfileCompletion? completion) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1380,22 +1387,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             Text(l10n.profileIncompleteSteps),
             const SizedBox(height: 8),
             if (completion?.missingSteps.isNotEmpty ?? false)
-              ...completion!.missingSteps
-                  .map((step) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.arrow_right,
-                                size: 16, color: AppColors.warningAmber),
-                            const SizedBox(width: 8),
-                            Expanded(
-                                child: Text(step,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall)),
-                          ],
-                        ),
-                      ))
-                  .toList(),
+              ...completion!.missingSteps.map((step) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.arrow_right,
+                            size: 16, color: AppColors.warningAmber),
+                        const SizedBox(width: 8),
+                        Expanded(
+                            child: Text(step,
+                                style: Theme.of(context).textTheme.bodySmall)),
+                      ],
+                    ),
+                  )),
           ],
         ),
         actions: [

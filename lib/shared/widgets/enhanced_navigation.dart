@@ -24,7 +24,8 @@ class EnhancedBottomNavigation extends StatefulWidget {
   });
 
   @override
-  State<EnhancedBottomNavigation> createState() => _EnhancedBottomNavigationState();
+  State<EnhancedBottomNavigation> createState() =>
+      _EnhancedBottomNavigationState();
 }
 
 class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
@@ -34,7 +35,7 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
   late Animation<double> _backgroundBlurAnimation;
   late Animation<double> _backgroundOpacityAnimation;
   late Animation<double> _selectionScaleAnimation;
-  
+
   List<AnimationController> _iconControllers = [];
   List<Animation<double>> _iconScaleAnimations = [];
   List<Animation<double>> _iconRotationAnimations = [];
@@ -56,13 +57,13 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
         return defaultDuration;
       }
     }
-    
+
     // Background glass effect animation
     _backgroundController = AnimationController(
       duration: getAnimationDuration(const Duration(milliseconds: 800)),
       vsync: this,
     );
-    
+
     // Selection animation
     _selectionController = AnimationController(
       duration: getAnimationDuration(const Duration(milliseconds: 400)),
@@ -152,29 +153,27 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
       // Use default value if service unavailable
       reducedMotion = false;
     }
-    
+
     // Animate selection change
     if (!reducedMotion) {
       _selectionController.forward().then((_) {
         _selectionController.reverse();
       });
-      
+
       // Animate icon
       _iconControllers[index].forward().then((_) {
         _iconControllers[index].reverse();
       });
     }
-    
+
     // Haptic feedback
     HapticFeedback.lightImpact();
-    
+
     widget.onTap(index);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     // Get accessibility service safely
     bool reducedMotion = false;
     try {
@@ -184,28 +183,33 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
       // Use default value if service unavailable
       reducedMotion = false;
     }
-    
+
     return Semantics(
       label: 'Barre de navigation principale',
       child: AnimatedBuilder(
-        animation: Listenable.merge([_backgroundController, _selectionController]),
+        animation:
+            Listenable.merge([_backgroundController, _selectionController]),
         builder: (context, child) {
-          return Container(
+          return SizedBox(
             height: widget.height + MediaQuery.of(context).padding.bottom,
             child: Stack(
               children: [
                 // Glass morphism background with solid fallback
                 Positioned.fill(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       // Solid background as fallback
                       color: AppColors.backgroundWhite,
                     ),
                     child: ClipRRect(
                       child: BackdropFilter(
                         filter: ImageFilter.blur(
-                          sigmaX: reducedMotion ? 0 : _backgroundBlurAnimation.value,
-                          sigmaY: reducedMotion ? 0 : _backgroundBlurAnimation.value,
+                          sigmaX: reducedMotion
+                              ? 0
+                              : _backgroundBlurAnimation.value,
+                          sigmaY: reducedMotion
+                              ? 0
+                              : _backgroundBlurAnimation.value,
                         ),
                         child: Container(
                           decoration: BoxDecoration(
@@ -213,17 +217,20 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                AppColors.backgroundWhite.withOpacity(
-                                  _backgroundOpacityAnimation.value * 0.85,
+                                AppColors.backgroundWhite.withValues(
+                                  alpha:
+                                      _backgroundOpacityAnimation.value * 0.85,
                                 ),
-                                AppColors.backgroundWhite.withOpacity(
-                                  _backgroundOpacityAnimation.value * 0.95,
+                                AppColors.backgroundWhite.withValues(
+                                  alpha:
+                                      _backgroundOpacityAnimation.value * 0.95,
                                 ),
                               ],
                             ),
                             border: Border(
                               top: BorderSide(
-                                color: AppColors.primaryGold.withOpacity(0.3),
+                                color: AppColors.primaryGold
+                                    .withValues(alpha: 0.3),
                                 width: 1.5,
                               ),
                             ),
@@ -276,7 +283,9 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
   }) {
     return Semantics(
       label: '${item.label}, onglet ${index + 1} sur ${widget.items.length}',
-      hint: isSelected ? 'Sélectionné' : 'Appuyer pour naviguer vers ${item.label}',
+      hint: isSelected
+          ? 'Sélectionné'
+          : 'Appuyer pour naviguer vers ${item.label}',
       button: true,
       selected: isSelected,
       child: AnimatedBuilder(
@@ -286,15 +295,13 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
         ]),
         builder: (context, child) {
           return Transform.scale(
-            scale: reducedMotion 
-                ? 1.0 
-                : isSelected 
-                    ? _selectionScaleAnimation.value 
+            scale: reducedMotion
+                ? 1.0
+                : isSelected
+                    ? _selectionScaleAnimation.value
                     : _iconScaleAnimations[index].value,
             child: Transform.rotate(
-              angle: reducedMotion 
-                  ? 0.0 
-                  : _iconRotationAnimations[index].value,
+              angle: reducedMotion ? 0.0 : _iconRotationAnimations[index].value,
               child: AnimatedPressable(
                 onPressed: () => _onItemTap(index),
                 enableGlowEffect: isSelected,
@@ -321,18 +328,22 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppColors.primaryGold.withOpacity(0.2),
-                                    AppColors.primaryGold.withOpacity(0.1),
+                                    AppColors.primaryGold
+                                        .withValues(alpha: 0.2),
+                                    AppColors.primaryGold
+                                        .withValues(alpha: 0.1),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppColors.primaryGold.withOpacity(0.4),
+                                  color: AppColors.primaryGold
+                                      .withValues(alpha: 0.4),
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primaryGold.withOpacity(0.3),
+                                    color: AppColors.primaryGold
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -346,8 +357,8 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
                             padding: const EdgeInsets.all(12),
                             child: Icon(
                               isSelected ? item.activeIcon : item.icon,
-                              color: isSelected 
-                                  ? AppColors.primaryGold 
+                              color: isSelected
+                                  ? AppColors.primaryGold
                                   : AppColors.textSecondary,
                               size: 24,
                               semanticLabel: '${item.label} icon',
@@ -355,21 +366,21 @@ class _EnhancedBottomNavigationState extends State<EnhancedBottomNavigation>
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: AppSpacing.xs),
-                      
+
                       // Label with animation
                       AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 200),
                         style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          color: isSelected 
-                              ? AppColors.primaryGold 
-                              : AppColors.textSecondary,
-                          fontWeight: isSelected 
-                              ? FontWeight.w600 
-                              : FontWeight.normal,
-                          fontSize: isSelected ? 11 : 10,
-                        ),
+                              color: isSelected
+                                  ? AppColors.primaryGold
+                                  : AppColors.textSecondary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              fontSize: isSelected ? 11 : 10,
+                            ),
                         child: Text(
                           item.label,
                           textAlign: TextAlign.center,
@@ -437,13 +448,12 @@ class _EnhancedAppBarState extends State<EnhancedAppBar>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _slideController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 400)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 400)),
       vsync: this,
     );
 
@@ -468,18 +478,16 @@ class _EnhancedAppBarState extends State<EnhancedAppBar>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return SlideTransition(
-      position: accessibilityService.reducedMotion 
-          ? AlwaysStoppedAnimation(Offset.zero)
+      position: accessibilityService.reducedMotion
+          ? const AlwaysStoppedAnimation(Offset.zero)
           : _slideAnimation,
       child: Container(
         decoration: BoxDecoration(
-          gradient: widget.enableGradient 
-              ? AppColors.subtleGradient 
-              : null,
-          color: widget.enableGradient 
-              ? null 
+          gradient: widget.enableGradient ? AppColors.subtleGradient : null,
+          color: widget.enableGradient
+              ? null
               : (widget.backgroundColor ?? AppColors.backgroundWhite),
         ),
         child: AppBar(
@@ -534,13 +542,12 @@ class _EnhancedTabBarState extends State<EnhancedTabBar>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _indicatorController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
 
@@ -576,8 +583,8 @@ class _EnhancedTabBarState extends State<EnhancedTabBar>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
-    return Container(
+
+    return SizedBox(
       height: 48,
       child: widget.isScrollable
           ? SingleChildScrollView(
@@ -588,7 +595,8 @@ class _EnhancedTabBarState extends State<EnhancedTabBar>
     );
   }
 
-  Widget _buildTabRow(ThemeData theme, AccessibilityService accessibilityService) {
+  Widget _buildTabRow(
+      ThemeData theme, AccessibilityService accessibilityService) {
     return Row(
       mainAxisSize: widget.isScrollable ? MainAxisSize.min : MainAxisSize.max,
       children: widget.tabs.asMap().entries.map((entry) {
@@ -611,27 +619,24 @@ class _EnhancedTabBarState extends State<EnhancedTabBar>
                   AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 200),
                     style: theme.textTheme.labelLarge!.copyWith(
-                      color: isSelected 
-                          ? AppColors.primaryGold 
+                      color: isSelected
+                          ? AppColors.primaryGold
                           : AppColors.textSecondary,
-                      fontWeight: isSelected 
-                          ? FontWeight.w600 
-                          : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
                     child: Text(tab),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Animated indicator
                   AnimatedBuilder(
                     animation: _indicatorAnimation,
                     builder: (context, child) {
                       return Container(
                         height: 3,
-                        width: isSelected 
-                            ? 30 * _indicatorAnimation.value 
-                            : 0,
+                        width: isSelected ? 30 * _indicatorAnimation.value : 0,
                         decoration: BoxDecoration(
                           color: AppColors.primaryGold,
                           borderRadius: BorderRadius.circular(1.5),

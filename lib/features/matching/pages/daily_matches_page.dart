@@ -11,8 +11,6 @@ import '../../../core/services/performance_cache_service.dart';
 import '../../../shared/widgets/optimized_image.dart';
 import '../../../shared/widgets/loading_animation.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../shared/widgets/enhanced_card.dart';
-import '../../../shared/widgets/enhanced_button.dart';
 import '../providers/matching_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
 import '../../subscription/widgets/subscription_banner.dart';
@@ -48,10 +46,11 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     // When app resumes, check if we need to refresh the daily selection
     if (state == AppLifecycleState.resumed) {
-      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+      final matchingProvider =
+          Provider.of<MatchingProvider>(context, listen: false);
       matchingProvider.refreshSelectionIfNeeded();
       // Also restart timers
       _startRefreshCheck();
@@ -65,13 +64,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   void _initializeAnimations() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _backgroundController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(const Duration(milliseconds: 2000)),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 2000)),
       vsync: this,
     );
     _cardController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(const Duration(milliseconds: 800)),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 800)),
       vsync: this,
     );
 
@@ -80,7 +81,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   void _startAnimations() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       _backgroundController.forward();
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -106,16 +107,17 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   void _startRefreshCheck() {
     // Cancel existing timer if any
     _refreshCheckTimer?.cancel();
-    
+
     // Check every minute if we need to refresh the selection
     _refreshCheckTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      
-      final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
-      
+
+      final matchingProvider =
+          Provider.of<MatchingProvider>(context, listen: false);
+
       // If new selection is available, refresh automatically
       if (matchingProvider.hasNewSelectionAvailable()) {
         matchingProvider.loadDailySelection();
@@ -126,14 +128,14 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   void _startCountdownTimer() {
     // Cancel existing timer if any
     _countdownTimer?.cancel();
-    
+
     // Update countdown every second
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      
+
       // Just trigger a rebuild to update the countdown display
       setState(() {});
     });
@@ -147,19 +149,22 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   /// Preload profile images for better performance
   void _preloadProfileImages() async {
-    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
-    final cacheService = Provider.of<PerformanceCacheService>(context, listen: false);
-    
+    final matchingProvider =
+        Provider.of<MatchingProvider>(context, listen: false);
+    final cacheService =
+        Provider.of<PerformanceCacheService>(context, listen: false);
+
     // Wait a bit for the profiles to be loaded
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     if (matchingProvider.dailyProfiles.isNotEmpty) {
       final imageUrls = matchingProvider.dailyProfiles
-          .expand((profile) => profile.photos ?? [])
+          .expand((profile) => profile.photos)
+          .map((photo) => photo.url)
           .where((url) => url.isNotEmpty)
           .take(10) // Preload first 10 images
           .toList();
-      
+
       for (final url in imageUrls) {
         cacheService.loadImageWithCache(url);
       }
@@ -169,20 +174,24 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: accessibilityService.highContrast ? null : LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).primaryColor.withOpacity(0.3),
-              Theme.of(context).primaryColor.withOpacity(0.1),
-              Colors.white,
-            ],
-          ),
-          color: accessibilityService.highContrast ? Theme.of(context).scaffoldBackgroundColor : null,
+          gradient: accessibilityService.highContrast
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                    Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    Colors.white,
+                  ],
+                ),
+          color: accessibilityService.highContrast
+              ? Theme.of(context).scaffoldBackgroundColor
+              : null,
         ),
         child: SafeArea(
           child: Semantics(
@@ -206,7 +215,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
       builder: (context, matchingProvider, child) {
         final hasNewSelection = matchingProvider.hasNewSelectionAvailable();
         final countdown = matchingProvider.getNextRefreshCountdown();
-        
+
         Widget header = Container(
           margin: const EdgeInsets.all(16),
           child: GlassCard(
@@ -224,18 +233,25 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           children: [
                             Text(
                               'Sélection du jour',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                               semanticsLabel: 'Titre: Sélection du jour',
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Découvrez vos matchs parfaits',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              semanticsLabel: 'Description: Découvrez vos matchs parfaits',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                              semanticsLabel:
+                                  'Description: Découvrez vos matchs parfaits',
                             ),
                           ],
                         ),
@@ -243,16 +259,22 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          gradient: accessibilityService.highContrast ? null : LinearGradient(
-                            colors: [
-                              Theme.of(context).primaryColor,
-                              Theme.of(context).primaryColor.withOpacity(0.8),
-                            ],
-                          ),
-                          color: accessibilityService.highContrast ? Theme.of(context).primaryColor : null,
+                          gradient: accessibilityService.highContrast
+                              ? null
+                              : LinearGradient(
+                                  colors: [
+                                    Theme.of(context).primaryColor,
+                                    Theme.of(context)
+                                        .primaryColor
+                                        .withValues(alpha: 0.8),
+                                  ],
+                                ),
+                          color: accessibilityService.highContrast
+                              ? Theme.of(context).primaryColor
+                              : null,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.favorite,
                           color: Colors.white,
                           size: 24,
@@ -261,12 +283,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       ),
                     ],
                   ),
-                  
+
                   // New Selection Badge
                   if (hasNewSelection)
                     Container(
                       margin: const EdgeInsets.only(top: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -277,7 +300,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.successGreen.withOpacity(0.3),
+                            color:
+                                AppColors.successGreen.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -286,7 +310,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.fiber_new,
                             color: Colors.white,
                             size: 20,
@@ -295,21 +319,25 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           const SizedBox(width: 8),
                           Text(
                             'Nouvelle sélection disponible !',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                             semanticsLabel: 'Nouvelle sélection disponible',
                           ),
                         ],
                       ),
                     ),
-                    
+
                   // Countdown Timer
                   if (!hasNewSelection)
                     Container(
                       margin: const EdgeInsets.only(top: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: AppColors.backgroundGrey,
                         borderRadius: BorderRadius.circular(12),
@@ -317,7 +345,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.timer_outlined,
                             color: AppColors.textDark,
                             size: 18,
@@ -326,11 +354,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           const SizedBox(width: 8),
                           Text(
                             'Prochaine sélection dans $countdown',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            semanticsLabel: 'Prochaine sélection dans $countdown',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textDark,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                            semanticsLabel:
+                                'Prochaine sélection dans $countdown',
                           ),
                         ],
                       ),
@@ -365,26 +395,29 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         }
 
         final profiles = matchingProvider.dailyProfiles;
-        
+
         // If selection is complete, don't show any profiles
         if (matchingProvider.isSelectionComplete) {
-          return _buildSelectionCompleteState(matchingProvider, subscriptionProvider);
+          return _buildSelectionCompleteState(
+              matchingProvider, subscriptionProvider);
         }
-        
-        final availableProfiles = profiles.where((profile) => 
-          !matchingProvider.isProfileSelected(profile.id)
-        ).toList();
+
+        final availableProfiles = profiles
+            .where((profile) => !matchingProvider.isProfileSelected(profile.id))
+            .toList();
 
         if (profiles.isEmpty) {
           return _buildEmptyState();
         }
 
         if (availableProfiles.isEmpty && profiles.isNotEmpty) {
-          return _buildSelectionCompleteState(matchingProvider, subscriptionProvider);
+          return _buildSelectionCompleteState(
+              matchingProvider, subscriptionProvider);
         }
 
         return Semantics(
-          label: '${availableProfiles.length} profils disponibles pour sélection',
+          label:
+              '${availableProfiles.length} profils disponibles pour sélection',
           child: Column(
             children: [
               // Subscription status indicator for premium users
@@ -394,28 +427,32 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   daysUntilExpiry: subscriptionProvider.daysUntilExpiry,
                   compact: true,
                 ),
-              
+
               _buildProfileCounter(availableProfiles.length),
               _buildSelectionInfo(matchingProvider, subscriptionProvider),
-              
+
               // Show upgrade banner for free users who have used their daily selection
-              if (!subscriptionProvider.hasActiveSubscription && !matchingProvider.canSelectMore)
-                SubscriptionPromoBanner(
-                  message: 'Limite atteinte ! Passez à GoldWen Plus pour 3 choix/jour',
+              if (!subscriptionProvider.hasActiveSubscription &&
+                  !matchingProvider.canSelectMore)
+                const SubscriptionPromoBanner(
+                  message:
+                      'Limite atteinte ! Passez à GoldWen Plus pour 3 choix/jour',
                   compact: true,
                 ),
-              
+
               const SizedBox(height: 16),
               Expanded(
-                child: _buildProfileCards(availableProfiles, matchingProvider, subscriptionProvider),
+                child: _buildProfileCards(
+                    availableProfiles, matchingProvider, subscriptionProvider),
               ),
-              
+
               // Bottom banner for free users who still have selections
-              if (!subscriptionProvider.hasActiveSubscription && matchingProvider.canSelectMore)
-                SubscriptionPromoBanner(
+              if (!subscriptionProvider.hasActiveSubscription &&
+                  matchingProvider.canSelectMore)
+                const SubscriptionPromoBanner(
                   compact: true,
                 ),
-                
+
               const SizedBox(height: 16),
             ],
           ),
@@ -433,11 +470,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         vertical: 8,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Semantics(
-        label: '$totalProfiles profil${totalProfiles > 1 ? 's' : ''} disponible${totalProfiles > 1 ? 's' : ''}',
+        label:
+            '$totalProfiles profil${totalProfiles > 1 ? 's' : ''} disponible${totalProfiles > 1 ? 's' : ''}',
         child: Text(
           '$totalProfiles profil${totalProfiles > 1 ? 's' : ''} disponible${totalProfiles > 1 ? 's' : ''}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -458,13 +496,14 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSelectionInfo(MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+  Widget _buildSelectionInfo(MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) {
     final accessibilityService = context.watch<AccessibilityService>();
     final remainingSelections = matchingProvider.remainingSelections;
     final maxSelections = matchingProvider.maxSelections;
     final hasSubscription = subscriptionProvider.hasActiveSubscription;
     final refreshTime = matchingProvider.dailySelection?.refreshTime;
-    
+
     final content = Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(
@@ -472,11 +511,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         vertical: 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Semantics(
-        label: 'Choix restants: $remainingSelections sur $maxSelections${hasSubscription ? ' avec abonnement GoldWen Plus' : ''}',
+        label:
+            'Choix restants: $remainingSelections sur $maxSelections${hasSubscription ? ' avec abonnement GoldWen Plus' : ''}',
         child: Column(
           children: [
             Row(
@@ -488,16 +528,16 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                     Text(
                       'Choix restants',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                     if (!hasSubscription)
                       Text(
                         'GoldWen Plus: 3 choix/jour',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontStyle: FontStyle.italic,
-                        ),
+                              color: AppColors.textSecondary,
+                              fontStyle: FontStyle.italic,
+                            ),
                       ),
                   ],
                 ),
@@ -506,35 +546,38 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                     if (hasSubscription)
                       Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           'PLUS',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
                           semanticsLabel: 'Abonné GoldWen Plus',
                         ),
                       ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: remainingSelections > 0 
-                          ? Theme.of(context).primaryColor
-                          : AppColors.dividerLight,
+                        color: remainingSelections > 0
+                            ? Theme.of(context).primaryColor
+                            : AppColors.dividerLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '$remainingSelections/$maxSelections',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ),
                   ],
@@ -546,7 +589,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.schedule,
                     size: 14,
                     color: AppColors.textSecondary,
@@ -555,8 +598,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   Text(
                     'Reset: ${_formatResetTime(refreshTime) ?? 'demain'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -576,17 +619,21 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildProfileCards(List<Profile> profiles, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+  Widget _buildProfileCards(
+      List<Profile> profiles,
+      MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: profiles.length,
       itemBuilder: (context, index) {
         final profile = profiles[index];
-        
-        Widget card = _buildProfileCard(profile, matchingProvider, subscriptionProvider);
-        
+
+        Widget card =
+            _buildProfileCard(profile, matchingProvider, subscriptionProvider);
+
         if (accessibilityService.reducedMotion) {
           return card;
         }
@@ -599,9 +646,11 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+  Widget _buildProfileCard(Profile profile, MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) {
     return Semantics(
-      label: 'Profil de ${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'âge non spécifié'} ans',
+      label:
+          'Profil de ${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'âge non spécifié'} ans',
       hint: 'Appuyez pour voir les détails du profil',
       button: true,
       child: GestureDetector(
@@ -612,7 +661,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -620,183 +669,205 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: Container(
+            child: SizedBox(
               height: 400,
               child: Stack(
                 children: [
-                // Optimized profile image
-                Positioned.fill(
-                  child: OptimizedImage(
-                    imageUrl: profile.photos != null && profile.photos!.isNotEmpty ? profile.photos!.first.url : null,
-                    semanticLabel: 'Photo de profil de ${profile.firstName ?? 'cette personne'}',
-                    fit: BoxFit.cover,
-                    lazyLoad: true,
-                    fadeIn: true,
-                    placeholder: Container(
+                  // Optimized profile image
+                  Positioned.fill(
+                    child: OptimizedImage(
+                      imageUrl: profile.photos.isNotEmpty
+                          ? profile.photos.first.url
+                          : null,
+                      semanticLabel:
+                          'Photo de profil de ${profile.firstName ?? 'cette personne'}',
+                      fit: BoxFit.cover,
+                      lazyLoad: true,
+                      fadeIn: true,
+                      placeholder: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.3),
+                              Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.7),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: ProfileCardSkeleton(),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Gradient overlay
+                  Positioned.fill(
+                    child: Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Theme.of(context).primaryColor.withOpacity(0.3),
-                            Theme.of(context).primaryColor.withOpacity(0.7),
+                            Colors.transparent,
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.7),
                           ],
+                          stops: const [0.0, 0.5, 1.0],
                         ),
                       ),
-                      child: const Center(
-                        child: ProfileCardSkeleton(),
-                      ),
                     ),
                   ),
-                ),
-                
-                // Gradient overlay
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Profile info
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'N/A'}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                    semanticsLabel: 'Nom: ${profile.firstName ?? ''} ${profile.lastName ?? ''}, Âge: ${profile.age ?? 'non spécifié'} ans',
-                                  ),
-                                  const SizedBox(height: 4),
-                                  if (profile.location != null && profile.location!.isNotEmpty)
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.location_on,
-                                          color: Colors.white.withOpacity(0.9),
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          profile.location!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: Colors.white.withOpacity(0.9),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  const SizedBox(height: 4),
-                                  if (profile.bio != null && profile.bio!.isNotEmpty)
+
+                  // Profile info
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      profile.bio!,
+                                      '${profile.firstName ?? ''} ${profile.lastName ?? ''}, ${profile.age ?? 'N/A'}',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium
+                                          .headlineMedium
                                           ?.copyWith(
-                                            color: Colors.white.withOpacity(0.9),
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      semanticsLabel: 'Bio: ${profile.bio}',
+                                      semanticsLabel:
+                                          'Nom: ${profile.firstName ?? ''} ${profile.lastName ?? ''}, Âge: ${profile.age ?? 'non spécifié'} ans',
                                     ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    if (profile.location != null &&
+                                        profile.location!.isNotEmpty)
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.location_on,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.9),
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            profile.location!,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.9),
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    const SizedBox(height: 4),
+                                    if (profile.bio != null &&
+                                        profile.bio!.isNotEmpty)
+                                      Text(
+                                        profile.bio!,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Colors.white
+                                                  .withValues(alpha: 0.9),
+                                            ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        semanticsLabel: 'Bio: ${profile.bio}',
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Action buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Semantics(
-                                label: 'Passer ce profil',
-                                hint: 'Appuyez pour passer au profil suivant sans sélectionner',
-                                button: true,
-                                child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    _passProfile(profile, matchingProvider, subscriptionProvider);
-                                  },
-                                  icon: const Icon(Icons.close),
-                                  label: const Text('Passer'),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    side: const BorderSide(color: Colors.white),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // Action buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Semantics(
+                                  label: 'Passer ce profil',
+                                  hint:
+                                      'Appuyez pour passer au profil suivant sans sélectionner',
+                                  button: true,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      _passProfile(profile, matchingProvider,
+                                          subscriptionProvider);
+                                    },
+                                    icon: const Icon(Icons.close),
+                                    label: const Text('Passer'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      side:
+                                          const BorderSide(color: Colors.white),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Semantics(
-                                label: matchingProvider.canSelectMore 
-                                    ? 'Choisir ${profile.firstName ?? 'ce profil'}'
-                                    : 'Limite de sélection atteinte',
-                                hint: matchingProvider.canSelectMore 
-                                    ? 'Appuyez pour sélectionner ce profil'
-                                    : 'Vous avez atteint votre limite quotidienne',
-                                button: matchingProvider.canSelectMore,
-                                child: ElevatedButton.icon(
-                                  onPressed: matchingProvider.canSelectMore
-                                      ? () => _showChoiceConfirmation(profile, matchingProvider, subscriptionProvider)
-                                      : null,
-                                  icon: const Icon(Icons.favorite),
-                                  label: const Text('Choisir'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: matchingProvider.canSelectMore
-                                        ? AppColors.primaryGold
-                                        : AppColors.dividerLight,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Semantics(
+                                  label: matchingProvider.canSelectMore
+                                      ? 'Choisir ${profile.firstName ?? 'ce profil'}'
+                                      : 'Limite de sélection atteinte',
+                                  hint: matchingProvider.canSelectMore
+                                      ? 'Appuyez pour sélectionner ce profil'
+                                      : 'Vous avez atteint votre limite quotidienne',
+                                  button: matchingProvider.canSelectMore,
+                                  child: ElevatedButton.icon(
+                                    onPressed: matchingProvider.canSelectMore
+                                        ? () => _showChoiceConfirmation(
+                                            profile,
+                                            matchingProvider,
+                                            subscriptionProvider)
+                                        : null,
+                                    icon: const Icon(Icons.favorite),
+                                    label: const Text('Choisir'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          matchingProvider.canSelectMore
+                                              ? AppColors.primaryGold
+                                              : AppColors.dividerLight,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -827,7 +898,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               // Photo placeholder
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(AppBorderRadius.large),
@@ -870,7 +941,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   gradient: LinearGradient(
                     colors: [
                       Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.8),
+                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
                     ],
                   ),
                   shape: BoxShape.circle,
@@ -936,7 +1007,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.errorRed.withOpacity(0.15),
+                  color: AppColors.errorRed.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -967,7 +1038,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 button: true,
                 child: ElevatedButton(
                   onPressed: () {
-                    final matchingProvider = Provider.of<MatchingProvider>(context, listen: false);
+                    final matchingProvider =
+                        Provider.of<MatchingProvider>(context, listen: false);
                     matchingProvider.loadDailySelection();
                   },
                   style: ElevatedButton.styleFrom(
@@ -988,10 +1060,11 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Widget _buildSelectionCompleteState(MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+  Widget _buildSelectionCompleteState(MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) {
     final refreshTime = matchingProvider.dailySelection?.refreshTime;
     final resetTimeText = _formatResetTime(refreshTime);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -1006,7 +1079,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   gradient: LinearGradient(
                     colors: [
                       Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.8),
+                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
                     ],
                   ),
                   shape: BoxShape.circle,
@@ -1028,17 +1101,19 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               ),
               const SizedBox(height: 12),
               Text(
-                matchingProvider.selectionCompleteMessage ?? 
-                'Vous avez fait vos choix pour aujourd\'hui. Revenez demain pour de nouveaux profils.',
+                matchingProvider.selectionCompleteMessage ??
+                    'Vous avez fait vos choix pour aujourd\'hui. Revenez demain pour de nouveaux profils.',
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               if (resetTimeText != null) ...[
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -1053,9 +1128,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                       Text(
                         'Prochaine sélection : $resetTimeText',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ],
                   ),
@@ -1065,7 +1140,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
               if (!matchingProvider.hasSubscription)
                 Semantics(
                   label: 'Découvrir GoldWen Plus pour plus d\'options',
-                  hint: 'Appuyez pour voir les avantages de l\'abonnement premium',
+                  hint:
+                      'Appuyez pour voir les avantages de l\'abonnement premium',
                   button: true,
                   child: ElevatedButton(
                     onPressed: () {
@@ -1091,12 +1167,12 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
   String? _formatResetTime(DateTime? resetTime) {
     if (resetTime == null) return null;
-    
+
     final now = DateTime.now();
     final difference = resetTime.difference(now);
-    
+
     if (difference.isNegative) return null;
-    
+
     if (difference.inHours < 24) {
       final hours = difference.inHours;
       final minutes = difference.inMinutes % 60;
@@ -1106,7 +1182,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         return '${minutes}min';
       }
     }
-    
+
     // Format as "demain à 12h00" or specific time
     final hour = resetTime.hour;
     final minute = resetTime.minute;
@@ -1118,25 +1194,27 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     context.push('/profile-detail/${profile.id}');
   }
 
-  Future<void> _passProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
+  Future<void> _passProfile(Profile profile, MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) async {
     final result = await matchingProvider.selectProfile(
       profile.id,
       subscriptionProvider: subscriptionProvider,
       choice: 'pass',
     );
-    
+
     if (result != null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Profil passé. Continuez à explorer !'),
             backgroundColor: AppColors.backgroundDark,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
           ),
         );
       }
     } else {
-      final errorMessage = matchingProvider.error ?? 'Erreur lors du passage du profil';
+      final errorMessage =
+          matchingProvider.error ?? 'Erreur lors du passage du profil';
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1149,7 +1227,10 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     }
   }
 
-  void _showChoiceConfirmation(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) {
+  void _showChoiceConfirmation(
+      Profile profile,
+      MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1182,7 +1263,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1190,24 +1272,27 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                         ? 'Ce sera votre dernier choix aujourd\'hui.'
                         : 'Il vous restera ${matchingProvider.remainingSelections - 1} choix après cette sélection.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
-                if (matchingProvider.remainingSelections - 1 <= 0 && !subscriptionProvider.hasActiveSubscription)
+                if (matchingProvider.remainingSelections - 1 <= 0 &&
+                    !subscriptionProvider.hasActiveSubscription)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryGold.withOpacity(0.08),
+                        color: AppColors.primaryGold.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.primaryGold.withOpacity(0.25)),
+                        border: Border.all(
+                            color:
+                                AppColors.primaryGold.withValues(alpha: 0.25)),
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.upgrade,
                             color: AppColors.goldDeep,
                             size: 16,
@@ -1217,10 +1302,13 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                           Expanded(
                             child: Text(
                               'GoldWen Plus : 3 choix/jour',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.goldDeep,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.goldDeep,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                           ),
                         ],
@@ -1240,13 +1328,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 ),
               ),
               Semantics(
-                label: 'Confirmer la sélection de ${profile.firstName ?? 'cette personne'}',
+                label:
+                    'Confirmer la sélection de ${profile.firstName ?? 'cette personne'}',
                 hint: 'Appuyez pour finaliser votre choix',
                 button: true,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _selectProfile(profile, matchingProvider, subscriptionProvider);
+                    _selectProfile(
+                        profile, matchingProvider, subscriptionProvider);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -1262,18 +1352,22 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     );
   }
 
-  Future<void> _selectProfile(Profile profile, MatchingProvider matchingProvider, SubscriptionProvider subscriptionProvider) async {
+  Future<void> _selectProfile(
+      Profile profile,
+      MatchingProvider matchingProvider,
+      SubscriptionProvider subscriptionProvider) async {
     // Check if user can select more profiles
     if (!matchingProvider.canSelectMore) {
       final refreshTime = matchingProvider.dailySelection?.refreshTime;
       final resetTimeText = _formatResetTime(refreshTime);
-      
+
       if (!subscriptionProvider.hasActiveSubscription) {
         // Show upgrade dialog for free users
         showDialog(
           context: context,
           builder: (context) => SubscriptionLimitReachedDialog(
-            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
+            currentSelections: matchingProvider.maxSelections -
+                matchingProvider.remainingSelections,
             maxSelections: matchingProvider.maxSelections,
             resetTime: matchingProvider.dailySelection?.refreshTime,
           ),
@@ -1281,10 +1375,10 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         return;
       } else {
         // Premium user reached their limit
-        final message = resetTimeText != null 
-          ? 'Vous avez atteint votre limite quotidienne de 3 sélections. Nouvelle sélection dans $resetTimeText.'
-          : 'Vous avez atteint votre limite quotidienne de 3 sélections.';
-        
+        final message = resetTimeText != null
+            ? 'Vous avez atteint votre limite quotidienne de 3 sélections. Nouvelle sélection dans $resetTimeText.'
+            : 'Vous avez atteint votre limite quotidienne de 3 sélections.';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -1295,21 +1389,23 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         return;
       }
     }
-    
+
     final result = await matchingProvider.selectProfile(
-      profile.id, 
+      profile.id,
       subscriptionProvider: subscriptionProvider,
       choice: 'like',
     );
-    
+
+    if (!mounted) return;
+
     if (result != null) {
       final isMatch = result['isMatch'] ?? false;
-      
+
       if (isMatch) {
         // Show match acceptance dialog
         final matchId = result['matchId'] as String?;
         final matchedProfile = result['profile'] as Profile?;
-        
+
         if (matchId != null && matchedProfile != null && mounted) {
           await showDialog(
             context: context,
@@ -1336,13 +1432,15 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         // No match, show regular success message
         final remaining = matchingProvider.remainingSelections;
         String message;
-        
+
         if (remaining <= 0 || matchingProvider.isSelectionComplete) {
-          message = '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
+          message =
+              '✨ Votre choix est fait ! Revenez demain pour de nouveaux profils.';
         } else {
-          message = '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
+          message =
+              '💖 Vous avez choisi ${profile.firstName ?? 'cette personne'} ! Il vous reste $remaining choix.';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -1352,15 +1450,17 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         );
       }
     } else {
-      final errorMessage = matchingProvider.error ?? 'Erreur lors de la sélection';
-      
+      final errorMessage =
+          matchingProvider.error ?? 'Erreur lors de la sélection';
+
       // Check if error suggests upgrade
-      if (!subscriptionProvider.hasActiveSubscription && 
+      if (!subscriptionProvider.hasActiveSubscription &&
           errorMessage.contains('limite')) {
         showDialog(
           context: context,
           builder: (context) => SubscriptionLimitReachedDialog(
-            currentSelections: matchingProvider.maxSelections - matchingProvider.remainingSelections,
+            currentSelections: matchingProvider.maxSelections -
+                matchingProvider.remainingSelections,
             maxSelections: matchingProvider.maxSelections,
             resetTime: matchingProvider.dailySelection?.refreshTime,
           ),
@@ -1376,5 +1476,4 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
       }
     }
   }
-
 }

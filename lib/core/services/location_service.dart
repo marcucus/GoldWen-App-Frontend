@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'api_service.dart';
@@ -45,8 +43,8 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
         permission = await Geolocator.requestPermission();
       }
 
-      _hasPermission = permission == LocationPermission.whileInUse || 
-                       permission == LocationPermission.always;
+      _hasPermission = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
 
       if (!_hasPermission) {
         debugPrint('LocationService: Location permission denied');
@@ -89,8 +87,10 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
 
       _currentPosition = position;
@@ -131,8 +131,8 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
 
       // Check permission status
       LocationPermission permission = await Geolocator.checkPermission();
-      return permission == LocationPermission.whileInUse || 
-             permission == LocationPermission.always;
+      return permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
     } catch (e) {
       debugPrint('LocationService: Error checking permission: $e');
       return false;
@@ -152,9 +152,9 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
 
       // Check current permission status
       LocationPermission permission = await Geolocator.checkPermission();
-      
+
       // If permission is already granted, return true
-      if (permission == LocationPermission.whileInUse || 
+      if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {
         debugPrint('LocationService: Permission already granted');
         return true;
@@ -163,9 +163,9 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       // If permission is denied, request it
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        
+
         // Check the result
-        if (permission == LocationPermission.whileInUse || 
+        if (permission == LocationPermission.whileInUse ||
             permission == LocationPermission.always) {
           debugPrint('LocationService: Permission granted after request');
           return true;
@@ -197,8 +197,10 @@ class LocationService extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
     } catch (e) {
       debugPrint('LocationService: Error getting current position: $e');

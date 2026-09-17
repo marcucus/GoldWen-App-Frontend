@@ -41,7 +41,7 @@ class _ReportPageState extends State<ReportPage> {
       final prefs = await SharedPreferences.getInstance();
       final reportKey = _getReportKey();
       final alreadyReported = prefs.getBool(reportKey) ?? false;
-      
+
       setState(() {
         _alreadyReported = alreadyReported;
         _isCheckingDuplicate = false;
@@ -68,7 +68,7 @@ class _ReportPageState extends State<ReportPage> {
       final reportKey = _getReportKey();
       await prefs.setBool(reportKey, true);
     } catch (e) {
-      print('Failed to mark as reported: $e');
+      debugPrint('Failed to mark as reported: $e');
     }
   }
 
@@ -76,14 +76,14 @@ class _ReportPageState extends State<ReportPage> {
     setState(() => _isSubmitting = true);
 
     try {
-      final reportProvider = Provider.of<ReportProvider>(context, listen: false);
-      
+      final reportProvider =
+          Provider.of<ReportProvider>(context, listen: false);
+
       await reportProvider.submitReport(
         targetUserId: widget.targetUserId,
         type: type,
-        reason: description.isEmpty 
-            ? _getDefaultReasonForType(type) 
-            : description,
+        reason:
+            description.isEmpty ? _getDefaultReasonForType(type) : description,
         messageId: widget.messageId,
         chatId: widget.chatId,
       );
@@ -94,7 +94,7 @@ class _ReportPageState extends State<ReportPage> {
       if (mounted) {
         // Show success dialog
         await _showSuccessDialog();
-        
+
         // Navigate back
         if (mounted) {
           Navigator.of(context).pop(true);
@@ -104,7 +104,7 @@ class _ReportPageState extends State<ReportPage> {
       if (mounted) {
         // Check if it's a duplicate error from backend
         final errorMessage = e.toString();
-        if (errorMessage.contains('already reported') || 
+        if (errorMessage.contains('already reported') ||
             errorMessage.contains('duplicate')) {
           await _markAsReported();
           await _showAlreadyReportedDialog();
@@ -193,10 +193,10 @@ class _ReportPageState extends State<ReportPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.warningAmber.withOpacity(0.12),
+                color: AppColors.warningAmber.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.info_outline,
                 color: AppColors.warningAmber,
                 size: 24,
@@ -251,7 +251,7 @@ class _ReportPageState extends State<ReportPage> {
             children: [
               // Header
               _buildHeader(),
-              
+
               // Content
               Expanded(
                 child: Container(
@@ -280,12 +280,11 @@ class _ReportPageState extends State<ReportPage> {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.cardOverlay.withOpacity(0.2),
+              color: AppColors.cardOverlay.withValues(alpha: 0.2),
             ),
             child: IconButton(
-              onPressed: _isSubmitting 
-                  ? null 
-                  : () => Navigator.of(context).pop(),
+              onPressed:
+                  _isSubmitting ? null : () => Navigator.of(context).pop(),
               icon: const Icon(
                 Icons.arrow_back,
                 color: AppColors.textLight,
@@ -300,16 +299,16 @@ class _ReportPageState extends State<ReportPage> {
                 Text(
                   'Signaler un problème',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Aidez-nous à maintenir une communauté saine',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textLight.withOpacity(0.9),
-                  ),
+                        color: AppColors.textLight.withValues(alpha: 0.9),
+                      ),
                 ),
               ],
             ),
@@ -355,10 +354,10 @@ class _ReportPageState extends State<ReportPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: AppColors.warningAmber.withOpacity(0.08),
+                color: AppColors.warningAmber.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.report_problem_outlined,
                 size: 64,
                 color: AppColors.warningAmber,
@@ -368,16 +367,16 @@ class _ReportPageState extends State<ReportPage> {
             Text(
               'Déjà signalé',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Vous avez déjà signalé ce contenu. Notre équipe de modération examine votre demande.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),

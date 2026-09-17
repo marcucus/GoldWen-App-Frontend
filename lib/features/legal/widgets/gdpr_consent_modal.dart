@@ -26,8 +26,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => widget.canDismiss,
+    return PopScope(
+      canPop: widget.canDismiss,
       child: Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
@@ -36,7 +36,7 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
             borderRadius: BorderRadius.circular(AppBorderRadius.large),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -57,7 +57,7 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.privacy_tip,
                       color: AppColors.textLight,
                       size: 32,
@@ -69,16 +69,23 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                         children: [
                           Text(
                             'Protection de vos données',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: AppColors.textLight,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           Text(
                             'Conformité RGPD',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textLight.withOpacity(0.8),
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textLight
+                                      .withValues(alpha: 0.8),
+                                ),
                           ),
                         ],
                       ),
@@ -86,7 +93,7 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                     if (widget.canDismiss)
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.close,
                           color: AppColors.textLight,
                         ),
@@ -105,8 +112,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                       Text(
                         'Nous respectons votre vie privée et nous nous engageons à protéger vos données personnelles conformément au RGPD.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                              color: AppColors.textSecondary,
+                            ),
                       ),
 
                       const SizedBox(height: AppSpacing.xl),
@@ -114,7 +121,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                       // Required consent
                       _buildConsentSection(
                         title: 'Traitement des données (Obligatoire)',
-                        description: 'Autorisation pour traiter vos données personnelles nécessaires au fonctionnement de l\'application (profil, matching, messagerie).',
+                        description:
+                            'Autorisation pour traiter vos données personnelles nécessaires au fonctionnement de l\'application (profil, matching, messagerie).',
                         value: _dataProcessingConsent,
                         onChanged: (value) {
                           setState(() {
@@ -129,7 +137,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                       // Optional consents
                       _buildConsentSection(
                         title: 'Marketing et communications (Optionnel)',
-                        description: 'Autorisation pour vous envoyer des informations promotionnelles, des conseils et des nouveautés.',
+                        description:
+                            'Autorisation pour vous envoyer des informations promotionnelles, des conseils et des nouveautés.',
                         value: _marketingConsent,
                         onChanged: (value) {
                           setState(() {
@@ -143,7 +152,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
 
                       _buildConsentSection(
                         title: 'Analyses et amélioration (Optionnel)',
-                        description: 'Autorisation pour analyser votre utilisation de l\'app afin d\'améliorer nos services.',
+                        description:
+                            'Autorisation pour analyser votre utilisation de l\'app afin d\'améliorer nos services.',
                         value: _analyticsConsent,
                         onChanged: (value) {
                           setState(() {
@@ -159,15 +169,16 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGold.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                          color: AppColors.primaryGold.withValues(alpha: 0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppBorderRadius.medium),
                           border: Border.all(
-                            color: AppColors.primaryGold.withOpacity(0.3),
+                            color: AppColors.primaryGold.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.info_outline,
                               color: AppColors.primaryGold,
                             ),
@@ -176,7 +187,7 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Plus d\'informations',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -188,7 +199,7 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                                       Navigator.of(context).pop();
                                       context.go('/privacy');
                                     },
-                                    child: Text(
+                                    child: const Text(
                                       'Consultez notre politique de confidentialité complète',
                                       style: TextStyle(
                                         color: AppColors.primaryGold,
@@ -221,9 +232,11 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryGold,
                           foregroundColor: AppColors.textLight,
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.md),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppBorderRadius.medium),
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.medium),
                           ),
                         ),
                         child: _isSubmitting
@@ -246,15 +259,15 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                               ),
                       ),
                     ),
-                    
                     if (!_dataProcessingConsent)
                       Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.sm),
                         child: Text(
                           'Le consentement pour le traitement des données est requis pour utiliser l\'application.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.errorRed,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.errorRed,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -303,9 +316,12 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                         Expanded(
                           child: Text(
                             title,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                         if (isRequired)
@@ -316,15 +332,19 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.errorRed,
-                              borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                              borderRadius:
+                                  BorderRadius.circular(AppBorderRadius.small),
                             ),
                             child: Text(
                               'REQUIS',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textLight,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textLight,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
                             ),
                           ),
                       ],
@@ -333,8 +353,8 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   ],
                 ),
@@ -367,11 +387,12 @@ class _GdprConsentModalState extends State<GdprConsentModal> {
       if (mounted) {
         Navigator.of(context).pop();
         widget.onConsentGiven?.call();
-        
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Vos préférences de confidentialité ont été enregistrées.'),
+          const SnackBar(
+            content: Text(
+                'Vos préférences de confidentialité ont été enregistrées.'),
             backgroundColor: AppColors.successGreen,
             behavior: SnackBarBehavior.floating,
           ),

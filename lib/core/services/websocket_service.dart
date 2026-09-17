@@ -7,10 +7,10 @@ import '../config/app_config.dart';
 import 'notification_manager.dart';
 
 class WebSocketService {
-  static String get baseUrl => AppConfig.isDevelopment 
-      ? AppConfig.devWebSocketBaseUrl 
+  static String get baseUrl => AppConfig.isDevelopment
+      ? AppConfig.devWebSocketBaseUrl
       : AppConfig.webSocketBaseUrl;
-  
+
   WebSocketChannel? _channel;
   String? _token;
   bool _isConnected = false;
@@ -22,21 +22,30 @@ class WebSocketService {
   Duration _currentReconnectDelay = _initialReconnectDelay;
   int _reconnectAttempt = 0;
   Timer? _reconnectTimer;
-  
+
   // Stream controllers for different event types
-  final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
-  final StreamController<Map<String, dynamic>> _typingController = StreamController.broadcast();
-  final StreamController<Map<String, dynamic>> _readReceiptController = StreamController.broadcast();
-  final StreamController<Map<String, dynamic>> _chatExpiredController = StreamController.broadcast();
-  final StreamController<Map<String, dynamic>> _onlineStatusController = StreamController.broadcast();
-  final StreamController<bool> _connectionController = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _messageController =
+      StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _typingController =
+      StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _readReceiptController =
+      StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _chatExpiredController =
+      StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _onlineStatusController =
+      StreamController.broadcast();
+  final StreamController<bool> _connectionController =
+      StreamController.broadcast();
 
   // Public streams
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   Stream<Map<String, dynamic>> get typingStream => _typingController.stream;
-  Stream<Map<String, dynamic>> get readReceiptStream => _readReceiptController.stream;
-  Stream<Map<String, dynamic>> get chatExpiredStream => _chatExpiredController.stream;
-  Stream<Map<String, dynamic>> get onlineStatusStream => _onlineStatusController.stream;
+  Stream<Map<String, dynamic>> get readReceiptStream =>
+      _readReceiptController.stream;
+  Stream<Map<String, dynamic>> get chatExpiredStream =>
+      _chatExpiredController.stream;
+  Stream<Map<String, dynamic>> get onlineStatusStream =>
+      _onlineStatusController.stream;
   Stream<bool> get connectionStream => _connectionController.stream;
 
   bool get isConnected => _isConnected;
@@ -90,7 +99,7 @@ class WebSocketService {
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     _reconnectAttempt++;
-    print(
+    debugPrint(
       'WebSocket reconnect attempt #$_reconnectAttempt '
       'in ${_currentReconnectDelay.inSeconds}s',
     );
@@ -139,32 +148,32 @@ class WebSocketService {
           _handleChatExpiringSoonNotification(data);
           break;
         default:
-          print('Unknown WebSocket event type: $eventType');
+          debugPrint('Unknown WebSocket event type: $eventType');
       }
     } catch (e) {
-      print('Error handling WebSocket message: $e');
+      debugPrint('Error handling WebSocket message: $e');
     }
   }
 
   void _handleNewMessageNotification(Map<String, dynamic> data) {
     if (_context == null) return;
-    
+
     try {
       final senderName = data['senderName'] as String?;
       final isFromCurrentUser = data['isFromCurrentUser'] as bool? ?? false;
-      
+
       // Only show notification if message is not from current user
       if (!isFromCurrentUser && senderName != null) {
         NotificationManager().showNewMessageNotification(_context!, senderName);
       }
     } catch (e) {
-      print('Failed to show new message notification: $e');
+      debugPrint('Failed to show new message notification: $e');
     }
   }
 
   void _handleChatExpiringNotification(Map<String, dynamic> data) {
     if (_context == null) return;
-    
+
     try {
       final partnerName = data['partnerName'] as String?;
       if (partnerName != null) {
@@ -177,38 +186,35 @@ class WebSocketService {
         );
       }
     } catch (e) {
-      print('Failed to show chat expired notification: $e');
+      debugPrint('Failed to show chat expired notification: $e');
     }
   }
 
   void _handleChatExpiringSoonNotification(Map<String, dynamic> data) {
     if (_context == null) return;
-    
+
     try {
       final partnerName = data['partnerName'] as String?;
       final hoursLeft = data['hoursLeft'] as int?;
-      
+
       if (partnerName != null && hoursLeft != null) {
-        NotificationManager().showChatExpiringNotification(
-          _context!, 
-          partnerName, 
-          hoursLeft
-        );
+        NotificationManager()
+            .showChatExpiringNotification(_context!, partnerName, hoursLeft);
       }
     } catch (e) {
-      print('Failed to show chat expiring soon notification: $e');
+      debugPrint('Failed to show chat expiring soon notification: $e');
     }
   }
 
-  void _handleError(error) {
-    print('WebSocket error: $error');
+  void _handleError(Object error) {
+    debugPrint('WebSocket error: $error');
     _isConnected = false;
     _connectionController.add(false);
     _scheduleReconnect();
   }
 
   void _handleDisconnection() {
-    print('WebSocket disconnected');
+    debugPrint('WebSocket disconnected');
     _isConnected = false;
     _connectionController.add(false);
     _scheduleReconnect();

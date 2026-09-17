@@ -3,14 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
-import 'core/config/firebase_config.dart';
 import 'core/services/location_service.dart';
 import 'core/services/firebase_messaging_service.dart';
-import 'core/services/navigation_service.dart';
 import 'core/services/app_initialization_service.dart';
 import 'core/services/gdpr_service.dart';
 import 'core/services/accessibility_service.dart';
@@ -23,8 +20,6 @@ import 'features/chat/providers/chat_provider.dart';
 import 'features/subscription/providers/subscription_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/settings/providers/email_notification_provider.dart';
-import 'features/admin/providers/admin_auth_provider.dart';
-import 'features/admin/providers/admin_provider.dart';
 import 'features/feedback/providers/feedback_provider.dart';
 import 'core/config/app_config.dart';
 import 'shared/widgets/keyboard_dismissible.dart';
@@ -44,7 +39,7 @@ void main() async {
   try {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
-    print('Background message handler not set: $e');
+    debugPrint('Background message handler not set: $e');
   }
   AppConfig.debugPrintApiUrl(); // Ajoute cette ligne
 
@@ -82,8 +77,8 @@ class GoldWenApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => NotificationProvider()
             ..loadNotificationSettings()
-            ..loadNotifications()
-                .catchError((e) => print('Failed to load notifications: $e')),
+            ..loadNotifications().catchError(
+                (e) => debugPrint('Failed to load notifications: $e')),
         ),
         ChangeNotifierProvider(
           create: (_) => EmailNotificationProvider(),

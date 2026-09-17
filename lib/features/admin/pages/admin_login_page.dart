@@ -54,34 +54,38 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Logo and Title
-                        Icon(
+                        const Icon(
                           Icons.admin_panel_settings,
                           size: 80,
                           color: AppColors.primaryGold,
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        
+
                         Text(
                           'GoldWen Admin',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: AppColors.textDark,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                color: AppColors.textDark,
+                                fontWeight: FontWeight.bold,
+                              ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: AppSpacing.md),
-                        
+
                         Text(
                           'Panneau d\'Administration',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: AppSpacing.xxl),
-                        
+
                         // Email Field
                         TextFormField(
                           controller: _emailController,
@@ -99,15 +103,16 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez entrer votre email';
                             }
-                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                .hasMatch(value)) {
                               return 'Veuillez entrer un email valide';
                             }
                             return null;
                           },
                         ),
-                        
+
                         const SizedBox(height: AppSpacing.lg),
-                        
+
                         // Password Field
                         TextFormField(
                           controller: _passwordController,
@@ -117,7 +122,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                _obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -141,26 +148,30 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             return null;
                           },
                         ),
-                        
+
                         const SizedBox(height: AppSpacing.xxl),
-                        
+
                         // Error Message
                         if (authProvider.error != null) ...[
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.md),
                             decoration: BoxDecoration(
-                              color: AppColors.errorRed.withOpacity(0.1),
+                              color: AppColors.errorRed.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.errorRed.withOpacity(0.3)),
+                              border: Border.all(
+                                  color: AppColors.errorRed
+                                      .withValues(alpha: 0.3)),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.error_outline, color: AppColors.errorRed, size: 20),
+                                const Icon(Icons.error_outline,
+                                    color: AppColors.errorRed, size: 20),
                                 const SizedBox(width: AppSpacing.sm),
                                 Expanded(
                                   child: Text(
                                     authProvider.error!,
-                                    style: TextStyle(color: AppColors.errorRed),
+                                    style: const TextStyle(
+                                        color: AppColors.errorRed),
                                   ),
                                 ),
                               ],
@@ -168,14 +179,15 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           ),
                           const SizedBox(height: AppSpacing.lg),
                         ],
-                        
+
                         // Login Button
                         SizedBox(
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: authProvider.status == AdminAuthStatus.loading
-                                ? null
-                                : _handleLogin,
+                            onPressed:
+                                authProvider.status == AdminAuthStatus.loading
+                                    ? null
+                                    : _handleLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryGold,
                               foregroundColor: Colors.white,
@@ -184,13 +196,15 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                               ),
                               elevation: 2,
                             ),
-                            child: authProvider.status == AdminAuthStatus.loading
+                            child: authProvider.status ==
+                                    AdminAuthStatus.loading
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
                                     ),
                                   )
                                 : const Text(
@@ -202,13 +216,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                                   ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: AppSpacing.xl),
-                        
+
                         // Back to App Link
                         TextButton(
                           onPressed: () => context.go('/'),
-                          child: Text(
+                          child: const Text(
                             'Retour à l\'application',
                             style: TextStyle(
                               color: AppColors.textSecondary,

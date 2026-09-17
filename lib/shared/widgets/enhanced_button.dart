@@ -40,26 +40,24 @@ class _EnhancedButtonState extends State<EnhancedButton>
   late AnimationController _pulseController;
   late Animation<double> _hoverAnimation;
   late Animation<double> _pulseAnimation;
-  
+
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _hoverController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 200)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 200)),
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 1200)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 1200)),
       vsync: this,
     );
 
@@ -97,9 +95,9 @@ class _EnhancedButtonState extends State<EnhancedButton>
 
   void _onHover(bool isHovered) {
     if (widget.onPressed == null) return;
-    
+
     setState(() => _isHovered = isHovered);
-    
+
     final accessibilityService = context.read<AccessibilityService>();
     if (!accessibilityService.reducedMotion) {
       if (isHovered) {
@@ -114,7 +112,7 @@ class _EnhancedButtonState extends State<EnhancedButton>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return AnimatedBuilder(
       animation: Listenable.merge([_hoverAnimation, _pulseAnimation]),
       builder: (context, child) {
@@ -129,7 +127,7 @@ class _EnhancedButtonState extends State<EnhancedButton>
                   ? [
                       BoxShadow(
                         color: widget.isPrimary
-                            ? AppColors.primaryGold.withOpacity(0.3)
+                            ? AppColors.primaryGold.withValues(alpha: 0.3)
                             : AppColors.shadowMedium,
                         blurRadius: 12.0 + (8.0 * _hoverAnimation.value),
                         offset: Offset(0, 4.0 + (2.0 * _hoverAnimation.value)),
@@ -141,26 +139,26 @@ class _EnhancedButtonState extends State<EnhancedButton>
             child: AnimatedPressable(
               onPressed: widget.isLoading ? null : widget.onPressed,
               enableGlowEffect: true,
-              glowColor: widget.isPrimary ? AppColors.primaryGold : AppColors.secondaryBeige,
+              glowColor: widget.isPrimary
+                  ? AppColors.primaryGold
+                  : AppColors.secondaryBeige,
               child: MouseRegion(
                 onEnter: (_) => _onHover(true),
                 onExit: (_) => _onHover(false),
                 child: Container(
-                  padding: widget.padding ?? const EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: 16.0,
-                  ),
+                  padding: widget.padding ??
+                      const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 16.0,
+                      ),
                   decoration: BoxDecoration(
-                    gradient: widget.isPrimary
-                        ? AppColors.primaryGradient
-                        : null,
-                    color: widget.isPrimary
-                        ? null
-                        : theme.colorScheme.surface,
+                    gradient:
+                        widget.isPrimary ? AppColors.primaryGradient : null,
+                    color: widget.isPrimary ? null : theme.colorScheme.surface,
                     border: widget.isPrimary
                         ? null
                         : Border.all(
-                            color: AppColors.primaryGold.withOpacity(0.3),
+                            color: AppColors.primaryGold.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                     borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -186,7 +184,10 @@ class _EnhancedButtonState extends State<EnhancedButton>
                       ] else if (widget.icon != null) ...[
                         AnimatedRotation(
                           duration: const Duration(milliseconds: 200),
-                          turns: _isHovered && !accessibilityService.reducedMotion ? 0.05 : 0.0,
+                          turns:
+                              _isHovered && !accessibilityService.reducedMotion
+                                  ? 0.05
+                                  : 0.0,
                           child: Icon(
                             widget.icon,
                             color: widget.isPrimary
@@ -204,9 +205,10 @@ class _EnhancedButtonState extends State<EnhancedButton>
                               ? AppColors.textLight
                               : AppColors.primaryGold,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: _isHovered && !accessibilityService.reducedMotion
-                              ? 0.8
-                              : 0.5,
+                          letterSpacing:
+                              _isHovered && !accessibilityService.reducedMotion
+                                  ? 0.8
+                                  : 0.5,
                         ),
                         child: Text(widget.text),
                       ),
@@ -253,20 +255,18 @@ class _EnhancedFABState extends State<EnhancedFAB>
   @override
   void initState() {
     super.initState();
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     _breathingController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 2000)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 2000)),
       vsync: this,
     );
-    
+
     _rotationController = AnimationController(
-      duration: accessibilityService.getAnimationDuration(
-        const Duration(milliseconds: 300)
-      ),
+      duration: accessibilityService
+          .getAnimationDuration(const Duration(milliseconds: 300)),
       vsync: this,
     );
 
@@ -300,12 +300,12 @@ class _EnhancedFABState extends State<EnhancedFAB>
 
   void _onPressed() {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       _rotationController.reset();
       _rotationController.forward();
     }
-    
+
     HapticFeedback.mediumImpact();
     widget.onPressed?.call();
   }
@@ -313,7 +313,7 @@ class _EnhancedFABState extends State<EnhancedFAB>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return AnimatedBuilder(
       animation: Listenable.merge([_breathingAnimation, _rotationAnimation]),
       builder: (context, child) {

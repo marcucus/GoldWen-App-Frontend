@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/services/websocket_service.dart';
 import '../../../core/services/local_notification_service.dart';
 import '../../../core/services/notification_manager.dart';
 import '../../../core/services/analytics_service.dart';
@@ -12,7 +11,7 @@ class MatchingProvider with ChangeNotifier {
   DailySelection? _dailySelection;
   List<Match> _matches = [];
   List<Profile> _dailyProfiles = [];
-  List<String> _selectedProfileIds = [];
+  final List<String> _selectedProfileIds = [];
   List<WhoLikedMeItem> _whoLikedMe = [];
   bool _isLoading = false;
   bool _isLoadingWhoLikedMe = false;
@@ -22,7 +21,8 @@ class MatchingProvider with ChangeNotifier {
 
   DailySelection? get dailySelection => _dailySelection;
   List<Match> get matches => _matches;
-  List<Profile> get dailyProfiles => _dailySelection?.profiles ?? _dailyProfiles;
+  List<Profile> get dailyProfiles =>
+      _dailySelection?.profiles ?? _dailyProfiles;
   List<String> get selectedProfileIds => _selectedProfileIds;
   List<WhoLikedMeItem> get whoLikedMe => _whoLikedMe;
   bool get isLoading => _isLoading;
@@ -41,6 +41,7 @@ class MatchingProvider with ChangeNotifier {
     // Free users: 1 selection, Premium users: 3 selections
     return (_subscriptionUsage?.dailyChoicesLimit ?? (hasSubscription ? 3 : 1));
   }
+
   int get remainingSelections {
     // Use daily selection metadata if available
     if (_dailySelection != null) {
@@ -49,6 +50,7 @@ class MatchingProvider with ChangeNotifier {
     // Fall back to subscription usage
     return _subscriptionUsage?.remainingChoices ?? 1;
   }
+
   bool get canSelectMore {
     // Use daily selection metadata if available
     if (_dailySelection != null) {
@@ -67,7 +69,7 @@ class MatchingProvider with ChangeNotifier {
 
     try {
       final response = await ApiService.getDailySelection();
-      
+
       // Handle different response structures
       dynamic selectionData;
       if (response.containsKey('data')) {
@@ -75,7 +77,7 @@ class MatchingProvider with ChangeNotifier {
       } else {
         selectionData = response;
       }
-      
+
       // If selectionData is null or empty, create an empty selection
       if (selectionData == null) {
         _dailySelection = DailySelection(
@@ -91,27 +93,28 @@ class MatchingProvider with ChangeNotifier {
         );
         _dailyProfiles = [];
       } else {
-        _dailySelection = DailySelection.fromJson(selectionData as Map<String, dynamic>);
+        _dailySelection =
+            DailySelection.fromJson(selectionData as Map<String, dynamic>);
         _dailyProfiles = _dailySelection!.profiles;
       }
-      
+
       _lastUpdateTime = DateTime.now();
       _error = null;
-      
+
       // Track daily selection viewed
       await AnalyticsService.trackDailySelectionViewed(_dailyProfiles.length);
-      
+
       // Load subscription usage to know limits
       await _loadSubscriptionUsage();
-      
+
       // Schedule next day's notification
       await _scheduleDailyNotifications();
     } catch (e) {
       // If API is not available, provide mock data for development only
       if (AppConfig.isDevelopment &&
-          (e.toString().contains('NetworkException') || 
-           e.toString().contains('ECONNREFUSED') ||
-           e.toString().contains('Failed to connect'))) {
+          (e.toString().contains('NetworkException') ||
+              e.toString().contains('ECONNREFUSED') ||
+              e.toString().contains('Failed to connect'))) {
         _createMockDailySelection();
         _error = null;
       } else {
@@ -130,21 +133,35 @@ class MatchingProvider with ChangeNotifier {
         'firstName': 'Emma',
         'lastName': 'L.',
         'age': 25,
-        'bio': 'Passionnée de voyage et de photographie. J\'adore découvrir de nouveaux endroits !',
+        'bio':
+            'Passionnée de voyage et de photographie. J\'adore découvrir de nouveaux endroits !',
         'photos': [
-          {'id': 'photo_1', 'url': 'https://images.unsplash.com/photo-1494790108755-2616b612b714', 'order': 1, 'isMain': true}
+          {
+            'id': 'photo_1',
+            'url':
+                'https://images.unsplash.com/photo-1494790108755-2616b612b714',
+            'order': 1,
+            'isMain': true
+          }
         ],
         'location': {'city': 'Paris', 'distance': 5},
         'interests': ['voyage', 'photographie', 'art'],
       }),
       Profile.fromJson({
-        'id': 'mock_2', 
+        'id': 'mock_2',
         'firstName': 'Sophie',
         'lastName': 'M.',
         'age': 28,
-        'bio': 'Cheffe passionnée qui aime cuisiner et partager de bons moments.',
+        'bio':
+            'Cheffe passionnée qui aime cuisiner et partager de bons moments.',
         'photos': [
-          {'id': 'photo_2', 'url': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80', 'order': 1, 'isMain': true}
+          {
+            'id': 'photo_2',
+            'url':
+                'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
+            'order': 1,
+            'isMain': true
+          }
         ],
         'location': {'city': 'Lyon', 'distance': 12},
         'interests': ['cuisine', 'vin', 'lecture'],
@@ -154,9 +171,16 @@ class MatchingProvider with ChangeNotifier {
         'firstName': 'Clara',
         'lastName': 'D.',
         'age': 24,
-        'bio': 'Architecte créative qui aime l\'art moderne et les balades en nature.',
+        'bio':
+            'Architecte créative qui aime l\'art moderne et les balades en nature.',
         'photos': [
-          {'id': 'photo_3', 'url': 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb', 'order': 1, 'isMain': true}
+          {
+            'id': 'photo_3',
+            'url':
+                'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb',
+            'order': 1,
+            'isMain': true
+          }
         ],
         'location': {'city': 'Marseille', 'distance': 8},
         'interests': ['architecture', 'art', 'nature'],
@@ -174,7 +198,7 @@ class MatchingProvider with ChangeNotifier {
       maxChoices: 1,
       refreshTime: DateTime.now().add(const Duration(days: 1)),
     );
-    
+
     _dailyProfiles = mockProfiles;
     _lastUpdateTime = DateTime.now();
   }
@@ -187,33 +211,36 @@ class MatchingProvider with ChangeNotifier {
       await LocalNotificationService().scheduleDailySelectionNotification();
     } catch (e) {
       // Don't fail the whole operation if notifications fail
-      print('Failed to schedule daily notifications: $e');
+      debugPrint('Failed to schedule daily notifications: $e');
     }
   }
 
   Future<void> initializeNotifications() async {
     try {
       await LocalNotificationService().initialize();
-      final permissionGranted = await LocalNotificationService().requestPermissions();
-      
+      final permissionGranted =
+          await LocalNotificationService().requestPermissions();
+
       if (permissionGranted) {
         await _scheduleDailyNotifications();
       }
     } catch (e) {
-      print('Failed to initialize notifications: $e');
+      debugPrint('Failed to initialize notifications: $e');
     }
   }
 
   /// Schedule daily notifications with context (should be called from UI)
-  Future<void> scheduleDailyNotificationsWithContext(BuildContext context) async {
+  Future<void> scheduleDailyNotificationsWithContext(
+      BuildContext context) async {
     try {
       await NotificationManager().scheduleDailySelectionNotifications(context);
     } catch (e) {
-      print('Failed to schedule daily notifications: $e');
+      debugPrint('Failed to schedule daily notifications: $e');
     }
   }
 
-  Future<void> loadMatches({int page = 1, int limit = 20, String? status}) async {
+  Future<void> loadMatches(
+      {int page = 1, int limit = 20, String? status}) async {
     if (page == 1) _setLoading();
 
     try {
@@ -222,7 +249,7 @@ class MatchingProvider with ChangeNotifier {
         limit: limit,
         status: status,
       );
-      
+
       final matchesData = response['data'] ?? response['matches'] ?? [];
       final newMatches = (matchesData as List)
           .map((m) => Match.fromJson(m as Map<String, dynamic>))
@@ -233,7 +260,7 @@ class MatchingProvider with ChangeNotifier {
       } else {
         _matches.addAll(newMatches);
       }
-      
+
       _error = null;
     } catch (e) {
       _handleError(e, 'Failed to load matches');
@@ -242,20 +269,24 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> selectProfile(String profileId, {SubscriptionProvider? subscriptionProvider, String choice = 'like'}) async {
+  Future<Map<String, dynamic>?> selectProfile(String profileId,
+      {SubscriptionProvider? subscriptionProvider,
+      String choice = 'like'}) async {
     // Check if user has remaining selections (only for 'like' choice)
     if (choice == 'like' && !canSelectMore) {
       final refreshTime = _dailySelection?.refreshTime;
-      final resetTimeInfo = refreshTime != null ? _formatResetTime(refreshTime) : null;
-      
-      if (subscriptionProvider != null && !subscriptionProvider.hasActiveSubscription) {
+      final resetTimeInfo =
+          refreshTime != null ? _formatResetTime(refreshTime) : null;
+
+      if (subscriptionProvider != null &&
+          !subscriptionProvider.hasActiveSubscription) {
         _error = resetTimeInfo != null
-          ? 'Vous avez atteint votre limite quotidienne. Nouvelle sélection dans $resetTimeInfo ou passez à GoldWen Plus pour 3 choix/jour !'
-          : 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
+            ? 'Vous avez atteint votre limite quotidienne. Nouvelle sélection dans $resetTimeInfo ou passez à GoldWen Plus pour 3 choix/jour !'
+            : 'Vous avez atteint votre limite quotidienne. Passez à GoldWen Plus pour 3 sélections par jour !';
       } else {
         _error = resetTimeInfo != null
-          ? 'Limite quotidienne de sélections atteinte. Nouvelle sélection dans $resetTimeInfo.'
-          : 'Limite quotidienne de sélections atteinte';
+            ? 'Limite quotidienne de sélections atteinte. Nouvelle sélection dans $resetTimeInfo.'
+            : 'Limite quotidienne de sélections atteinte';
       }
       notifyListeners();
       return null;
@@ -268,15 +299,16 @@ class MatchingProvider with ChangeNotifier {
     }
 
     try {
-      final response = await ApiService.chooseProfile(profileId, choice: choice);
-      
+      final response =
+          await ApiService.chooseProfile(profileId, choice: choice);
+
       // Check if it's a match
       final responseData = response['data'] ?? response;
       final isMatch = responseData['isMatch'] ?? false;
       final matchedUserName = responseData['matchedUserName'] as String?;
       final matchId = responseData['matchId'] as String?;
       final choicesRemaining = responseData['choicesRemaining'] as int?;
-      
+
       // Track profile chosen or passed
       if (choice == 'like') {
         final profile = _dailyProfiles.firstWhere((p) => p.id == profileId);
@@ -287,16 +319,16 @@ class MatchingProvider with ChangeNotifier {
       } else if (choice == 'pass') {
         await AnalyticsService.trackProfilePassed(profileId);
       }
-      
+
       if (isMatch) {
         // Track match created
         if (matchId != null) {
           await AnalyticsService.trackMatchCreated(matchId, profileId);
         }
-        
+
         // Reload matches to include the new one
         await loadMatches();
-        
+
         // Trigger new match notification
         if (matchedUserName != null) {
           try {
@@ -304,11 +336,11 @@ class MatchingProvider with ChangeNotifier {
               matchedUserName: matchedUserName,
             );
           } catch (e) {
-            print('Failed to show match notification: $e');
+            debugPrint('Failed to show match notification: $e');
             // Don't fail the entire operation if notification fails
           }
         }
-        
+
         // Return match information for UI to handle
         final matchInfo = {
           'isMatch': true,
@@ -316,20 +348,20 @@ class MatchingProvider with ChangeNotifier {
           'matchId': matchId,
           'profile': _dailyProfiles.firstWhere((p) => p.id == profileId),
         };
-        
+
         _selectedProfileIds.add(profileId);
         _updateDailySelectionAfterChoice(choicesRemaining);
         _error = null;
         notifyListeners();
-        
+
         return matchInfo;
       }
-      
+
       _selectedProfileIds.add(profileId);
       _updateDailySelectionAfterChoice(choicesRemaining);
       _error = null;
       notifyListeners();
-      
+
       return {'isMatch': false, 'choice': choice};
     } catch (e) {
       _handleError(e, 'Failed to select profile');
@@ -340,9 +372,9 @@ class MatchingProvider with ChangeNotifier {
   String? _formatResetTime(DateTime resetTime) {
     final now = DateTime.now();
     final difference = resetTime.difference(now);
-    
+
     if (difference.isNegative) return null;
-    
+
     if (difference.inHours < 24) {
       final hours = difference.inHours;
       final minutes = difference.inMinutes % 60;
@@ -352,7 +384,7 @@ class MatchingProvider with ChangeNotifier {
         return '${minutes}min';
       }
     }
-    
+
     // Format as "demain à HH:MM"
     final hour = resetTime.hour;
     final minute = resetTime.minute;
@@ -361,8 +393,10 @@ class MatchingProvider with ChangeNotifier {
 
   void _updateDailySelectionAfterChoice(int? choicesRemaining) {
     if (_dailySelection != null) {
-      final newChoicesRemaining = choicesRemaining ?? (_dailySelection!.choicesRemaining - 1).clamp(0, _dailySelection!.maxChoices);
-      
+      final newChoicesRemaining = choicesRemaining ??
+          (_dailySelection!.choicesRemaining - 1)
+              .clamp(0, _dailySelection!.maxChoices);
+
       _dailySelection = DailySelection(
         profiles: _dailySelection!.profiles,
         generatedAt: _dailySelection!.generatedAt,
@@ -381,7 +415,7 @@ class MatchingProvider with ChangeNotifier {
     try {
       final response = await ApiService.getCompatibility(profileId);
       final compatibilityData = response['data'] ?? response;
-      
+
       return CompatibilityResult.fromJson(compatibilityData);
     } catch (e) {
       _handleError(e, 'Failed to get compatibility score');
@@ -389,23 +423,25 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> acceptMatch(String matchId, {required bool accept}) async {
+  Future<Map<String, dynamic>?> acceptMatch(String matchId,
+      {required bool accept}) async {
     try {
       _setLoading();
-      
+
       final response = await ApiService.acceptMatch(matchId, accept: accept);
       final result = response['data'] ?? response;
-      
+
       if (accept && result != null) {
         // If accepted, the response should contain chat details
         return result;
       }
-      
+
       _error = null;
       notifyListeners();
       return result;
     } catch (e) {
-      _handleError(e, accept ? 'Failed to accept match' : 'Failed to decline match');
+      _handleError(
+          e, accept ? 'Failed to accept match' : 'Failed to decline match');
       return null;
     } finally {
       _setLoaded();
@@ -427,7 +463,7 @@ class MatchingProvider with ChangeNotifier {
     try {
       final response = await ApiService.getMatchDetails(matchId);
       final matchData = response['data'] ?? response;
-      
+
       return Match.fromJson(matchData);
     } catch (e) {
       _handleError(e, 'Failed to get match details');
@@ -439,7 +475,7 @@ class MatchingProvider with ChangeNotifier {
     try {
       final response = await ApiService.getSubscriptionUsage();
       final usageData = response['data'] ?? response;
-      
+
       _subscriptionUsage = SubscriptionUsage.fromJson(usageData);
     } catch (e) {
       // Don't handle error here as it's not critical
@@ -453,7 +489,7 @@ class MatchingProvider with ChangeNotifier {
 
   bool shouldShowNewProfiles() {
     if (_dailySelection == null || _lastUpdateTime == null) return true;
-    
+
     // Check if daily selection is expired
     return _dailySelection!.isExpired;
   }
@@ -462,44 +498,44 @@ class MatchingProvider with ChangeNotifier {
   /// This is used to show the "Nouvelle sélection disponible !" badge
   bool hasNewSelectionAvailable() {
     if (_dailySelection == null) return true;
-    
+
     // Check if the selection has expired
     if (_dailySelection!.isExpired) return true;
-    
+
     // Check if it's past noon (12:00) local time and we haven't refreshed today
     final now = DateTime.now();
     final lastUpdate = _lastUpdateTime ?? _dailySelection!.generatedAt;
-    
+
     // If last update was before today at noon, there might be a new selection
     final todayNoon = DateTime(now.year, now.month, now.day, 12, 0, 0);
-    
+
     // If we're past noon today and last update was before today's noon
     if (now.isAfter(todayNoon) && lastUpdate.isBefore(todayNoon)) {
       return true;
     }
-    
+
     // If refresh time is set and we're past it
-    if (_dailySelection!.refreshTime != null && 
+    if (_dailySelection!.refreshTime != null &&
         now.isAfter(_dailySelection!.refreshTime!)) {
       return true;
     }
-    
+
     return false;
   }
 
   /// Get time remaining until next selection refresh
   Duration? getTimeUntilNextRefresh() {
     final now = DateTime.now();
-    
+
     // If we have a refresh time from the selection, use it
     if (_dailySelection?.refreshTime != null) {
       final difference = _dailySelection!.refreshTime!.difference(now);
       return difference.isNegative ? null : difference;
     }
-    
+
     // Otherwise, calculate next noon (12:00)
     final todayNoon = DateTime(now.year, now.month, now.day, 12, 0, 0);
-    
+
     if (now.isBefore(todayNoon)) {
       // Next refresh is today at noon
       return todayNoon.difference(now);
@@ -514,7 +550,7 @@ class MatchingProvider with ChangeNotifier {
   String getNextRefreshCountdown() {
     final timeUntil = getTimeUntilNextRefresh();
     if (timeUntil == null) return 'Bientôt disponible';
-    
+
     if (timeUntil.inDays > 0) {
       return '${timeUntil.inDays}j ${timeUntil.inHours % 24}h';
     } else if (timeUntil.inHours > 0) {
@@ -581,7 +617,7 @@ class MatchingProvider with ChangeNotifier {
       );
 
       final historyData = PaginatedHistory.fromJson(response);
-      
+
       if (refresh || page == 1) {
         _historyItems = historyData.data;
       } else {
@@ -597,8 +633,6 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-
-
   // Utility methods
   void _setLoading() {
     _isLoading = true;
@@ -613,25 +647,27 @@ class MatchingProvider with ChangeNotifier {
 
   void _handleError(dynamic error, String fallbackMessage) {
     _isLoading = false;
-    
+
     if (error is ApiException) {
       _error = error.message;
-    } else if (error.toString().contains('SocketException') || 
-               error.toString().contains('NetworkException')) {
+    } else if (error.toString().contains('SocketException') ||
+        error.toString().contains('NetworkException')) {
       _error = 'Vérifiez votre connexion internet et réessayez';
     } else if (error.toString().contains('TimeoutException')) {
       _error = 'La requête a pris trop de temps. Réessayez plus tard';
     } else {
       _error = fallbackMessage;
     }
-    
+
     notifyListeners();
   }
 
   // Subscription-related methods
   bool get canSeeWhoLikedYou => _subscriptionUsage?.canSeeWhoLikedYou ?? false;
-  bool get canUseAdvancedFilters => _subscriptionUsage?.canUseAdvancedFilters ?? false;
-  bool get hasUnlimitedRewinds => _subscriptionUsage?.hasUnlimitedRewinds ?? false;
+  bool get canUseAdvancedFilters =>
+      _subscriptionUsage?.canUseAdvancedFilters ?? false;
+  bool get hasUnlimitedRewinds =>
+      _subscriptionUsage?.hasUnlimitedRewinds ?? false;
 
   int get superLikesRemaining => _subscriptionUsage?.remainingSuperLikes ?? 0;
   int get boostsRemaining => _subscriptionUsage?.remainingBoosts ?? 0;
@@ -647,11 +683,11 @@ class MatchingProvider with ChangeNotifier {
     try {
       final response = await ApiService.getWhoLikedMe();
       final data = response['data'] as List<dynamic>? ?? [];
-      
+
       _whoLikedMe = data
           .map((item) => WhoLikedMeItem.fromJson(item as Map<String, dynamic>))
           .toList();
-      
+
       _error = null;
     } catch (e) {
       _handleError(e, 'Failed to load who liked you');
@@ -670,8 +706,10 @@ class MatchingProvider with ChangeNotifier {
   List<CompatibilityScoreV2>? _advancedRecommendations;
   bool _isLoadingAdvancedRecommendations = false;
 
-  List<CompatibilityScoreV2>? get advancedRecommendations => _advancedRecommendations;
-  bool get isLoadingAdvancedRecommendations => _isLoadingAdvancedRecommendations;
+  List<CompatibilityScoreV2>? get advancedRecommendations =>
+      _advancedRecommendations;
+  bool get isLoadingAdvancedRecommendations =>
+      _isLoadingAdvancedRecommendations;
 
   Future<void> loadAdvancedRecommendations({
     required String userId,
@@ -695,11 +733,13 @@ class MatchingProvider with ChangeNotifier {
         includeAdvancedScoring: includeAdvancedScoring,
       );
 
-      final scoresData = response['data']?['compatibilityScores'] ?? response['compatibilityScores'];
-      
+      final scoresData = response['data']?['compatibilityScores'] ??
+          response['compatibilityScores'];
+
       if (scoresData is List) {
         _advancedRecommendations = scoresData
-            .map((score) => CompatibilityScoreV2.fromJson(score as Map<String, dynamic>))
+            .map((score) =>
+                CompatibilityScoreV2.fromJson(score as Map<String, dynamic>))
             .toList();
         _error = null;
       } else {

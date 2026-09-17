@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/profile.dart';
-import '../../../core/utils/text_validator.dart';
 import '../../../shared/widgets/enhanced_input.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/prompt_selection_widget.dart';
@@ -41,8 +39,9 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
       _isLoading = true;
     });
 
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-    
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+
     try {
       await profileProvider.loadPrompts();
       await profileProvider.loadProfile();
@@ -51,12 +50,13 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
         setState(() {
           // Get current prompt answers from provider
           _selectedPromptIds = profileProvider.promptAnswers.keys.toList();
-          
+
           // Initialize controllers with current answers
           for (final entry in profileProvider.promptAnswers.entries) {
-            _answerControllers[entry.key] = TextEditingController(text: entry.value);
+            _answerControllers[entry.key] =
+                TextEditingController(text: entry.value);
           }
-          
+
           _isLoading = false;
         });
       }
@@ -92,7 +92,8 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
       if (controller.text.trim().length > 150) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Les réponses ne doivent pas dépasser 150 caractères'),
+            content:
+                Text('Les réponses ne doivent pas dépasser 150 caractères'),
             backgroundColor: AppColors.warningOrange,
           ),
         );
@@ -104,7 +105,8 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
       _isSaving = true;
     });
 
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
 
     try {
       // Clear existing answers
@@ -137,7 +139,7 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
         setState(() {
           _isSaving = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -151,19 +153,21 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
   void _cancelEdit() {
     setState(() {
       _isEditMode = false;
-      
+
       // Restore original values
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
       _selectedPromptIds = profileProvider.promptAnswers.keys.toList();
-      
+
       // Reset controllers
       for (final controller in _answerControllers.values) {
         controller.dispose();
       }
       _answerControllers.clear();
-      
+
       for (final entry in profileProvider.promptAnswers.entries) {
-        _answerControllers[entry.key] = TextEditingController(text: entry.value);
+        _answerControllers[entry.key] =
+            TextEditingController(text: entry.value);
       }
     });
   }
@@ -205,14 +209,20 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                                   children: [
                                     Text(
                                       'Étape 1: Sélectionnez vos prompts',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
                                     ),
                                     const SizedBox(height: AppSpacing.xs),
                                     Text(
                                       'Choisissez 3 prompts qui vous représentent',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
                                             color: AppColors.textSecondary,
                                           ),
                                     ),
@@ -221,22 +231,27 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                               ),
                               Expanded(
                                 child: PromptSelectionWidget(
-                                  availablePrompts: profileProvider.availablePrompts,
+                                  availablePrompts:
+                                      profileProvider.availablePrompts,
                                   selectedPromptIds: _selectedPromptIds,
                                   onSelectionChanged: (newSelection) {
                                     setState(() {
                                       _selectedPromptIds = newSelection;
-                                      
+
                                       // Create controllers for newly selected prompts
                                       for (final id in newSelection) {
-                                        if (!_answerControllers.containsKey(id)) {
-                                          _answerControllers[id] = TextEditingController();
+                                        if (!_answerControllers
+                                            .containsKey(id)) {
+                                          _answerControllers[id] =
+                                              TextEditingController();
                                         }
                                       }
-                                      
+
                                       // Remove controllers for deselected prompts
-                                      final keysToRemove = _answerControllers.keys
-                                          .where((key) => !newSelection.contains(key))
+                                      final keysToRemove = _answerControllers
+                                          .keys
+                                          .where((key) =>
+                                              !newSelection.contains(key))
                                           .toList();
                                       for (final key in keysToRemove) {
                                         _answerControllers[key]?.dispose();
@@ -272,18 +287,27 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                                         ),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Étape 2: Répondez aux prompts',
-                                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                      fontWeight: FontWeight.w600,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                     ),
                                               ),
                                               Text(
                                                 'Maximum 150 caractères par réponse',
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                      color: AppColors.textSecondary,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: AppColors
+                                                          .textSecondary,
                                                     ),
                                               ),
                                             ],
@@ -300,24 +324,33 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                                   itemCount: _selectedPromptIds.length,
                                   itemBuilder: (context, index) {
                                     final promptId = _selectedPromptIds[index];
-                                    final prompt = profileProvider.availablePrompts
+                                    final prompt = profileProvider
+                                        .availablePrompts
                                         .firstWhere((p) => p.id == promptId);
-                                    final controller = _answerControllers[promptId]!;
+                                    final controller =
+                                        _answerControllers[promptId]!;
 
                                     return Card(
-                                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                                      margin: const EdgeInsets.only(
+                                          bottom: AppSpacing.md),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(AppSpacing.md),
+                                        padding:
+                                            const EdgeInsets.all(AppSpacing.md),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               prompt.text,
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                             ),
-                                            const SizedBox(height: AppSpacing.sm),
+                                            const SizedBox(
+                                                height: AppSpacing.sm),
                                             EnhancedTextField(
                                               controller: controller,
                                               hintText: 'Votre réponse...',
@@ -345,13 +378,13 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                       // Action buttons
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.shadowMedium,
                               blurRadius: 8,
-                              offset: const Offset(0, -2),
+                              offset: Offset(0, -2),
                             ),
                           ],
                         ),
@@ -367,7 +400,8 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                               const SizedBox(width: AppSpacing.md),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: _isSaving || _selectedPromptIds.length != 3
+                                  onPressed: _isSaving ||
+                                          _selectedPromptIds.length != 3
                                       ? null
                                       : _savePrompts,
                                   child: _isSaving
@@ -376,7 +410,9 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                                           height: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
                                           ),
                                         )
                                       : const Text('Enregistrer'),
@@ -401,14 +437,14 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                           ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    
                     if (profileProvider.promptAnswers.isEmpty)
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.xxl),
                           child: Column(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.chat_bubble_outline,
                                 size: 64,
                                 color: AppColors.textTertiary,
@@ -416,14 +452,20 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                               const SizedBox(height: AppSpacing.md),
                               Text(
                                 'Aucun prompt configuré',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 'Ajoutez des prompts pour enrichir votre profil',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
                                       color: AppColors.textTertiary,
                                     ),
                               ),
@@ -433,7 +475,8 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                       )
                     else
                       ...profileProvider.promptAnswers.entries.map((entry) {
-                        final prompt = profileProvider.availablePrompts.firstWhere(
+                        final prompt =
+                            profileProvider.availablePrompts.firstWhere(
                           (p) => p.id == entry.key,
                           orElse: () => Prompt(
                             id: entry.key,
@@ -452,7 +495,10 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                               children: [
                                 Text(
                                   prompt.text,
-                                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
                                 ),
@@ -465,7 +511,7 @@ class _PromptsManagementPageState extends State<PromptsManagementPage> {
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                   ],
                 );
               },

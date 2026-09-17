@@ -36,14 +36,14 @@ class NotificationItem extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: AppSpacing.sm),
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: notification.isRead 
-                ? AppColors.cardBackground 
-                : AppColors.primaryGold.withOpacity(0.05),
+            color: notification.isRead
+                ? AppColors.cardBackground
+                : AppColors.primaryGold.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(AppBorderRadius.medium),
             border: Border.all(
               color: notification.isRead
                   ? AppColors.border
-                  : AppColors.primaryGold.withOpacity(0.2),
+                  : AppColors.primaryGold.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -61,12 +61,13 @@ class NotificationItem extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontWeight: notification.isRead 
-                                      ? FontWeight.normal 
-                                      : FontWeight.bold,
-                                  color: AppColors.textDark,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: notification.isRead
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
+                                      color: AppColors.textDark,
+                                    ),
                           ),
                         ),
                         if (!notification.isRead)
@@ -137,7 +138,7 @@ class NotificationItem extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
       ),
       child: Icon(
         iconData,

@@ -45,7 +45,7 @@ class FeedbackProvider with ChangeNotifier {
       final metadata = _generateMetadata(currentPage);
 
       // Submit feedback using API service
-      final response = await ApiService.submitFeedback(
+      await ApiService.submitFeedback(
         type: _feedbackTypeToString(type),
         subject: subject,
         message: message,
@@ -55,7 +55,8 @@ class FeedbackProvider with ChangeNotifier {
 
       _isLoading = false;
       _isSubmitted = true;
-      _successMessage = 'Votre feedback a été envoyé avec succès. Merci pour votre contribution !';
+      _successMessage =
+          'Votre feedback a été envoyé avec succès. Merci pour votre contribution !';
       notifyListeners();
 
       return true;

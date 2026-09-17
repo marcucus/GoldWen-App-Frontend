@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_messaging_service.dart';
 import 'local_notification_service.dart';
 import 'analytics_service.dart';
-import 'location_service.dart';
 
 class AppInitializationService {
   static bool _initialized = false;

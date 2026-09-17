@@ -52,7 +52,7 @@ class _ParallaxScrollViewState extends State<ParallaxScrollView> {
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (accessibilityService.reducedMotion) {
       return SingleChildScrollView(
         controller: _scrollController,
@@ -65,7 +65,7 @@ class _ParallaxScrollViewState extends State<ParallaxScrollView> {
       children: [
         // Parallax layers
         ...widget.layers.map((layer) => _buildParallaxLayer(layer)),
-        
+
         // Main scrollable content
         SingleChildScrollView(
           controller: _scrollController,
@@ -78,7 +78,7 @@ class _ParallaxScrollViewState extends State<ParallaxScrollView> {
 
   Widget _buildParallaxLayer(ParallaxLayer layer) {
     final offset = _scrollOffset * layer.speed;
-    
+
     return Positioned.fill(
       child: Transform.translate(
         offset: Offset(0, offset),
@@ -91,7 +91,8 @@ class _ParallaxScrollViewState extends State<ParallaxScrollView> {
 /// Individual parallax layer configuration
 class ParallaxLayer {
   final Widget child;
-  final double speed; // 0.0 = no movement, 1.0 = normal scroll speed, 0.5 = half speed
+  final double
+      speed; // 0.0 = no movement, 1.0 = normal scroll speed, 0.5 = half speed
   final Alignment alignment;
 
   const ParallaxLayer({
@@ -131,13 +132,13 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (widget.enableParallax && !accessibilityService.reducedMotion) {
-          final RenderBox? renderBox = 
+          final RenderBox? renderBox =
               _childKey.currentContext?.findRenderObject() as RenderBox?;
-          
+
           if (renderBox != null) {
             final position = renderBox.localToGlobal(Offset.zero);
             setState(() {
@@ -152,12 +153,13 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
         child: Stack(
           children: [
             // Parallax background
-            if (widget.backgroundImage != null || 
-                widget.gradient != null || 
+            if (widget.backgroundImage != null ||
+                widget.gradient != null ||
                 widget.backgroundColor != null)
               Positioned.fill(
                 child: Transform.translate(
-                  offset: widget.enableParallax && !accessibilityService.reducedMotion
+                  offset: widget.enableParallax &&
+                          !accessibilityService.reducedMotion
                       ? Offset(0, _scrollOffset)
                       : Offset.zero,
                   child: Container(
@@ -174,7 +176,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
                   ),
                 ),
               ),
-            
+
             // Content
             widget.child,
           ],
@@ -215,7 +217,7 @@ class _ParallaxCardState extends State<ParallaxCard> {
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (!accessibilityService.reducedMotion) {
@@ -225,17 +227,18 @@ class _ParallaxCardState extends State<ParallaxCard> {
             final screenHeight = MediaQuery.of(context).size.height;
             final cardCenter = position.dy + renderBox.size.height / 2;
             final screenCenter = screenHeight / 2;
-            
+
             setState(() {
-              _offsetY = (screenCenter - cardCenter) * widget.parallaxStrength * 0.01;
+              _offsetY =
+                  (screenCenter - cardCenter) * widget.parallaxStrength * 0.01;
             });
           }
         }
         return false;
       },
       child: Transform.translate(
-        offset: accessibilityService.reducedMotion 
-            ? Offset.zero 
+        offset: accessibilityService.reducedMotion
+            ? Offset.zero
             : Offset(0, _offsetY),
         child: Container(
           margin: widget.margin,
@@ -243,13 +246,14 @@ class _ParallaxCardState extends State<ParallaxCard> {
           decoration: BoxDecoration(
             color: widget.backgroundColor ?? AppColors.cardBackground,
             borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
-            boxShadow: widget.boxShadow ?? [
-              const BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
+            boxShadow: widget.boxShadow ??
+                [
+                  const BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
           ),
           child: widget.child,
         ),
@@ -289,19 +293,18 @@ class _StaggeredParallaxListState extends State<StaggeredParallaxList>
   @override
   void initState() {
     super.initState();
-    
+
     _scrollController = widget.controller ?? ScrollController();
     _scrollController.addListener(_onScroll);
-    
+
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     // Initialize stagger animations
     _controllers = List.generate(
       widget.children.length,
       (index) => AnimationController(
-        duration: accessibilityService.getAnimationDuration(
-          Duration(milliseconds: 600 + (index * widget.staggerDelay).round())
-        ),
+        duration: accessibilityService.getAnimationDuration(Duration(
+            milliseconds: 600 + (index * widget.staggerDelay).round())),
         vsync: this,
       ),
     );
@@ -321,7 +324,7 @@ class _StaggeredParallaxListState extends State<StaggeredParallaxList>
 
   void _startStaggeredAnimations() async {
     final accessibilityService = context.read<AccessibilityService>();
-    
+
     if (!accessibilityService.reducedMotion) {
       for (int i = 0; i < _controllers.length; i++) {
         Future.delayed(
@@ -359,16 +362,16 @@ class _StaggeredParallaxListState extends State<StaggeredParallaxList>
   @override
   Widget build(BuildContext context) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     return ListView.builder(
       controller: _scrollController,
       padding: widget.padding,
       itemCount: widget.children.length,
       itemBuilder: (context, index) {
-        final parallaxOffset = accessibilityService.reducedMotion 
-            ? 0.0 
+        final parallaxOffset = accessibilityService.reducedMotion
+            ? 0.0
             : _scrollOffset * widget.parallaxStrength * (index % 3 - 1);
-        
+
         return FadeTransition(
           opacity: _animations[index],
           child: SlideTransition(
@@ -421,8 +424,6 @@ class _DepthParallaxState extends State<DepthParallax> {
 
   @override
   Widget build(BuildContext context) {
-    final accessibilityService = context.watch<AccessibilityService>();
-    
     return LayoutBuilder(
       builder: (context, constraints) {
         return MouseRegion(
@@ -431,7 +432,7 @@ class _DepthParallaxState extends State<DepthParallax> {
             children: [
               // Depth layers
               ...widget.layers.map((layer) => _buildDepthLayer(layer)),
-              
+
               // Main content
               widget.child,
             ],
@@ -443,7 +444,7 @@ class _DepthParallaxState extends State<DepthParallax> {
 
   Widget _buildDepthLayer(DepthLayer layer) {
     final accessibilityService = context.watch<AccessibilityService>();
-    
+
     if (accessibilityService.reducedMotion) {
       return Positioned.fill(child: layer.child);
     }

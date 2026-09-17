@@ -15,7 +15,7 @@ class UserProfilePage extends StatefulWidget {
   State<UserProfilePage> createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> 
+class _UserProfilePageState extends State<UserProfilePage>
     with TickerProviderStateMixin {
   late AnimationController _backgroundController;
   late AnimationController _contentController;
@@ -81,7 +81,8 @@ class _UserProfilePageState extends State<UserProfilePage>
   }
 
   void _loadProfile() {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
     profileProvider.loadProfile();
     profileProvider.loadProfileCompletion(); // Also load completion status
   }
@@ -98,8 +99,8 @@ class _UserProfilePageState extends State<UserProfilePage>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.3),
-                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   Colors.white,
                 ],
                 stops: const [0.0, 0.4, 1.0],
@@ -143,8 +144,8 @@ class _UserProfilePageState extends State<UserProfilePage>
               child: Text(
                 'Mon Profil',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
             AnimatedPressable(
@@ -152,7 +153,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.dividerLight.withOpacity(0.5),
+                  color: AppColors.dividerLight.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -193,9 +194,9 @@ class _UserProfilePageState extends State<UserProfilePage>
             children: [
               // Profile Header Card
               _buildProfileHeader(user, profileProvider),
-              
+
               const SizedBox(height: 24),
-              
+
               // Profile Completion Status
               SlideInAnimation(
                 delay: const Duration(milliseconds: 300),
@@ -204,22 +205,22 @@ class _UserProfilePageState extends State<UserProfilePage>
                   onMissingStepTap: () => context.go('/profile-setup'),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Profile Management Section
               _buildProfileManagement(),
-              
+
               const SizedBox(height: 16),
-              
+
               // App Settings Section
               _buildAppSettings(),
-              
+
               const SizedBox(height: 16),
-              
+
               // Account Section
               _buildAccountSection(authProvider),
-              
+
               const SizedBox(height: 32),
             ],
           ),
@@ -238,7 +239,7 @@ class _UserProfilePageState extends State<UserProfilePage>
             gradient: LinearGradient(
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withValues(alpha: 0.8),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
@@ -252,7 +253,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.white.withOpacity(0.3),
+                      backgroundColor: Colors.white.withValues(alpha: 0.3),
                       child: const Icon(
                         Icons.person,
                         size: 40,
@@ -265,27 +266,35 @@ class _UserProfilePageState extends State<UserProfilePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            profileProvider.name ?? user?.displayName ?? 'Utilisateur',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            profileProvider.name ??
+                                user?.displayName ??
+                                'Utilisateur',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             user?.email ?? '',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Profile completion bar
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,24 +304,27 @@ class _UserProfilePageState extends State<UserProfilePage>
                       children: [
                         Text(
                           'Profil complété',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                  ),
                         ),
                         Text(
                           '75%',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       value: 0.75,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      backgroundColor: Colors.white.withValues(alpha: 0.3),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ],
                 ),
@@ -333,8 +345,8 @@ class _UserProfilePageState extends State<UserProfilePage>
           child: Text(
             'Gestion du profil',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         const SizedBox(height: 12),
@@ -399,8 +411,8 @@ class _UserProfilePageState extends State<UserProfilePage>
           child: Text(
             'Paramètres de l\'app',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         const SizedBox(height: 12),
@@ -449,22 +461,22 @@ class _UserProfilePageState extends State<UserProfilePage>
           child: Text(
             'Compte',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         const SizedBox(height: 12),
         SlideInAnimation(
           delay: const Duration(milliseconds: 800),
           child: FloatingCard(
-            backgroundColor: AppColors.errorRed.withOpacity(0.08),
+            backgroundColor: AppColors.errorRed.withValues(alpha: 0.08),
             onTap: () => _showLogoutDialog(authProvider),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.errorRed.withOpacity(0.08),
+                    color: AppColors.errorRed.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -480,17 +492,18 @@ class _UserProfilePageState extends State<UserProfilePage>
                     children: [
                       Text(
                         'Se déconnecter',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.errorRed,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.errorRed,
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Quitter votre compte',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.errorRed.withOpacity(0.7),
-                        ),
+                              color: AppColors.errorRed.withValues(alpha: 0.7),
+                            ),
                       ),
                     ],
                   ),
@@ -518,7 +531,8 @@ class _UserProfilePageState extends State<UserProfilePage>
   }) {
     return FloatingCard(
       onTap: onTap,
-      backgroundColor: isHighlighted ? AppColors.primaryGold.withOpacity(0.08) : null,
+      backgroundColor:
+          isHighlighted ? AppColors.primaryGold.withValues(alpha: 0.08) : null,
       child: Row(
         children: [
           Container(
@@ -528,7 +542,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -548,16 +562,16 @@ class _UserProfilePageState extends State<UserProfilePage>
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isHighlighted ? AppColors.goldDeep : null,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: isHighlighted ? AppColors.goldDeep : null,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -587,7 +601,7 @@ class _UserProfilePageState extends State<UserProfilePage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
@@ -603,11 +617,12 @@ class _UserProfilePageState extends State<UserProfilePage>
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            trailing ?? const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
+            trailing ??
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
           ],
         ),
       ),
@@ -630,7 +645,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               Navigator.of(context).pop();
               await authProvider.signOut();
               if (mounted) {
-                context.go('/login');
+                this.context.go('/login');
               }
             },
             style: ElevatedButton.styleFrom(
@@ -650,7 +665,8 @@ class _UserProfilePageState extends State<UserProfilePage>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Préférences'),
-          content: const Text('Fonctionnalité de préférences en cours de développement. '
+          content: const Text(
+              'Fonctionnalité de préférences en cours de développement. '
               'Vous pourrez bientôt personnaliser vos critères de recherche ici.'),
           actions: [
             TextButton(
@@ -662,7 +678,7 @@ class _UserProfilePageState extends State<UserProfilePage>
       },
     );
   }
-  
+
   void _showSupportDialog() {
     showDialog(
       context: context,

@@ -110,9 +110,9 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.gradientStart.withOpacity(0.96),
-                AppColors.gradientMiddle.withOpacity(0.95),
-                AppColors.backgroundWhite.withOpacity(0.97),
+                AppColors.gradientStart.withValues(alpha: 0.96),
+                AppColors.gradientMiddle.withValues(alpha: 0.95),
+                AppColors.backgroundWhite.withValues(alpha: 0.97),
               ],
               stops: const [0.0, 0.4, 1.0],
             ),
@@ -130,7 +130,7 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
                       child: Text(
                         'Passer',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -169,7 +169,7 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
                       decoration: BoxDecoration(
                         color: isActive
                             ? Colors.white
-                            : Colors.white.withOpacity(0.4),
+                            : Colors.white.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
@@ -196,7 +196,7 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
                               BorderRadius.circular(AppBorderRadius.medium),
                         ),
                         elevation: 4,
-                        shadowColor: Colors.black.withOpacity(0.2),
+                        shadowColor: Colors.black.withValues(alpha: 0.2),
                       ),
                       child: Text(
                         _currentPage == _slides.length - 1
@@ -232,15 +232,15 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
@@ -273,17 +273,17 @@ class _OnboardingTutorialOverlayState extends State<OnboardingTutorialOverlay>
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppBorderRadius.large),
               border: Border.all(
-                color: Colors.white.withOpacity(0.25),
+                color: Colors.white.withValues(alpha: 0.25),
                 width: 1,
               ),
             ),
             child: Text(
               slide.description,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     height: 1.6,
                   ),
               textAlign: TextAlign.center,

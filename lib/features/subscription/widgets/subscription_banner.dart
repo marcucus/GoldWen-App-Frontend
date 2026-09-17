@@ -7,7 +7,7 @@ class SubscriptionPromoBanner extends StatelessWidget {
   final String? message;
   final bool compact;
   final VoidCallback? onTap;
-  
+
   const SubscriptionPromoBanner({
     super.key,
     this.message,
@@ -17,10 +17,10 @@ class SubscriptionPromoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultMessage = compact 
-      ? 'Passez à GoldWen Plus pour 3 choix/jour'
-      : 'Passez à GoldWen Plus pour choisir jusqu\'à 3 profils par jour';
-    
+    final defaultMessage = compact
+        ? 'Passez à GoldWen Plus pour 3 choix/jour'
+        : 'Passez à GoldWen Plus pour choisir jusqu\'à 3 profils par jour';
+
     return FadeInAnimation(
       child: Container(
         margin: EdgeInsets.symmetric(
@@ -36,15 +36,15 @@ class SubscriptionPromoBanner extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryGold.withOpacity(0.1),
-                  AppColors.primaryGoldLight.withOpacity(0.05),
+                  AppColors.primaryGold.withValues(alpha: 0.1),
+                  AppColors.primaryGoldLight.withValues(alpha: 0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
               border: Border.all(
-                color: AppColors.primaryGold.withOpacity(0.3),
+                color: AppColors.primaryGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -52,14 +52,17 @@ class SubscriptionPromoBanner extends StatelessWidget {
               onTap: onTap ?? () => context.push('/subscription'),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
               child: Padding(
-                padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
+                padding:
+                    EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
                 child: Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(compact ? AppSpacing.xs : AppSpacing.sm),
+                      padding: EdgeInsets.all(
+                          compact ? AppSpacing.xs : AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryGold.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(AppBorderRadius.small),
+                        color: AppColors.primaryGold.withValues(alpha: 0.2),
+                        borderRadius:
+                            BorderRadius.circular(AppBorderRadius.small),
                       ),
                       child: Icon(
                         Icons.star,
@@ -75,9 +78,10 @@ class SubscriptionPromoBanner extends StatelessWidget {
                         children: [
                           Text(
                             message ?? defaultMessage,
-                            style: (compact 
-                              ? Theme.of(context).textTheme.bodyMedium 
-                              : Theme.of(context).textTheme.bodyLarge)?.copyWith(
+                            style: (compact
+                                    ? Theme.of(context).textTheme.bodyMedium
+                                    : Theme.of(context).textTheme.bodyLarge)
+                                ?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: AppColors.textDark,
                             ),
@@ -86,9 +90,12 @@ class SubscriptionPromoBanner extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               'Plus de matches, plus de possibilités !',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                           ],
                         ],
@@ -114,7 +121,7 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
   final int currentSelections;
   final int maxSelections;
   final DateTime? resetTime;
-  
+
   const SubscriptionLimitReachedDialog({
     super.key,
     required this.currentSelections,
@@ -125,9 +132,9 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
   String _formatResetTime(DateTime resetTime) {
     final now = DateTime.now();
     final difference = resetTime.difference(now);
-    
+
     if (difference.isNegative) return 'bientôt';
-    
+
     if (difference.inHours < 24) {
       final hours = difference.inHours;
       final minutes = difference.inMinutes % 60;
@@ -137,7 +144,7 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
         return 'dans ${minutes}min';
       }
     }
-    
+
     // Format as "demain à HH:MM"
     final hour = resetTime.hour;
     final minute = resetTime.minute;
@@ -146,8 +153,9 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resetTimeText = resetTime != null ? _formatResetTime(resetTime!) : null;
-    
+    final resetTimeText =
+        resetTime != null ? _formatResetTime(resetTime!) : null;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
@@ -157,10 +165,10 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
+              color: AppColors.primaryGold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppBorderRadius.small),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.star,
               color: AppColors.primaryGold,
             ),
@@ -181,7 +189,7 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.schedule,
                   size: 16,
                   color: AppColors.textSecondary,
@@ -190,8 +198,8 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
                 Text(
                   'Nouvelle sélection $resetTimeText',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -202,13 +210,13 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryGold.withOpacity(0.1),
-                  AppColors.primaryGold.withOpacity(0.05),
+                  AppColors.primaryGold.withValues(alpha: 0.1),
+                  AppColors.primaryGold.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
               border: Border.all(
-                color: AppColors.primaryGold.withOpacity(0.3),
+                color: AppColors.primaryGold.withValues(alpha: 0.3),
               ),
             ),
             child: Column(
@@ -216,14 +224,15 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.star, color: AppColors.primaryGold, size: 20),
+                    const Icon(Icons.star,
+                        color: AppColors.primaryGold, size: 20),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       'Avec GoldWen Plus:',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.primaryGold,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: AppColors.primaryGold,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -262,7 +271,7 @@ class SubscriptionStatusIndicator extends StatelessWidget {
   final bool hasActiveSubscription;
   final int? daysUntilExpiry;
   final bool compact;
-  
+
   const SubscriptionStatusIndicator({
     super.key,
     required this.hasActiveSubscription,
@@ -273,9 +282,9 @@ class SubscriptionStatusIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!hasActiveSubscription) return const SizedBox.shrink();
-    
+
     final isExpiringSoon = daysUntilExpiry != null && daysUntilExpiry! <= 7;
-    
+
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: compact ? AppSpacing.sm : AppSpacing.md,
@@ -287,21 +296,21 @@ class SubscriptionStatusIndicator extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isExpiringSoon 
-            ? [
-                AppColors.warningOrange.withOpacity(0.1),
-                AppColors.warningOrange.withOpacity(0.05),
-              ]
-            : [
-                AppColors.primaryGold.withOpacity(0.1),
-                AppColors.primaryGold.withOpacity(0.05),
-              ],
+          colors: isExpiringSoon
+              ? [
+                  AppColors.warningOrange.withValues(alpha: 0.1),
+                  AppColors.warningOrange.withValues(alpha: 0.05),
+                ]
+              : [
+                  AppColors.primaryGold.withValues(alpha: 0.1),
+                  AppColors.primaryGold.withValues(alpha: 0.05),
+                ],
         ),
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
         border: Border.all(
-          color: isExpiringSoon 
-            ? AppColors.warningOrange.withOpacity(0.3)
-            : AppColors.primaryGold.withOpacity(0.3),
+          color: isExpiringSoon
+              ? AppColors.warningOrange.withValues(alpha: 0.3)
+              : AppColors.primaryGold.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -309,19 +318,24 @@ class SubscriptionStatusIndicator extends StatelessWidget {
         children: [
           Icon(
             isExpiringSoon ? Icons.warning : Icons.star,
-            color: isExpiringSoon ? AppColors.warningOrange : AppColors.primaryGold,
+            color: isExpiringSoon
+                ? AppColors.warningOrange
+                : AppColors.primaryGold,
             size: compact ? 16 : 20,
           ),
           SizedBox(width: compact ? AppSpacing.xs : AppSpacing.sm),
           Flexible(
             child: Text(
-              isExpiringSoon 
-                ? 'Plus expire dans $daysUntilExpiry jour${daysUntilExpiry! > 1 ? 's' : ''}'
-                : 'GoldWen Plus actif',
-              style: (compact 
-                ? Theme.of(context).textTheme.bodySmall 
-                : Theme.of(context).textTheme.bodyMedium)?.copyWith(
-                color: isExpiringSoon ? AppColors.warningOrange : AppColors.primaryGold,
+              isExpiringSoon
+                  ? 'Plus expire dans $daysUntilExpiry jour${daysUntilExpiry! > 1 ? 's' : ''}'
+                  : 'GoldWen Plus actif',
+              style: (compact
+                      ? Theme.of(context).textTheme.bodySmall
+                      : Theme.of(context).textTheme.bodyMedium)
+                  ?.copyWith(
+                color: isExpiringSoon
+                    ? AppColors.warningOrange
+                    : AppColors.primaryGold,
                 fontWeight: FontWeight.w600,
               ),
             ),

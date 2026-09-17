@@ -16,7 +16,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final _formKey = GlobalKey<FormState>();
   final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
-  
+
   FeedbackType? _selectedType;
   int? _selectedRating;
 
@@ -56,7 +56,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.cardOverlay.withOpacity(0.2),
+                            color: AppColors.cardOverlay.withValues(alpha: 0.2),
                           ),
                           child: IconButton(
                             onPressed: () => Navigator.of(context).pop(),
@@ -70,22 +70,25 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         Expanded(
                           child: Text(
                             'Votre feedback',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: AppColors.textLight,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Content
                   Expanded(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.backgroundWhite,
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(AppBorderRadius.xLarge),
                           topRight: Radius.circular(AppBorderRadius.xLarge),
                         ),
@@ -102,7 +105,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context, FeedbackProvider feedbackProvider) {
+  Widget _buildContent(
+      BuildContext context, FeedbackProvider feedbackProvider) {
     if (feedbackProvider.isSubmitted) {
       return _buildSuccessView(context, feedbackProvider);
     }
@@ -118,41 +122,41 @@ class _FeedbackPageState extends State<FeedbackPage> {
             Text(
               'Nous sommes à l\'écoute de vos retours pour améliorer GoldWen.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Type selection
             _buildSectionTitle('Type de feedback'),
             const SizedBox(height: AppSpacing.md),
             _buildTypeSelection(feedbackProvider),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Subject field
             _buildSectionTitle('Sujet'),
             const SizedBox(height: AppSpacing.md),
             _buildSubjectField(),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Rating section (optional)
             _buildSectionTitle('Évaluation (optionnel)'),
             const SizedBox(height: AppSpacing.md),
             _buildRatingSection(),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Message field
             _buildSectionTitle('Message'),
             const SizedBox(height: AppSpacing.md),
             _buildMessageField(),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Error display
             if (feedbackProvider.error != null) ...[
               _buildErrorCard(feedbackProvider.error!),
               const SizedBox(height: AppSpacing.lg),
             ],
-            
+
             // Submit button
             _buildSubmitButton(context, feedbackProvider),
             const SizedBox(height: AppSpacing.xl),
@@ -162,7 +166,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  Widget _buildSuccessView(BuildContext context, FeedbackProvider feedbackProvider) {
+  Widget _buildSuccessView(
+      BuildContext context, FeedbackProvider feedbackProvider) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -173,10 +178,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: AppColors.successGreen.withOpacity(0.1),
+                color: AppColors.successGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.check_circle,
                 size: 60,
                 color: AppColors.successGreen,
@@ -186,17 +191,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
             Text(
               'Merci pour votre feedback !',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              feedbackProvider.successMessage ?? 'Votre feedback a été envoyé avec succès.',
+              feedbackProvider.successMessage ??
+                  'Votre feedback a été envoyé avec succès.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -211,7 +217,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Retour aux paramètres',
                   style: TextStyle(
                     color: AppColors.textLight,
@@ -230,15 +236,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: AppColors.textDark,
-        fontWeight: FontWeight.bold,
-      ),
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
   Widget _buildTypeSelection(FeedbackProvider feedbackProvider) {
     final options = feedbackProvider.getFeedbackTypeOptions();
-    
+
     return Column(
       children: options.map((option) {
         final isSelected = _selectedType == option.type;
@@ -258,7 +264,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: option.color.withOpacity(0.1),
+                  color: option.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                 ),
                 child: Icon(
@@ -270,18 +276,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 option.title,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? AppColors.primaryGold : AppColors.textDark,
+                  color:
+                      isSelected ? AppColors.primaryGold : AppColors.textDark,
                 ),
               ),
               subtitle: Text(
                 option.subtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.textSecondary,
                 ),
               ),
               trailing: isSelected
-                  ? Icon(Icons.check_circle, color: AppColors.primaryGold)
-                  : Icon(Icons.radio_button_unchecked, color: AppColors.textSecondary),
+                  ? const Icon(Icons.check_circle, color: AppColors.primaryGold)
+                  : const Icon(Icons.radio_button_unchecked,
+                      color: AppColors.textSecondary),
               onTap: () {
                 setState(() {
                   _selectedType = option.type;
@@ -301,13 +309,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         hintText: 'Décrivez brièvement votre feedback',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-          borderSide: BorderSide(color: AppColors.border),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-          borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryGold, width: 2),
         ),
-        prefixIcon: Icon(Icons.title, color: AppColors.textSecondary),
+        prefixIcon: const Icon(Icons.title, color: AppColors.textSecondary),
       ),
       maxLength: 100,
       validator: (value) {
@@ -336,7 +344,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Notez votre expérience globale avec GoldWen',
               style: TextStyle(
                 color: AppColors.textSecondary,
@@ -348,7 +356,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (index) {
                 final rating = index + 1;
-                final isSelected = _selectedRating != null && _selectedRating! >= rating;
+                final isSelected =
+                    _selectedRating != null && _selectedRating! >= rating;
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -360,7 +369,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     child: Icon(
                       Icons.star,
                       size: 40,
-                      color: isSelected ? AppColors.primaryGold : AppColors.textSecondary.withOpacity(0.3),
+                      color: isSelected
+                          ? AppColors.primaryGold
+                          : AppColors.textSecondary.withValues(alpha: 0.3),
                     ),
                   ),
                 );
@@ -371,7 +382,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               Center(
                 child: Text(
                   '${_selectedRating!} étoile${_selectedRating! > 1 ? 's' : ''}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primaryGold,
                     fontWeight: FontWeight.w600,
                   ),
@@ -391,11 +402,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
         hintText: 'Détaillez votre feedback...',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-          borderSide: BorderSide(color: AppColors.border),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-          borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryGold, width: 2),
         ),
       ),
       maxLines: 6,
@@ -420,21 +431,21 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   Widget _buildErrorCard(String error) {
     return Card(
-      color: AppColors.errorRed.withOpacity(0.1),
+      color: AppColors.errorRed.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppBorderRadius.medium),
-        side: BorderSide(color: AppColors.errorRed.withOpacity(0.3)),
+        side: BorderSide(color: AppColors.errorRed.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
-            Icon(Icons.error_outline, color: AppColors.errorRed),
+            const Icon(Icons.error_outline, color: AppColors.errorRed),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 error,
-                style: TextStyle(color: AppColors.errorRed),
+                style: const TextStyle(color: AppColors.errorRed),
               ),
             ),
           ],
@@ -443,7 +454,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, FeedbackProvider feedbackProvider) {
+  Widget _buildSubmitButton(
+      BuildContext context, FeedbackProvider feedbackProvider) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -458,15 +470,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ),
         ),
         child: feedbackProvider.isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppColors.textLight),
                   strokeWidth: 2,
                 ),
               )
-            : Text(
+            : const Text(
                 'Envoyer le feedback',
                 style: TextStyle(
                   color: AppColors.textLight,
@@ -478,7 +491,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  void _submitFeedback(BuildContext context, FeedbackProvider feedbackProvider) async {
+  void _submitFeedback(
+      BuildContext context, FeedbackProvider feedbackProvider) async {
     // Clear any previous errors
     feedbackProvider.clearError();
 
@@ -489,7 +503,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     if (_selectedType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Veuillez sélectionner un type de feedback'),
           backgroundColor: AppColors.errorRed,
         ),
@@ -509,8 +523,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
     if (!success && context.mounted) {
       // Error handling is managed by the provider and displayed in the UI
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors de l\'envoi du feedback. Veuillez réessayer.'),
+        const SnackBar(
+          content:
+              Text('Erreur lors de l\'envoi du feedback. Veuillez réessayer.'),
           backgroundColor: AppColors.errorRed,
         ),
       );

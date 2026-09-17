@@ -7,7 +7,7 @@ class OnlineStatusIndicator extends StatelessWidget {
   final OnlineStatus? status;
   final bool showText;
   final bool compact;
-  
+
   const OnlineStatusIndicator({
     super.key,
     this.status,
@@ -34,7 +34,7 @@ class OnlineStatusIndicator extends StatelessWidget {
             boxShadow: isOnline
                 ? [
                     BoxShadow(
-                      color: AppColors.successGreen.withOpacity(0.5),
+                      color: AppColors.successGreen.withValues(alpha: 0.5),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -47,7 +47,9 @@ class OnlineStatusIndicator extends StatelessWidget {
           Text(
             statusText,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isOnline ? AppColors.successGreen : AppColors.textSecondary,
+                  color: isOnline
+                      ? AppColors.successGreen
+                      : AppColors.textSecondary,
                   fontSize: compact ? 10 : 12,
                 ),
           ),

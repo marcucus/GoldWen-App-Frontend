@@ -88,7 +88,7 @@ class PremiumCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: AppShadows.medium(),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.primaryGold.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -253,9 +253,9 @@ class ProfileCard extends StatelessWidget {
                 ),
             ],
           ),
-          
+
           const SizedBox(width: AppSpacing.md),
-          
+
           // Information
           Expanded(
             child: Column(
@@ -264,23 +264,23 @@ class ProfileCard extends StatelessWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     subtitle!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ],
             ),
           ),
-          
+
           // Trailing widget
           if (trailing != null) trailing!,
         ],
@@ -357,9 +357,9 @@ class PremiumButton extends StatelessWidget {
                     Text(
                       text,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: textColor ?? Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: textColor ?? Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ],
@@ -408,7 +408,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar>
     );
     _colorAnimation = ColorTween(
       begin: AppColors.backgroundGrey,
-      end: AppColors.primaryGold.withOpacity(0.1),
+      end: AppColors.primaryGold.withValues(alpha: 0.1),
     ).animate(_animationController);
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);

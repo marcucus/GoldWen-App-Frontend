@@ -16,14 +16,14 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   String? _selectedStatusFilter;
-  
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AdminProvider>().loadUsers(refresh: true);
     });
-    
+
     _scrollController.addListener(_onScroll);
   }
 
@@ -35,11 +35,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       final adminProvider = context.read<AdminProvider>();
       if (adminProvider.hasMoreUsers && !adminProvider.isLoading) {
         adminProvider.loadUsers(
-          search: _searchController.text.isNotEmpty ? _searchController.text : null,
+          search:
+              _searchController.text.isNotEmpty ? _searchController.text : null,
           status: _selectedStatusFilter,
         );
       }
@@ -48,10 +50,11 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
 
   void _performSearch() {
     context.read<AdminProvider>().loadUsers(
-      refresh: true,
-      search: _searchController.text.isNotEmpty ? _searchController.text : null,
-      status: _selectedStatusFilter,
-    );
+          refresh: true,
+          search:
+              _searchController.text.isNotEmpty ? _searchController.text : null,
+          status: _selectedStatusFilter,
+        );
   }
 
   @override
@@ -73,7 +76,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -102,15 +105,15 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                   ),
                   onSubmitted: (_) => _performSearch(),
                 ),
-                
+
                 const SizedBox(height: AppSpacing.md),
-                
+
                 // Filter Row
                 Row(
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _selectedStatusFilter,
+                        initialValue: _selectedStatusFilter,
                         decoration: InputDecoration(
                           labelText: 'Statut',
                           border: OutlineInputBorder(
@@ -120,10 +123,14 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           fillColor: AppColors.backgroundGrey,
                         ),
                         items: const [
-                          DropdownMenuItem(value: null, child: Text('Tous les statuts')),
-                          DropdownMenuItem(value: 'active', child: Text('Actifs')),
-                          DropdownMenuItem(value: 'suspended', child: Text('Suspendus')),
-                          DropdownMenuItem(value: 'banned', child: Text('Bannis')),
+                          DropdownMenuItem(
+                              value: null, child: Text('Tous les statuts')),
+                          DropdownMenuItem(
+                              value: 'active', child: Text('Actifs')),
+                          DropdownMenuItem(
+                              value: 'suspended', child: Text('Suspendus')),
+                          DropdownMenuItem(
+                              value: 'banned', child: Text('Bannis')),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -152,7 +159,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               ],
             ),
           ),
-          
+
           // Users List
           Expanded(
             child: Consumer<AdminProvider>(
@@ -160,17 +167,19 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                 if (adminProvider.isLoading && adminProvider.users.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
                     ),
                   );
                 }
 
-                if (adminProvider.error != null && adminProvider.users.isEmpty) {
+                if (adminProvider.error != null &&
+                    adminProvider.users.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           size: 64,
                           color: AppColors.errorRed,
@@ -184,11 +193,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         Text(
                           adminProvider.error!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style:
+                              const TextStyle(color: AppColors.textSecondary),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         ElevatedButton(
-                          onPressed: () => adminProvider.loadUsers(refresh: true),
+                          onPressed: () =>
+                              adminProvider.loadUsers(refresh: true),
                           child: const Text('Réessayer'),
                         ),
                       ],
@@ -201,7 +212,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.people_outline,
                           size: 64,
                           color: AppColors.textTertiary,
@@ -212,7 +223,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        Text(
+                        const Text(
                           'Essayez de modifier vos critères de recherche',
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
@@ -224,15 +235,18 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                 return RefreshIndicator(
                   onRefresh: () => adminProvider.loadUsers(
                     refresh: true,
-                    search: _searchController.text.isNotEmpty ? _searchController.text : null,
+                    search: _searchController.text.isNotEmpty
+                        ? _searchController.text
+                        : null,
                     status: _selectedStatusFilter,
                   ),
                   child: ListView.separated(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: adminProvider.users.length + 
+                    itemCount: adminProvider.users.length +
                         (adminProvider.hasMoreUsers ? 1 : 0),
-                    separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       if (index == adminProvider.users.length) {
                         // Loading indicator for pagination
@@ -240,7 +254,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                           padding: EdgeInsets.all(AppSpacing.lg),
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryGold),
                             ),
                           ),
                         );
@@ -250,7 +265,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                       return UserListItem(
                         user: user,
                         onTap: () => _showUserDetails(context, user),
-                        onStatusChanged: (newStatus) => _updateUserStatus(user.id, newStatus),
+                        onStatusChanged: (newStatus) =>
+                            _updateUserStatus(user.id, newStatus),
                       );
                     },
                   ),
@@ -275,11 +291,19 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             children: [
               _DetailRow(label: 'Email', value: user.email),
               _DetailRow(label: 'ID', value: user.id),
-              _DetailRow(label: 'Nom', value: '${user.firstName ?? ''} ${user.lastName ?? ''}'),
+              _DetailRow(
+                  label: 'Nom',
+                  value: '${user.firstName ?? ''} ${user.lastName ?? ''}'),
               _DetailRow(label: 'Statut', value: user.status ?? 'Actif'),
-              _DetailRow(label: 'Créé le', value: user.createdAt != null ? _formatDate(user.createdAt!) : 'Non disponible'),
+              _DetailRow(
+                  label: 'Créé le',
+                  value: user.createdAt != null
+                      ? _formatDate(user.createdAt!)
+                      : 'Non disponible'),
               if (user.lastActive != null)
-                _DetailRow(label: 'Dernière activité', value: _formatDate(user.lastActive!)),
+                _DetailRow(
+                    label: 'Dernière activité',
+                    value: _formatDate(user.lastActive!)),
             ],
           ),
         ),
@@ -306,7 +330,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
 
   void _showStatusChangeDialog(BuildContext context, User user) {
     String? selectedStatus;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -347,15 +371,17 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   }
 
   void _updateUserStatus(String userId, String newStatus) async {
-    final success = await context.read<AdminProvider>().updateUserStatus(userId, newStatus);
-    
+    final success =
+        await context.read<AdminProvider>().updateUserStatus(userId, newStatus);
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success 
-              ? 'Statut utilisateur mis à jour' 
+          content: Text(success
+              ? 'Statut utilisateur mis à jour'
               : 'Erreur lors de la mise à jour'),
-          backgroundColor: success ? AppColors.successGreen : AppColors.errorRed,
+          backgroundColor:
+              success ? AppColors.successGreen : AppColors.errorRed,
         ),
       );
     }
@@ -383,7 +409,7 @@ class _DetailRow extends StatelessWidget {
             width: 100,
             child: Text(
               '$label:',
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),

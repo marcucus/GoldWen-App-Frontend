@@ -76,7 +76,9 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
             Text(
               '${_photos.length}/${widget.maxPhotos} photos${!hasMinPhotos ? ' (min ${widget.minPhotos})' : ''}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: hasMinPhotos ? AppColors.textSecondary : AppColors.error,
+                    color: hasMinPhotos
+                        ? AppColors.textSecondary
+                        : AppColors.error,
                   ),
             ),
           ],
@@ -86,7 +88,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
             onPressed: _addPhoto,
             icon: const Icon(Icons.add_photo_alternate),
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.primaryGold.withOpacity(0.1),
+              backgroundColor: AppColors.primaryGold.withValues(alpha: 0.1),
               foregroundColor: AppColors.primaryGold,
             ),
           ),
@@ -135,10 +137,10 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       ),
       childWhenDragging: Container(
         decoration: BoxDecoration(
-          color: AppColors.accentCream.withOpacity(0.5),
+          color: AppColors.accentCream.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(AppBorderRadius.medium),
           border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.3),
+            color: AppColors.primaryGold.withValues(alpha: 0.3),
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -152,7 +154,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         ),
       ),
       child: DragTarget<int>(
-        onAccept: (draggedIndex) {
+        onAcceptWithDetails: (details) {
+          final draggedIndex = details.data;
           if (draggedIndex != index) {
             _onReorder(draggedIndex, index);
           }
@@ -197,10 +200,11 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
                         ),
                         child: Text(
                           'Principal',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                     ),
@@ -285,7 +289,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
   Widget _buildEmptyPhotoTile(int index) {
     return DragTarget<int>(
-      onAccept: (draggedIndex) {
+      onAcceptWithDetails: (details) {
+        final draggedIndex = details.data;
         // Move dragged photo to this empty position
         if (draggedIndex < _photos.length && index >= _photos.length) {
           _onReorder(draggedIndex, index);
@@ -301,12 +306,12 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
                 : null,
             child: Container(
               decoration: BoxDecoration(
-                color: isReceiving 
-                    ? AppColors.primaryGold.withOpacity(0.1)
+                color: isReceiving
+                    ? AppColors.primaryGold.withValues(alpha: 0.1)
                     : AppColors.accentCream,
                 borderRadius: BorderRadius.circular(AppBorderRadius.medium),
                 border: Border.all(
-                  color: isReceiving 
+                  color: isReceiving
                       ? AppColors.primaryGold
                       : AppColors.dividerLight,
                   width: isReceiving ? 2 : 1,
@@ -317,21 +322,23 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isReceiving 
+                    isReceiving
                         ? Icons.move_to_inbox
                         : Icons.add_photo_alternate,
                     size: 32,
-                    color: isReceiving 
+                    color: isReceiving
                         ? AppColors.primaryGold
                         : AppColors.textSecondary,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    isReceiving 
+                    isReceiving
                         ? 'Déposer ici'
-                        : (index == 0 ? 'Photo principale' : 'Ajouter une photo'),
+                        : (index == 0
+                            ? 'Photo principale'
+                            : 'Ajouter une photo'),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isReceiving 
+                          color: isReceiving
                               ? AppColors.primaryGold
                               : AppColors.textSecondary,
                         ),
@@ -356,7 +363,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: color?.withOpacity(0.9) ?? Colors.black54,
+        color: color?.withValues(alpha: 0.9) ?? Colors.black54,
         shape: BoxShape.circle,
       ),
       child: IconButton(
@@ -401,20 +408,21 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         // Handle platform-specific errors (permissions denied, camera unavailable, etc.)
         if (mounted) {
           setState(() => _isLoading = false);
-          
+
           String errorMessage = 'Erreur lors de l\'accès à l\'appareil photo';
-          
+
           // Check for common error types
-          if (e.toString().contains('camera_access_denied') || 
+          if (e.toString().contains('camera_access_denied') ||
               e.toString().contains('photo_access_denied') ||
               e.toString().contains('Permission')) {
-            errorMessage = source == ImageSource.camera 
+            errorMessage = source == ImageSource.camera
                 ? 'Permission d\'accès à l\'appareil photo refusée. Veuillez autoriser l\'accès dans les réglages de votre appareil.'
                 : 'Permission d\'accès à la galerie photo refusée. Veuillez autoriser l\'accès dans les réglages de votre appareil.';
           } else if (e.toString().contains('camera_access_restricted')) {
-            errorMessage = 'L\'accès à l\'appareil photo est restreint sur cet appareil.';
+            errorMessage =
+                'L\'accès à l\'appareil photo est restreint sur cet appareil.';
           }
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
@@ -459,7 +467,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
           // Handle array response from backend
           final responseData = response['data'];
           Map<String, dynamic> photoData;
-          
+
           if (responseData is List && responseData.isNotEmpty) {
             // Backend returns array of photos
             photoData = responseData[0] as Map<String, dynamic>;
@@ -470,7 +478,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
             // Fallback to full response
             photoData = response;
           }
-          
+
           final newPhoto = Photo.fromJson(photoData);
 
           setState(() {
@@ -546,7 +554,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
       // Get temporary directory
       final tempDir = await getTemporaryDirectory();
-      final targetPath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.jpg';
+      final targetPath =
+          '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.jpg';
 
       // Start with quality 85 and reduce if needed
       int quality = 85;
@@ -566,7 +575,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         if (compressedFile != null) {
           final compressedSize = await File(compressedFile.path).length();
           if (compressedSize <= maxSizeInBytes) {
-            debugPrint('Image compressed: ${fileSizeInBytes / 1024 / 1024}MB -> ${compressedSize / 1024 / 1024}MB (quality: $quality)');
+            debugPrint(
+                'Image compressed: ${fileSizeInBytes / 1024 / 1024}MB -> ${compressedSize / 1024 / 1024}MB (quality: $quality)');
             return compressedFile.path;
           }
         }
@@ -597,7 +607,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('La photo est trop volumineuse (max 10MB). Veuillez choisir une photo plus petite.'),
+              content: Text(
+                  'La photo est trop volumineuse (max 10MB). Veuillez choisir une photo plus petite.'),
               backgroundColor: AppColors.warningAmber,
             ),
           );
@@ -608,12 +619,13 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       // Check image format
       final extension = image.path.toLowerCase().split('.').last;
       final allowedFormats = ['jpg', 'jpeg', 'png', 'heic'];
-      
+
       if (!allowedFormats.contains(extension)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Format d\'image non supporté (JPG, PNG, HEIC uniquement)'),
+              content: Text(
+                  'Format d\'image non supporté (JPG, PNG, HEIC uniquement)'),
               backgroundColor: AppColors.warningAmber,
             ),
           );
@@ -666,7 +678,8 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Supprimer la photo'),
-          content: const Text('Êtes-vous sûr de vouloir supprimer cette photo ?'),
+          content:
+              const Text('Êtes-vous sûr de vouloir supprimer cette photo ?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -688,7 +701,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
     try {
       await ApiService.deletePhoto(photo.id);
-      
+
       setState(() {
         _photos.removeWhere((p) => p.id == photo.id);
         // Reorder remaining photos and set first as primary
@@ -739,14 +752,14 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
     try {
       await ApiService.setPrimaryPhoto(photo.id);
-      
+
       // Move the selected photo to the first position
       final photoIndex = _photos.indexWhere((p) => p.id == photo.id);
       if (photoIndex != -1 && photoIndex != 0) {
         setState(() {
           final selectedPhoto = _photos.removeAt(photoIndex);
           _photos.insert(0, selectedPhoto);
-          
+
           // Update order for all photos and set first as primary
           for (int i = 0; i < _photos.length; i++) {
             _photos[i] = Photo(
@@ -766,13 +779,15 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       } else {
         // Just update the isPrimary flag if already first
         setState(() {
-          _photos = _photos.map((p) => Photo(
-            id: p.id,
-            url: p.url,
-            order: p.order,
-            isPrimary: p.id == photo.id,
-            createdAt: p.createdAt,
-          )).toList();
+          _photos = _photos
+              .map((p) => Photo(
+                    id: p.id,
+                    url: p.url,
+                    order: p.order,
+                    isPrimary: p.id == photo.id,
+                    createdAt: p.createdAt,
+                  ))
+              .toList();
         });
       }
 
@@ -804,7 +819,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
   void _onReorder(int oldIndex, int newIndex) {
     if (oldIndex >= _photos.length) return;
-    
+
     // If moving to an empty position, just reorder
     if (newIndex >= _photos.length) {
       // This would extend beyond current photos, so we just move to the end
@@ -832,7 +847,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
 
     // Update backend for the moved photo
     _updatePhotoOrder(_photos[newIndex], newIndex + 1);
-    
+
     // Set first photo as primary on backend
     if (newIndex == 0) {
       _setPrimaryPhotoOnBackend(_photos[0].id);
@@ -840,7 +855,7 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
       // If we moved the primary photo away, set the new first photo as primary
       _setPrimaryPhotoOnBackend(_photos[0].id);
     }
-    
+
     widget.onPhotosChanged(_photos);
   }
 

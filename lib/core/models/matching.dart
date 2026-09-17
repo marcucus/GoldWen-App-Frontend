@@ -105,7 +105,7 @@ class DailySelection {
           .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList(),
       generatedAt: DateTime.parse(json['generatedAt'] as String? ?? DateTime.now().toIso8601String()),
-      expiresAt: DateTime.parse(json['expiresAt'] as String? ?? DateTime.now().add(Duration(hours: 24)).toIso8601String()),
+      expiresAt: DateTime.parse(json['expiresAt'] as String? ?? DateTime.now().add(const Duration(hours: 24)).toIso8601String()),
       remainingLikes: json['remainingLikes'] as int? ?? 0,
       hasUsedSuperLike: json['hasUsedSuperLike'] as bool? ?? false,
       choicesRemaining: choicesRemaining,

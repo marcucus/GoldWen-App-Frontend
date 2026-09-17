@@ -205,7 +205,7 @@ class SubscriptionUsage {
       canSeeWhoLikedYou: json['canSeeWhoLikedYou'] as bool? ?? false,
       canUseAdvancedFilters: json['canUseAdvancedFilters'] as bool? ?? false,
       hasUnlimitedRewinds: json['hasUnlimitedRewinds'] as bool? ?? false,
-      resetDate: DateTime.parse(json['resetDate'] as String? ?? dailyChoices?['resetTime'] as String? ?? DateTime.now().add(Duration(days: 1)).toIso8601String()),
+      resetDate: DateTime.parse(json['resetDate'] as String? ?? dailyChoices?['resetTime'] as String? ?? DateTime.now().add(const Duration(days: 1)).toIso8601String()),
     );
   }
 
