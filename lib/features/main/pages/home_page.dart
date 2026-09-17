@@ -86,6 +86,7 @@ class _HomePageState extends State<HomePage> {
             slivers: [
               SliverToBoxAdapter(child: _buildHero(firstName)),
               SliverToBoxAdapter(child: _buildStreakCard()),
+              const SliverToBoxAdapter(child: SizedBox(height: 40)),
               SliverToBoxAdapter(child: _buildProfilesHeader()),
               SliverToBoxAdapter(child: _buildProfilesList()),
               SliverToBoxAdapter(child: _buildActiveConversation()),
@@ -231,8 +232,10 @@ class _HomePageState extends State<HomePage> {
             ? 'Actif aujourd\'hui ✓'
             : 'Revenez chaque jour';
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(18, -22, 18, 0),
+    return Transform.translate(
+      offset: const Offset(0, -22),
+      child: Container(
+      margin: const EdgeInsets.fromLTRB(18, 0, 18, 0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
@@ -332,7 +335,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-    );
+    ),   // end Container
+    );   // end Transform.translate
       }, // end Consumer builder
     ); // end Consumer
   }
@@ -344,7 +348,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, mp, _) {
         final used = mp.remainingSelections == 0;
         return Padding(
-          padding: const EdgeInsets.fromLTRB(22, 24, 22, 8),
+          padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

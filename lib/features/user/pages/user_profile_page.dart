@@ -378,7 +378,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               icon: Icons.star,
               title: 'GoldWen Plus',
               subtitle: 'Accédez aux fonctionnalités premium',
-              onTap: () => context.go('/subscription'),
+              onTap: () => context.push('/subscription'),
               gradient: const LinearGradient(
                 colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
               ),

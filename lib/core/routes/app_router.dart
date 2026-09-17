@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/providers/auth_provider.dart';
@@ -11,7 +10,6 @@ import '../../features/auth/pages/splash_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/profile/pages/prompts_management_page.dart';
 import '../../features/main/pages/main_navigation_page.dart';
-import '../../features/matching/pages/daily_matches_page.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
 import '../../features/matching/pages/matches_page.dart';
 import '../../features/matching/pages/history_page.dart';
@@ -36,7 +34,6 @@ import '../../features/admin/pages/admin_dashboard_page.dart';
 import '../../features/admin/pages/admin_users_page.dart';
 import '../../features/admin/pages/admin_reports_page.dart';
 import '../../features/admin/pages/admin_support_page.dart';
-import '../../features/admin/guards/admin_auth_guard.dart';
 import '../../features/reports/pages/user_reports_page.dart';
 
 class AppRouter {

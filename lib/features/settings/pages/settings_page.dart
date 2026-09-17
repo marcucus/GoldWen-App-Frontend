@@ -324,7 +324,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 'Passer à GoldWen Plus',
                 'Débloquez toutes les fonctionnalités premium',
                 Icons.star,
-                () => context.go('/subscription'),
+                () => context.push('/subscription'),
                 highlight: true,
               ),
               _buildUpgradePromotionCard(),
@@ -973,7 +973,7 @@ class _SettingsPageState extends State<SettingsPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                context.go('/subscription');
+                context.push('/subscription');
               },
               child: const Text('Modifier le plan'),
             ),

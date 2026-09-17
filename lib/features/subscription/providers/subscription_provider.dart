@@ -82,17 +82,18 @@ class SubscriptionProvider with ChangeNotifier {
       // Track subscription page viewed
       await AnalyticsService.trackSubscriptionPageViewed();
       
-      // Initialize RevenueCat if not already initialized
-      await RevenueCatService.initialize();
-
-      // Load packages from RevenueCat
-      _revenueCatPackages = await RevenueCatService.getAvailablePackages();
-
-      // Convert packages to subscription plans
-      _plans = _revenueCatPackages
-          .map(
-              (package) => RevenueCatService.packageToSubscriptionPlan(package))
-          .toList();
+      // Initialize RevenueCat — failures (invalid key, no network) are non-fatal
+      try {
+        await RevenueCatService.initialize();
+        _revenueCatPackages = await RevenueCatService.getAvailablePackages();
+        _plans = _revenueCatPackages
+            .map((package) => RevenueCatService.packageToSubscriptionPlan(package))
+            .toList();
+      } catch (rcError) {
+        // RevenueCat unavailable in dev (no key configured) — fall through to API
+        _revenueCatPackages = [];
+        _plans = [];
+      }
 
       // Also try to load plans from API as fallback
       try {
@@ -140,12 +141,12 @@ class SubscriptionProvider with ChangeNotifier {
 
       _error = null;
     } catch (e) {
-      // If all loading methods fail, provide mock data in debug mode only
-      if (kDebugMode &&
-          (e.toString().contains('NetworkException') ||
-           e.toString().contains('ECONNREFUSED') ||
-           e.toString().contains('Failed to connect'))) {
-        _createMockPlans();
+      // Network error (backend unreachable) — don't block the page, use mock plans in debug
+      final isNetworkError = (e is ApiException && e.statusCode == 0) ||
+          e.toString().contains('ECONNREFUSED') ||
+          e.toString().contains('Failed to connect');
+      if (isNetworkError) {
+        if (kDebugMode && _plans.isEmpty) _createMockPlans();
         _error = null;
       } else {
         _handleError(e, 'Failed to load subscription plans');
@@ -231,9 +232,10 @@ class SubscriptionProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
     } catch (e) {
-      if (e is ApiException && e.statusCode == 404) {
-        // No subscription found is OK
+      // 404 = no subscription, 0 = network error (backend unreachable) — both mean free tier
+      if (e is ApiException && (e.statusCode == 404 || e.statusCode == 0)) {
         _currentSubscription = null;
+        _error = null;
         notifyListeners();
       } else {
         _handleError(e, 'Failed to load current subscription');
@@ -250,9 +252,10 @@ class SubscriptionProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
     } catch (e) {
-      if (e is ApiException && e.statusCode == 404) {
-        // No subscription usage found is OK for free users
+      // 404 = no usage data, 0 = network error — both mean free tier limits apply
+      if (e is ApiException && (e.statusCode == 404 || e.statusCode == 0)) {
         _usage = null;
+        _error = null;
         notifyListeners();
       } else {
         _handleError(e, 'Failed to load subscription usage');

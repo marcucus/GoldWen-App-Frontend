@@ -143,20 +143,39 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> socialLogin({
-    required String socialId,
-    required String provider,
-    required String email,
-    required String firstName,
+  // SECURITY (Phase 0.1): POST /auth/social-login accepted a raw
+  // { socialId, email } body with no proof of identity and has been removed
+  // server-side. Social sign-in now always sends the provider's own signed
+  // token (Google ID token / Apple identity token), which the backend
+  // verifies before creating a session.
+  static Future<Map<String, dynamic>> loginWithGoogle({
+    required String idToken,
+  }) async {
+    final response = await _makeRequest(
+      _dio.post('/auth/google', data: jsonEncode({
+          'idToken': idToken,
+        }),
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> loginWithApple({
+    required String identityToken,
+    String? firstName,
     String? lastName,
   }) async {
     final response = await _makeRequest(
-      _dio.post('/auth/social-login', data: jsonEncode({
-          'socialId': socialId,
-          'provider': provider,
-          'email': email,
-          'firstName': firstName,
-          'lastName': lastName,
+      _dio.post('/auth/apple', data: jsonEncode({
+          'identityToken': identityToken,
+          if (firstName != null || lastName != null)
+            'user': {
+              'name': {
+                'firstName': firstName,
+                'lastName': lastName,
+              },
+            },
         }),
       ),
     );

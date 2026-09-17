@@ -49,7 +49,7 @@ class SubscriptionPromoBanner extends StatelessWidget {
               ),
             ),
             child: InkWell(
-              onTap: onTap ?? () => context.go('/subscription'),
+              onTap: onTap ?? () => context.push('/subscription'),
               borderRadius: BorderRadius.circular(AppBorderRadius.medium),
               child: Padding(
                 padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
@@ -245,7 +245,7 @@ class SubscriptionLimitReachedDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             Navigator.of(context).pop();
-            context.go('/subscription');
+            context.push('/subscription');
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryGold,

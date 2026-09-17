@@ -6,16 +6,22 @@ import '../models/models.dart';
 import 'api_service.dart';
 
 class RevenueCatService {
-  static const String _apiKey = 'your_revenue_cat_api_key_here';
+  // TODO: replace with your RevenueCat public iOS key (appl_...) from the RC dashboard
+  static const String _apiKey = String.fromEnvironment(
+    'REVENUECAT_API_KEY',
+    defaultValue: '',
+  );
   static bool _isInitialized = false;
   
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    
+    if (_apiKey.isEmpty) {
+      throw Exception('RevenueCat API key not configured. Set REVENUECAT_API_KEY or hardcode it in revenue_cat_service.dart.');
+    }
     try {
       await Purchases.configure(
         PurchasesConfiguration(_apiKey)
-          ..appUserID = null, // Let RevenueCat generate the user ID
+          ..appUserID = null,
       );
       _isInitialized = true;
     } catch (e) {

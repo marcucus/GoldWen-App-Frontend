@@ -111,13 +111,10 @@ class AuthProvider with ChangeNotifier {
         throw Exception('Failed to obtain Google authentication tokens');
       }
 
-      // Use the Google user information to authenticate with our backend
-      final response = await ApiService.socialLogin(
-        socialId: googleUser.id,
-        provider: 'google',
-        email: googleUser.email,
-        firstName: googleUser.displayName?.split(' ').first ?? '',
-        lastName: googleUser.displayName?.split(' ').skip(1).join(' '),
+      // Send Google's own signed ID token to the backend — the backend
+      // verifies it with Google before creating a session (Phase 0.1).
+      final response = await ApiService.loginWithGoogle(
+        idToken: googleAuth.idToken!,
       );
 
       await _handleAuthSuccess(response, isSignup: true, signupMethod: 'google');
@@ -157,14 +154,16 @@ class AuthProvider with ChangeNotifier {
         lastName = credential.familyName;
       }
 
-      // Use the Apple credential to authenticate with our backend
-      final response = await ApiService.socialLogin(
-        socialId: credential.userIdentifier ?? '',
-        provider: 'apple',
-        email: credential.email ??
-            'noemail@appleid.com', // Apple might not provide email
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
+      if (credential.identityToken == null) {
+        throw Exception('Failed to obtain Apple identity token');
+      }
+
+      // Send Apple's own signed identity token to the backend — the backend
+      // verifies it with Apple before creating a session (Phase 0.1).
+      final response = await ApiService.loginWithApple(
+        identityToken: credential.identityToken!,
+        firstName: firstName,
+        lastName: lastName,
       );
 
       await _handleAuthSuccess(response, isSignup: true, signupMethod: 'apple');

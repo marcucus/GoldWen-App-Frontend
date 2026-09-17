@@ -38,8 +38,8 @@ class AppConfig {
       if (Platform.isAndroid) {
         return 'http://192.168.1.183:$port/api/v1';
       } else if (Platform.isIOS) {
-        // Use your Mac's local IP address for iOS physical devices and simulator
-        return 'http://192.168.1.5:$port/api/v1';
+        // iOS simulator shares the Mac's network stack — localhost works directly
+        return 'http://localhost:$port/api/v1';
       }
     } catch (e) {
       // Platform.isAndroid might not be available in some contexts (like tests)
@@ -54,8 +54,7 @@ class AppConfig {
       if (Platform.isAndroid) {
         return 'ws://192.168.1.183:$port/chat';
       } else if (Platform.isIOS) {
-        // Use your Mac's local IP address for iOS physical devices
-        return 'ws://192.168.1.5:$port/chat';
+        return 'ws://localhost:$port/chat';
       }
     } catch (e) {
       // Platform.isAndroid might not be available in some contexts (like tests)

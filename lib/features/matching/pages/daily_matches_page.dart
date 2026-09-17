@@ -904,7 +904,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigation vers la page d'abonnement
-                    context.go('/subscription');
+                    context.push('/subscription');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -1069,7 +1069,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                   button: true,
                   child: ElevatedButton(
                     onPressed: () {
-                      context.go('/subscription');
+                      context.push('/subscription');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
