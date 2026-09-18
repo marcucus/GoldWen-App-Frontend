@@ -354,12 +354,20 @@ class PremiumButton extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                     ],
-                    Text(
-                      text,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: textColor ?? Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    // Flexible + ellipsis: long labels (or large accessibility
+                    // text scales) must shrink instead of overflowing the button.
+                    Flexible(
+                      child: Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: textColor ?? Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
                     ),
                   ],
                 ],

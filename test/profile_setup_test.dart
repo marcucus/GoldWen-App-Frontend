@@ -177,7 +177,8 @@ void main() {
       expect(tester.widget<ElevatedButton>(button).onPressed, isNull);
     });
 
-    testWidgets('Prompt text fields should have 300 character limit', (WidgetTester tester) async {
+    // Aligned with the backend contract: PromptAnswerDto @MaxLength(150).
+    testWidgets('Prompt text fields should have 150 character limit', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
@@ -206,7 +207,7 @@ void main() {
       final fields = tester.widgetList<TextField>(find.byType(TextField));
       expect(fields, isNotEmpty);
       await tester.scrollUntilVisible(find.text('Question 2'), 200, scrollable: find.byType(Scrollable).last);
-      expect(fields.every((field) => field.maxLength == 300), isTrue);
+      expect(fields.every((field) => field.maxLength == 150), isTrue);
     });
   });
 }

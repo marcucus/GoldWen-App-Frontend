@@ -24,11 +24,15 @@ void main() {
       when(mockProvider.error).thenReturn(null);
       when(mockProvider.submitReport(targetUserId: anyNamed('targetUserId'), type: anyNamed('type'), reason: anyNamed('reason'), messageId: anyNamed('messageId'), chatId: anyNamed('chatId'))).thenAnswer((_) async {});
 
+      // The provider sits above MaterialApp, as in main.dart: showDialog pushes
+      // a route on the root Navigator, so a provider placed under `home` is not
+      // visible from the dialog (ProviderNotFoundException, caught by the
+      // dialog, and submitReport was never called).
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ReportProvider>(
-            create: (_) => mockProvider,
-            child: Scaffold(
+        ChangeNotifierProvider<ReportProvider>.value(
+          value: mockProvider,
+          child: MaterialApp(
+            home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
                   onPressed: () => showDialog(context: context, builder: (_) => ReportDialog(

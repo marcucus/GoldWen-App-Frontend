@@ -36,8 +36,10 @@ void main() {
         // This would require setting up a valid selection through provider methods
         // For now, testing the time-based logic
         final now = DateTime.now();
-        final generatedAt = DateTime(now.year, now.month, now.day, 10, 0, 0); // Today at 10 AM
-        final expiresAt = DateTime(now.year, now.month, now.day + 1, 12, 0, 0); // Tomorrow at noon
+        // Relative to `now` so the test does not depend on the time of day the
+        // suite runs (it used to fail on CI runners before 10:00 local time).
+        final generatedAt = now.subtract(const Duration(hours: 1));
+        final expiresAt = now.add(const Duration(days: 1));
 
         // Selection is valid and recent
         expect(generatedAt.isBefore(now), true);

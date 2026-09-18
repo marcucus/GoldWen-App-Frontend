@@ -231,15 +231,22 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Sélection du jour',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              semanticsLabel: 'Titre: Sélection du jour',
+                            // Own semantics node flagged as a heading, so screen
+                            // readers can jump to it instead of hearing it merged
+                            // into the header container's label.
+                            Semantics(
+                              container: true,
+                              header: true,
+                              child: Text(
+                                'Sélection du jour',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                semanticsLabel: 'Titre: Sélection du jour',
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(

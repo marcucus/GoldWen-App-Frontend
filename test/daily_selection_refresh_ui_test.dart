@@ -397,12 +397,13 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
+        // Semantics must be enabled before the first frame, otherwise the tree
+        // is not built and bySemanticsLabel finds nothing.
+        final semantics = tester.ensureSemantics();
+        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
-
-        final semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
         // Find semantics with specific labels
         expect(find.bySemanticsLabel(RegExp('En-tête de sélection quotidienne')), findsOneWidget);
         expect(find.bySemanticsLabel('Titre: Sélection du jour'), findsOneWidget);

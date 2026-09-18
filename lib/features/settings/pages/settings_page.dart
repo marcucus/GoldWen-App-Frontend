@@ -471,11 +471,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: AppColors.primaryGold,
               ),
               SizedBox(width: AppSpacing.sm),
-              Text(
-                'Fonctionnalités Premium',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryGold,
+              // Expanded so the title wraps on narrow screens / large text
+              // scales instead of overflowing the card.
+              Expanded(
+                child: Text(
+                  'Fonctionnalités Premium',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
               ),
             ],
