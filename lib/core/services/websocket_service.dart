@@ -270,9 +270,7 @@ class WebSocketService {
       final expiresAtRaw = data['expiresAt'] as String?;
       final expiresAt =
           expiresAtRaw != null ? DateTime.tryParse(expiresAtRaw) : null;
-      final hoursLeft = expiresAt != null
-          ? expiresAt.difference(DateTime.now()).inHours.clamp(0, 24)
-          : null;
+      final hoursLeft = expiresAt?.difference(DateTime.now()).inHours.clamp(0, 24);
 
       NotificationManager().showNotificationIfAllowed(
         context: _context!,

@@ -60,7 +60,7 @@ class _ReportDialogState extends State<ReportDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: SingleChildScrollView(child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -242,7 +242,7 @@ class _ReportDialogState extends State<ReportDialog> {
               ],
             ),
           ],
-        ),
+        )),
       ),
     );
   }

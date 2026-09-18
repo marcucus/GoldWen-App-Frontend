@@ -216,6 +216,6 @@ class AccountDeletionStatus {
   
   int? get daysUntilDeletion {
     if (deletionDate == null) return null;
-    return deletionDate!.difference(DateTime.now()).inDays;
+    return (deletionDate!.difference(DateTime.now()).inSeconds / Duration.secondsPerDay).ceil();
   }
 }

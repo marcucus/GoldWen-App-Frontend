@@ -96,7 +96,7 @@ class MatchReasonsWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        '${isPositive ? '+' : ''}$percentage%',
+        '${isPositive ? '+' : '-'}$percentage%',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,

@@ -1,3 +1,4 @@
+import 'support/api_adapter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:goldwen_app/features/notifications/providers/notification_provider.dart';
@@ -16,11 +17,9 @@ class MockLocalNotificationService extends Mock implements LocalNotificationServ
 void main() {
   group('NotificationProvider Tests', () {
     late NotificationProvider provider;
-    late MockApiService mockApiService;
 
     setUp(() {
       provider = NotificationProvider();
-      mockApiService = MockApiService();
     });
 
     test('should initialize with empty notifications and default settings', () {
@@ -46,17 +45,7 @@ void main() {
         ]
       };
 
-      // Mock ApiService response
-      when(mockApiService.getNotifications(
-        page: anyNamed('page'),
-        limit: anyNamed('limit'),
-        type: anyNamed('type'),
-        read: anyNamed('read'),
-      )).thenAnswer((_) async => mockResponse);
-
-      // Override the static method temporarily for testing
-      // In a real test, we would use dependency injection
-      
+      ApiService.configureTestAdapter(() => ApiAdapter((_) => (200, mockResponse)));
       // Act & Assert
       // Note: This test would need to be refactored to use dependency injection
       // to properly mock the ApiService static methods
@@ -244,114 +233,4 @@ void main() {
     });
   });
 
-  group('Firebase Messaging Integration Tests', () {
-    late MockFirebaseMessagingService mockFirebaseService;
-
-    setUp(() {
-      mockFirebaseService = MockFirebaseMessagingService();
-    });
-
-    test('should initialize Firebase messaging service', () async {
-      when(mockFirebaseService.initialize()).thenAnswer((_) async {});
-      when(mockFirebaseService.requestPermissions()).thenAnswer((_) async => true);
-      when(mockFirebaseService.deviceToken).thenReturn('test_token');
-
-      await mockFirebaseService.initialize();
-      final token = mockFirebaseService.deviceToken;
-
-      verify(mockFirebaseService.initialize()).called(1);
-      expect(token, 'test_token');
-    });
-
-    test('should handle permission requests', () async {
-      when(mockFirebaseService.requestPermissions()).thenAnswer((_) async => true);
-
-      final permissionGranted = await mockFirebaseService.requestPermissions();
-
-      expect(permissionGranted, true);
-      verify(mockFirebaseService.requestPermissions()).called(1);
-    });
-  });
-
-  group('Local Notification Service Tests', () {
-    late MockLocalNotificationService mockLocalService;
-
-    setUp(() {
-      mockLocalService = MockLocalNotificationService();
-    });
-
-    test('should initialize local notifications', () async {
-      when(mockLocalService.initialize()).thenAnswer((_) async {});
-
-      await mockLocalService.initialize();
-
-      verify(mockLocalService.initialize()).called(1);
-    });
-
-    test('should schedule daily selection notification', () async {
-      when(mockLocalService.scheduleDailySelectionNotification())
-          .thenAnswer((_) async {});
-
-      await mockLocalService.scheduleDailySelectionNotification();
-
-      verify(mockLocalService.scheduleDailySelectionNotification()).called(1);
-    });
-
-    test('should show instant notification', () async {
-      when(mockLocalService.showInstantNotification(
-        title: any(named: 'title'),
-        body: any(named: 'body'),
-        payload: any(named: 'payload'),
-        id: any(named: 'id'),
-      )).thenAnswer((_) async {});
-
-      await mockLocalService.showInstantNotification(
-        title: 'Test Title',
-        body: 'Test Body',
-        payload: 'test_payload',
-        id: 1,
-      );
-
-      verify(mockLocalService.showInstantNotification(
-        title: 'Test Title',
-        body: 'Test Body',
-        payload: 'test_payload',
-        id: 1,
-      )).called(1);
-    });
-  });
-
-  group('Push Notification Integration Tests', () {
-    test('should handle daily selection notification flow', () async {
-      // This would test the complete flow from backend trigger to user notification
-      // 1. Backend sends push notification
-      // 2. FCM delivers to device
-      // 3. App handles foreground/background message
-      // 4. Local notification is shown if needed
-      // 5. User taps notification and navigates to daily selection
-
-      // For now, this is a placeholder for the integration test
-      expect(true, true); // Placeholder assertion
-    });
-
-    test('should handle new match notification flow', () async {
-      // Test complete flow for match notifications
-      expect(true, true); // Placeholder assertion
-    });
-
-    test('should handle message notification flow', () async {
-      // Test complete flow for message notifications
-      expect(true, true); // Placeholder assertion
-    });
-
-    test('should respect notification settings', () async {
-      // Test that notifications are not sent when disabled in settings
-      expect(true, true); // Placeholder assertion
-    });
-
-    test('should respect quiet hours', () async {
-      // Test that notifications are not shown during quiet hours
-      expect(true, true); // Placeholder assertion
-    });
-  });
 }

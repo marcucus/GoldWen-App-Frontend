@@ -18,11 +18,10 @@ void main() {
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
       
       profileProvider = ProfileProvider();
       subscriptionProvider = SubscriptionProvider();
-      notificationProvider = NotificationProvider(prefs);
+      notificationProvider = NotificationProvider();
       authProvider = AuthProvider();
     });
 

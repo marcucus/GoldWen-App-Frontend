@@ -1,0 +1,4 @@
+# Phase 5 — scaffold minimal, sans secret. À compléter une fois le compte
+# Google Play Console créé et un compte de service configuré.
+json_key_file(ENV["ANDROID_JSON_KEY_FILE"] || "fastlane/play-console-service-account.json") # jamais versionné
+package_name("com.goldwen.app")

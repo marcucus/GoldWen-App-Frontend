@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadData() async {
     unawaited(context.read<MatchingProvider>().loadDailySelection());
+    unawaited(context.read<MatchingProvider>().loadWeekHistory());
     try {
       final res = await ApiService.getProfile();
       final data = res['data'] ?? res;
@@ -229,11 +230,22 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStreakCard() {
     final days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-    final todayIdx = DateTime.now().weekday - 1; // Mon=0
+    final now = DateTime.now();
+    final todayIdx = now.weekday - 1; // Mon=0
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: todayIdx));
+    String fmt(DateTime d) =>
+        '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
     return Consumer<MatchingProvider>(
       builder: (context, mp, _) {
-        final hasEngagedToday = mp.dailySelection != null;
+        // Real engagement per day of the current week, from the matching
+        // history endpoint — never fabricated from "today's state" alone.
+        final engagedDates = mp.historyItems
+            .where((h) => h.choices.isNotEmpty)
+            .map((h) => h.date.substring(0, 10))
+            .toSet();
+        final hasEngagedToday = engagedDates.contains(fmt(now));
         final subtitle =
             hasEngagedToday ? 'Actif aujourd\'hui ✓' : 'Revenez chaque jour';
 
@@ -262,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                           size: 22, color: AppColors.primaryGold),
                     ),
                     const SizedBox(width: 12),
-                    Column(
+                    Expanded(child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
@@ -285,14 +297,15 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ],
-                    ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(7, (i) {
-                    final done = i < todayIdx && hasEngagedToday;
+                    final done = i <= todayIdx &&
+                        engagedDates.contains(fmt(startOfWeek.add(Duration(days: i))));
                     final today = i == todayIdx;
                     return Expanded(
                       child: Column(
@@ -813,6 +826,25 @@ class _HomePageState extends State<HomePage> {
 
   // --- Conseil du jour ---------------------------------------------------
 
+  // Curated editorial tips (not user data — safe to ship as static
+  // content), rotated deterministically by day of year so the section
+  // actually changes "du jour" instead of showing one frozen string.
+  static const List<String> _dailyTips = [
+    'Une question ouverte vaut mille messages. Demandez ce qui les fait vibrer.',
+    'Un compliment précis (« j\'aime ce que vous dites sur... ») marque plus qu\'un compliment vague.',
+    'Le silence n\'est pas un échec : prenez le temps de répondre avec soin plutôt que vite.',
+    'Proposez un sujet concret plutôt qu\'un « comment ça va ? » : les échanges démarrent mieux.',
+    'Votre bio dit qui vous êtes ; votre premier message dit pourquoi vous avez choisi cette personne.',
+    'Une conversation qui respire vaut mieux qu\'un flot de messages sans réponse.',
+    'Osez parler de ce qui vous passionne vraiment : l\'authenticité attire l\'authenticité.',
+  ];
+
+  String get _tipOfTheDay {
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    return _dailyTips[dayOfYear % _dailyTips.length];
+  }
+
   Widget _buildConseilDuJour() {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 22, 20, 0),
@@ -825,10 +857,10 @@ class _HomePageState extends State<HomePage> {
           width: 1,
         ),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.auto_awesome_rounded,
                   size: 12, color: AppColors.primaryGold),
@@ -844,10 +876,10 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            '« Une question ouverte vaut mille messages. Demandez ce qui les fait vibrer. »',
-            style: TextStyle(
+            '« $_tipOfTheDay »',
+            style: const TextStyle(
               fontFamily: 'Playfair Display',
               fontStyle: FontStyle.italic,
               fontSize: 15,

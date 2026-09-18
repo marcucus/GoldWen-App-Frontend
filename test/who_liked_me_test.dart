@@ -58,7 +58,7 @@ void main() {
           'id': 'profile-123',
           'userId': 'user-123',
           'pseudo': 'John',
-          'birthDate': DateTime.now().subtract(const Duration(days: 365 * 30)).toIso8601String(),
+          'birthDate': DateTime(DateTime.now().year - 30, DateTime.now().month, DateTime.now().day).toIso8601String(),
           'photos': [],
           'bio': 'Test user bio',
           'promptAnswers': [],

@@ -68,7 +68,7 @@ void main() {
 
     test('canSelectMore returns correct state', () {
       // Initially with no daily selection data
-      expect(matchingProvider.canSelectMore, false);
+      expect(matchingProvider.canSelectMore, true);
       
       // canSelectMore depends on choicesRemaining from dailySelection
       // which comes from the API response

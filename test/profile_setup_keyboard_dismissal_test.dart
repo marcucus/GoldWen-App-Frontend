@@ -1,3 +1,5 @@
+import 'package:goldwen_app/core/services/accessibility_service.dart';
+import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (context) => ProfileProvider()),
@@ -55,6 +61,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (context) => ProfileProvider()),
@@ -94,6 +104,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (context) => ProfileProvider()),

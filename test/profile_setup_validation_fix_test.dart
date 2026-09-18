@@ -1,3 +1,4 @@
+import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:goldwen_app/core/services/api_service.dart';
@@ -9,11 +10,9 @@ import 'mocks.mocks.dart';
 void main() {
   group('Profile Setup Validation Fix Tests', () {
     late ProfileProvider profileProvider;
-    late MockApiService mockApiService;
 
     setUp(() {
       profileProvider = ProfileProvider();
-      mockApiService = MockApiService();
     });
 
     test('Profile provider should save basic info correctly', () {

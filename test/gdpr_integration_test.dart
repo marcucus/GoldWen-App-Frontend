@@ -1,3 +1,5 @@
+import 'package:goldwen_app/core/services/api_service.dart';
+import 'support/api_adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,7 @@ void main() {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       gdprService = GdprService();
+      ApiService.configureTestAdapter(() => ApiAdapter((_) => (200, {'data': {}})));
     });
 
     testWidgets('should display consent modal with all required options', (WidgetTester tester) async {
@@ -170,7 +173,8 @@ void main() {
 
       // Note: The actual API call would be mocked in a real test environment
       // Here we're testing that the UI flow works correctly
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(gdprService.hasValidConsent, isTrue);
     });
   });
 

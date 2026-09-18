@@ -151,7 +151,7 @@ void main() {
       );
       expect(
         validatePassword('Çàéêù123', isSignUp: true),
-        equals('Le mot de passe doit contenir au moins un caractère spécial'),
+        equals('Le mot de passe doit contenir au moins une majuscule'),
       );
       
       // But should be valid with special chars

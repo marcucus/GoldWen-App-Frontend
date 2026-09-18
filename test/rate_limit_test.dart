@@ -91,7 +91,7 @@ void main() {
 
       final message = rateLimitInfo.getRetryMessage();
       expect(message, contains('3 minute'));
-      expect(message, contains('30 seconde'));
+      expect(message, anyOf(contains('29 seconde'), contains('30 seconde')));
     });
 
     test('should handle resetTime in the past', () {

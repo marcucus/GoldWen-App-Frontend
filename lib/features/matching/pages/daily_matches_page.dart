@@ -29,6 +29,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   late AnimationController _cardController;
   Timer? _refreshCheckTimer;
   Timer? _countdownTimer;
+  Timer? _cardStartTimer;
 
   @override
   void initState() {
@@ -36,8 +37,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     WidgetsBinding.instance.addObserver(this);
     _initializeAnimations();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _loadDailyMatches();
-      _preloadProfileImages();
       _startRefreshCheck();
       _startCountdownTimer();
     });
@@ -84,7 +85,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
 
     if (!accessibilityService.reducedMotion) {
       _backgroundController.forward();
-      Future.delayed(const Duration(milliseconds: 300), () {
+      _cardStartTimer = Timer(const Duration(milliseconds: 300), () {
         if (mounted) _cardController.forward();
       });
     } else {
@@ -97,6 +98,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _cardStartTimer?.cancel();
     _backgroundController.dispose();
     _cardController.dispose();
     _refreshCheckTimer?.cancel();
@@ -141,21 +143,19 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     });
   }
 
-  void _loadDailyMatches() {
+  Future<void> _loadDailyMatches() async {
     final matchingProvider =
         Provider.of<MatchingProvider>(context, listen: false);
-    matchingProvider.loadDailySelection();
+    await matchingProvider.loadDailySelection();
+    if (mounted) _preloadProfileImages();
   }
 
   /// Preload profile images for better performance
-  void _preloadProfileImages() async {
+  void _preloadProfileImages() {
     final matchingProvider =
         Provider.of<MatchingProvider>(context, listen: false);
     final cacheService =
         Provider.of<PerformanceCacheService>(context, listen: false);
-
-    // Wait a bit for the profiles to be loaded
-    await Future.delayed(const Duration(milliseconds: 500));
 
     if (matchingProvider.dailyProfiles.isNotEmpty) {
       final imageUrls = matchingProvider.dailyProfiles
@@ -317,7 +317,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             semanticLabel: 'Nouveau',
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          Flexible(child: Text(
                             'Nouvelle sélection disponible !',
                             style: Theme.of(context)
                                 .textTheme
@@ -327,7 +327,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                   fontWeight: FontWeight.bold,
                                 ),
                             semanticsLabel: 'Nouvelle sélection disponible',
-                          ),
+                          )),
                         ],
                       ),
                     ),
@@ -352,7 +352,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             semanticLabel: 'Timer',
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          Flexible(child: Text(
                             'Prochaine sélection dans $countdown',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -361,7 +361,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                                     ),
                             semanticsLabel:
                                 'Prochaine sélection dans $countdown',
-                          ),
+                          )),
                         ],
                       ),
                     ),
@@ -522,7 +522,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -540,7 +540,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             ),
                       ),
                   ],
-                ),
+                )),
                 Row(
                   children: [
                     if (hasSubscription)
@@ -874,9 +874,9 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   Widget _buildLoadingState() {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
+      child: SingleChildScrollView(child: Column(
         children: List.generate(3, (index) => _buildShimmerCard()),
-      ),
+      )),
     );
   }
 

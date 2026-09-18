@@ -10,6 +10,7 @@ import '../../features/auth/pages/splash_page.dart';
 import '../../features/profile/pages/profile_setup_page.dart';
 import '../../features/profile/pages/prompts_management_page.dart';
 import '../../features/main/pages/main_navigation_page.dart';
+import '../widgets/gdpr_consent_guard.dart';
 import '../../features/matching/pages/profile_detail_page.dart';
 import '../../features/matching/pages/matches_page.dart';
 import '../../features/matching/pages/history_page.dart';
@@ -143,7 +144,11 @@ class AppRouter {
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const MainNavigationPage(),
+        // GDPR consent (annexe A du cahier des charges) must be collected
+        // before the user reaches the main app — this guard shows a
+        // blocking modal on first entry if consent is missing or stale.
+        builder: (context, state) =>
+            const GdprConsentGuard(child: MainNavigationPage()),
       ),
       GoRoute(
         path: '/profile/:profileId',

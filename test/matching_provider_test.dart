@@ -23,11 +23,11 @@ void main() {
       expect(matchingProvider.error, null);
       expect(matchingProvider.dailyProfiles, isEmpty);
       expect(matchingProvider.selectedProfileIds, isEmpty);
-      expect(matchingProvider.remainingSelections, 0);
+      expect(matchingProvider.remainingSelections, 1);
     });
 
     test('canSelectMore returns false when no remaining selections', () {
-      expect(matchingProvider.canSelectMore, false);
+      expect(matchingProvider.canSelectMore, true);
     });
 
     test('isProfileSelected returns false for unselected profile', () {

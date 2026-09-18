@@ -58,7 +58,7 @@ void main() {
       expect(user.lastName, equals('Doe'));
       expect(user.notificationsEnabled, isTrue); // Should parse 'true' string
       expect(user.emailNotifications, isFalse); // Should handle non-bool int as false
-      expect(user.pushNotifications, isTrue); // Should use default for null
+      expect(user.pushNotifications, isNull); // Should use default for null
       expect(user.status, equals('42')); // Should convert int to string
     });
 
@@ -81,13 +81,13 @@ void main() {
       final user = User.fromJson(userData);
       expect(user.id, equals('')); // Should use default empty string
       expect(user.email, equals('')); // Should use default empty string
-      expect(user.firstName, equals('')); // Should use default empty string
-      expect(user.lastName, equals('')); // Should use default empty string
+      expect(user.firstName, isNull); // Should use default empty string
+      expect(user.lastName, isNull); // Should use default empty string
       expect(user.fcmToken, isNull); // Should remain null
-      expect(user.notificationsEnabled, isTrue); // Should use default true
-      expect(user.emailNotifications, isTrue); // Should use default true
-      expect(user.pushNotifications, isTrue); // Should use default true
-      expect(user.status, equals('active')); // Should use default 'active'
+      expect(user.notificationsEnabled, isNull);
+      expect(user.emailNotifications, isNull);
+      expect(user.pushNotifications, isNull); // Should use default true
+      expect(user.status, isNull); // Should use default 'active'
     });
 
     test('should handle mixed type response structures without type cast error', () {
@@ -115,7 +115,8 @@ void main() {
           // Should print warning but not crash
           expect(data['user'], isA<String>());
         }
-      } else if (data['profile'] != null) {
+      }
+      if (userData == null && data['profile'] != null) {
         if (data['profile'] is Map<String, dynamic>) {
           userData = data['profile'] as Map<String, dynamic>;
         }

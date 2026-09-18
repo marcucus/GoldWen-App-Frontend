@@ -38,9 +38,11 @@ void main() {
       await tester.tap(find.text('Test'));
       await tester.pumpAndSettle();
 
-      // Should have shown dialog
-      expect(handled, isTrue);
+      // The handler completes after the dialog closes.
       expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Compris'));
+      await tester.pumpAndSettle();
+      expect(handled, isTrue);
     });
 
     testWidgets('should not handle non-rate-limit errors', (WidgetTester tester) async {

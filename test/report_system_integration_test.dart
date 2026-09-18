@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
 
-import '../lib/core/models/models.dart';
-import '../lib/features/matching/providers/report_provider.dart';
-import '../lib/features/matching/widgets/report_dialog.dart';
+import 'package:goldwen_app/core/models/models.dart';
+import 'package:goldwen_app/features/matching/providers/report_provider.dart';
+import 'package:goldwen_app/features/matching/widgets/report_dialog.dart';
 
 // Use the centralized mocks file
 import 'mocks.mocks.dart';
@@ -14,10 +14,15 @@ import 'mocks.mocks.dart';
 void main() {
   group('Report System Integration Tests', () {
     testWidgets('Report dialog should submit report successfully', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Test that the report dialog works with the provider
       final mockProvider = MockReportProvider();
       when(mockProvider.isLoading).thenReturn(false);
       when(mockProvider.error).thenReturn(null);
+      when(mockProvider.submitReport(targetUserId: anyNamed('targetUserId'), type: anyNamed('type'), reason: anyNamed('reason'), messageId: anyNamed('messageId'), chatId: anyNamed('chatId'))).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -26,11 +31,10 @@ void main() {
             child: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
-                  onPressed: () => ReportDialog.show(
-                    context,
+                  onPressed: () => showDialog(context: context, builder: (_) => ReportDialog(
                     targetUserId: 'test-user-id',
                     targetUserName: 'Test User',
-                  ),
+                  )),
                   child: const Text('Report'),
                 ),
               ),
@@ -44,14 +48,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify the dialog is shown
-      expect(find.text('Signaler ce profil'), findsOneWidget);
+      expect(find.text('Signaler un problème'), findsOneWidget);
       expect(find.text('Contenu inapproprié'), findsOneWidget);
       
       // Fill in the reason
       await tester.enterText(find.byType(TextFormField), 'Test report reason');
       
       // Submit the report
-      await tester.tap(find.text('Envoyer le signalement'));
+      await tester.ensureVisible(find.text('Signaler'));
+      await tester.tap(find.text('Signaler'));
       await tester.pumpAndSettle();
 
       // Verify that submitReport was called on the provider
@@ -146,12 +151,5 @@ extension ReportMockExtension on MockReportProvider {
     // Extension methods cannot use super.noSuchMethod
     // This should be handled by mockito's generated code instead
     throw UnimplementedError('This method should be mocked using when() from mockito');
-  }
-}
-          #evidence: evidence,
-        },
-      ),
-      returnValue: Future<void>.value(),
-    );
   }
 }

@@ -1,0 +1,22 @@
+# Phase 5 — scaffold Fastlane iOS, sans secret.
+# Prérequis avant utilisation réelle :
+#   - Compte Apple Developer Program actif
+#   - Certificats/profils de provisioning (match, ou géré manuellement dans Xcode)
+#   - Capability "Sign in with Apple" activée sur l'App ID (voir Runner.entitlements)
+default_platform(:ios)
+
+platform :ios do
+  desc "Build un IPA de release"
+  lane :build_release do
+    sh("cd .. && flutter build ipa --release")
+  end
+
+  desc "Publie sur TestFlight"
+  lane :beta do
+    build_release
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/goldwen_app.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

@@ -78,7 +78,7 @@ class TextValidator {
       return null;
     }
 
-    final normalizedText = _normalizeText(text);
+    final normalizedText = text.trim();
 
     // Email pattern
     if (RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
@@ -107,7 +107,7 @@ class TextValidator {
       return null;
     }
 
-    final normalizedText = _normalizeText(text);
+    final normalizedText = text.trim();
 
     // Excessive repetition
     if (RegExp(r'(.)\1{4,}').hasMatch(normalizedText)) {

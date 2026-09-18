@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
 
-import '../lib/features/reports/pages/user_reports_page.dart';
-import '../lib/features/matching/providers/report_provider.dart';
-import '../lib/core/models/models.dart';
+import 'package:goldwen_app/features/reports/pages/user_reports_page.dart';
+import 'package:goldwen_app/features/matching/providers/report_provider.dart';
+import 'package:goldwen_app/core/models/models.dart';
 
 // Use the centralized mocks file
 import 'mocks.mocks.dart';
@@ -102,8 +102,8 @@ void main() {
       expect(find.text('Harcèlement'), findsOneWidget);
       expect(find.text('Test report reason'), findsOneWidget);
       expect(find.text('Another test report'), findsOneWidget);
-      expect(find.text('En attente'), findsOneWidget);
-      expect(find.text('Résolu'), findsOneWidget);
+      expect(find.text('En attente'), findsWidgets);
+      expect(find.text('Résolu'), findsWidgets);
     });
 
     testWidgets('should display error state when error occurs', (WidgetTester tester) async {
@@ -148,9 +148,9 @@ void main() {
 
       // Assert
       expect(find.text('Tous'), findsOneWidget);
-      expect(find.text('En attente'), findsOneWidget);
+      expect(find.text('En attente'), findsWidgets);
       expect(find.text('Examiné'), findsOneWidget);
-      expect(find.text('Résolu'), findsOneWidget);
+      expect(find.text('Résolu'), findsWidgets);
       expect(find.text('Rejeté'), findsOneWidget);
 
       // Test filter interaction

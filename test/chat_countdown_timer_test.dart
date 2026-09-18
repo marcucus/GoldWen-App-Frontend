@@ -64,8 +64,9 @@ void main() {
         ),
       );
 
-      // Wait for timer to expire
-      await tester.pump(const Duration(seconds: 2));
+      // DateTime.now uses wall-clock time, independently of tester.pump.
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 1100)));
+      await tester.pump(const Duration(seconds: 1));
 
       expect(callbackCalled, isTrue);
     });

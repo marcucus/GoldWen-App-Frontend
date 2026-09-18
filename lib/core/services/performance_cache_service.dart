@@ -27,6 +27,7 @@ class PerformanceCacheService extends ChangeNotifier {
   final Map<String, Future<Uint8List?>> _pendingImageLoads = {};
   final Map<String, Future<dynamic>> _pendingProfileLoads = {};
 
+  Timer? _cleanupTimer;
   bool _initialized = false;
   bool get isInitialized => _initialized;
 
@@ -54,7 +55,7 @@ class PerformanceCacheService extends ChangeNotifier {
 
   /// Set up periodic cache cleanup
   void _setupPeriodicCleanup() {
-    Timer.periodic(const Duration(hours: 6), (_) {
+    _cleanupTimer = Timer.periodic(const Duration(hours: 6), (_) {
       _cleanExpiredEntries();
     });
   }
@@ -438,6 +439,7 @@ class PerformanceCacheService extends ChangeNotifier {
   /// Dispose of resources
   @override
   void dispose() {
+    _cleanupTimer?.cancel();
     _dio.close();
     super.dispose();
   }

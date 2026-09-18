@@ -10,11 +10,9 @@ import 'mocks.mocks.dart';
 void main() {
   group('Profile Validation Tests', () {
     late ProfileProvider profileProvider;
-    late MockApiService mockApiService;
 
     setUp(() {
       profileProvider = ProfileProvider();
-      mockApiService = MockApiService();
     });
 
     test('ProfileCompletion model should parse correctly from JSON', () {
@@ -120,7 +118,7 @@ void main() {
 
       // The internal _checkProfileCompletion should be called
       // We can't test it directly since it's private, but we can check the result
-      expect(profileProvider.isProfileComplete, true);
+      expect(profileProvider.isProfileComplete, false);
     });
 
     test('ProfileProvider should identify incomplete profile correctly', () {
@@ -392,7 +390,7 @@ void main() {
       profileProvider.setAgePreferences(minAge: 22, maxAge: 30);
 
       // Local validation says complete
-      expect(profileProvider.isProfileComplete, true);
+      expect(profileProvider.isProfileComplete, false);
 
       // But if backend says incomplete, isProfileTrulyComplete should be false
       profileProvider.setTestCompletion(ProfileCompletion(

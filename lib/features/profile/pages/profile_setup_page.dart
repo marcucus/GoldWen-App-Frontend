@@ -49,10 +49,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
 
     // Load prompts from backend
-    _loadPrompts();
-
-    // Initialize to the correct page based on profile completion
-    _initializeCurrentPage();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _loadPrompts();
+      _initializeCurrentPage();
+    });
   }
 
   void _initializeCurrentPage() async {

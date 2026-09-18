@@ -1,3 +1,4 @@
+import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,9 @@ void main() {
             ChangeNotifierProvider(create: (_) => AccessibilityService()),
           ],
           child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
             home: ProfileSetupPage(),
           ),
         ),
@@ -40,6 +44,9 @@ void main() {
             ChangeNotifierProvider(create: (_) => AccessibilityService()),
           ],
           child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
             home: ProfileSetupPage(),
           ),
         ),

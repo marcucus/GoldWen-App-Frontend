@@ -68,7 +68,7 @@ void main() {
       expect(find.text('Complete personality questionnaire'), findsOneWidget);
       
       // Should show progress indicator
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsNWidgets(4));
       
       // Button should be for completing profile
       expect(find.text('Compléter le profil'), findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
       expect(find.text('Étapes manquantes:'), findsNothing);
       
       // Should show progress indicator at 100%
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsNWidgets(4));
       expect(find.text('100%'), findsOneWidget);
       
       // All status rows should show as completed

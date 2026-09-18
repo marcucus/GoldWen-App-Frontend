@@ -1,3 +1,4 @@
+import 'fake_gdpr_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -13,12 +14,12 @@ class MockAuthProvider extends Mock implements AuthProvider {}
 
 void main() {
   group('AccountDeletionPage Widget Tests', () {
-    late GdprService gdprService;
+    late FakeGdprService gdprService;
     late MockAuthProvider mockAuthProvider;
 
     setUp(() {
       SharedPreferences.setMockInitialValues({});
-      gdprService = GdprService();
+      gdprService = FakeGdprService();
       mockAuthProvider = MockAuthProvider();
     });
 
@@ -69,6 +70,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find and tap the checkbox
+      await tester.ensureVisible(find.byType(Checkbox));
       await tester.tap(find.byType(Checkbox));
       await tester.pumpAndSettle();
 
@@ -90,7 +92,7 @@ void main() {
     testWidgets('should display scheduled deletion view when deletion is scheduled', (WidgetTester tester) async {
       // Set scheduled deletion status
       final deletionDate = DateTime.now().add(const Duration(days: 25));
-      // gdprService.accountDeletionStatus = AccountDeletionStatus(
+      gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         message: 'Votre compte sera supprimé dans 30 jours',
@@ -108,7 +110,7 @@ void main() {
 
     testWidgets('should display cancel button when deletion can be cancelled', (WidgetTester tester) async {
       final deletionDate = DateTime.now().add(const Duration(days: 20));
-      // gdprService.accountDeletionStatus = AccountDeletionStatus(
+      gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         canCancel: true,
@@ -123,7 +125,7 @@ void main() {
 
     testWidgets('should show deletion date in scheduled view', (WidgetTester tester) async {
       final deletionDate = DateTime.now().add(const Duration(days: 30));
-      // gdprService.accountDeletionStatus = AccountDeletionStatus(
+      gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: deletionDate,
         canCancel: true,
@@ -173,7 +175,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Icon should change to visibility_off
-      expect(find.byIcon(Icons.visibility_off), findsOneWidget);
+      expect(find.byIcon(Icons.visibility), findsOneWidget);
     });
 
     testWidgets('should have back button', (WidgetTester tester) async {
@@ -193,7 +195,7 @@ void main() {
     });
 
     testWidgets('should display warning icon in scheduled view', (WidgetTester tester) async {
-      // gdprService.accountDeletionStatus = AccountDeletionStatus(
+      gdprService.accountDeletionStatus = AccountDeletionStatus(
         status: 'scheduled_deletion',
         deletionDate: DateTime.now().add(const Duration(days: 15)),
         canCancel: true,
@@ -218,9 +220,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(find.text('Supprimer mon compte').last, 300, scrollable: find.byType(Scrollable).first);
       // The delete button should use error color
       final deleteButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Supprimer mon compte'),
+        find.ancestor(of: find.text('Supprimer mon compte').last, matching: find.byWidgetPredicate((widget) => widget is ElevatedButton)).first,
       );
 
       expect(deleteButton.style?.backgroundColor?.resolve({}), AppColors.errorRed);

@@ -37,6 +37,12 @@ class ProfileProvider with ChangeNotifier {
   String? _favoriteSong;
   ProfileCompletion? _profileCompletion;
 
+  // Lightweight account stats (GET /users/me/stats) — used by the
+  // Réglages/Profil screens instead of hardcoded placeholder numbers.
+  int? _matchesCount;
+  int? _messagesSentCount;
+  bool _isLoadingStats = false;
+
   String? get name => _name;
   int? get age => _age;
   DateTime? get birthDate => _birthDate;
@@ -69,6 +75,9 @@ class ProfileProvider with ChangeNotifier {
   List<String> get interests => _interests;
   List<String> get languages => _languages;
   ProfileCompletion? get profileCompletion => _profileCompletion;
+  int? get matchesCount => _matchesCount;
+  int? get messagesSentCount => _messagesSentCount;
+  bool get isLoadingStats => _isLoadingStats;
 
   void setBasicInfo(String name, int age, String bio, {DateTime? birthDate}) {
     _name = name;
@@ -580,6 +589,21 @@ class ProfileProvider with ChangeNotifier {
       _profileCompletion = null;
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadStats() async {
+    _isLoadingStats = true;
+    try {
+      final response = await ApiService.getUserStats();
+      final data = (response['data'] ?? response) as Map<String, dynamic>;
+      _matchesCount = (data['totalMatches'] as num?)?.toInt();
+      _messagesSentCount = (data['messagesSent'] as num?)?.toInt();
+    } catch (_) {
+      // Non-critical: the UI falls back to a neutral placeholder.
+    } finally {
+      _isLoadingStats = false;
       notifyListeners();
     }
   }

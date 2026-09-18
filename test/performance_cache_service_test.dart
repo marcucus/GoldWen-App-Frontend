@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goldwen_app/core/services/performance_cache_service.dart';
@@ -6,12 +8,17 @@ void main() {
   group('PerformanceCacheService', () {
     late PerformanceCacheService service;
 
-    setUp(() {
+    late Directory cacheDirectory;
+    setUp(() async {
+      cacheDirectory = await Directory.systemTemp.createTemp('goldwen-cache-test');
+      Hive.init(cacheDirectory.path);
       service = PerformanceCacheService();
     });
 
-    tearDown(() {
+    tearDown(() async {
       service.dispose();
+      await Hive.close();
+      await cacheDirectory.delete(recursive: true);
     });
 
     test('should initialize correctly', () {

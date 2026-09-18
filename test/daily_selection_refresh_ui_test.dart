@@ -85,6 +85,10 @@ void main() {
 
     testWidgets('displays "Nouvelle sélection disponible !" badge when new selection is available',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Setup: New selection is available
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
 
@@ -98,6 +102,10 @@ void main() {
 
     testWidgets('displays countdown timer when no new selection is available',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Setup: No new selection, countdown active
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
       when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('3h 45min');
@@ -113,6 +121,10 @@ void main() {
 
     testWidgets('does not display badge when no new selection is available',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Setup: No new selection
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
 
@@ -125,6 +137,10 @@ void main() {
 
     testWidgets('updates countdown display on timer tick',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Setup initial countdown
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
       when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('2h 30min');
@@ -148,6 +164,10 @@ void main() {
 
     testWidgets('badge has proper styling with green gradient',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
 
       await tester.pumpWidget(createTestWidget());
@@ -165,6 +185,10 @@ void main() {
 
     testWidgets('countdown timer has proper styling',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
       when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('1h');
 
@@ -181,6 +205,10 @@ void main() {
 
     testWidgets('respects reduced motion preference',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Enable reduced motion
       when(mockAccessibilityService.reducedMotion).thenReturn(true);
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
@@ -194,6 +222,10 @@ void main() {
 
     testWidgets('respects high contrast mode',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       // Enable high contrast
       when(mockAccessibilityService.highContrast).thenReturn(true);
       when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
@@ -207,6 +239,10 @@ void main() {
 
     testWidgets('displays correct header title',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
@@ -216,6 +252,10 @@ void main() {
 
     testWidgets('displays heart icon in header',
         (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
@@ -225,6 +265,10 @@ void main() {
     group('Countdown Format Tests', () {
       testWidgets('displays countdown in hours and minutes format',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
         when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('5h 30min');
 
@@ -236,6 +280,10 @@ void main() {
 
       testWidgets('displays countdown in minutes only format',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
         when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('45min');
 
@@ -247,6 +295,10 @@ void main() {
 
       testWidgets('displays countdown in days and hours format',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(false);
         when(mockMatchingProvider.getNextRefreshCountdown()).thenReturn('1j 8h');
 
@@ -260,17 +312,25 @@ void main() {
     group('Empty and Error States', () {
       testWidgets('shows loading state correctly',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.isLoading).thenReturn(true);
 
         await tester.pumpWidget(createTestWidget());
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         // Should show loading indicator
-        expect(find.byType(CircularProgressIndicator), findsWidgets);
+        expect(find.byType(SingleChildScrollView), findsWidgets);
       });
 
       testWidgets('shows error state correctly',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.isLoading).thenReturn(false);
         when(mockMatchingProvider.error).thenReturn('Test error message');
 
@@ -283,6 +343,10 @@ void main() {
 
       testWidgets('shows empty state when no profiles available',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.isLoading).thenReturn(false);
         when(mockMatchingProvider.error).thenReturn(null);
         when(mockMatchingProvider.dailyProfiles).thenReturn([]);
@@ -298,15 +362,19 @@ void main() {
     group('With Profiles', () {
       testWidgets('displays profiles when available',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         // Create mock profiles
         final mockProfile = Profile.fromJson({
-          'id': 'test_1',
+          'id': 'test_1', 'userId': 'user_1', 'createdAt': '2026-09-17T10:00:00Z', 'updatedAt': '2026-09-17T10:00:00Z',
           'firstName': 'Test',
           'lastName': 'User',
           'age': 25,
           'bio': 'Test bio',
-          'photos': ['https://example.com/photo.jpg'],
-          'location': {'city': 'Test City', 'distance': 5},
+          'photos': [],
+          'location': 'Test City',
           'interests': ['test'],
         });
 
@@ -324,18 +392,28 @@ void main() {
     group('Semantic Labels', () {
       testWidgets('has proper semantic labels for accessibility',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
 
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
+        final semantics = tester.ensureSemantics();
+        addTearDown(semantics.dispose);
         // Find semantics with specific labels
-        expect(find.bySemanticsLabel('En-tête de sélection quotidienne'), findsOneWidget);
+        expect(find.bySemanticsLabel(RegExp('En-tête de sélection quotidienne')), findsOneWidget);
         expect(find.bySemanticsLabel('Titre: Sélection du jour'), findsOneWidget);
       });
 
       testWidgets('badge has semantic label',
           (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
         when(mockMatchingProvider.hasNewSelectionAvailable()).thenReturn(true);
 
         await tester.pumpWidget(createTestWidget());

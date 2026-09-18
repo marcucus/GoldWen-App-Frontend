@@ -89,7 +89,7 @@ void main() {
         isNull,
       );
       expect(
-        validatePasswordConfirmation('Test#$%123', 'Test#$%123', isSignUp: true),
+        validatePasswordConfirmation(r'Test#$%123', r'Test#$%123', isSignUp: true),
         isNull,
       );
       expect(

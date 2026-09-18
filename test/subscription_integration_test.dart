@@ -19,6 +19,7 @@ void main() {
         ),
       );
 
+      await tester.pumpAndSettle();
       expect(find.text('Test message'), findsOneWidget);
       expect(find.byIcon(Icons.star), findsOneWidget);
       expect(find.byIcon(Icons.arrow_forward_ios), findsOneWidget);

@@ -53,21 +53,23 @@ void main() {
         expect(result, false);
       });
 
-      test('should return true for recent consent', () {
-        // gdprService.currentConsent = GdprConsent(
-          dataProcessing: true,
-          consentedAt: DateTime.now().subtract(const Duration(days: 30)),
-        );
+      test('should return true for recent consent', () async {
+        SharedPreferences.setMockInitialValues({
+          'gdpr_consent_given': true,
+          'gdpr_consent_date': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+        });
+        await gdprService.checkConsentStatus();
 
         final result = gdprService.isConsentStillValid();
         expect(result, true);
       });
 
-      test('should return false for old consent (over 1 year)', () {
-        // gdprService.currentConsent = GdprConsent(
-          dataProcessing: true,
-          consentedAt: DateTime.now().subtract(const Duration(days: 370)),
-        );
+      test('should return false for old consent (over 1 year)', () async {
+        SharedPreferences.setMockInitialValues({
+          'gdpr_consent_given': true,
+          'gdpr_consent_date': DateTime.now().subtract(const Duration(days: 370)).toIso8601String(),
+        });
+        await gdprService.checkConsentStatus();
 
         final result = gdprService.isConsentStillValid();
         expect(result, false);
@@ -80,21 +82,23 @@ void main() {
         expect(result, true);
       });
 
-      test('should return false for recent consent', () {
-        // gdprService.currentConsent = GdprConsent(
-          dataProcessing: true,
-          consentedAt: DateTime.now().subtract(const Duration(days: 30)),
-        );
+      test('should return false for recent consent', () async {
+        SharedPreferences.setMockInitialValues({
+          'gdpr_consent_given': true,
+          'gdpr_consent_date': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+        });
+        await gdprService.checkConsentStatus();
 
         final result = gdprService.needsConsentRenewal();
         expect(result, false);
       });
 
-      test('should return true for consent older than 10 months', () {
-        // gdprService.currentConsent = GdprConsent(
-          dataProcessing: true,
-          consentedAt: DateTime.now().subtract(const Duration(days: 305)),
-        );
+      test('should return true for consent older than 10 months', () async {
+        SharedPreferences.setMockInitialValues({
+          'gdpr_consent_given': true,
+          'gdpr_consent_date': DateTime.now().subtract(const Duration(days: 305)).toIso8601String(),
+        });
+        await gdprService.checkConsentStatus();
 
         final result = gdprService.needsConsentRenewal();
         expect(result, true);
@@ -104,10 +108,8 @@ void main() {
     group('clearLocalConsentData', () {
       test('should clear all local consent data', () async {
         // Set initial data
-        // gdprService.currentConsent = GdprConsent(
-          dataProcessing: true,
-          consentedAt: DateTime.now(),
-        );
+        SharedPreferences.setMockInitialValues({'gdpr_consent_given': true, 'gdpr_consent_date': DateTime.now().toIso8601String()});
+        await gdprService.checkConsentStatus();
         
         await gdprService.clearLocalConsentData();
 

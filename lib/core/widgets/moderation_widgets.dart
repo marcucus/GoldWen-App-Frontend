@@ -180,7 +180,7 @@ class ModerationFlagsWidget extends StatelessWidget {
           (match) => ' ${match.group(1)}',
         )
         .trim()
-        .split(' ')
+        .split(RegExp(r'\s+'))
         .map((word) => word.isNotEmpty
             ? word[0].toUpperCase() + word.substring(1).toLowerCase()
             : '')

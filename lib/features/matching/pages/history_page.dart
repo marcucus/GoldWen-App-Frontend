@@ -27,7 +27,9 @@ class _HistoryPageState extends State<HistoryPage>
     super.initState();
     _initializeAnimations();
     _initializeScrollController();
-    _loadHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadHistory();
+    });
   }
 
   void _initializeAnimations() {
@@ -58,6 +60,7 @@ class _HistoryPageState extends State<HistoryPage>
 
   void _loadHistory() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final matchingProvider =
           Provider.of<MatchingProvider>(context, listen: false);
       matchingProvider.loadHistory(page: 1, limit: _itemsPerPage);

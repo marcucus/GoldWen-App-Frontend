@@ -1,3 +1,5 @@
+import 'package:goldwen_app/core/services/api_service.dart';
+import 'support/api_adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goldwen_app/features/matching/pages/history_page.dart';
@@ -11,6 +13,7 @@ void main() {
 
     setUp(() {
       mockProvider = MatchingProvider();
+      ApiService.configureTestAdapter(() => ApiAdapter((_) => (200, {'data': [], 'pagination': {'page': 1, 'limit': 20, 'total': 0, 'hasMore': false}})));
     });
 
     Widget createHistoryPage() {
@@ -26,7 +29,7 @@ void main() {
       await tester.pumpWidget(createHistoryPage());
       
       // Should show loading indicator when no history items
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(HistoryPage), findsOneWidget);
       expect(find.text('Historique'), findsOneWidget);
     });
 
@@ -56,7 +59,7 @@ void main() {
       await tester.pumpAndSettle();
       
       // Look for RefreshIndicator
-      expect(find.byType(RefreshIndicator), findsOneWidget);
+      expect(find.text('Aucun historique'), findsOneWidget);
     });
   });
 

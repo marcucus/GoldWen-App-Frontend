@@ -7,6 +7,12 @@ import '../../profile/providers/profile_provider.dart';
 import '../../subscription/providers/subscription_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../feedback/pages/feedback_page.dart';
+import '../../profile/pages/photo_management_page.dart';
+import '../../moderation/pages/moderation_history_page.dart';
+import 'preferences_settings_page.dart';
+import 'location_settings_page.dart';
+import 'security_settings_page.dart';
+import 'accessibility_settings_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,7 +25,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadProfile();
+    });
   }
 
   void _loadProfile() {
@@ -28,6 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final subscriptionProvider =
         Provider.of<SubscriptionProvider>(context, listen: false);
     profileProvider.loadProfile();
+    profileProvider.loadStats();
     subscriptionProvider.loadCurrentSubscription();
     subscriptionProvider.loadSubscriptionUsage();
   }
@@ -42,25 +51,14 @@ class _SettingsPageState extends State<SettingsPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header with back button
+              // Header — this page lives in the bottom-tab IndexedStack
+              // (MainNavigationPage), not a navigation stack, so there is
+              // no "back" to go to here; a back arrow was previously
+              // rendered but Navigator.pop() had nothing to pop.
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.cardOverlay.withValues(alpha: 0.2),
-                      ),
-                      child: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(
                         'Profil & Paramètres',
@@ -176,13 +174,33 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             child: profileProvider.photos.isNotEmpty
                 ? ClipOval(
-                    child: Container(
-                      color: AppColors.primaryGold.withValues(alpha: 0.6),
-                      child: const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.white,
+                    child: Image.network(
+                      profileProvider.photos.first.url,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: AppColors.primaryGold.withValues(alpha: 0.6),
+                        child: const Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.white,
+                        ),
                       ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryGold),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   )
                 : const Icon(
@@ -223,8 +241,14 @@ class _SettingsPageState extends State<SettingsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem('Photos', '${profileProvider.photos.length}'),
-              _buildStatItem('Matches', '3'),
-              _buildStatItem('Messages', '2'),
+              _buildStatItem(
+                'Matches',
+                profileProvider.matchesCount?.toString() ?? '—',
+              ),
+              _buildStatItem(
+                'Messages',
+                profileProvider.messagesSentCount?.toString() ?? '—',
+              ),
             ],
           ),
         ],
@@ -484,14 +508,25 @@ class _SettingsPageState extends State<SettingsPage> {
           'Localisation',
           'Paramètres de géolocalisation',
           Icons.location_on,
-          () => _showLocationSettings(context),
+          () => _navigateToLocationSettings(context),
         ),
         _buildSettingItem(
           context,
           'Sécurité',
           'Mot de passe et sécurité',
           Icons.security,
-          () => _showSecuritySettings(context),
+          () => _navigateToSecuritySettings(context),
+        ),
+        _buildSettingItem(
+          context,
+          'Accessibilité',
+          'Taille du texte, contraste, réduction des animations',
+          Icons.accessibility_new,
+          () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const AccessibilitySettingsPage(),
+            ),
+          ),
         ),
       ],
     );
@@ -509,10 +544,28 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         _buildSettingItem(
           context,
+          'Historique de mes sélections',
+          'Vos choix passés et vos matchs',
+          Icons.history,
+          () => context.push('/history'),
+        ),
+        _buildSettingItem(
+          context,
           'Mes signalements',
           'Voir l\'historique de vos signalements',
           Icons.report,
-          () => context.go('/reports'),
+          () => context.push('/reports'),
+        ),
+        _buildSettingItem(
+          context,
+          'Historique de modération',
+          'Le suivi de vos photos et contenus modérés',
+          Icons.shield_outlined,
+          () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ModerationHistoryPage(),
+            ),
+          ),
         ),
         _buildSettingItem(
           context,
@@ -526,35 +579,35 @@ class _SettingsPageState extends State<SettingsPage> {
           'Paramètres de confidentialité',
           'Gérer vos données et consentements RGPD',
           Icons.security,
-          () => context.go('/privacy-settings'),
+          () => context.push('/privacy-settings'),
         ),
         _buildSettingItem(
           context,
           'Télécharger mes données',
           'Exporter toutes vos données personnelles (RGPD)',
           Icons.file_download,
-          () => context.go('/data-export'),
+          () => context.push('/data-export'),
         ),
         _buildSettingItem(
           context,
           'Confidentialité',
           'Politique de confidentialité',
           Icons.privacy_tip,
-          () => context.go('/privacy'),
+          () => context.push('/privacy'),
         ),
         _buildSettingItem(
           context,
           'Conditions',
           'Conditions d\'utilisation',
           Icons.description,
-          () => context.go('/terms'),
+          () => context.push('/terms'),
         ),
         _buildSettingItem(
           context,
           'Supprimer mon compte',
           'Suppression définitive de votre compte',
           Icons.delete_forever,
-          () => context.go('/account-deletion'),
+          () => context.push('/account-deletion'),
           isDestructive: true,
         ),
       ],
@@ -641,15 +694,23 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Navigation methods
   void _navigateToPhotoManagement(BuildContext context) {
-    context.go('/profile-setup');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PhotoManagementPage(),
+      ),
+    );
   }
 
   void _navigateToPromptsEditing(BuildContext context) {
-    context.go('/prompts-management');
+    context.push('/prompts-management');
   }
 
   void _navigateToPreferences(BuildContext context) {
-    _showPreferencesDialog(context);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PreferencesSettingsPage(),
+      ),
+    );
   }
 
   void _navigateToFeedback(BuildContext context) {
@@ -661,26 +722,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   // Dialog methods
-  void _showPreferencesDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Préférences'),
-          content: const Text(
-              'Fonctionnalité de préférences en cours de développement. '
-              'Vous pourrez bientôt personnaliser vos critères de recherche ici.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showNotificationSettings(BuildContext context) {
     showDialog(
       context: context,
@@ -814,18 +855,32 @@ class _SettingsPageState extends State<SettingsPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Heures silencieuses',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${settings.quietHoursStart} – ${settings.quietHoursEnd}',
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 13),
-                          ),
-                        ],
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          context.push('/notifications');
+                        },
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Heures silencieuses',
+                                      style:
+                                          TextStyle(fontWeight: FontWeight.w600)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${settings.quietHoursStart} – ${settings.quietHoursEnd}',
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right, size: 18),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -844,41 +899,19 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showLocationSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Localisation'),
-          content: const Text(
-              'Paramètres de géolocalisation en cours de développement.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+  void _navigateToLocationSettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const LocationSettingsPage(),
+      ),
     );
   }
 
-  void _showSecuritySettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sécurité'),
-          content:
-              const Text('Paramètres de sécurité en cours de développement.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+  void _navigateToSecuritySettings(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SecuritySettingsPage(),
+      ),
     );
   }
 
@@ -907,9 +940,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ouverture du chat support...')),
-                );
+                _navigateToFeedback(context);
               },
               child: const Text('Contacter'),
             ),

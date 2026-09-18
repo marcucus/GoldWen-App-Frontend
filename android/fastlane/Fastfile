@@ -1,0 +1,24 @@
+# Phase 5 — scaffold Fastlane Android, sans secret.
+# Prérequis avant utilisation réelle :
+#   - Compte Google Play Console + compte de service (clé JSON, non versionnée)
+#   - android/key.properties + android/upload-keystore.jks présents (générés, voir README)
+default_platform(:android)
+
+platform :android do
+  desc "Build un AAB de release signé"
+  lane :build_release do
+    sh("cd .. && flutter build appbundle --release")
+  end
+
+  desc "Publie sur la piste interne (internal testing) du Play Store"
+  lane :deploy_internal do
+    build_release
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

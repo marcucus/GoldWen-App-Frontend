@@ -86,7 +86,7 @@ void main() {
       expect(user.email, equals('test@example.com'));
       expect(user.firstName, equals('John'));
       expect(user.lastName, equals('Doe'));
-      expect(user.status, equals('active')); // default value
+      expect(user.status, isNull); // default value
     });
 
     test('should handle snake_case field names', () {

@@ -12,13 +12,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -42,13 +42,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -66,13 +66,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -94,13 +94,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -129,13 +129,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -148,13 +148,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -182,13 +182,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -197,6 +197,7 @@ void main() {
       expect(find.byIcon(Icons.add_photo_alternate), findsWidgets); // Add button still visible
 
       // Add sixth photo to reach maximum
+      photos = [...photos];
       photos.add(
         Photo(
           id: '6',
@@ -210,13 +211,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -248,13 +249,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );
@@ -263,6 +264,7 @@ void main() {
       expect(find.text('Principal'), findsOneWidget);
 
       // Add another photo
+      photos = [...photos];
       photos.add(
         Photo(
           id: '3',
@@ -276,13 +278,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PhotoManagementWidget(
+            body: SingleChildScrollView(child: PhotoManagementWidget(
               photos: photos,
               onPhotosChanged: (updatedPhotos) {},
               minPhotos: 3,
               maxPhotos: 6,
               showAddButton: true,
-            ),
+            )),
           ),
         ),
       );

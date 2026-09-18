@@ -38,6 +38,14 @@ class ApiService {
   // at the first call time, not at class loading time.
   static Dio? _dioInstance;
 
+  @visibleForTesting
+  static void configureTestAdapter(HttpClientAdapter Function() factory) {
+    _dioInstance = null;
+    _testAdapterFactory = factory;
+  }
+
+  static HttpClientAdapter Function()? _testAdapterFactory;
+
   static Dio get _dio {
     if (_dioInstance == null) {
       _dioInstance = Dio(BaseOptions(
@@ -48,6 +56,9 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       ));
+      if (_testAdapterFactory != null) {
+        _dioInstance!.httpClientAdapter = _testAdapterFactory!();
+      }
       _dioInstance!.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
           if (_token != null) {
@@ -95,7 +106,7 @@ class ApiService {
           try {
             final retryRequest = e.requestOptions
               ..headers['Authorization'] = 'Bearer $newToken';
-            final retryResponse = await _dio.fetch(retryRequest);
+            final retryResponse = await _dioInstance!.fetch(retryRequest);
             return handler.resolve(retryResponse);
           } on DioException catch (retryError) {
             // Refresh succeeded, but the retried request failed for its
@@ -156,6 +167,9 @@ class ApiService {
         receiveTimeout: AppConfig.defaultTimeout,
         headers: {'Content-Type': 'application/json'},
       ));
+      if (_testAdapterFactory != null) {
+        refreshDio.httpClientAdapter = _testAdapterFactory!();
+      }
       final response = await refreshDio.post(
         '/auth/refresh',
         data: jsonEncode({'refreshToken': currentRefreshToken}),
@@ -336,8 +350,9 @@ class ApiService {
   static Future<Map<String, dynamic>> submitPersonalityAnswers(
       List<Map<String, dynamic>> answers) async {
     if (AppConfig.isDevelopment) {
-      debugPrint('Submitting personality answers: $answers');
-      debugPrint('Request body: ${jsonEncode({'answers': answers})}');
+      // Log shape only, never the user's actual answers: personality
+      // responses are personal data and must not end up in device logs.
+      debugPrint('Submitting ${answers.length} personality answer(s)');
     }
 
     final response = await _dio.post(
@@ -1126,6 +1141,25 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // Preferences endpoints
+  static Future<Map<String, dynamic>> getPreferences() async {
+    final response = await _makeRequest(_dio.get('/preferences/me'));
+
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> updatePreferences(
+      Map<String, dynamic> preferences) async {
+    final response = await _makeRequest(
+      _dio.put(
+        '/preferences/me',
+        data: jsonEncode(preferences),
+      ),
+    );
+
+    return _handleResponse(response);
+  }
+
   static Future<Map<String, dynamic>> getPrivacyPolicy({
     String? version,
     String format = 'json',
@@ -1574,6 +1608,7 @@ class RateLimitInfo {
   });
 
   factory RateLimitInfo.fromHeaders(Map<String, String> headers) {
+    headers = headers.map((key, value) => MapEntry(key.toLowerCase(), value));
     // Parse X-RateLimit-Limit header
     final limit = headers['x-ratelimit-limit'] != null
         ? int.tryParse(headers['x-ratelimit-limit']!)

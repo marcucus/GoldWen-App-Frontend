@@ -12,3 +12,5 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+fastlane/play-console-service-account.json
+fastlane/report.xml

@@ -1,3 +1,5 @@
+import 'package:goldwen_app/core/services/api_service.dart';
+import 'support/api_adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,7 @@ void main() {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       gdprService = GdprService();
+      ApiService.configureTestAdapter(() => ApiAdapter((_) => (200, {'data': {}})));
     });
 
     testWidgets('should display consent page with modal', (WidgetTester tester) async {
@@ -63,6 +66,7 @@ void main() {
           home: ChangeNotifierProvider<GdprService>.value(
             value: gdprService,
             child: ConsentPage(
+              canDismiss: false,
               onConsentGiven: () {
                 callbackCalled = true;
               },
@@ -78,7 +82,9 @@ void main() {
 
       // Tap the accept button
       final acceptButton = find.text('Accepter et continuer');
+      await tester.ensureVisible(acceptButton);
       await tester.tap(acceptButton);
+      await tester.pumpAndSettle();
       await tester.pump();
 
       // Wait for async operations

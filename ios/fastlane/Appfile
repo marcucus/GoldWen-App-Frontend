@@ -1,0 +1,7 @@
+# Phase 5 — scaffold minimal, sans secret. À compléter une fois le compte
+# Apple Developer Program actif (app_identifier doit correspondre au bundle
+# ID enregistré sur App Store Connect).
+app_identifier("com.goldwen.app")
+apple_id(ENV["APPLE_ID"] || "") # ex: contact@goldwen.app
+itc_team_id(ENV["ITC_TEAM_ID"] || "")
+team_id(ENV["APPLE_TEAM_ID"] || "3L39MWQ44C")

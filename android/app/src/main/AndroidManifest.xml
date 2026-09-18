@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <application
-        android:label="goldwen_app"
+        android:label="GoldWen"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:networkSecurityConfig="@xml/network_security_config">
@@ -44,6 +44,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Phase 5: default channel/icon FCM utilise quand l'app est en arrière-plan/fermée.
+             Sans ça, Android range les notifications FCM dans un canal "Divers" générique.
+             Le canal "general" est créé dynamiquement par flutter_local_notifications
+             (voir local_notification_service.dart) au premier lancement. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="general" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

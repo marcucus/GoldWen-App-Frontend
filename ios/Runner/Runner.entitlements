@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Phase 5: requis car sign_in_with_apple est proposé comme option de connexion
+	     (une app qui offre une connexion sociale tierce DOIT aussi proposer Sign in with
+	     Apple, sous peine de rejet à la revue App Store — guideline 4.8).
+	     Cette entitlement seule ne suffit pas : la capability "Sign in with Apple" doit
+	     aussi être activée pour l'App ID sur le portail Apple Developer (nécessite un
+	     compte Apple Developer Program actif), puis le profil de provisioning régénéré. -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+</dict>
+</plist>

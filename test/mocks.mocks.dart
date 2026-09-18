@@ -3,13 +3,21 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i5;
+import 'dart:async' as _i4;
+import 'dart:ui' as _i8;
 
-import 'package:flutter/material.dart' as _i6;
-import 'package:goldwen_app/core/models/models.dart' as _i7;
-import 'package:goldwen_app/features/matching/providers/matching_provider.dart' as _i4;
-import 'package:goldwen_app/features/subscription/providers/subscription_provider.dart' as _i2;
+import 'package:flutter/material.dart' as _i5;
+import 'package:goldwen_app/core/models/models.dart' as _i3;
+import 'package:goldwen_app/core/services/api_service.dart' as _i10;
+import 'package:goldwen_app/features/matching/providers/matching_provider.dart'
+    as _i2;
+import 'package:goldwen_app/features/matching/providers/report_provider.dart'
+    as _i11;
+import 'package:goldwen_app/features/subscription/providers/subscription_provider.dart'
+    as _i6;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:purchases_flutter/purchases_flutter.dart' as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -24,24 +32,37 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeSubscriptionProvider_0 extends _i1.SmartFake
-    implements _i2.SubscriptionProvider {
-  _FakeSubscriptionProvider_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
 /// A class which mocks [MatchingProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
+class MockMatchingProvider extends _i1.Mock implements _i2.MatchingProvider {
   MockMatchingProvider() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  List<_i3.Match> get matches => (super.noSuchMethod(
+        Invocation.getter(#matches),
+        returnValue: <_i3.Match>[],
+      ) as List<_i3.Match>);
+
+  @override
+  List<_i3.Profile> get dailyProfiles => (super.noSuchMethod(
+        Invocation.getter(#dailyProfiles),
+        returnValue: <_i3.Profile>[],
+      ) as List<_i3.Profile>);
+
+  @override
+  List<String> get selectedProfileIds => (super.noSuchMethod(
+        Invocation.getter(#selectedProfileIds),
+        returnValue: <String>[],
+      ) as List<String>);
+
+  @override
+  List<_i3.WhoLikedMeItem> get whoLikedMe => (super.noSuchMethod(
+        Invocation.getter(#whoLikedMe),
+        returnValue: <_i3.WhoLikedMeItem>[],
+      ) as List<_i3.WhoLikedMeItem>);
 
   @override
   bool get isLoading => (super.noSuchMethod(
@@ -50,19 +71,22 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
       ) as bool);
 
   @override
-  String? get error => (super.noSuchMethod(Invocation.getter(#error)) as String?);
+  bool get isLoadingWhoLikedMe => (super.noSuchMethod(
+        Invocation.getter(#isLoadingWhoLikedMe),
+        returnValue: false,
+      ) as bool);
 
   @override
-  List<_i7.Profile> get dailyProfiles => (super.noSuchMethod(
-        Invocation.getter(#dailyProfiles),
-        returnValue: <_i7.Profile>[],
-      ) as List<_i7.Profile>);
+  bool get hasSubscription => (super.noSuchMethod(
+        Invocation.getter(#hasSubscription),
+        returnValue: false,
+      ) as bool);
 
   @override
-  List<String> get selectedProfileIds => (super.noSuchMethod(
-        Invocation.getter(#selectedProfileIds),
-        returnValue: <String>[],
-      ) as List<String>);
+  int get maxSelections => (super.noSuchMethod(
+        Invocation.getter(#maxSelections),
+        returnValue: 0,
+      ) as int);
 
   @override
   int get remainingSelections => (super.noSuchMethod(
@@ -83,20 +107,58 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
       ) as bool);
 
   @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
+  List<_i3.HistoryItem> get historyItems => (super.noSuchMethod(
+        Invocation.getter(#historyItems),
+        returnValue: <_i3.HistoryItem>[],
+      ) as List<_i3.HistoryItem>);
+
+  @override
+  bool get hasMoreHistory => (super.noSuchMethod(
+        Invocation.getter(#hasMoreHistory),
         returnValue: false,
       ) as bool);
 
   @override
-  _i5.Future<void> loadDailySelection() => (super.noSuchMethod(
-        Invocation.method(
-          #loadDailySelection,
-          [],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
+  bool get canSeeWhoLikedYou => (super.noSuchMethod(
+        Invocation.getter(#canSeeWhoLikedYou),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get canUseAdvancedFilters => (super.noSuchMethod(
+        Invocation.getter(#canUseAdvancedFilters),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasUnlimitedRewinds => (super.noSuchMethod(
+        Invocation.getter(#hasUnlimitedRewinds),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  int get superLikesRemaining => (super.noSuchMethod(
+        Invocation.getter(#superLikesRemaining),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  int get boostsRemaining => (super.noSuchMethod(
+        Invocation.getter(#boostsRemaining),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  bool get isLoadingAdvancedRecommendations => (super.noSuchMethod(
+        Invocation.getter(#isLoadingAdvancedRecommendations),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasListeners => (super.noSuchMethod(
+        Invocation.getter(#hasListeners),
+        returnValue: false,
+      ) as bool);
 
   @override
   void clearError() => super.noSuchMethod(
@@ -108,7 +170,269 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
       );
 
   @override
-  void addListener(_i6.VoidCallback? listener) => super.noSuchMethod(
+  _i4.Future<void> loadDailySelection() => (super.noSuchMethod(
+        Invocation.method(
+          #loadDailySelection,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> initializeNotifications() => (super.noSuchMethod(
+        Invocation.method(
+          #initializeNotifications,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> scheduleDailyNotificationsWithContext(
+          _i5.BuildContext? context) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #scheduleDailyNotificationsWithContext,
+          [context],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadMatches({
+    int? page = 1,
+    int? limit = 20,
+    String? status,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadMatches,
+          [],
+          {
+            #page: page,
+            #limit: limit,
+            #status: status,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<Map<String, dynamic>?> selectProfile(
+    String? profileId, {
+    _i6.SubscriptionProvider? subscriptionProvider,
+    String? choice = r'like',
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #selectProfile,
+          [profileId],
+          {
+            #subscriptionProvider: subscriptionProvider,
+            #choice: choice,
+          },
+        ),
+        returnValue: _i4.Future<Map<String, dynamic>?>.value(),
+      ) as _i4.Future<Map<String, dynamic>?>);
+
+  @override
+  _i4.Future<_i3.CompatibilityResult?> getCompatibility(String? profileId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getCompatibility,
+          [profileId],
+        ),
+        returnValue: _i4.Future<_i3.CompatibilityResult?>.value(),
+      ) as _i4.Future<_i3.CompatibilityResult?>);
+
+  @override
+  _i4.Future<Map<String, dynamic>?> acceptMatch(
+    String? matchId, {
+    required bool? accept,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #acceptMatch,
+          [matchId],
+          {#accept: accept},
+        ),
+        returnValue: _i4.Future<Map<String, dynamic>?>.value(),
+      ) as _i4.Future<Map<String, dynamic>?>);
+
+  @override
+  _i4.Future<void> deleteMatch(String? matchId) => (super.noSuchMethod(
+        Invocation.method(
+          #deleteMatch,
+          [matchId],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i3.Match?> getMatchDetails(String? matchId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getMatchDetails,
+          [matchId],
+        ),
+        returnValue: _i4.Future<_i3.Match?>.value(),
+      ) as _i4.Future<_i3.Match?>);
+
+  @override
+  bool isProfileSelected(String? profileId) => (super.noSuchMethod(
+        Invocation.method(
+          #isProfileSelected,
+          [profileId],
+        ),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool shouldShowNewProfiles() => (super.noSuchMethod(
+        Invocation.method(
+          #shouldShowNewProfiles,
+          [],
+        ),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool hasNewSelectionAvailable() => (super.noSuchMethod(
+        Invocation.method(
+          #hasNewSelectionAvailable,
+          [],
+        ),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  String getNextRefreshCountdown() => (super.noSuchMethod(
+        Invocation.method(
+          #getNextRefreshCountdown,
+          [],
+        ),
+        returnValue: _i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #getNextRefreshCountdown,
+            [],
+          ),
+        ),
+      ) as String);
+
+  @override
+  void clearDailySelection() => super.noSuchMethod(
+        Invocation.method(
+          #clearDailySelection,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void refreshSelectionIfNeeded() => super.noSuchMethod(
+        Invocation.method(
+          #refreshSelectionIfNeeded,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i4.Future<void> loadWeekHistory() => (super.noSuchMethod(
+        Invocation.method(
+          #loadWeekHistory,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadHistory({
+    int? page = 1,
+    int? limit = 20,
+    String? startDate,
+    String? endDate,
+    bool? refresh = false,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadHistory,
+          [],
+          {
+            #page: page,
+            #limit: limit,
+            #startDate: startDate,
+            #endDate: endDate,
+            #refresh: refresh,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadWhoLikedMe() => (super.noSuchMethod(
+        Invocation.method(
+          #loadWhoLikedMe,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  void clearWhoLikedMe() => super.noSuchMethod(
+        Invocation.method(
+          #clearWhoLikedMe,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i4.Future<void> loadAdvancedRecommendations({
+    required String? userId,
+    required List<String>? candidateIds,
+    Map<String, dynamic>? personalityAnswers,
+    Map<String, dynamic>? preferences,
+    Map<String, dynamic>? userLocation,
+    bool? includeAdvancedScoring = true,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadAdvancedRecommendations,
+          [],
+          {
+            #userId: userId,
+            #candidateIds: candidateIds,
+            #personalityAnswers: personalityAnswers,
+            #preferences: preferences,
+            #userLocation: userLocation,
+            #includeAdvancedScoring: includeAdvancedScoring,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  void clearAdvancedRecommendations() => super.noSuchMethod(
+        Invocation.method(
+          #clearAdvancedRecommendations,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -117,7 +441,7 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
       );
 
   @override
-  void removeListener(_i6.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],
@@ -148,16 +472,28 @@ class MockMatchingProvider extends _i1.Mock implements _i4.MatchingProvider {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionProvider extends _i1.Mock
-    implements _i2.SubscriptionProvider {
+    implements _i6.SubscriptionProvider {
   MockSubscriptionProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  bool get hasActiveSubscription => (super.noSuchMethod(
-        Invocation.getter(#hasActiveSubscription),
-        returnValue: false,
-      ) as bool);
+  List<_i3.SubscriptionPlan> get plans => (super.noSuchMethod(
+        Invocation.getter(#plans),
+        returnValue: <_i3.SubscriptionPlan>[],
+      ) as List<_i3.SubscriptionPlan>);
+
+  @override
+  List<_i3.SubscriptionPlan> get activePlans => (super.noSuchMethod(
+        Invocation.getter(#activePlans),
+        returnValue: <_i3.SubscriptionPlan>[],
+      ) as List<_i3.SubscriptionPlan>);
+
+  @override
+  List<_i9.Package> get revenueCatPackages => (super.noSuchMethod(
+        Invocation.getter(#revenueCatPackages),
+        returnValue: <_i9.Package>[],
+      ) as List<_i9.Package>);
 
   @override
   bool get isLoading => (super.noSuchMethod(
@@ -166,7 +502,76 @@ class MockSubscriptionProvider extends _i1.Mock
       ) as bool);
 
   @override
-  String? get error => (super.noSuchMethod(Invocation.getter(#error)) as String?);
+  bool get hasActiveSubscription => (super.noSuchMethod(
+        Invocation.getter(#hasActiveSubscription),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasExpiredSubscription => (super.noSuchMethod(
+        Invocation.getter(#hasExpiredSubscription),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get willRenew => (super.noSuchMethod(
+        Invocation.getter(#willRenew),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get canSeeWhoLikedYou => (super.noSuchMethod(
+        Invocation.getter(#canSeeWhoLikedYou),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get canUseAdvancedFilters => (super.noSuchMethod(
+        Invocation.getter(#canUseAdvancedFilters),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasUnlimitedRewinds => (super.noSuchMethod(
+        Invocation.getter(#hasUnlimitedRewinds),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  int get dailyLikesRemaining => (super.noSuchMethod(
+        Invocation.getter(#dailyLikesRemaining),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  int get superLikesRemaining => (super.noSuchMethod(
+        Invocation.getter(#superLikesRemaining),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  int get boostsRemaining => (super.noSuchMethod(
+        Invocation.getter(#boostsRemaining),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  bool get hasRemainingLikes => (super.noSuchMethod(
+        Invocation.getter(#hasRemainingLikes),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasRemainingSuperLikes => (super.noSuchMethod(
+        Invocation.getter(#hasRemainingSuperLikes),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasRemainingBoosts => (super.noSuchMethod(
+        Invocation.getter(#hasRemainingBoosts),
+        returnValue: false,
+      ) as bool);
 
   @override
   bool get hasListeners => (super.noSuchMethod(
@@ -175,7 +580,120 @@ class MockSubscriptionProvider extends _i1.Mock
       ) as bool);
 
   @override
-  void addListener(_i6.VoidCallback? listener) => super.noSuchMethod(
+  void clearError() => super.noSuchMethod(
+        Invocation.method(
+          #clearError,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i4.Future<void> initializeWithUser(String? userId) => (super.noSuchMethod(
+        Invocation.method(
+          #initializeWithUser,
+          [userId],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadSubscriptionPlans() => (super.noSuchMethod(
+        Invocation.method(
+          #loadSubscriptionPlans,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadCurrentSubscription() => (super.noSuchMethod(
+        Invocation.method(
+          #loadCurrentSubscription,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadSubscriptionUsage() => (super.noSuchMethod(
+        Invocation.method(
+          #loadSubscriptionUsage,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<bool> purchaseSubscription({
+    required String? planId,
+    required String? platform,
+    required String? receiptData,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #purchaseSubscription,
+          [],
+          {
+            #planId: planId,
+            #platform: platform,
+            #receiptData: receiptData,
+          },
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> cancelSubscription() => (super.noSuchMethod(
+        Invocation.method(
+          #cancelSubscription,
+          [],
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> restoreSubscription() => (super.noSuchMethod(
+        Invocation.method(
+          #restoreSubscription,
+          [],
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i3.SubscriptionPlan? getPlanById(String? planId) =>
+      (super.noSuchMethod(Invocation.method(
+        #getPlanById,
+        [planId],
+      )) as _i3.SubscriptionPlan?);
+
+  @override
+  _i4.Future<void> refreshAll() => (super.noSuchMethod(
+        Invocation.method(
+          #refreshAll,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -184,7 +702,142 @@ class MockSubscriptionProvider extends _i1.Mock
       );
 
   @override
-  void removeListener(_i6.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #removeListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void dispose() => super.noSuchMethod(
+        Invocation.method(
+          #dispose,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+        Invocation.method(
+          #notifyListeners,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+}
+
+/// A class which mocks [ApiService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockApiService extends _i1.Mock implements _i10.ApiService {
+  MockApiService() {
+    _i1.throwOnMissingStub(this);
+  }
+}
+
+/// A class which mocks [ReportProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockReportProvider extends _i1.Mock implements _i11.ReportProvider {
+  MockReportProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  List<_i3.Report> get myReports => (super.noSuchMethod(
+        Invocation.getter(#myReports),
+        returnValue: <_i3.Report>[],
+      ) as List<_i3.Report>);
+
+  @override
+  bool get isLoading => (super.noSuchMethod(
+        Invocation.getter(#isLoading),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasMoreReports => (super.noSuchMethod(
+        Invocation.getter(#hasMoreReports),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get hasListeners => (super.noSuchMethod(
+        Invocation.getter(#hasListeners),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  void clearError() => super.noSuchMethod(
+        Invocation.method(
+          #clearError,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i4.Future<void> submitReport({
+    required String? targetUserId,
+    required _i3.ReportType? type,
+    required String? reason,
+    String? messageId,
+    String? chatId,
+    List<String>? evidence,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #submitReport,
+          [],
+          {
+            #targetUserId: targetUserId,
+            #type: type,
+            #reason: reason,
+            #messageId: messageId,
+            #chatId: chatId,
+            #evidence: evidence,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> loadMyReports({
+    int? page = 1,
+    int? limit = 20,
+    _i3.ReportStatus? status,
+    bool? refresh = false,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadMyReports,
+          [],
+          {
+            #page: page,
+            #limit: limit,
+            #status: status,
+            #refresh: refresh,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #addListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],

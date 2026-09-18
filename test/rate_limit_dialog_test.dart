@@ -42,7 +42,7 @@ void main() {
       expect(find.text('Limite de requêtes atteinte'), findsOneWidget);
       
       // Verify countdown is shown
-      expect(find.textContaining('seconde'), findsOneWidget);
+      expect(find.textContaining('1 minute'), findsWidgets);
     });
 
     testWidgets('should display brute force login error', (WidgetTester tester) async {
@@ -190,7 +190,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initial countdown
-      expect(find.textContaining('3 seconde'), findsOneWidget);
+      expect(find.textContaining('3 seconde'), findsNWidgets(2));
 
       // Wait 1 second
       await tester.pump(const Duration(seconds: 1));

@@ -594,6 +594,23 @@ class MatchingProvider with ChangeNotifier {
   List<HistoryItem> get historyItems => _historyItems;
   bool get hasMoreHistory => _hasMoreHistory;
 
+  /// Loads the current calendar week's history (Monday through today) so
+  /// the home screen's ritual streak can show real engagement per day
+  /// instead of a client-side fabrication.
+  Future<void> loadWeekHistory() async {
+    final now = DateTime.now();
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    String fmt(DateTime d) =>
+        '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    await loadHistory(
+      startDate: fmt(startOfWeek),
+      endDate: fmt(now),
+      limit: 7,
+      refresh: true,
+    );
+  }
+
   Future<void> loadHistory({
     int page = 1,
     int limit = 20,

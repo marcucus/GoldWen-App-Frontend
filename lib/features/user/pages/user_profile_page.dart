@@ -7,6 +7,8 @@ import '../../../core/widgets/modern_cards.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../profile/widgets/profile_completion_widget.dart';
+import '../../profile/pages/photo_management_page.dart';
+import '../../settings/pages/preferences_settings_page.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -27,7 +29,9 @@ class _UserProfilePageState extends State<UserProfilePage>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadProfile();
+    });
     _startAnimations();
   }
 
@@ -211,17 +215,12 @@ class _UserProfilePageState extends State<UserProfilePage>
               // Profile Management Section
               _buildProfileManagement(),
 
-              const SizedBox(height: 16),
-
-              // App Settings Section
-              _buildAppSettings(),
-
-              const SizedBox(height: 16),
-
-              // Account Section
-              _buildAccountSection(authProvider),
-
               const SizedBox(height: 32),
+
+              // Notifications, security, help, and sign-out all live in the
+              // Réglages tab (SettingsPage) — this screen is the profile
+              // overview only, to stop the two screens drifting apart
+              // (item 3.2 of the finalisation plan).
             ],
           ),
         );
@@ -254,11 +253,16 @@ class _UserProfilePageState extends State<UserProfilePage>
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white.withValues(alpha: 0.3),
-                      child: const Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                      backgroundImage: profileProvider.photos.isNotEmpty
+                          ? NetworkImage(profileProvider.photos.first.url)
+                          : null,
+                      child: profileProvider.photos.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Colors.white,
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -293,41 +297,6 @@ class _UserProfilePageState extends State<UserProfilePage>
                   ],
                 ),
 
-                const SizedBox(height: 16),
-
-                // Profile completion bar
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Profil complété',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                        ),
-                        Text(
-                          '75%',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: 0.75,
-                      backgroundColor: Colors.white.withValues(alpha: 0.3),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -358,7 +327,11 @@ class _UserProfilePageState extends State<UserProfilePage>
               title: 'Mes photos',
               subtitle: 'Gérer vos photos de profil',
               onTap: () {
-                context.go('/profile-setup');
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PhotoManagementPage(),
+                  ),
+                );
               },
               gradient: const LinearGradient(
                 colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
@@ -369,7 +342,7 @@ class _UserProfilePageState extends State<UserProfilePage>
               title: 'Mes réponses',
               subtitle: 'Questions et réponses',
               onTap: () {
-                context.go('/questionnaire');
+                context.push('/questionnaire');
               },
               gradient: const LinearGradient(
                 colors: [AppColors.errorRed, Color(0xFFC62828)],
@@ -380,7 +353,11 @@ class _UserProfilePageState extends State<UserProfilePage>
               title: 'Préférences',
               subtitle: 'Critères de recherche',
               onTap: () {
-                _showPreferencesDialog();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PreferencesSettingsPage(),
+                  ),
+                );
               },
               gradient: const LinearGradient(
                 colors: [AppColors.infoBlue, Color(0xFF1565C0)],
@@ -397,125 +374,6 @@ class _UserProfilePageState extends State<UserProfilePage>
               isHighlighted: true,
             ),
           ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAppSettings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            'Paramètres de l\'app',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SlideInAnimation(
-          delay: const Duration(milliseconds: 700),
-          child: GlassCard(
-            child: Column(
-              children: [
-                _buildSettingItem(
-                  icon: Icons.notifications,
-                  title: 'Notifications',
-                  onTap: () {
-                    // Handle notifications settings
-                  },
-                ),
-                const Divider(height: 1),
-                _buildSettingItem(
-                  icon: Icons.privacy_tip,
-                  title: 'Confidentialité',
-                  onTap: () {
-                    context.go('/privacy');
-                  },
-                ),
-                const Divider(height: 1),
-                _buildSettingItem(
-                  icon: Icons.help,
-                  title: 'Aide',
-                  onTap: () {
-                    _showSupportDialog();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAccountSection(AuthProvider authProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            'Compte',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SlideInAnimation(
-          delay: const Duration(milliseconds: 800),
-          child: FloatingCard(
-            backgroundColor: AppColors.errorRed.withValues(alpha: 0.08),
-            onTap: () => _showLogoutDialog(authProvider),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.errorRed.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.logout,
-                    color: AppColors.errorRed,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Se déconnecter',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: AppColors.errorRed,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Quitter votre compte',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.errorRed.withValues(alpha: 0.7),
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColors.errorRed,
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
@@ -586,129 +444,4 @@ class _UserProfilePageState extends State<UserProfilePage>
     );
   }
 
-  Widget _buildSettingItem({
-    required IconData icon,
-    required String title,
-    VoidCallback? onTap,
-    Widget? trailing,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            trailing ??
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutDialog(AuthProvider authProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Se déconnecter'),
-        content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await authProvider.signOut();
-              if (mounted) {
-                this.context.go('/login');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.errorRed,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Se déconnecter'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPreferencesDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Préférences'),
-          content: const Text(
-              'Fonctionnalité de préférences en cours de développement. '
-              'Vous pourrez bientôt personnaliser vos critères de recherche ici.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSupportDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Aide et Support'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('📱 Téléphone: +33 1 23 45 67 89'),
-              SizedBox(height: 8),
-              Text('✉️ Email: support@goldwen.com'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fermer'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Handle contact action
-              },
-              child: const Text('Contacter'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

@@ -73,7 +73,7 @@ void main() {
           final expectedDuration = tomorrowNoon.difference(now);
           
           expect(expectedDuration.inHours, greaterThan(0));
-          expect(expectedDuration.inHours, lessThanOrEqual(24));
+          expect(expectedDuration.inHours, lessThanOrEqualTo(24));
         }
       });
 
@@ -308,8 +308,8 @@ void main() {
         
         final difference = date2.difference(date1);
         // Should be approximately 24 hours (might vary slightly due to DST)
-        expect(difference.inHours, greaterThanOrEqual(23));
-        expect(difference.inHours, lessThanOrEqual(25));
+        expect(difference.inHours, greaterThanOrEqualTo(23));
+        expect(difference.inHours, lessThanOrEqualTo(25));
       });
 
       test('handles very short durations correctly', () {

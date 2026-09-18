@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../shared/widgets/keyboard_dismissible.dart';
-import '../core/theme/app_theme.dart';
+import 'package:goldwen_app/shared/widgets/keyboard_dismissible.dart';
+import 'package:goldwen_app/core/theme/app_theme.dart';
 
 /// Demo page to showcase keyboard dismissal functionality.
 ///

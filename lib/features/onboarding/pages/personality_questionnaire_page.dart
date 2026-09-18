@@ -25,12 +25,12 @@ class _PersonalityQuestionnairePageState
   String? _error;
   List<PersonalityQuestion> _questions = [];
 
-  // Hardcoded fallback questions in case API fails
-
   @override
   void initState() {
     super.initState();
-    _loadPersonalityQuestions();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadPersonalityQuestions();
+    });
   }
 
   Future<void> _loadPersonalityQuestions() async {

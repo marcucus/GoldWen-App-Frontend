@@ -23,7 +23,11 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
+          child: LayoutBuilder(builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(child: Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
             child: Column(
@@ -206,7 +210,10 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
               ],
             ),
-          ),
+          )),
+              ),
+            );
+          }),
         ),
       ),
     );

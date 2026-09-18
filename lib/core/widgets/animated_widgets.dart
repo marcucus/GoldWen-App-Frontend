@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
@@ -190,6 +191,7 @@ class FadeInAnimation extends StatefulWidget {
 
 class _FadeInAnimationState extends State<FadeInAnimation>
     with SingleTickerProviderStateMixin {
+  Timer? _delayTimer;
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _scaleAnimation;
@@ -221,7 +223,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
     ));
 
     final actualDelay = reducedMotion ? Duration.zero : widget.delay;
-    Future.delayed(actualDelay, () {
+    _delayTimer = Timer(actualDelay, () {
       if (mounted) {
         _controller.forward();
       }
@@ -230,6 +232,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

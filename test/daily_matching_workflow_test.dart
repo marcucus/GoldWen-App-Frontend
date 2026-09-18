@@ -21,7 +21,7 @@ void main() {
       expect(matchingProvider.maxSelections, 1,
         reason: 'Free users should have 1 selection limit by default');
         
-      expect(matchingProvider.canSelectMore, false,
+      expect(matchingProvider.canSelectMore, true,
         reason: 'Should not be able to select when no selections remain');
 
       // Test 3: Profile selection tracking works

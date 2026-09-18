@@ -1,3 +1,5 @@
+import 'package:goldwen_app/core/services/accessibility_service.dart';
+import 'package:goldwen_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +13,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -34,6 +40,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -45,7 +55,7 @@ void main() {
 
       // Navigate to photos page (index 1)
       final pageView = tester.widget<PageView>(find.byType(PageView));
-      pageView.controller.jumpToPage(1);
+      pageView.controller!.jumpToPage(1);
       await tester.pumpAndSettle();
 
       // Verify SingleChildScrollView exists on photos page
@@ -60,6 +70,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -71,7 +85,7 @@ void main() {
 
       // Navigate to media page (index 2)
       final pageView = tester.widget<PageView>(find.byType(PageView));
-      pageView.controller.jumpToPage(2);
+      pageView.controller!.jumpToPage(2);
       await tester.pumpAndSettle();
 
       // Verify SingleChildScrollView exists on media page
@@ -86,6 +100,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -97,7 +115,7 @@ void main() {
 
       // Navigate to validation page (index 4)
       final pageView = tester.widget<PageView>(find.byType(PageView));
-      pageView.controller.jumpToPage(4);
+      pageView.controller!.jumpToPage(4);
       await tester.pumpAndSettle();
 
       // Verify SingleChildScrollView exists on validation page
@@ -112,6 +130,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -123,7 +145,7 @@ void main() {
 
       // Navigate to review page (index 5)
       final pageView = tester.widget<PageView>(find.byType(PageView));
-      pageView.controller.jumpToPage(5);
+      pageView.controller!.jumpToPage(5);
       await tester.pumpAndSettle();
 
       // Verify SingleChildScrollView exists on review page
@@ -138,6 +160,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -149,24 +175,24 @@ void main() {
 
       // Test photos page (2/6) - should not have Expanded in ScrollView
       final pageView = tester.widget<PageView>(find.byType(PageView));
-      pageView.controller.jumpToPage(1);
+      pageView.controller!.jumpToPage(1);
       await tester.pumpAndSettle();
 
       // This test ensures no layout exceptions occur
       expect(tester.takeException(), isNull);
 
       // Navigate to media page (3/6)
-      pageView.controller.jumpToPage(2);
+      pageView.controller!.jumpToPage(2);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
       // Navigate to validation page (5/6)
-      pageView.controller.jumpToPage(4);
+      pageView.controller!.jumpToPage(4);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
       // Navigate to review page (6/6)
-      pageView.controller.jumpToPage(5);
+      pageView.controller!.jumpToPage(5);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -175,6 +201,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => ChangeNotifierProvider(create: (_) => AccessibilityService(), child: child!),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: ChangeNotifierProvider(
             create: (context) => ProfileProvider(),
             child: const ProfileSetupPage(),
@@ -188,7 +218,7 @@ void main() {
       final pageView = tester.widget<PageView>(find.byType(PageView));
       
       for (int i = 0; i < 6; i++) {
-        pageView.controller.jumpToPage(i);
+        pageView.controller!.jumpToPage(i);
         await tester.pumpAndSettle();
         
         // No exceptions should occur

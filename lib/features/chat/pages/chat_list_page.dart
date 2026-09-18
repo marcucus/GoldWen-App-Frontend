@@ -26,7 +26,9 @@ class _ChatListPageState extends State<ChatListPage>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _loadChats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadChats();
+    });
     _startAnimations();
   }
 

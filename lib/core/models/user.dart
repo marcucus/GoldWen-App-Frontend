@@ -157,8 +157,13 @@ class User {
             : null,
       );
     } catch (e) {
-      debugPrint('Error parsing User from JSON: $e');
-      debugPrint('JSON data: $json');
+      // Never log the raw payload here: it carries the user's PII
+      // (email, tokens, subscription data...) and debugPrint is not
+      // stripped from release builds. Log only the shape of what failed.
+      if (kDebugMode) {
+        debugPrint('Error parsing User from JSON: $e');
+        debugPrint('JSON keys: ${json.keys.toList()}');
+      }
       rethrow;
     }
   }
