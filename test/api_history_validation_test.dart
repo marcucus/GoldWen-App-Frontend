@@ -35,11 +35,37 @@ void main() {
   });
 
   test('report submission serializes the backend contract', () async {
+    // Le contrat réel (CreateReportDto côté backend) est `targetType` +
+    // `targetId` + `reason` (l'enum ReportType) + `description` (texte
+    // libre) ; `targetUserId`/`type`/`chatId` n'existent pas dans ce DTO, et
+    // `ValidationPipe` a `forbidNonWhitelisted: true` — les envoyer faisait
+    // rejeter (400) tout signalement avant ce correctif. `chatId` ici n'a
+    // plus d'usage côté fil (le backend retrouve chatId lui-même à partir du
+    // message quand targetType == 'message').
     await ApiService.submitReport(targetUserId: 'user-2', type: ReportType.harassment, reason: 'Messages insistants', chatId: 'chat-1');
     expect(requests.single.method, 'POST');
     expect(requests.single.uri.path, '/api/v1/reports');
     expect(jsonDecode(requests.single.data as String), {
-      'targetUserId': 'user-2', 'type': 'harassment', 'reason': 'Messages insistants', 'chatId': 'chat-1',
+      'targetType': 'user', 'targetId': 'user-2', 'reason': 'harassment', 'description': 'Messages insistants',
+    });
+  });
+
+  test('message report submission targets the message id, not the user id',
+      () async {
+    await ApiService.submitReport(
+      targetUserId: 'user-2',
+      type: ReportType.inappropriateContent,
+      reason: 'Contenu déplacé',
+      messageId: 'message-9',
+      chatId: 'chat-1',
+      decryptedMessageContent: 'texte déchiffré du message signalé',
+    );
+    expect(jsonDecode(requests.single.data as String), {
+      'targetType': 'message',
+      'targetId': 'message-9',
+      'reason': 'inappropriate_content',
+      'description': 'Contenu déplacé',
+      'decryptedMessageContent': 'texte déchiffré du message signalé',
     });
   });
 

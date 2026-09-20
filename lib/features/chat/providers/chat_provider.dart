@@ -6,6 +6,8 @@ import '../../../core/services/analytics_service.dart';
 import '../../../core/services/local_notification_service.dart';
 import '../../../core/models/models.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/services/e2e_message_crypto_service.dart';
+import '../../../core/services/e2e_key_service.dart';
 
 class ChatProvider with ChangeNotifier {
   List<Conversation> _conversations = [];
@@ -17,6 +19,7 @@ class ChatProvider with ChangeNotifier {
   WebSocketService? _webSocketService;
   bool _isWebSocketConnected = false;
   String? _currentUserId;
+  String? _connectedToken;
   Timer? _typingTimer;
   String? _currentTypingChatId;
   final Map<String, Timer?> _expirationCheckTimers = {};
@@ -47,6 +50,28 @@ class ChatProvider with ChangeNotifier {
 
   void setCurrentUserId(String userId) {
     _currentUserId = userId;
+  }
+
+  /// Keeps the real-time connection aligned with the authenticated session.
+  /// MultiProvider calls this whenever AuthProvider changes; repeated rebuilds
+  /// with the same credentials are intentionally no-ops.
+  void updateSession(String? token, String? userId) {
+    if (token == null || userId == null) {
+      _connectedToken = null;
+      _currentUserId = null;
+      _webSocketService?.disconnect();
+      _isWebSocketConnected = false;
+      return;
+    }
+    if (_connectedToken == token && _currentUserId == userId) return;
+    _connectedToken = token;
+    _currentUserId = userId;
+    unawaited(initializeWebSocket(token));
+    // AV-15 / V106 : s'assure que la clé publique X25519 de cet appareil est
+    // bien connue du serveur dès qu'une session authentifiée est active,
+    // pour que les autres participants puissent chiffrer leurs messages vers
+    // cet utilisateur. Best-effort, voir E2eKeyService.ensurePublicKeyUploaded.
+    unawaited(E2eKeyService.instance.ensurePublicKeyUploaded());
   }
 
   void clearError() {
@@ -138,10 +163,6 @@ class ChatProvider with ChangeNotifier {
 
       final response = await ApiService.getConversations();
 
-      if (AppConfig.isDevelopment) {
-        debugPrint('ChatProvider: Received response: $response');
-      }
-
       final conversationsData =
           response['data'] ?? response['conversations'] ?? [];
 
@@ -162,7 +183,6 @@ class ChatProvider with ChangeNotifier {
           // Log parsing error but continue with other conversations
           if (AppConfig.isDevelopment) {
             debugPrint('Error parsing conversation: $e');
-            debugPrint('Conversation data: $conversationJson');
           }
           // Skip this conversation and continue with others
         }
@@ -228,18 +248,29 @@ class ChatProvider with ChangeNotifier {
           // Log parsing error but continue with other messages
           if (AppConfig.isDevelopment) {
             debugPrint('Error parsing message: $e');
-            debugPrint('Message data: $messageJson');
           }
           // Skip this message and continue with others
         }
       }
 
+      // AV-15 / V106 : déchiffrement de bout en bout. La clé publique de
+      // l'autre participant est la même pour toute la conversation, quel que
+      // soit l'expéditeur d'un message donné (ECDH est symétrique) — pas
+      // besoin de la connaître par message. Si la conversation n'est pas
+      // encore en cache (accès direct au chat sans être passé par la liste),
+      // on va la chercher : sans ça on ne pourrait pas distinguer un message
+      // en clair (ancien) d'un ciphertext qu'on affiche par erreur tel quel.
+      final peerPublicKey = await _peerPublicKeyFor(chatId);
+      final decryptedNewMessages = await Future.wait(
+        newMessages.map((m) => _decryptIfNeeded(m, peerPublicKey)),
+      );
+
       if (page == 1) {
-        _chatMessages[chatId] = newMessages;
+        _chatMessages[chatId] = decryptedNewMessages;
       } else {
         _chatMessages[chatId] = [
           ...(_chatMessages[chatId] ?? []),
-          ...newMessages
+          ...decryptedNewMessages
         ];
       }
 
@@ -270,7 +301,10 @@ class ChatProvider with ChangeNotifier {
       // Check if this is the first message in the conversation
       final isFirstMessage = (_chatMessages[chatId]?.isEmpty ?? true);
 
-      // Optimistically add message to UI
+      // Optimistically add message to UI. `decryptedContent` carries the
+      // plaintext the user just typed so it displays immediately, while the
+      // wire payload (see below) is what actually gets encrypted and sent —
+      // the two are deliberately different here (AV-15 / V106).
       final tempMessage = ChatMessage(
         id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
         conversationId: chatId,
@@ -278,6 +312,7 @@ class ChatProvider with ChangeNotifier {
             _currentUserId ?? 'current_user', // Use set user ID or fallback
         type: type,
         content: message,
+        decryptedContent: message,
         isRead: false,
         createdAt: DateTime.now(),
       );
@@ -285,16 +320,30 @@ class ChatProvider with ChangeNotifier {
       _chatMessages[chatId] = [...(_chatMessages[chatId] ?? []), tempMessage];
       notifyListeners();
 
-      // Send via WebSocket for real-time delivery
-      if (_isWebSocketConnected) {
-        _webSocketService?.sendMessage(chatId, message, type: type);
-      }
+      // AV-15 / V106 : le contenu réellement envoyé sur le fil (Socket.IO ou
+      // REST) est chiffré de bout en bout quand la clé de l'interlocuteur est
+      // connue ; seul ce blob opaque atteint le serveur.
+      final wireContent =
+          type == 'text' ? await _encryptForChat(chatId, message) : message;
 
-      // Also send via REST API for persistence
-      final response =
-          await ApiService.sendMessage(chatId, type: type, content: message);
-      final sentMessageData = response['data'] ?? response;
-      final sentMessage = ChatMessage.fromJson(sentMessageData);
+      // Socket.IO persists and broadcasts the message. REST is a fallback
+      // only: doing both used to create two database rows per message.
+      final Map<String, dynamic> sentMessageData;
+      if (_isWebSocketConnected && _webSocketService != null) {
+        sentMessageData = await _webSocketService!
+            .sendMessage(chatId, wireContent, type: type);
+      } else {
+        final response = await ApiService.sendMessage(chatId,
+            type: type, content: wireContent);
+        sentMessageData = Map<String, dynamic>.from(
+          (response['data'] ?? response) as Map,
+        );
+      }
+      // `sentMessageData['content']` is the ciphertext echoed back by the
+      // server ; we already know the plaintext we just encrypted, no need to
+      // decrypt what we ourselves just produced.
+      final sentMessage =
+          ChatMessage.fromJson(sentMessageData).copyWith(decryptedContent: message);
 
       // Track analytics
       if (isFirstMessage) {
@@ -417,6 +466,88 @@ class ChatProvider with ChangeNotifier {
     _webSocketService?.leaveChat(chatId);
   }
 
+  /// Clé publique (base64) de l'autre participant d'une conversation,
+  /// nécessaire au chiffrement/déchiffrement E2E (AV-15 / V106). Utilise le
+  /// cache `_conversations` s'il est déjà chargé ; sinon va chercher les
+  /// détails de la conversation une fois (ex: ouverture directe d'un chat
+  /// via une notification, sans être passé par la liste des conversations).
+  Future<String?> _peerPublicKeyFor(String chatId) async {
+    final cached = getConversation(chatId);
+    if (cached != null) {
+      return cached.otherParticipantPublicKey;
+    }
+    try {
+      final response = await ApiService.getConversationDetails(chatId);
+      final conversationData = response['data'] ?? response;
+      final conversation = Conversation.fromJson(conversationData);
+      final index = _conversations.indexWhere((c) => c.id == chatId);
+      if (index != -1) {
+        _conversations[index] = conversation;
+      } else {
+        _conversations.add(conversation);
+      }
+      return conversation.otherParticipantPublicKey;
+    } catch (_) {
+      // Pas de clé trouvable : le message restera affiché tel quel s'il est
+      // en clair, ou signalé "illisible" s'il s'avère être du ciphertext
+      // (voir _decryptIfNeeded) — jamais de ciphertext brut affiché en clair.
+      return null;
+    }
+  }
+
+  /// Déchiffre [message] si c'est un message texte et qu'on a la clé
+  /// publique de l'interlocuteur. Ne modifie jamais `content` (valeur brute
+  /// telle que reçue du serveur) : le résultat va dans `decryptedContent`
+  /// (succès) ou `decryptionFailed` (échec), pour que l'UI affiche l'un ou
+  /// l'autre via `ChatMessage.displayContent` — jamais le ciphertext tel
+  /// quel. Un message sans clé disponible reste affiché tel quel : c'est le
+  /// cas normal d'un message envoyé avant que le chiffrement soit possible
+  /// pour cette paire (voir E2eMessageCryptoService, limite assumée).
+  Future<ChatMessage> _decryptIfNeeded(
+    ChatMessage message,
+    String? peerPublicKey,
+  ) async {
+    if (!message.isTextMessage ||
+        peerPublicKey == null ||
+        peerPublicKey.isEmpty) {
+      return message;
+    }
+    final plainText = await E2eMessageCryptoService.instance.decryptMessage(
+      content: message.content,
+      peerPublicKeyBase64: peerPublicKey,
+    );
+    if (plainText != null) {
+      return message.copyWith(decryptedContent: plainText);
+    }
+    // Ambigu par nature : soit un vrai échec de déchiffrement (clé qui a
+    // changé, corruption), soit un message en clair envoyé avant l'E2E pour
+    // cette conversation. On ne peut pas distinguer les deux de façon fiable
+    // sans marqueur de version en base ; on assume l'échec plutôt que
+    // d'afficher silencieusement une valeur qui pourrait être du
+    // ciphertext — cohérent avec la doc de E2eMessageCryptoService.decryptMessage.
+    return message.copyWith(decryptionFailed: true);
+  }
+
+  /// Chiffre [plainText] pour la conversation [chatId] si l'interlocuteur a
+  /// déjà une clé publique connue ; sinon renvoie le texte en clair tel quel
+  /// (dégradation assumée : ce message précis ne pourra pas être chiffré,
+  /// voir E2eKeyService). N'échoue jamais : un problème de chiffrement ne
+  /// doit pas empêcher l'envoi du message.
+  Future<String> _encryptForChat(String chatId, String plainText) async {
+    final peerPublicKey = await _peerPublicKeyFor(chatId);
+    if (peerPublicKey == null || peerPublicKey.isEmpty) {
+      return plainText;
+    }
+    try {
+      return await E2eMessageCryptoService.instance.encryptMessage(
+        plainText: plainText,
+        peerPublicKeyBase64: peerPublicKey,
+      );
+    } catch (_) {
+      return plainText;
+    }
+  }
+
   // WebSocket event handlers
   void _handleNewMessage(Map<String, dynamic> data) {
     try {
@@ -436,20 +567,31 @@ class ChatProvider with ChangeNotifier {
         return;
       }
 
-      messages.add(message);
-      _chatMessages[chatId] = messages;
+      // AV-15 / V106 : `content` reçu ici est le ciphertext (ou du texte en
+      // clair pour un message pré-E2E) — déchiffrement asynchrone avant
+      // d'ajouter le message à l'écran, jamais d'affichage du ciphertext brut
+      // le temps de l'attente.
+      unawaited(_peerPublicKeyFor(chatId).then((peerPublicKey) async {
+        final decrypted = await _decryptIfNeeded(message, peerPublicKey);
+        final current = _chatMessages[chatId] ?? [];
+        if (current.any((m) => m.id == decrypted.id)) {
+          return; // reçu deux fois pendant le déchiffrement (rare)
+        }
+        current.add(decrypted);
+        _chatMessages[chatId] = current;
 
-      // Update conversation's last message
-      final convIndex = _conversations.indexWhere((c) => c.id == chatId);
-      if (convIndex != -1) {
-        _conversations[convIndex] = _conversations[convIndex].copyWith(
-          lastMessage: message,
-          unreadCount: _conversations[convIndex].unreadCount + 1,
-          updatedAt: DateTime.now(),
-        );
-      }
+        // Update conversation's last message
+        final convIndex = _conversations.indexWhere((c) => c.id == chatId);
+        if (convIndex != -1) {
+          _conversations[convIndex] = _conversations[convIndex].copyWith(
+            lastMessage: decrypted,
+            unreadCount: _conversations[convIndex].unreadCount + 1,
+            updatedAt: DateTime.now(),
+          );
+        }
 
-      notifyListeners();
+        notifyListeners();
+      }));
     } catch (e) {
       // Handle error silently
     }

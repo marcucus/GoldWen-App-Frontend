@@ -827,9 +827,6 @@ class _PhotoManagementWidgetState extends State<PhotoManagementWidget> {
     }
 
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final Photo item = _photos.removeAt(oldIndex);
       _photos.insert(newIndex, item);
 

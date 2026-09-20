@@ -10,6 +10,11 @@ class ReportDialog extends StatefulWidget {
   final String? targetUserName;
   final String? messageId;
   final String? chatId;
+  // AV-15 / V106 : contenu déchiffré du message signalé, tel que vu par le
+  // signalant au moment du signalement (jamais le ciphertext, jamais le
+  // texte de repli "Message illisible"). Uniquement pertinent quand
+  // [messageId] est renseigné ; voir ChatMessage.displayContent côté appelant.
+  final String? messageDecryptedContent;
 
   const ReportDialog({
     super.key,
@@ -17,6 +22,7 @@ class ReportDialog extends StatefulWidget {
     this.targetUserName,
     this.messageId,
     this.chatId,
+    this.messageDecryptedContent,
   });
 
   @override
@@ -317,6 +323,8 @@ class _ReportDialogState extends State<ReportDialog> {
         reason: _reasonController.text.trim(),
         messageId: widget.messageId,
         chatId: widget.chatId,
+        decryptedMessageContent:
+            widget.messageId != null ? widget.messageDecryptedContent : null,
       );
 
       if (mounted) {

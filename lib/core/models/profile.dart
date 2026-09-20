@@ -30,7 +30,8 @@ class Profile {
   final DateTime createdAt;
   final DateTime updatedAt;
   final double? compatibilityScore;
-  final Map<String, double>? compatibilityDetails; // e.g. {communication, values, lifestyle, personality}
+  final Map<String, double>?
+      compatibilityDetails; // e.g. {communication, values, lifestyle, personality}
   final List<String> sharedInterests;
 
   Profile({
@@ -91,10 +92,18 @@ class Profile {
   }
 
   factory Profile.fromJson(Map<String, dynamic> json) {
+    final firstName = json['firstName'] as String?;
+    final lastName = json['lastName'] as String?;
+    final fallbackName = [firstName, lastName]
+        .whereType<String>()
+        .where((part) => part.trim().isNotEmpty)
+        .join(' ');
+
     return Profile(
       id: json['id'] as String,
       userId: json['userId'] as String,
-      pseudo: json['pseudo'] as String?,
+      pseudo: (json['pseudo'] as String?) ??
+          (fallbackName.isNotEmpty ? fallbackName : null),
       birthDate: json['birthDate'] != null
           ? DateTime.parse(json['birthDate'] as String)
           : null,
@@ -105,17 +114,18 @@ class Profile {
           [],
       bio: json['bio'] as String?,
       bioModerationResult: json['bioModerationResult'] != null
-          ? ModerationResult.fromJson(json['bioModerationResult'] as Map<String, dynamic>)
+          ? ModerationResult.fromJson(
+              json['bioModerationResult'] as Map<String, dynamic>)
           : null,
       jobTitle: json['jobTitle'] as String?,
       company: json['company'] as String?,
       education: json['education'] as String?,
       location: json['location'] as String?,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
-      maxDistance: json['maxDistance'] as int? ?? 50,
-      minAge: json['minAge'] as int? ?? 18,
-      maxAge: json['maxAge'] as int? ?? 99,
+      latitude: _asDouble(json['latitude']),
+      longitude: _asDouble(json['longitude']),
+      maxDistance: _asInt(json['maxDistance']) ?? 50,
+      minAge: _asInt(json['minAge']) ?? 18,
+      maxAge: _asInt(json['maxAge']) ?? 99,
       interests: (json['interests'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -124,7 +134,7 @@ class Profile {
               ?.map((e) => e as String)
               .toList() ??
           [],
-      height: json['height'] as int?,
+      height: _asInt(json['height']),
       photos: (json['photos'] as List<dynamic>?)
               ?.map((e) => Photo.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -144,16 +154,30 @@ class Profile {
           [],
       favoriteSong: json['favoriteSong'] as String?,
       isComplete: json['isComplete'] as bool? ?? false,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      compatibilityScore: (json['compatibilityScore'] as num?)?.toDouble(),
-      compatibilityDetails: (json['compatibilityDetails'] as Map<String, dynamic>?)
-          ?.map((k, v) => MapEntry(k, (v as num).toDouble())),
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      compatibilityScore: _asDouble(json['compatibilityScore']),
+      compatibilityDetails:
+          (json['compatibilityDetails'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, _asDouble(v) ?? 0)),
       sharedInterests: (json['sharedInterests'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
     );
+  }
+
+  static double? _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return value is String ? double.tryParse(value) : null;
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return value is String ? int.tryParse(value) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -187,7 +211,8 @@ class Profile {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       if (compatibilityScore != null) 'compatibilityScore': compatibilityScore,
-      if (compatibilityDetails != null) 'compatibilityDetails': compatibilityDetails,
+      if (compatibilityDetails != null)
+        'compatibilityDetails': compatibilityDetails,
       if (sharedInterests.isNotEmpty) 'sharedInterests': sharedInterests,
     };
   }
@@ -218,7 +243,8 @@ class Photo {
       isPrimary: json['isPrimary'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       moderationResult: json['moderationResult'] != null
-          ? ModerationResult.fromJson(json['moderationResult'] as Map<String, dynamic>)
+          ? ModerationResult.fromJson(
+              json['moderationResult'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -441,7 +467,8 @@ class ProfileCompletion {
       hasPhotos: json['hasPhotos'] as bool? ?? false,
       hasPrompts: json['hasPrompts'] as bool? ?? false,
       hasPersonalityAnswers: json['hasPersonalityAnswers'] as bool? ?? false,
-      hasRequiredProfileFields: json['hasRequiredProfileFields'] as bool? ?? false,
+      hasRequiredProfileFields:
+          json['hasRequiredProfileFields'] as bool? ?? false,
       missingSteps: (json['missingSteps'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

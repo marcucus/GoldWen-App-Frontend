@@ -200,7 +200,7 @@ class _ArchivedChatsPageState extends State<ArchivedChatsPage> {
                     if (lastMessage != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        lastMessage.content,
+                        lastMessage.displayContent,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),

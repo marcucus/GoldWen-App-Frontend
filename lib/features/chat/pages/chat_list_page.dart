@@ -373,7 +373,7 @@ class _ChatListPageState extends State<ChatListPage>
                       children: [
                         Expanded(
                           child: Text(
-                            conversation.lastMessage?.content ??
+                            conversation.lastMessage?.displayContent ??
                                 (isExpired
                                     ? 'Conversation expirée'
                                     : 'Félicitations! Vous avez un match'),

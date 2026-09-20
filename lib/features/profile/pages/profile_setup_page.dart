@@ -1281,8 +1281,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         i < _promptControllers.length && i < _selectedPromptIds.length;
         i++) {
       if (_promptControllers[i].text.isNotEmpty) {
-        debugPrint(
-            'Setting prompt answer: ${_selectedPromptIds[i]} -> ${_promptControllers[i].text}');
         profileProvider.setPromptAnswer(
             _selectedPromptIds[i], _promptControllers[i].text.trim());
       }

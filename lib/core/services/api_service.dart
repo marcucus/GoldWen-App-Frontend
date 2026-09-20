@@ -1086,6 +1086,23 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  /// Enregistre/écrase la clé publique X25519 de l'appareil pour le
+  /// chiffrement de bout en bout du chat (AV-15 / V106, voir
+  /// lib/core/services/e2e_key_service.dart). Le serveur ne voit jamais la
+  /// clé privée correspondante.
+  static Future<Map<String, dynamic>> updatePublicKey({
+    required String publicKey,
+  }) async {
+    final response = await _dio.put(
+      '/users/me/public-key',
+      data: jsonEncode({
+        'publicKey': publicKey,
+      }),
+    );
+
+    return _handleResponse(response);
+  }
+
   // Legacy method for backward compatibility
   @Deprecated('Use registerPushToken instead')
   static Future<Map<String, dynamic>> registerDeviceToken(
@@ -1459,14 +1476,28 @@ class ApiService {
     String? messageId,
     String? chatId,
     List<String>? evidence,
+    // AV-15 / V106 : contenu du message tel que vu par le signalant, envoyé
+    // en clair au moment du signalement uniquement (le serveur ne peut pas
+    // déchiffrer un chat E2E de lui-même). Alimente `Report.retainedEvidence`
+    // côté backend — voir reports.service.ts et CreateReportDto.
+    String? decryptedMessageContent,
   }) async {
+    // Contrat réel du backend (CreateReportDto) : `targetType` +
+    // `targetId` (l'ID du message signalé quand `messageId` est fourni,
+    // sinon l'ID de l'utilisateur), `reason` porte la catégorie (l'enum),
+    // le texte libre va dans `description`. `chatId`/`evidence` n'existent
+    // pas dans ce DTO ; `ValidationPipe` a `forbidNonWhitelisted: true`, donc
+    // les envoyer les aurait fait rejeter la requête entière (400) — c'est
+    // ce qui rendait tout signalement impossible avant ce correctif.
+    final targetType = messageId != null ? 'message' : 'user';
+    final targetId = messageId ?? targetUserId;
     final body = {
-      'targetUserId': targetUserId,
-      'type': _reportTypeToString(type),
-      'reason': reason,
-      if (messageId != null) 'messageId': messageId,
-      if (chatId != null) 'chatId': chatId,
-      if (evidence != null) 'evidence': evidence,
+      'targetType': targetType,
+      'targetId': targetId,
+      'reason': _reportTypeToString(type),
+      if (reason.trim().isNotEmpty) 'description': reason.trim(),
+      if (decryptedMessageContent != null)
+        'decryptedMessageContent': decryptedMessageContent,
     };
 
     final response = await _makeRequest(

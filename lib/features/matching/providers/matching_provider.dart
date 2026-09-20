@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import '../../../core/services/api_service.dart';
 import '../../../core/services/local_notification_service.dart';
 import '../../../core/services/notification_manager.dart';
@@ -111,7 +112,8 @@ class MatchingProvider with ChangeNotifier {
       await _scheduleDailyNotifications();
     } catch (e) {
       // If API is not available, provide mock data for development only
-      if (AppConfig.isDevelopment &&
+      if (kDebugMode &&
+          AppConfig.isDevelopment &&
           (e.toString().contains('NetworkException') ||
               e.toString().contains('ECONNREFUSED') ||
               e.toString().contains('Failed to connect'))) {
@@ -269,7 +271,7 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> selectProfile(String profileId,
+  Future<Map<String, dynamic>?> selectProfile(String targetUserId,
       {SubscriptionProvider? subscriptionProvider,
       String choice = 'like'}) async {
     // Check if user has remaining selections (only for 'like' choice)
@@ -292,7 +294,7 @@ class MatchingProvider with ChangeNotifier {
       return null;
     }
 
-    if (_selectedProfileIds.contains(profileId)) {
+    if (_selectedProfileIds.contains(targetUserId)) {
       _error = 'Profil déjà sélectionné';
       notifyListeners();
       return null;
@@ -300,7 +302,7 @@ class MatchingProvider with ChangeNotifier {
 
     try {
       final response =
-          await ApiService.chooseProfile(profileId, choice: choice);
+          await ApiService.chooseProfile(targetUserId, choice: choice);
 
       // Check if it's a match
       final responseData = response['data'] ?? response;
@@ -311,19 +313,20 @@ class MatchingProvider with ChangeNotifier {
 
       // Track profile chosen or passed
       if (choice == 'like') {
-        final profile = _dailyProfiles.firstWhere((p) => p.id == profileId);
+        final profile =
+            _dailyProfiles.firstWhere((p) => p.userId == targetUserId);
         await AnalyticsService.trackProfileChosen(
-          profileId,
+          targetUserId,
           compatibilityScore: profile.compatibilityScore,
         );
       } else if (choice == 'pass') {
-        await AnalyticsService.trackProfilePassed(profileId);
+        await AnalyticsService.trackProfilePassed(targetUserId);
       }
 
       if (isMatch) {
         // Track match created
         if (matchId != null) {
-          await AnalyticsService.trackMatchCreated(matchId, profileId);
+          await AnalyticsService.trackMatchCreated(matchId, targetUserId);
         }
 
         // Reload matches to include the new one
@@ -346,10 +349,10 @@ class MatchingProvider with ChangeNotifier {
           'isMatch': true,
           'matchedUserName': matchedUserName,
           'matchId': matchId,
-          'profile': _dailyProfiles.firstWhere((p) => p.id == profileId),
+          'profile': _dailyProfiles.firstWhere((p) => p.userId == targetUserId),
         };
 
-        _selectedProfileIds.add(profileId);
+        _selectedProfileIds.add(targetUserId);
         _updateDailySelectionAfterChoice(choicesRemaining);
         _error = null;
         notifyListeners();
@@ -357,7 +360,7 @@ class MatchingProvider with ChangeNotifier {
         return matchInfo;
       }
 
-      _selectedProfileIds.add(profileId);
+      _selectedProfileIds.add(targetUserId);
       _updateDailySelectionAfterChoice(choicesRemaining);
       _error = null;
       notifyListeners();
@@ -483,8 +486,8 @@ class MatchingProvider with ChangeNotifier {
     }
   }
 
-  bool isProfileSelected(String profileId) {
-    return _selectedProfileIds.contains(profileId);
+  bool isProfileSelected(String targetUserId) {
+    return _selectedProfileIds.contains(targetUserId);
   }
 
   bool shouldShowNewProfiles() {

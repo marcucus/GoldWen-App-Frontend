@@ -153,20 +153,6 @@ class _PhotoManagementPageState extends State<PhotoManagementPage> {
                 ],
               ),
             ),
-      floatingActionButton: Consumer<ProfileProvider>(
-        builder: (context, profileProvider, child) {
-          if (profileProvider.photos.length >= 6) return Container();
-
-          return FloatingActionButton(
-            onPressed: () {
-              // Trigger photo addition through the widget
-              // The PhotoManagementWidget handles the actual photo adding
-            },
-            backgroundColor: AppColors.primaryGold,
-            child: const Icon(Icons.add_a_photo, color: Colors.white),
-          );
-        },
-      ),
     );
   }
 

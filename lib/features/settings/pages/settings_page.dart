@@ -372,6 +372,16 @@ class _SettingsPageState extends State<SettingsPage> {
               Icons.restore,
               () => _restorePurchases(context, subscriptionProvider),
             ),
+            _buildSettingItem(
+              context,
+              'Qui m\'a sélectionné',
+              hasActiveSubscription
+                  ? 'Découvrir les profils intéressés par vous'
+                  : 'Inclus avec GoldWen Plus',
+              Icons.visibility_outlined,
+              () => context.push('/who-liked-me'),
+              highlight: hasActiveSubscription,
+            ),
           ],
         );
       },
@@ -871,8 +881,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text('Heures silencieuses',
-                                      style:
-                                          TextStyle(fontWeight: FontWeight.w600)),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600)),
                                   const SizedBox(height: 4),
                                   Text(
                                     '${settings.quietHoursStart} – ${settings.quietHoursEnd}',
@@ -929,11 +939,10 @@ class _SettingsPageState extends State<SettingsPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Pour toute question ou problème:'),
+              Text(
+                  'Pour toute question ou difficulté, contactez notre support :'),
               SizedBox(height: 12),
-              Text('📧 Email: support@goldwen.app'),
-              Text('💬 Chat: Disponible dans l\'app'),
-              Text('📱 Téléphone: +33 1 23 45 67 89'),
+              SelectableText('goldwen.supp.app@gmail.com'),
             ],
           ),
           actions: [
@@ -975,7 +984,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 await subscriptionProvider.logout();
                 await authProvider.signOut();
                 if (context.mounted) {
-                  context.go('/');
+                  context.go('/welcome');
                 }
               },
               style: ElevatedButton.styleFrom(

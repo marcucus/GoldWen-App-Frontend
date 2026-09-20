@@ -263,30 +263,21 @@ class AuthProvider with ChangeNotifier {
   Future<void> _handleAuthSuccess(Map<String, dynamic> response,
       {bool isSignup = false, String? signupMethod}) async {
     try {
-      // Debug: Print the full response to understand its structure
-      debugPrint('Auth response received: $response');
-
       // The backend returns: { "success": true, "message": "...", "data": { "user": {...}, "accessToken": "..." } }
       final data = response['data'] as Map<String, dynamic>?;
       if (data == null) {
         throw Exception('Response data is null');
       }
-      debugPrint('Extracted data: $data');
-
       // Extract user data
       final userData = data['user'] as Map<String, dynamic>?;
       if (userData == null) {
         throw Exception('User data not found in response');
       }
-      debugPrint('User data: $userData');
-
       // Extract token - backend returns it as 'accessToken'
       final token = data['accessToken'] as String?;
       if (token == null || token.isEmpty) {
         throw Exception('Access token not found in response');
       }
-      debugPrint('Token: ${token.substring(0, 10)}...');
-
       // Refresh token is only present on flows that call /auth/login,
       // /auth/google or /auth/apple directly (not on every response shape
       // that reaches this method), so it's optional here.
@@ -315,10 +306,6 @@ class AuthProvider with ChangeNotifier {
       // Initialize Firebase Messaging after successful authentication
       await _initializeFirebaseMessaging();
 
-      debugPrint(
-          'Authentication successful, status: $_status, isAuthenticated: $isAuthenticated');
-      debugPrint(
-          'User: ${_user?.email}, Token: ${_token?.substring(0, 10)}...');
       notifyListeners();
     } catch (e) {
       debugPrint('Error in _handleAuthSuccess: $e');

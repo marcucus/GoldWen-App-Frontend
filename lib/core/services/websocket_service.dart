@@ -117,7 +117,8 @@ class WebSocketService {
       socket.on('user_typing', (data) => _handleTyping(_asMap(data), true));
       socket.on(
           'user_stopped_typing', (data) => _handleTyping(_asMap(data), false));
-      socket.on('user_presence_changed', (data) => _handlePresence(_asMap(data)));
+      socket.on(
+          'user_presence_changed', (data) => _handlePresence(_asMap(data)));
       socket.on('chat_expired', (data) => _handleChatExpired(_asMap(data)));
       socket.on('chat_expiring', (data) => _handleChatExpiring(_asMap(data)));
       socket.on('error', (data) {
@@ -201,8 +202,7 @@ class WebSocketService {
           'type': data['type'] ?? 'text',
           'content': data['content'],
           'isRead': false,
-          'createdAt': data['timestamp'] ??
-              DateTime.now().toIso8601String(),
+          'createdAt': data['timestamp'] ?? DateTime.now().toIso8601String(),
         },
       });
     } catch (e) {
@@ -270,7 +270,8 @@ class WebSocketService {
       final expiresAtRaw = data['expiresAt'] as String?;
       final expiresAt =
           expiresAtRaw != null ? DateTime.tryParse(expiresAtRaw) : null;
-      final hoursLeft = expiresAt?.difference(DateTime.now()).inHours.clamp(0, 24);
+      final hoursLeft =
+          expiresAt?.difference(DateTime.now()).inHours.clamp(0, 24);
 
       NotificationManager().showNotificationIfAllowed(
         context: _context!,
@@ -304,16 +305,39 @@ class WebSocketService {
 
   // Send events to server. Field names match what ChatGateway's
   // @SubscribeMessage handlers destructure (`conversationId`, not `chatId`).
-  void sendMessage(String chatId, String content, {String type = 'text'}) {
+  Future<Map<String, dynamic>> sendMessage(String chatId, String content,
+      {String type = 'text'}) {
     if (!_isConnected || _socket == null) {
       throw Exception('WebSocket not connected');
     }
 
-    _socket!.emit('send_message', {
+    final completer = Completer<Map<String, dynamic>>();
+    final timeout = Timer(const Duration(seconds: 15), () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+            TimeoutException('Message acknowledgement timed out'));
+      }
+    });
+
+    _socket!.emitWithAck('send_message', {
       'conversationId': chatId,
       'content': content,
       'type': type,
+    }, ack: (dynamic response) {
+      if (completer.isCompleted) return;
+      timeout.cancel();
+      final payload = _asMap(response);
+      if (payload['success'] == true && payload['message'] is Map) {
+        completer
+            .complete(Map<String, dynamic>.from(payload['message'] as Map));
+      } else {
+        completer.completeError(
+          Exception(payload['error'] ?? 'Failed to send message'),
+        );
+      }
     });
+
+    return completer.future.whenComplete(timeout.cancel);
   }
 
   void sendTyping(String chatId) {

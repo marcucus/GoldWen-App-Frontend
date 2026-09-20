@@ -143,16 +143,20 @@ class _PrivacyPageState extends State<PrivacyPage> {
                       '• En cas de transfert d\'entreprise : avec anonymisation si possible',
                 ),
 
+                // AV-15 / V05 : cette section ne doit lister que des garanties
+                // réellement mises en œuvre et vérifiables dans le code, pas des
+                // promesses génériques. Chiffrement au repos, audits réguliers et
+                // formation du personnel n'étaient établis par aucune vérification
+                // technique (recette du 19/09/2026) — retirés jusqu'à preuve du
+                // contraire. La 2FA existe (TOTP) mais est une option que
+                // l'utilisateur active lui-même, pas une protection automatique.
                 _buildSection(
                   context,
                   '5. Sécurité des données',
-                  'Nous mettons en place des mesures de sécurité robustes :\n\n'
+                  'Nous mettons en place les mesures de sécurité suivantes :\n\n'
                       '• Chiffrement des données en transit (TLS)\n'
-                      '• Chiffrement des données sensibles au repos\n'
-                      '• Authentification à deux facteurs\n'
-                      '• Surveillance continue des accès\n'
-                      '• Audits de sécurité réguliers\n'
-                      '• Formation du personnel sur la sécurité',
+                      '• Authentification à deux facteurs disponible en option sur votre compte\n'
+                      '• Surveillance des accès et des tentatives de connexion suspectes',
                 ),
 
                 _buildSection(

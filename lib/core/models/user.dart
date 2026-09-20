@@ -176,7 +176,9 @@ class User {
       try {
         return DateTime.parse(dateValue);
       } catch (e) {
-        debugPrint('Error parsing date: $dateValue');
+        if (kDebugMode) {
+          debugPrint('User date field could not be parsed');
+        }
         return null;
       }
     }

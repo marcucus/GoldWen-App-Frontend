@@ -102,7 +102,8 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
 
     setState(() {
       _profile = profile;
-      _compatibilityScore = profile!.compatibilityScore ?? match?.compatibilityScore;
+      _compatibilityScore =
+          profile!.compatibilityScore ?? match?.compatibilityScore;
       _compatibilityDetails = profile.compatibilityDetails;
       _sharedInterests = profile.sharedInterests;
       _isFromDailySelection =
@@ -115,8 +116,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
     // No compatibility breakdown embedded yet (e.g. a "qui m'a choisi·e"
     // profile) — fetch it in the background rather than block the page.
     if (_compatibilityDetails == null) {
-      final result =
-          await matchingProvider.getCompatibility(widget.profileId);
+      final result = await matchingProvider.getCompatibility(widget.profileId);
       if (!mounted || result == null) return;
       setState(() {
         _compatibilityScore ??= result.score;
@@ -166,7 +166,8 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
     }
 
     final profile = _profile!;
-    final photos = [...profile.photos]..sort((a, b) => a.order.compareTo(b.order));
+    final photos = [...profile.photos]
+      ..sort((a, b) => a.order.compareTo(b.order));
     final displayName = profile.firstName ?? profile.pseudo ?? 'Profil';
     final ageSuffix = profile.age != null ? ', ${profile.age}' : '';
     final promptCatalog = context.watch<ProfileProvider>().availablePrompts;
@@ -276,8 +277,8 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.primaryGold,
-                              borderRadius: BorderRadius.circular(
-                                  AppBorderRadius.medium),
+                              borderRadius:
+                                  BorderRadius.circular(AppBorderRadius.medium),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -364,14 +365,13 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                       }
 
                       return Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: AppSpacing.lg),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           decoration: BoxDecoration(
                             color: AppColors.accentCream,
-                            borderRadius: BorderRadius.circular(
-                                AppBorderRadius.large),
+                            borderRadius:
+                                BorderRadius.circular(AppBorderRadius.large),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,9 +413,8 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                              right: index < photos.length - 1
-                                  ? AppSpacing.md
-                                  : 0,
+                              right:
+                                  index < photos.length - 1 ? AppSpacing.md : 0,
                             ),
                             child: ClipRRect(
                               borderRadius:
@@ -561,8 +560,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
       decoration: BoxDecoration(
         color: AppColors.primaryGold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppBorderRadius.large),
-        border:
-            Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -712,12 +710,13 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
     );
   }
 
-  void _selectProfile(BuildContext context, Profile profile) {
+  Future<void> _selectProfile(BuildContext context, Profile profile) async {
     final matchingProvider =
         Provider.of<MatchingProvider>(context, listen: false);
     final displayName = profile.firstName ?? profile.pseudo ?? 'ce profil';
 
-    matchingProvider.selectProfile(profile.id);
+    final result = await matchingProvider.selectProfile(profile.userId);
+    if (!context.mounted || result == null) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

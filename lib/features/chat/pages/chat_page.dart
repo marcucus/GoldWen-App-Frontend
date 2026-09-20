@@ -11,6 +11,7 @@ import '../widgets/chat_countdown_timer.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/online_status_indicator.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../matching/widgets/report_dialog.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -376,7 +377,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          message.content,
+                          message.displayContent,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: isFromCurrentUser
@@ -555,6 +556,32 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   final chatProvider =
                       Provider.of<ChatProvider>(context, listen: false);
                   await chatProvider.deleteMessage(message.id);
+                },
+              ),
+            // V100 : signaler un message précis, disponible uniquement pour les
+            // messages reçus (pas les siens). Auparavant le signalement
+            // n'était accessible que depuis la fiche profil, jamais depuis le
+            // chat lui-même — absent bloquant pour la soumission stores
+            // (Apple 1.2, contenu généré par les utilisateurs).
+            if (!isFromCurrentUser)
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: const Text('Signaler ce message'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final reportableContent =
+                      message.isTextMessage && !message.decryptionFailed
+                          ? message.displayContent
+                          : null;
+                  showDialog<void>(
+                    context: context,
+                    builder: (_) => ReportDialog(
+                      targetUserId: message.senderId,
+                      messageId: message.id,
+                      chatId: widget.chatId,
+                      messageDecryptedContent: reportableContent,
+                    ),
+                  );
                 },
               ),
             ListTile(
@@ -960,8 +987,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               ),
               const SizedBox(height: AppSpacing.md),
               _buildInfoItem(
+                // AV-15 / V106 : ne jamais promettre un chiffrement de bout
+                // en bout tant qu'aucun protocole E2E n'est implémenté et
+                // audité côté backend (les messages sont stockés en clair,
+                // cf. chat.service.ts / message.entity.ts). On décrit
+                // uniquement une garantie réellement tenue : la suppression
+                // définitive à l'expiration (politique de rétention 24 h).
                 'Confidentialité',
-                'Messages chiffrés de bout en bout',
+                'Messages supprimés définitivement à l\'expiration',
                 Icons.security,
               ),
               const SizedBox(height: AppSpacing.md),

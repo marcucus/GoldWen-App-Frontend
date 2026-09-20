@@ -25,6 +25,7 @@ class ReportProvider with ChangeNotifier {
     String? messageId,
     String? chatId,
     List<String>? evidence,
+    String? decryptedMessageContent,
   }) async {
     _setLoading(true);
 
@@ -36,6 +37,7 @@ class ReportProvider with ChangeNotifier {
         messageId: messageId,
         chatId: chatId,
         evidence: evidence,
+        decryptedMessageContent: decryptedMessageContent,
       );
 
       // If successful, the report was submitted

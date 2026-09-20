@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../auth/pages/auth_page.dart';
+import 'package:go_router/go_router.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -170,11 +170,7 @@ class WelcomePage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const AuthPage(),
-                          ),
-                        );
+                        context.push('/auth');
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 18),
@@ -197,13 +193,18 @@ class WelcomePage extends StatelessWidget {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Text(
-                    'En continuant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textTertiary,
-                          height: 1.5,
-                        ),
-                    textAlign: TextAlign.center,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () => context.push('/terms'),
+                        child: const Text('Conditions d’utilisation'),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push('/privacy'),
+                        child: const Text('Politique de confidentialité'),
+                      ),
+                    ],
                   ),
                 ),
 

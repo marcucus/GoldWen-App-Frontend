@@ -18,7 +18,7 @@ void main() {
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
-      
+
       profileProvider = ProfileProvider();
       subscriptionProvider = SubscriptionProvider();
       notificationProvider = NotificationProvider();
@@ -29,8 +29,10 @@ void main() {
       return MultiProvider(
         providers: [
           ChangeNotifierProvider<ProfileProvider>.value(value: profileProvider),
-          ChangeNotifierProvider<SubscriptionProvider>.value(value: subscriptionProvider),
-          ChangeNotifierProvider<NotificationProvider>.value(value: notificationProvider),
+          ChangeNotifierProvider<SubscriptionProvider>.value(
+              value: subscriptionProvider),
+          ChangeNotifierProvider<NotificationProvider>.value(
+              value: notificationProvider),
           ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ],
         child: MaterialApp(
@@ -40,17 +42,19 @@ void main() {
       );
     }
 
-    testWidgets('should display "Télécharger mes données" button in help section', 
+    testWidgets(
+        'should display "Télécharger mes données" button in help section',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       // Verify the data export button is present
       expect(find.text('Télécharger mes données'), findsOneWidget);
-      expect(find.text('Exporter toutes vos données personnelles (RGPD)'), findsOneWidget);
+      expect(find.text('Exporter toutes vos données personnelles (RGPD)'),
+          findsOneWidget);
     });
 
-    testWidgets('should display download icon for data export button', 
+    testWidgets('should display download icon for data export button',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -59,7 +63,7 @@ void main() {
       expect(find.byIcon(Icons.file_download), findsWidgets);
     });
 
-    testWidgets('should have data export button in the help & legal section', 
+    testWidgets('should have data export button in the help & legal section',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -75,7 +79,7 @@ void main() {
       expect(find.text('Télécharger mes données'), findsOneWidget);
     });
 
-    testWidgets('should display data export button near privacy settings', 
+    testWidgets('should display data export button near privacy settings',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -89,18 +93,18 @@ void main() {
 
       // Both privacy settings and data export should be visible together
       expect(find.text('Paramètres de confidentialité'), findsOneWidget);
-      
+
       // Scroll a bit more to ensure data export is visible
       await tester.scrollUntilVisible(
         find.text('Télécharger mes données'),
         100.0,
         scrollable: find.byType(Scrollable).last,
       );
-      
+
       expect(find.text('Télécharger mes données'), findsOneWidget);
     });
 
-    testWidgets('data export button should be tappable', 
+    testWidgets('data export button should be tappable',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
@@ -119,19 +123,56 @@ void main() {
       );
 
       expect(dataExportTile, findsOneWidget);
-      
+
       // Verify it's tappable (has onTap callback)
       final listTile = tester.widget<ListTile>(dataExportTile);
       expect(listTile.onTap, isNotNull);
     });
 
-    testWidgets('should show correct section title "Aide & Confidentialité"', 
+    testWidgets('should show correct section title "Aide & Confidentialité"',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       // Verify the section title
       expect(find.text('Aide & Confidentialité'), findsOneWidget);
+    });
+
+    testWidgets('exposes the GoldWen Plus who-liked-me feature',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Qui m\'a sélectionné'),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
+
+      final tile = find.ancestor(
+        of: find.text('Qui m\'a sélectionné'),
+        matching: find.byType(ListTile),
+      );
+      expect(tile, findsOneWidget);
+      expect(tester.widget<ListTile>(tile).onTap, isNotNull);
+    });
+
+    testWidgets('support dialog uses the confirmed support address only',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Aide et support'),
+        500,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text('Aide et support'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('goldwen.supp.app@gmail.com'), findsOneWidget);
+      expect(find.textContaining('+33'), findsNothing);
+      expect(find.textContaining('Disponible dans l\'app'), findsNothing);
     });
   });
 }

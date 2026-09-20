@@ -31,7 +31,9 @@ class Match {
       userId1: json['userId1'] as String,
       userId2: json['userId2'] as String,
       status: json['status'] as String,
-      compatibilityScore: (json['compatibilityScore'] as num).toDouble(),
+      compatibilityScore: json['compatibilityScore'] is num
+          ? (json['compatibilityScore'] as num).toDouble()
+          : double.tryParse('${json['compatibilityScore']}') ?? 0,
       chatId: json['chatId'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       expiresAt: json['expiresAt'] != null
@@ -91,28 +93,32 @@ class DailySelection {
   factory DailySelection.fromJson(Map<String, dynamic> json) {
     final metadata = json['metadata'] as Map<String, dynamic>?;
     final profiles = json['profiles'] as List<dynamic>? ?? [];
-    
-    // Handle case where backend sends selection data directly without metadata wrapper  
-    final choicesRemaining = metadata?['choicesRemaining'] as int? ?? 
-                            json['choicesRemaining'] as int? ?? 1;
-    final choicesMade = metadata?['choicesMade'] as int? ?? 
-                       json['choicesMade'] as int? ?? 0;
-    final maxChoices = metadata?['maxChoices'] as int? ?? 
-                      json['maxChoices'] as int? ?? 1;
-    
+
+    // Handle case where backend sends selection data directly without metadata wrapper
+    final choicesRemaining = metadata?['choicesRemaining'] as int? ??
+        json['choicesRemaining'] as int? ??
+        1;
+    final choicesMade =
+        metadata?['choicesMade'] as int? ?? json['choicesMade'] as int? ?? 0;
+    final maxChoices =
+        metadata?['maxChoices'] as int? ?? json['maxChoices'] as int? ?? 1;
+
     return DailySelection(
       profiles: profiles
           .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList(),
-      generatedAt: DateTime.parse(json['generatedAt'] as String? ?? DateTime.now().toIso8601String()),
-      expiresAt: DateTime.parse(json['expiresAt'] as String? ?? DateTime.now().add(const Duration(hours: 24)).toIso8601String()),
+      generatedAt: DateTime.parse(
+          json['generatedAt'] as String? ?? DateTime.now().toIso8601String()),
+      expiresAt: DateTime.parse(json['expiresAt'] as String? ??
+          DateTime.now().add(const Duration(hours: 24)).toIso8601String()),
       remainingLikes: json['remainingLikes'] as int? ?? 0,
       hasUsedSuperLike: json['hasUsedSuperLike'] as bool? ?? false,
       choicesRemaining: choicesRemaining,
       choicesMade: choicesMade,
       maxChoices: maxChoices,
-      refreshTime: (metadata?['refreshTime'] ?? json['refreshTime']) != null 
-          ? DateTime.parse((metadata?['refreshTime'] ?? json['refreshTime']) as String)
+      refreshTime: (metadata?['refreshTime'] ?? json['refreshTime']) != null
+          ? DateTime.parse(
+              (metadata?['refreshTime'] ?? json['refreshTime']) as String)
           : null,
     );
   }
@@ -246,7 +252,8 @@ class ScoreBreakdown {
   }
 
   double get baseScore => personalityScore + preferencesScore;
-  double get totalBonuses => activityBonus + responseRateBonus + reciprocityBonus;
+  double get totalBonuses =>
+      activityBonus + responseRateBonus + reciprocityBonus;
 }
 
 class MatchReason {
@@ -294,10 +301,12 @@ class CompatibilityScoreV2 {
     return CompatibilityScoreV2(
       userId: json['userId'] as String,
       score: (json['score'] as num).toDouble(),
-      breakdown: ScoreBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>),
+      breakdown:
+          ScoreBreakdown.fromJson(json['breakdown'] as Map<String, dynamic>),
       matchReasons: (json['matchReasons'] as List<dynamic>?)
-          ?.map((e) => MatchReason.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((e) => MatchReason.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 

@@ -233,7 +233,7 @@ class _ReportPageState extends State<ReportPage> {
         action: SnackBarAction(
           label: 'OK',
           textColor: Colors.white,
-          onPressed: () {},
+          onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
         ),
       ),
     );

@@ -324,7 +324,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             semanticLabel: 'Nouveau',
                           ),
                           const SizedBox(width: 8),
-                          Flexible(child: Text(
+                          Flexible(
+                              child: Text(
                             'Nouvelle sélection disponible !',
                             style: Theme.of(context)
                                 .textTheme
@@ -359,7 +360,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
                             semanticLabel: 'Timer',
                           ),
                           const SizedBox(width: 8),
-                          Flexible(child: Text(
+                          Flexible(
+                              child: Text(
                             'Prochaine sélection dans $countdown',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -410,7 +412,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
         }
 
         final availableProfiles = profiles
-            .where((profile) => !matchingProvider.isProfileSelected(profile.id))
+            .where((profile) =>
+                !matchingProvider.isProfileSelected(profile.userId))
             .toList();
 
         if (profiles.isEmpty) {
@@ -529,7 +532,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: Column(
+                Expanded(
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -881,7 +885,8 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   Widget _buildLoadingState() {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: SingleChildScrollView(child: Column(
+      child: SingleChildScrollView(
+          child: Column(
         children: List.generate(3, (index) => _buildShimmerCard()),
       )),
     );
@@ -1204,7 +1209,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
   Future<void> _passProfile(Profile profile, MatchingProvider matchingProvider,
       SubscriptionProvider subscriptionProvider) async {
     final result = await matchingProvider.selectProfile(
-      profile.id,
+      profile.userId,
       subscriptionProvider: subscriptionProvider,
       choice: 'pass',
     );
@@ -1398,7 +1403,7 @@ class _DailyMatchesPageState extends State<DailyMatchesPage>
     }
 
     final result = await matchingProvider.selectProfile(
-      profile.id,
+      profile.userId,
       subscriptionProvider: subscriptionProvider,
       choice: 'like',
     );

@@ -49,7 +49,7 @@ class AppRouter {
       final user = authProvider.user;
       final currentPath = state.matchedLocation;
       
-      final publicRoutes = ['/welcome', '/auth', '/auth/email', '/splash'];
+      final publicRoutes = ['/welcome', '/auth', '/auth/email', '/splash', '/terms', '/privacy'];
       final isPublicRoute = publicRoutes.contains(currentPath);
 
       // Unauthenticated users
@@ -70,7 +70,7 @@ class AppRouter {
             '/profile-setup'
           ];
           
-          if (!allowedOnboardingRoutes.contains(currentPath)) {
+          if (!allowedOnboardingRoutes.contains(currentPath) && currentPath != '/terms' && currentPath != '/privacy') {
              // Bounce them precisely to the step stored in backend
              switch (user.onboardingStep) {
                case 'gender': return '/gender-selection';
@@ -84,13 +84,13 @@ class AppRouter {
         } 
         // Enforce profile completion
         else if (user.isProfileCompleted != true) {
-           if (currentPath != '/profile-setup' && !currentPath.startsWith('/settings') && currentPath != '/splash') {
+           if (currentPath != '/profile-setup' && !currentPath.startsWith('/settings') && currentPath != '/splash' && currentPath != '/terms' && currentPath != '/privacy') {
               return '/profile-setup';
            }
         } 
         // Fully authenticated and mapped
         else {
-           if (isPublicRoute) {
+           if (isPublicRoute && currentPath != '/terms' && currentPath != '/privacy') {
              return '/home';
            }
         }

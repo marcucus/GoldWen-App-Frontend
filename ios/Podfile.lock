@@ -108,6 +108,8 @@ PODS:
     - SDWebImageWebPCoder
   - flutter_local_notifications (0.0.1):
     - Flutter
+  - flutter_native_splash (2.4.3):
+    - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
@@ -238,6 +240,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
@@ -306,6 +309,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
   google_sign_in_ios:
@@ -360,6 +365,7 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7

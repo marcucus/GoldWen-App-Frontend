@@ -12,6 +12,9 @@ dependencies:
   audioplayers: ^6.1.0
   cached_network_image: ^3.3.0
   crypto: ^3.0.3
+  # AV-15 / V106 : chiffrement de bout en bout du chat (X25519 + AES-GCM),
+  # à ne pas confondre avec `crypto` ci-dessus qui n'offre que du hachage.
+  cryptography: ^2.7.0
   cupertino_icons: ^1.0.6
   dio: ^5.3.3
   emoji_picker_flutter: ^4.3.0
@@ -26,6 +29,10 @@ dependencies:
   flutter_local_notifications: ^19.4.1
   flutter_localizations:
     sdk: flutter
+  # Stockage de la clé privée X25519 dans le trousseau sécurisé de l'OS
+  # (Keychain iOS / Keystore Android), jamais en clair (SharedPreferences,
+  # Hive) — voir lib/core/services/e2e_key_service.dart.
+  flutter_secure_storage: ^9.2.2
   flutter_svg: ^2.0.9
   geolocator: ^14.0.2
   go_router: ^16.2.0

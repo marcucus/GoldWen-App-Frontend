@@ -646,9 +646,6 @@ class _PersonalityQuestionnairePageState
         return answerData;
       }).toList();
 
-      debugPrint('Submitting ${apiAnswers.length} personality answers');
-      debugPrint('API Answers format: $apiAnswers');
-
       // Submit to backend and refresh user to get updated status
       await ApiService.submitPersonalityAnswers(apiAnswers);
       await authProvider.refreshUser();

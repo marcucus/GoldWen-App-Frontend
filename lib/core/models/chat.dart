@@ -13,6 +13,13 @@ class Conversation {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Profile? otherParticipant;
+  // AV-15 / V106 : clé publique X25519 de l'autre participant pour le
+  // chiffrement de bout en bout du chat (voir chat.service.ts,
+  // ChatView.otherParticipantPublicKey). Null si l'autre participant n'a
+  // pas encore uploadé de clé (ancien compte, ou app pas encore mise à
+  // jour) : dans ce cas les messages de cette conversation restent en
+  // clair (dégradation assumée, voir e2e_message_crypto_service.dart).
+  final String? otherParticipantPublicKey;
 
   Conversation({
     required this.id,
@@ -25,6 +32,7 @@ class Conversation {
     required this.createdAt,
     required this.updatedAt,
     this.otherParticipant,
+    this.otherParticipantPublicKey,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
@@ -47,6 +55,7 @@ class Conversation {
       otherParticipant: json['otherParticipant'] != null
           ? Profile.fromJson(json['otherParticipant'] as Map<String, dynamic>)
           : null,
+      otherParticipantPublicKey: json['otherParticipantPublicKey'] as String?,
     );
   }
 
@@ -62,6 +71,7 @@ class Conversation {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'otherParticipant': otherParticipant?.toJson(),
+      'otherParticipantPublicKey': otherParticipantPublicKey,
     };
   }
 
@@ -83,6 +93,7 @@ class Conversation {
     DateTime? createdAt,
     DateTime? updatedAt,
     Profile? otherParticipant,
+    String? otherParticipantPublicKey,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -95,6 +106,8 @@ class Conversation {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       otherParticipant: otherParticipant ?? this.otherParticipant,
+      otherParticipantPublicKey:
+          otherParticipantPublicKey ?? this.otherParticipantPublicKey,
     );
   }
 }
@@ -110,6 +123,12 @@ class ChatMessage {
   final DateTime? readAt;
   final User? sender;
   final ModerationResult? moderationResult;
+  // AV-15 / V106 : champs calculés côté client, jamais sérialisés depuis/vers
+  // le serveur (le serveur ne voit et ne stocke que `content`, en clair pour
+  // les messages antérieurs à l'E2E ou chiffré ensuite). Voir
+  // e2e_message_crypto_service.dart et ChatProvider._decryptIfNeeded.
+  final String? decryptedContent;
+  final bool decryptionFailed;
 
   ChatMessage({
     required this.id,
@@ -122,14 +141,16 @@ class ChatMessage {
     this.readAt,
     this.sender,
     this.moderationResult,
+    this.decryptedContent,
+    this.decryptionFailed = false,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       id: json['id'] as String,
-      conversationId: json['conversationId'] as String,
+      conversationId: (json['conversationId'] ?? json['chatId']) as String,
       senderId: json['senderId'] as String,
-      type: json['type'] as String,
+      type: json['type'] as String? ?? 'text',
       content: json['content'] as String,
       isRead: json['isRead'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -140,7 +161,8 @@ class ChatMessage {
           ? User.fromJson(json['sender'] as Map<String, dynamic>)
           : null,
       moderationResult: json['moderationResult'] != null
-          ? ModerationResult.fromJson(json['moderationResult'] as Map<String, dynamic>)
+          ? ModerationResult.fromJson(
+              json['moderationResult'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -164,6 +186,16 @@ class ChatMessage {
   bool get isImageMessage => type == 'image';
   bool get isSystemMessage => type == 'system';
 
+  /// Ce qu'il faut réellement afficher à l'utilisateur : le texte déchiffré
+  /// quand il est disponible, un état explicite si le déchiffrement a été
+  /// tenté et a échoué (jamais le ciphertext brut), sinon `content` tel quel
+  /// (messages non-texte, ou message envoyé avant que l'E2E soit disponible
+  /// pour cette conversation).
+  String get displayContent {
+    if (decryptionFailed) return 'Message illisible';
+    return decryptedContent ?? content;
+  }
+
   ChatMessage copyWith({
     String? id,
     String? conversationId,
@@ -175,6 +207,8 @@ class ChatMessage {
     DateTime? readAt,
     User? sender,
     ModerationResult? moderationResult,
+    String? decryptedContent,
+    bool? decryptionFailed,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -187,6 +221,8 @@ class ChatMessage {
       readAt: readAt ?? this.readAt,
       sender: sender ?? this.sender,
       moderationResult: moderationResult ?? this.moderationResult,
+      decryptedContent: decryptedContent ?? this.decryptedContent,
+      decryptionFailed: decryptionFailed ?? this.decryptionFailed,
     );
   }
 }
@@ -209,7 +245,7 @@ class TypingStatus {
       userId: json['userId'] as String,
       conversationId: json['conversationId'] as String,
       isTyping: json['isTyping'] as bool? ?? false,
-      timestamp: json['timestamp'] != null 
+      timestamp: json['timestamp'] != null
           ? DateTime.parse(json['timestamp'] as String)
           : DateTime.now(),
     );

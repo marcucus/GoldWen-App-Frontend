@@ -386,13 +386,8 @@ class ProfileProvider with ChangeNotifier {
         return answerData;
       }).toList();
 
-      debugPrint(
-          'ProfileProvider: Submitting ${answersData.length} personality answers');
-      debugPrint('ProfileProvider: Answers data: $answersData');
-
       await ApiService.submitPersonalityAnswers(answersData);
       _error = null;
-      debugPrint('ProfileProvider: Personality answers submitted successfully');
 
       // Track personality quiz completion
       await AnalyticsService.trackPersonalityQuizCompleted();
@@ -453,9 +448,7 @@ class ProfileProvider with ChangeNotifier {
         if (_favoriteSong != null) 'favoriteSong': _favoriteSong,
       };
 
-      debugPrint('Saving profile data: $profileData');
       await ApiService.updateProfile(profileData);
-      debugPrint('Profile saved successfully');
 
       // Refresh profile data and completion status after successful save
       await loadProfile();
@@ -468,10 +461,6 @@ class ProfileProvider with ChangeNotifier {
 
   Future<void> submitPromptAnswers() async {
     try {
-      debugPrint('DEBUG: Current _promptAnswers state: $_promptAnswers');
-      debugPrint(
-          'DEBUG: _promptAnswers.entries: ${_promptAnswers.entries.toList()}');
-
       final promptAnswers = _promptAnswers.entries.map((entry) {
         return {
           'promptId': entry.key, // Use real prompt ID
@@ -479,16 +468,12 @@ class ProfileProvider with ChangeNotifier {
         };
       }).toList();
 
-      debugPrint('Submitting ${promptAnswers.length} prompt answers');
-      debugPrint('Prompt answers data: $promptAnswers');
-
       if (promptAnswers.isEmpty) {
         throw Exception(
             'No prompt answers to submit. Please fill in the prompts first.');
       }
 
       await ApiService.submitPromptAnswers(promptAnswers);
-      debugPrint('Prompt answers submitted successfully');
 
       // Refresh profile data and completion status after successful submission
       await loadProfile();
@@ -613,12 +598,6 @@ class ProfileProvider with ChangeNotifier {
       final response = await ApiService.getProfileCompletion();
       final completionData = response['data'] ?? response;
 
-      // Debug: Print the backend response for profile completion
-      debugPrint('Profile completion raw response: $completionData');
-      debugPrint('Requirements section: ${completionData['requirements']}');
-      debugPrint(
-          'Minimum prompts section: ${completionData['requirements']?['minimumPrompts']}');
-
       // Map backend response to frontend model
       final mappedData = {
         'isCompleted': completionData['isComplete'] ?? false,
@@ -638,8 +617,6 @@ class ProfileProvider with ChangeNotifier {
         })(),
         'missingSteps': completionData['missingSteps'] ?? [],
       };
-
-      debugPrint('Mapped completion data: $mappedData');
 
       _profileCompletion = ProfileCompletion.fromJson(mappedData);
       _isProfileComplete = _profileCompletion!.isCompleted;
