@@ -787,6 +787,7 @@ class MockReportProvider extends _i1.Mock implements _i11.ReportProvider {
     String? messageId,
     String? chatId,
     List<String>? evidence,
+    String? decryptedMessageContent,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -799,6 +800,7 @@ class MockReportProvider extends _i1.Mock implements _i11.ReportProvider {
             #messageId: messageId,
             #chatId: chatId,
             #evidence: evidence,
+            #decryptedMessageContent: decryptedMessageContent,
           },
         ),
         returnValue: _i4.Future<void>.value(),
