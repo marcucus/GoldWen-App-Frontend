@@ -574,12 +574,6 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> getProfileById(String userId) async {
-    final response = await _dio.get('/profiles/$userId');
-
-    return _handleResponse(response);
-  }
-
   static Future<Map<String, dynamic>> uploadPhoto(String filePath,
       {int? order}) async {
     String extension = filePath.split('.').last.toLowerCase();
